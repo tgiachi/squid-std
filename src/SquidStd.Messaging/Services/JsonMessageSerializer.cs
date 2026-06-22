@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using SquidStd.Messaging.Abstractions.Interfaces;
 
-namespace SquidStd.Messaging;
+namespace SquidStd.Messaging.Services;
 
 /// <summary>
 /// Default JSON message serializer based on System.Text.Json.
@@ -16,13 +16,13 @@ public sealed class JsonMessageSerializer : IMessageSerializer
         _options = new(JsonSerializerDefaults.Web);
     }
 
-    [RequiresUnreferencedCode("JSON serialization may require types that cannot be statically analyzed.")]
-    [RequiresDynamicCode("JSON serialization may require runtime code generation.")]
+    [RequiresUnreferencedCode("JSON serialization may require types that cannot be statically analyzed."),
+     RequiresDynamicCode("JSON serialization may require runtime code generation.")]
     public ReadOnlyMemory<byte> Serialize<TMessage>(TMessage message)
         => JsonSerializer.SerializeToUtf8Bytes(message, _options);
 
-    [RequiresUnreferencedCode("JSON deserialization may require types that cannot be statically analyzed.")]
-    [RequiresDynamicCode("JSON deserialization may require runtime code generation.")]
+    [RequiresUnreferencedCode("JSON deserialization may require types that cannot be statically analyzed."),
+     RequiresDynamicCode("JSON deserialization may require runtime code generation.")]
     public TMessage Deserialize<TMessage>(ReadOnlyMemory<byte> payload)
         => JsonSerializer.Deserialize<TMessage>(payload.Span, _options) ??
            throw new InvalidOperationException($"Deserialization returned null for type {typeof(TMessage).Name}.");

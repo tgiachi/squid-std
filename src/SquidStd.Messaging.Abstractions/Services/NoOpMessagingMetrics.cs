@@ -1,6 +1,6 @@
 using SquidStd.Messaging.Abstractions.Interfaces;
 
-namespace SquidStd.Messaging.Abstractions;
+namespace SquidStd.Messaging.Abstractions.Services;
 
 /// <summary>
 /// Metrics sink that ignores all events. Used when no metrics are configured.

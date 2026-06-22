@@ -1,9 +1,10 @@
 using DryIoc;
 using SquidStd.Core.Interfaces.Metrics;
-using SquidStd.Messaging.Abstractions;
+using SquidStd.Messaging.Abstractions.Data.Config;
 using SquidStd.Messaging.Abstractions.Interfaces;
+using SquidStd.Messaging.Services;
 
-namespace SquidStd.Messaging;
+namespace SquidStd.Messaging.Extensions;
 
 /// <summary>
 /// DryIoc registration helpers for the in-memory messaging system.

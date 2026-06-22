@@ -1,10 +1,11 @@
 using System.Collections.Concurrent;
 using Serilog;
-using SquidStd.Messaging.Abstractions;
+using SquidStd.Messaging.Abstractions.Data.Config;
 using SquidStd.Messaging.Abstractions.Interfaces;
+using SquidStd.Messaging.Abstractions.Services;
 using SquidStd.Messaging.Internal;
 
-namespace SquidStd.Messaging;
+namespace SquidStd.Messaging.Services;
 
 /// <summary>
 /// In-memory <see cref="IQueueProvider" />: one buffered channel + consumer loop per named queue,

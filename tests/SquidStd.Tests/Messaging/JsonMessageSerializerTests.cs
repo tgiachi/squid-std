@@ -1,4 +1,5 @@
-using SquidStd.Messaging;
+using SquidStd.Messaging.Extensions;
+using SquidStd.Messaging.Services;
 using SquidStd.Messaging.Abstractions.Interfaces;
 
 namespace SquidStd.Tests.Messaging;
