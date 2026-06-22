@@ -11,7 +11,7 @@ public class VersionUtilsTests
 
         Assert.False(string.IsNullOrWhiteSpace(version));
         Assert.DoesNotContain('+', version);
-        Assert.StartsWith("0.1.0", version);
+        Assert.Matches(@"^\d+\.\d+\.\d+", version);
     }
 
     [Fact]

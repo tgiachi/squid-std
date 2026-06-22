@@ -7,6 +7,7 @@
 <p align="center">
   <a href="https://www.nuget.org/packages/SquidStd.Caching.Redis/"><img src="https://img.shields.io/nuget/v/SquidStd.Caching.Redis.svg" alt="NuGet" /></a>
   <img src="https://img.shields.io/nuget/dt/SquidStd.Caching.Redis.svg" alt="Downloads" />
+  <a href="https://tgiachi.github.io/SquidSTD/articles/caching-redis.html"><img src="https://img.shields.io/badge/docs-DocFX-1390A3.svg" alt="docs" /></a>
   <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license" />
 </p>
 
