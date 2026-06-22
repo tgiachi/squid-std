@@ -1,5 +1,6 @@
 using DryIoc;
 using SquidStd.Core.Interfaces.Metrics;
+using SquidStd.Core.Interfaces.Serialization;
 using SquidStd.Messaging.Extensions;
 using SquidStd.Messaging.Services;
 using SquidStd.Messaging.Abstractions.Interfaces;
@@ -17,7 +18,8 @@ public class MessagingRegistrationExtensionsTests
 
         Assert.NotNull(container.Resolve<IMessageQueue>());
         Assert.NotNull(container.Resolve<IQueueProvider>());
-        Assert.NotNull(container.Resolve<IMessageSerializer>());
+        Assert.NotNull(container.Resolve<IDataSerializer>());
+        Assert.NotNull(container.Resolve<IDataDeserializer>());
         Assert.NotNull(container.Resolve<IMessagingMetrics>());
 
         Assert.Contains(container.Resolve<IEnumerable<IMetricProvider>>(), p => p.ProviderName == "messaging");

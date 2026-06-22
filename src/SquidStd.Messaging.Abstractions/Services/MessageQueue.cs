@@ -1,3 +1,4 @@
+using SquidStd.Core.Interfaces.Serialization;
 using SquidStd.Messaging.Abstractions.Interfaces;
 
 namespace SquidStd.Messaging.Abstractions.Services;
@@ -9,12 +10,14 @@ namespace SquidStd.Messaging.Abstractions.Services;
 public sealed class MessageQueue : IMessageQueue
 {
     private readonly IQueueProvider _provider;
-    private readonly IMessageSerializer _serializer;
+    private readonly IDataSerializer _serializer;
+    private readonly IDataDeserializer _deserializer;
 
-    public MessageQueue(IQueueProvider provider, IMessageSerializer serializer)
+    public MessageQueue(IQueueProvider provider, IDataSerializer serializer, IDataDeserializer deserializer)
     {
         _provider = provider;
         _serializer = serializer;
+        _deserializer = deserializer;
     }
 
     /// <inheritdoc />
@@ -30,7 +33,7 @@ public sealed class MessageQueue : IMessageQueue
             queueName,
             (payload, _) =>
             {
-                listener.Handle(_serializer.Deserialize<TMessage>(payload));
+                listener.Handle(_deserializer.Deserialize<TMessage>(payload));
 
                 return Task.CompletedTask;
             }
@@ -44,7 +47,7 @@ public sealed class MessageQueue : IMessageQueue
 
         return _provider.Subscribe(
             queueName,
-            (payload, cancellationToken) => listener.HandleAsync(_serializer.Deserialize<TMessage>(payload), cancellationToken)
+            (payload, cancellationToken) => listener.HandleAsync(_deserializer.Deserialize<TMessage>(payload), cancellationToken)
         );
     }
 }
