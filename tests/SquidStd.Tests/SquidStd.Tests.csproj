@@ -37,6 +37,8 @@
         <ProjectReference Include="..\..\src\SquidStd.Scripting.Lua\SquidStd.Scripting.Lua.csproj" />
         <ProjectReference Include="..\..\src\SquidStd.Messaging.Abstractions\SquidStd.Messaging.Abstractions.csproj" />
         <ProjectReference Include="..\..\src\SquidStd.Messaging\SquidStd.Messaging.csproj" />
+        <ProjectReference Include="..\..\src\SquidStd.Database.Abstractions\SquidStd.Database.Abstractions.csproj" />
+        <ProjectReference Include="..\..\src\SquidStd.Database\SquidStd.Database.csproj" />
     </ItemGroup>
 
 </Project>
