@@ -13,7 +13,21 @@
 
 ## Overview
 
-Short description goes here.
+**squid-std** is a batteries-included standard library for .NET, distilled from years and years
+of building real-world server software. Instead of re-solving the same problems on every project,
+it bundles the foundations you reach for again and again behind small, well-defined contracts:
+
+- **Security & hashing** — password hashing and verification (`HashUtils`), AES-GCM secret
+  protection and a pluggable secret store (`ISecretProtector` / `ISecretStore`).
+- **Configuration** — a YAML-backed config manager with section registration and environment-variable expansion.
+- **Serialization** — unified JSON/YAML utilities (`JsonUtils`, `YamlUtils`) and a shared `IDataSerializer` / `IDataDeserializer`.
+- **String & platform helpers** — case converters (camel/kebab/snake/pascal/…), network, version, platform and resource utilities.
+- **Runtime services** — DI bootstrap, event bus, job system, timer/cron scheduler, metrics and storage.
+- **Infrastructure modules** — messaging (in-memory + RabbitMQ), caching (in-memory + Redis),
+  database access, networking (TCP/UDP) and Lua scripting.
+
+Everything is modular: take only the packages you need, each behind a clean abstraction with an
+in-memory implementation for tests and an external backend for production.
 
 ## Packages
 
