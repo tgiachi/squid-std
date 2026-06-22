@@ -10,12 +10,13 @@ namespace SquidStd.Storage.S3.Services;
 /// S3-compatible <see cref="IStorageService" /> backed by the MinIO client. The bucket is created
 /// lazily on first use.
 /// </summary>
-public sealed class S3StorageService : IStorageService
+public sealed class S3StorageService : IStorageService, IDisposable
 {
     private readonly IMinioClient _client;
     private readonly string _bucket;
     private readonly SemaphoreSlim _bucketLock = new(1, 1);
     private bool _bucketReady;
+    private int _disposed;
 
     public S3StorageService(S3StorageOptions options)
     {
@@ -146,5 +147,17 @@ public sealed class S3StorageService : IStorageService
         {
             _bucketLock.Release();
         }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
+        _client.Dispose();
+        _bucketLock.Dispose();
     }
 }
