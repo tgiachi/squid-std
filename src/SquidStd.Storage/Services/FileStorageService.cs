@@ -1,8 +1,8 @@
 using SquidStd.Storage.Abstractions.Data.Config;
 using SquidStd.Storage.Abstractions.Interfaces;
-using SquidStd.Services.Core.Services.Internal;
+using SquidStd.Storage.Internal;
 
-namespace SquidStd.Services.Core.Services.Storage;
+namespace SquidStd.Storage.Services;
 
 /// <summary>
 /// Local file-backed binary storage.

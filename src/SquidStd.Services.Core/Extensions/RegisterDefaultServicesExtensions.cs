@@ -87,7 +87,6 @@ public static class RegisterDefaultServicesExtensions
             container.RegisterMainThreadDispatcherService();
             container.RegisterTimerWheelService();
             container.RegisterMetricsCollectionService();
-            container.RegisterStorageServices();
             container.RegisterSecretServices();
 
             return container;
@@ -136,19 +135,6 @@ public static class RegisterDefaultServicesExtensions
             container.RegisterConfigSection("metrics", static () => new MetricsConfig(), -80);
 
             return container.RegisterStdService<IMetricsCollectionService, MetricsCollectionService>(1000);
-        }
-
-        /// <summary>
-        /// Registers default local storage services in the container.
-        /// </summary>
-        /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterStorageServices()
-        {
-            container.RegisterConfigSection("storage", static () => new StorageConfig(), -70);
-            container.Register<IStorageService, FileStorageService>(Reuse.Singleton);
-            container.Register<IObjectStorageService, YamlObjectStorageService>(Reuse.Singleton);
-
-            return container;
         }
 
         /// <summary>

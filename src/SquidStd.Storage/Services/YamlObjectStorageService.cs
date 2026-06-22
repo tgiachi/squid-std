@@ -2,7 +2,7 @@ using System.Text;
 using SquidStd.Storage.Abstractions.Interfaces;
 using SquidStd.Core.Yaml;
 
-namespace SquidStd.Services.Core.Services.Storage;
+namespace SquidStd.Storage.Services;
 
 /// <summary>
 /// YAML object storage built on top of binary storage.
