@@ -1,6 +1,7 @@
 using DryIoc;
 using SquidStd.Abstractions.Data.Internal.Config;
 using SquidStd.Abstractions.Data.Internal.Services;
+using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Data.Jobs;
 using SquidStd.Core.Data.Timing;
 using SquidStd.Core.Interfaces.Config;
@@ -84,5 +85,21 @@ public class RegisterDefaultServicesExtensionsTests
         Assert.Contains(entries, entry => entry.SectionName == "timerWheel" && entry.ConfigType == typeof(TimerWheelConfig));
         Assert.False(container.IsRegistered<JobsConfig>());
         Assert.False(container.IsRegistered<TimerWheelConfig>());
+    }
+
+    [Fact]
+    public void RegisterDefaultCoreConfigSections_RegistersLoggerMetadata()
+    {
+        using var container = new Container();
+
+        container.RegisterDefaultCoreConfigSections();
+
+        var entries = container.Resolve<List<ConfigRegistrationData>>();
+
+        Assert.Contains(
+            entries,
+            entry => entry.SectionName == "logger" && entry.ConfigType == typeof(SquidStdLoggerOptions)
+        );
+        Assert.False(container.IsRegistered<SquidStdLoggerOptions>());
     }
 }

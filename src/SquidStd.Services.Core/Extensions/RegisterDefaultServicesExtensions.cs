@@ -3,6 +3,7 @@ using SquidStd.Abstractions.Data.Internal.Services;
 using SquidStd.Abstractions.Extensions.Config;
 using SquidStd.Abstractions.Extensions.Container;
 using SquidStd.Abstractions.Extensions.Services;
+using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Data.Jobs;
 using SquidStd.Core.Data.Timing;
 using SquidStd.Core.Interfaces.Config;
@@ -71,6 +72,7 @@ public static class RegisterDefaultServicesExtensions
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterDefaultCoreConfigSections()
         {
+            container.RegisterConfigSection("logger", static () => new SquidStdLoggerOptions(), -1000);
             container.RegisterConfigSection("jobs", static () => new JobsConfig(), -100);
             container.RegisterConfigSection("timerWheel", static () => new TimerWheelConfig(), -90);
 
