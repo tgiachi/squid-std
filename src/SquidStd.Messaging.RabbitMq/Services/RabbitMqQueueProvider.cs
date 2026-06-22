@@ -7,7 +7,7 @@ using SquidStd.Messaging.Abstractions.Interfaces;
 using SquidStd.Messaging.Abstractions.Services;
 
 using SquidStd.Messaging.RabbitMq.Data.Config;
-namespace SquidStd.Messaging.RabbitMq;
+namespace SquidStd.Messaging.RabbitMq.Services;
 
 /// <summary>
 /// RabbitMQ <see cref="IQueueProvider" />: named queues map to quorum queues with a delivery limit

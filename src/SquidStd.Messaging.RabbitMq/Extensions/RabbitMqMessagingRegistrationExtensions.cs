@@ -5,7 +5,9 @@ using SquidStd.Messaging.Abstractions.Interfaces;
 using SquidStd.Messaging.Abstractions.Services;
 
 using SquidStd.Messaging.RabbitMq.Data.Config;
-namespace SquidStd.Messaging.RabbitMq;
+using SquidStd.Messaging.RabbitMq.Services;
+
+namespace SquidStd.Messaging.RabbitMq.Extensions;
 
 /// <summary>
 /// DryIoc registration helpers for the RabbitMQ messaging provider.
