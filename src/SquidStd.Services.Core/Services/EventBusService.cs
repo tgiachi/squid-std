@@ -21,7 +21,7 @@ public sealed class EventBusService : IEventBus, IDisposable
     public EventBusService()
     {
         _dispatches = Channel.CreateUnbounded<EventDispatch>(
-            new UnboundedChannelOptions
+            new()
             {
                 SingleReader = true,
                 SingleWriter = false
@@ -30,20 +30,52 @@ public sealed class EventBusService : IEventBus, IDisposable
         _dispatcher = Task.Run(ProcessDispatchesAsync);
     }
 
-    /// <inheritdoc />
-    public void RegisterListener<TEvent>(ISyncEventListener<TEvent> listener)
-        where TEvent : IEvent
+    private sealed class EventDispatch
     {
-        ArgumentNullException.ThrowIfNull(listener);
-        AddListener<TEvent>(_syncListeners, listener);
+        private readonly CancellationToken _cancellationToken;
+        private readonly Func<Task> _dispatch;
+        private readonly TaskCompletionSource _completion;
+
+        public Task Completion => _completion.Task;
+
+        public EventDispatch(Func<Task> dispatch, CancellationToken cancellationToken)
+        {
+            _dispatch = dispatch;
+            _cancellationToken = cancellationToken;
+            _completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        }
+
+        public async Task ExecuteAsync()
+        {
+            try
+            {
+                await _dispatch();
+                _completion.TrySetResult();
+            }
+            catch (OperationCanceledException)
+            {
+                _completion.TrySetCanceled(_cancellationToken);
+            }
+            catch (Exception exception)
+            {
+                _completion.TrySetException(exception);
+            }
+        }
     }
 
-    /// <inheritdoc />
-    public void RegisterAsyncListener<TEvent>(IAsyncEventListener<TEvent> listener)
-        where TEvent : IEvent
+    /// <summary>
+    /// Stops the internal dispatcher.
+    /// </summary>
+    public void Dispose()
     {
-        ArgumentNullException.ThrowIfNull(listener);
-        AddListener<TEvent>(_asyncListeners, listener);
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+        _dispatches.Writer.TryComplete();
+        _dispatcher.GetAwaiter().GetResult();
     }
 
     /// <inheritdoc />
@@ -93,19 +125,20 @@ public sealed class EventBusService : IEventBus, IDisposable
         await dispatch.Completion;
     }
 
-    /// <summary>
-    /// Stops the internal dispatcher.
-    /// </summary>
-    public void Dispose()
+    /// <inheritdoc />
+    public void RegisterAsyncListener<TEvent>(IAsyncEventListener<TEvent> listener)
+        where TEvent : IEvent
     {
-        if (_disposed)
-        {
-            return;
-        }
+        ArgumentNullException.ThrowIfNull(listener);
+        AddListener<TEvent>(_asyncListeners, listener);
+    }
 
-        _disposed = true;
-        _dispatches.Writer.TryComplete();
-        _dispatcher.GetAwaiter().GetResult();
+    /// <inheritdoc />
+    public void RegisterListener<TEvent>(ISyncEventListener<TEvent> listener)
+        where TEvent : IEvent
+    {
+        ArgumentNullException.ThrowIfNull(listener);
+        AddListener<TEvent>(_syncListeners, listener);
     }
 
     private void AddListener<TEvent>(Dictionary<Type, List<object>> listenersByType, object listener)
@@ -127,6 +160,16 @@ public sealed class EventBusService : IEventBus, IDisposable
         }
     }
 
+    private void Enqueue(EventDispatch dispatch)
+    {
+        ThrowIfDisposed();
+
+        if (!_dispatches.Writer.TryWrite(dispatch))
+        {
+            throw new ObjectDisposedException(nameof(EventBusService));
+        }
+    }
+
     private TListener[] GetListeners<TEvent, TListener>(Dictionary<Type, List<object>> listenersByType)
         where TEvent : IEvent
         where TListener : class
@@ -144,16 +187,6 @@ public sealed class EventBusService : IEventBus, IDisposable
         }
     }
 
-    private void Enqueue(EventDispatch dispatch)
-    {
-        ThrowIfDisposed();
-
-        if (!_dispatches.Writer.TryWrite(dispatch))
-        {
-            throw new ObjectDisposedException(nameof(EventBusService));
-        }
-    }
-
     private async Task ProcessDispatchesAsync()
     {
         await foreach (var dispatch in _dispatches.Reader.ReadAllAsync())
@@ -167,39 +200,6 @@ public sealed class EventBusService : IEventBus, IDisposable
         if (_disposed)
         {
             throw new ObjectDisposedException(nameof(EventBusService));
-        }
-    }
-
-    private sealed class EventDispatch
-    {
-        private readonly CancellationToken _cancellationToken;
-        private readonly Func<Task> _dispatch;
-        private readonly TaskCompletionSource _completion;
-
-        public Task Completion => _completion.Task;
-
-        public EventDispatch(Func<Task> dispatch, CancellationToken cancellationToken)
-        {
-            _dispatch = dispatch;
-            _cancellationToken = cancellationToken;
-            _completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        }
-
-        public async Task ExecuteAsync()
-        {
-            try
-            {
-                await _dispatch();
-                _completion.TrySetResult();
-            }
-            catch (OperationCanceledException)
-            {
-                _completion.TrySetCanceled(_cancellationToken);
-            }
-            catch (Exception exception)
-            {
-                _completion.TrySetException(exception);
-            }
         }
     }
 }

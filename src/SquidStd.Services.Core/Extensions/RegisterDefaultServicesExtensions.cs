@@ -23,6 +23,24 @@ public static class RegisterDefaultServicesExtensions
     extension(IContainer container)
     {
         /// <summary>
+        /// Registers the default config manager service as a singleton instance.
+        /// </summary>
+        /// <param name="configName">The logical config name or YAML file name.</param>
+        /// <param name="configDirectory">The directory where the config file is searched.</param>
+        /// <returns>The same container for chaining.</returns>
+        public IContainer RegisterConfigManagerService(string configName, string configDirectory)
+        {
+            var service = new ConfigManagerService(container, configName, configDirectory);
+            container.RegisterInstance<IConfigManagerService>(service, IfAlreadyRegistered.Replace);
+            container.RegisterInstance(service, IfAlreadyRegistered.Replace);
+            container.AddToRegisterTypedList(
+                new ServiceRegistrationData(typeof(IConfigManagerService), typeof(ConfigManagerService), -1000)
+            );
+
+            return container;
+        }
+
+        /// <summary>
         /// Registers the default SquidStd core services using the default config file location.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
@@ -48,31 +66,13 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        /// Registers the default config manager service as a singleton instance.
-        /// </summary>
-        /// <param name="configName">The logical config name or YAML file name.</param>
-        /// <param name="configDirectory">The directory where the config file is searched.</param>
-        /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterConfigManagerService(string configName, string configDirectory)
-        {
-            var service = new ConfigManagerService(container, configName, configDirectory);
-            container.RegisterInstance<IConfigManagerService>(service, IfAlreadyRegistered.Replace);
-            container.RegisterInstance(service, IfAlreadyRegistered.Replace);
-            container.AddToRegisterTypedList(
-                new ServiceRegistrationData(typeof(IConfigManagerService), typeof(ConfigManagerService), -1000)
-            );
-
-            return container;
-        }
-
-        /// <summary>
         /// Registers the default SquidStd core configuration sections.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterDefaultCoreConfigSections()
         {
-            container.RegisterConfigSection<JobsConfig>("jobs", static () => new JobsConfig(), -100);
-            container.RegisterConfigSection<TimerWheelConfig>("timerWheel", static () => new TimerWheelConfig(), -90);
+            container.RegisterConfigSection("jobs", static () => new JobsConfig(), -100);
+            container.RegisterConfigSection("timerWheel", static () => new TimerWheelConfig(), -90);
 
             return container;
         }
@@ -82,9 +82,7 @@ public static class RegisterDefaultServicesExtensions
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterEventBusService()
-        {
-            return container.RegisterStdService<IEventBus, EventBusService>(-1);
-        }
+            => container.RegisterStdService<IEventBus, EventBusService>(-1);
 
         /// <summary>
         /// Registers the default job system service in the container.
@@ -92,7 +90,7 @@ public static class RegisterDefaultServicesExtensions
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterJobSystemService()
         {
-            container.RegisterConfigSection<JobsConfig>("jobs", static () => new JobsConfig(), -100);
+            container.RegisterConfigSection("jobs", static () => new JobsConfig(), -100);
 
             return container.RegisterStdService<IJobSystem, JobSystemService>(-1);
         }
@@ -102,9 +100,7 @@ public static class RegisterDefaultServicesExtensions
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterMainThreadDispatcherService()
-        {
-            return container.RegisterStdService<IMainThreadDispatcher, MainThreadDispatcherService>(-1);
-        }
+            => container.RegisterStdService<IMainThreadDispatcher, MainThreadDispatcherService>(-1);
 
         /// <summary>
         /// Registers the default timer wheel service in the container.
@@ -112,7 +108,7 @@ public static class RegisterDefaultServicesExtensions
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterTimerWheelService()
         {
-            container.RegisterConfigSection<TimerWheelConfig>("timerWheel", static () => new TimerWheelConfig(), -90);
+            container.RegisterConfigSection("timerWheel", static () => new TimerWheelConfig(), -90);
 
             return container.RegisterStdService<ITimerService, TimerWheelService>(-1);
         }

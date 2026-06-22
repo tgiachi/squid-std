@@ -13,25 +13,10 @@ namespace SquidStd.Tests.Services.Core;
 public class RegisterDefaultServicesExtensionsTests
 {
     [Fact]
-    public void RegisterConfigManagerService_RegistersSingletonInstance()
-    {
-        using var temp = new TempDirectory();
-        using var container = new DryIoc.Container();
-
-        container.RegisterConfigManagerService("app", temp.Path);
-
-        var first = container.Resolve<IConfigManagerService>();
-        var second = container.Resolve<IConfigManagerService>();
-
-        Assert.Same(first, second);
-        Assert.Equal(Path.Combine(temp.Path, "app.yaml"), first.ConfigPath);
-    }
-
-    [Fact]
     public void RegisterConfigManagerService_AddsServiceRegistrationDataWithEarliestPriority()
     {
         using var temp = new TempDirectory();
-        using var container = new DryIoc.Container();
+        using var container = new Container();
 
         container.RegisterConfigManagerService("app", temp.Path);
 
@@ -45,18 +30,18 @@ public class RegisterDefaultServicesExtensionsTests
     }
 
     [Fact]
-    public void RegisterDefaultCoreConfigSections_RegistersJobsAndTimerWheelMetadata()
+    public void RegisterConfigManagerService_RegistersSingletonInstance()
     {
-        using var container = new DryIoc.Container();
+        using var temp = new TempDirectory();
+        using var container = new Container();
 
-        container.RegisterDefaultCoreConfigSections();
+        container.RegisterConfigManagerService("app", temp.Path);
 
-        var entries = container.Resolve<List<ConfigRegistrationData>>();
+        var first = container.Resolve<IConfigManagerService>();
+        var second = container.Resolve<IConfigManagerService>();
 
-        Assert.Contains(entries, entry => entry.SectionName == "jobs" && entry.ConfigType == typeof(JobsConfig));
-        Assert.Contains(entries, entry => entry.SectionName == "timerWheel" && entry.ConfigType == typeof(TimerWheelConfig));
-        Assert.False(container.IsRegistered<JobsConfig>());
-        Assert.False(container.IsRegistered<TimerWheelConfig>());
+        Assert.Same(first, second);
+        Assert.Equal(Path.Combine(temp.Path, "app.yaml"), first.ConfigPath);
     }
 
     [Fact]
@@ -74,7 +59,7 @@ public class RegisterDefaultServicesExtensionsTests
               WheelSize: 32
             """
         );
-        using var container = new DryIoc.Container();
+        using var container = new Container();
         container.RegisterCoreServices("app", temp.Path);
 
         var manager = container.Resolve<IConfigManagerService>();
@@ -84,5 +69,20 @@ public class RegisterDefaultServicesExtensionsTests
         Assert.Equal(3, container.Resolve<JobsConfig>().ShutdownTimeoutSeconds);
         Assert.Equal(TimeSpan.FromMilliseconds(10), container.Resolve<TimerWheelConfig>().TickDuration);
         Assert.Equal(32, container.Resolve<TimerWheelConfig>().WheelSize);
+    }
+
+    [Fact]
+    public void RegisterDefaultCoreConfigSections_RegistersJobsAndTimerWheelMetadata()
+    {
+        using var container = new Container();
+
+        container.RegisterDefaultCoreConfigSections();
+
+        var entries = container.Resolve<List<ConfigRegistrationData>>();
+
+        Assert.Contains(entries, entry => entry.SectionName == "jobs" && entry.ConfigType == typeof(JobsConfig));
+        Assert.Contains(entries, entry => entry.SectionName == "timerWheel" && entry.ConfigType == typeof(TimerWheelConfig));
+        Assert.False(container.IsRegistered<JobsConfig>());
+        Assert.False(container.IsRegistered<TimerWheelConfig>());
     }
 }

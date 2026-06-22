@@ -66,7 +66,8 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
             var entry = entries[i];
             var value = string.IsNullOrWhiteSpace(yaml)
                             ? entry.CreateDefault()
-                            : YamlUtils.DeserializeSection(yaml, entry.SectionName, entry.ConfigType) ?? entry.CreateDefault();
+                            : YamlUtils.DeserializeSection(yaml, entry.SectionName, entry.ConfigType) ??
+                              entry.CreateDefault();
 
             _values[entry.ConfigType] = value;
             _container.RegisterInstance(entry.ConfigType, value, IfAlreadyRegistered.Replace);
@@ -135,10 +136,12 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
             return [];
         }
 
-        return _container.Resolve<List<ConfigRegistrationData>>()
+        return
+        [
+            .. _container.Resolve<List<ConfigRegistrationData>>()
                          .OrderBy(entry => entry.Priority)
                          .ThenBy(entry => entry.SectionName, StringComparer.Ordinal)
-                         .ToList();
+        ];
     }
 
     private static string ResolveConfigPath(string configName, string configDirectory)

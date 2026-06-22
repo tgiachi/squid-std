@@ -272,6 +272,10 @@ public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDispo
             return [_endPoint];
         }
 
-        return [.. NetworkUtils.GetListeningAddresses(_endPoint).Select(address => new IPEndPoint(address.Address, _endPoint.Port))];
+        return
+        [
+            .. NetworkUtils.GetListeningAddresses(_endPoint)
+                           .Select(address => new IPEndPoint(address.Address, _endPoint.Port))
+        ];
     }
 }

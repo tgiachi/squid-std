@@ -7,11 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SquidStd.Core\SquidStd.Core.csproj" />
+        <ProjectReference Include="..\SquidStd.Core\SquidStd.Core.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <InternalsVisibleTo Include="SquidStd.Tests" />
+        <InternalsVisibleTo Include="SquidStd.Tests"/>
     </ItemGroup>
 
 </Project>

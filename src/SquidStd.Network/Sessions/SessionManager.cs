@@ -49,16 +49,6 @@ public sealed class SessionManager<TState> : ISessionManager<TState>, IDisposabl
     }
 
     /// <inheritdoc />
-    public bool TryGetSession(long sessionId, out Session<TState>? session)
-        => _sessions.TryGetValue(sessionId, out session);
-
-    /// <inheritdoc />
-    public Task SendAsync(long sessionId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
-        => _sessions.TryGetValue(sessionId, out var session)
-               ? session.SendAsync(payload, cancellationToken)
-               : Task.CompletedTask;
-
-    /// <inheritdoc />
     public async Task BroadcastAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
     {
         var snapshot = _sessions.Values.ToArray();
@@ -77,6 +67,29 @@ public sealed class SessionManager<TState> : ISessionManager<TState>, IDisposabl
         => _sessions.TryGetValue(sessionId, out var session)
                ? session.CloseAsync(cancellationToken)
                : Task.CompletedTask;
+
+    public void Dispose()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
+        _server.OnClientConnect -= HandleServerClientConnect;
+        _server.OnClientDisconnect -= HandleServerClientDisconnect;
+        _server.OnDataReceived -= HandleServerDataReceived;
+        _sessions.Clear();
+    }
+
+    /// <inheritdoc />
+    public Task SendAsync(long sessionId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
+        => _sessions.TryGetValue(sessionId, out var session)
+               ? session.SendAsync(payload, cancellationToken)
+               : Task.CompletedTask;
+
+    /// <inheritdoc />
+    public bool TryGetSession(long sessionId, out Session<TState>? session)
+        => _sessions.TryGetValue(sessionId, out session);
 
     internal void HandleConnected(INetworkConnection connection)
     {
@@ -113,18 +126,6 @@ public sealed class SessionManager<TState> : ISessionManager<TState>, IDisposabl
         }
     }
 
-    private async Task SendSafelyAsync(Session<TState> session, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
-    {
-        try
-        {
-            await session.SendAsync(payload, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.Warning(ex, "Broadcast send failed for session {SessionId}", session.SessionId);
-        }
-    }
-
     private void HandleServerClientConnect(object? sender, SquidStdTcpClientEventArgs e)
         => HandleConnected(e.Client);
 
@@ -146,18 +147,6 @@ public sealed class SessionManager<TState> : ISessionManager<TState>, IDisposabl
         }
     }
 
-    private void RaiseSessionRemoved(Session<TState> session)
-    {
-        try
-        {
-            OnSessionRemoved?.Invoke(this, new(session));
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "OnSessionRemoved handler failed for session {SessionId}", session.SessionId);
-        }
-    }
-
     private void RaiseSessionData(Session<TState> session, ReadOnlyMemory<byte> data)
     {
         try
@@ -170,16 +159,31 @@ public sealed class SessionManager<TState> : ISessionManager<TState>, IDisposabl
         }
     }
 
-    public void Dispose()
+    private void RaiseSessionRemoved(Session<TState> session)
     {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        try
         {
-            return;
+            OnSessionRemoved?.Invoke(this, new(session));
         }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "OnSessionRemoved handler failed for session {SessionId}", session.SessionId);
+        }
+    }
 
-        _server.OnClientConnect -= HandleServerClientConnect;
-        _server.OnClientDisconnect -= HandleServerClientDisconnect;
-        _server.OnDataReceived -= HandleServerDataReceived;
-        _sessions.Clear();
+    private async Task SendSafelyAsync(
+        Session<TState> session,
+        ReadOnlyMemory<byte> payload,
+        CancellationToken cancellationToken
+    )
+    {
+        try
+        {
+            await session.SendAsync(payload, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.Warning(ex, "Broadcast send failed for session {SessionId}", session.SessionId);
+        }
     }
 }

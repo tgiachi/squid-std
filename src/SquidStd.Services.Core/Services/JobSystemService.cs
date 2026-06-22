@@ -33,7 +33,7 @@ public sealed class JobSystemService : IJobSystem, ISquidStdService
         _config = config;
         WorkerCount = ResolveWorkerCount(config.WorkerThreadCount);
         _channel = Channel.CreateUnbounded<JobItem>(
-            new UnboundedChannelOptions
+            new()
             {
                 SingleReader = false,
                 SingleWriter = false
@@ -187,6 +187,27 @@ public sealed class JobSystemService : IJobSystem, ISquidStdService
         return ValueTask.CompletedTask;
     }
 
+    private void Enqueue(JobItem item)
+    {
+        Interlocked.Increment(ref _pendingCount);
+
+        if (!_channel.Writer.TryWrite(item))
+        {
+            Interlocked.Decrement(ref _pendingCount);
+
+            throw new ObjectDisposedException(nameof(JobSystemService));
+        }
+    }
+
+    private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs args)
+    {
+        _logger.Error(args.Exception, "Unobserved task exception");
+        args.SetObserved();
+    }
+
+    private static int ResolveWorkerCount(int configured)
+        => configured > 0 ? configured : Math.Max(1, Environment.ProcessorCount - 1);
+
     private void Stop(CancellationToken cancellationToken)
     {
         if (Interlocked.CompareExchange(ref _disposed, 1, 0) != 0)
@@ -233,27 +254,6 @@ public sealed class JobSystemService : IJobSystem, ISquidStdService
 
         _shutdownCts.Dispose();
     }
-
-    private void Enqueue(JobItem item)
-    {
-        Interlocked.Increment(ref _pendingCount);
-
-        if (!_channel.Writer.TryWrite(item))
-        {
-            Interlocked.Decrement(ref _pendingCount);
-
-            throw new ObjectDisposedException(nameof(JobSystemService));
-        }
-    }
-
-    private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs args)
-    {
-        _logger.Error(args.Exception, "Unobserved task exception");
-        args.SetObserved();
-    }
-
-    private static int ResolveWorkerCount(int configured)
-        => configured > 0 ? configured : Math.Max(1, Environment.ProcessorCount - 1);
 
     private void ThrowIfDisposed()
     {
