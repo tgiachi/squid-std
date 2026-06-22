@@ -10,7 +10,7 @@ namespace SquidStd.Network.Client;
 /// Connectionless UDP client that binds a local socket and surfaces inbound datagrams through an
 /// async receive loop. Datagrams can be sent to any endpoint with <see cref="SendToAsync" />, or to
 /// an optional default remote endpoint via <see cref="SendAsync" />. Mirrors the lifecycle surface of
-/// <see cref="OrionTcpClient" /> (session id, connect/disconnect/data/exception events, and
+/// <see cref="SquidStdTcpClient" /> (session id, connect/disconnect/data/exception events, and
 /// <see cref="INetworkConnection" />). Supports Start once; recreate the instance to listen again.
 /// </summary>
 public sealed class SquidStdUdpClient : INetworkConnection, IAsyncDisposable, IDisposable
