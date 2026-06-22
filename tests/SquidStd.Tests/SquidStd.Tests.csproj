@@ -46,6 +46,7 @@
         <ProjectReference Include="..\..\src\SquidStd.Caching\SquidStd.Caching.csproj" />
         <ProjectReference Include="..\..\src\SquidStd.Caching.Redis\SquidStd.Caching.Redis.csproj" />
         <ProjectReference Include="..\..\src\SquidStd.Storage\SquidStd.Storage.csproj" />
+        <ProjectReference Include="..\..\src\SquidStd.Storage.S3\SquidStd.Storage.S3.csproj" />
     </ItemGroup>
 
 </Project>
