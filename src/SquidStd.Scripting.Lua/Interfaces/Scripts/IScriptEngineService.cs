@@ -1,3 +1,4 @@
+using SquidStd.Abstractions.Interfaces.Services;
 using SquidStd.Scripting.Lua.Data.Scripts;
 
 namespace SquidStd.Scripting.Lua.Interfaces.Scripts;
@@ -5,7 +6,7 @@ namespace SquidStd.Scripting.Lua.Interfaces.Scripts;
 /// <summary>
 /// Interface for the script engine service that manages Lua execution.
 /// </summary>
-public interface IScriptEngineService
+public interface IScriptEngineService : ISquidStdService
 {
     /// <summary>
     /// Delegate for handling script file change events.
@@ -162,12 +163,6 @@ public interface IScriptEngineService
     /// <param name="name">The name of the global function in scripts.</param>
     /// <param name="func">The delegate to register as a global function.</param>
     void RegisterGlobalFunction(string name, Delegate func);
-
-    /// <summary>
-    /// Starts the script engine service asynchronously.
-    /// </summary>
-    /// <returns></returns>
-    Task StartAsync();
 
     /// <summary>
     /// Converts a .NET method name to a Lua-compatible function name.

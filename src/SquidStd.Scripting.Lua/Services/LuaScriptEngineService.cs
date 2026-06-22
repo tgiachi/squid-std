@@ -615,14 +615,14 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     /// Stops the script engine asynchronously.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public Task ShutdownAsync()
-        => Task.CompletedTask;
+    public ValueTask StopAsync(CancellationToken cancellationToken = default)
+        => ValueTask.CompletedTask;
 
     /// <summary>
     /// Starts the script engine asynchronously.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task StartAsync()
+    public async ValueTask StartAsync(CancellationToken cancellationToken = default)
     {
         if (_isInitialized)
         {
@@ -640,8 +640,8 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
             // scanners (e.g. LuaComponentLoader) once the script is ready but before bootstrap runs.
             AfterModulesRegistered?.Invoke(LuaScript);
 
-            AddConstant("version", VersionUtils.GetVersion());
-            AddConstant("engine", "Moongate");
+            AddConstant("version", _engineConfig.EngineVersion);
+            AddConstant("engine", _engineConfig.EngineName);
             AddConstant("platform", PlatformUtils.GetCurrentPlatform().ToString());
 
             _ = Task.Run(() => GenerateLuaMetaFileAsync(CancellationToken.None), CancellationToken.None);
