@@ -4,11 +4,15 @@ using SquidStd.Abstractions.Data.Internal.Services;
 using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Data.Jobs;
 using SquidStd.Core.Data.Metrics;
+using SquidStd.Core.Data.Storage;
 using SquidStd.Core.Data.Timing;
 using SquidStd.Core.Interfaces.Config;
 using SquidStd.Core.Interfaces.Metrics;
+using SquidStd.Core.Interfaces.Secrets;
+using SquidStd.Core.Interfaces.Storage;
 using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services;
+using SquidStd.Services.Core.Services.Storage;
 using SquidStd.Tests.Support;
 
 namespace SquidStd.Tests.Services.Core;
@@ -119,6 +123,21 @@ public class RegisterDefaultServicesExtensionsTests
     }
 
     [Fact]
+    public void RegisterDefaultCoreConfigSections_RegistersStorageAndSecretsMetadata()
+    {
+        using var container = new Container();
+
+        container.RegisterDefaultCoreConfigSections();
+
+        var entries = container.Resolve<List<ConfigRegistrationData>>();
+
+        Assert.Contains(entries, entry => entry.SectionName == "storage" && entry.ConfigType == typeof(StorageConfig));
+        Assert.Contains(entries, entry => entry.SectionName == "secrets" && entry.ConfigType == typeof(SecretsConfig));
+        Assert.False(container.IsRegistered<StorageConfig>());
+        Assert.False(container.IsRegistered<SecretsConfig>());
+    }
+
+    [Fact]
     public void RegisterMetricsCollectionService_AddsLateServiceRegistrationData()
     {
         using var container = new Container();
@@ -143,5 +162,46 @@ public class RegisterDefaultServicesExtensionsTests
         container.RegisterCoreServices("app", temp.Path);
 
         Assert.True(container.IsRegistered<IMetricsCollectionService>());
+    }
+
+    [Fact]
+    public void RegisterCoreServices_RegistersStorageAndSecretServices()
+    {
+        using var temp = new TempDirectory();
+        using var container = new Container();
+
+        container.RegisterCoreServices("app", temp.Path);
+
+        Assert.True(container.IsRegistered<IStorageService>());
+        Assert.True(container.IsRegistered<IObjectStorageService>());
+        Assert.True(container.IsRegistered<ISecretProtector>());
+        Assert.True(container.IsRegistered<ISecretStore>());
+    }
+
+    [Fact]
+    public async Task RegisterStorageServices_RegistersFileAndYamlStorage()
+    {
+        using var temp = new TempDirectory();
+        using var container = new Container();
+
+        container.RegisterStorageServices();
+        container.RegisterConfigManagerService("app", temp.Path);
+        await ((ConfigManagerService)container.Resolve<IConfigManagerService>()).StartAsync(CancellationToken.None);
+
+        Assert.True(container.IsRegistered<IStorageService>());
+        Assert.True(container.IsRegistered<IObjectStorageService>());
+        Assert.IsType<FileStorageService>(container.Resolve<IStorageService>());
+        Assert.IsType<YamlObjectStorageService>(container.Resolve<IObjectStorageService>());
+    }
+
+    [Fact]
+    public void RegisterSecretServices_RegistersSecretProtectorAndStore()
+    {
+        using var container = new Container();
+
+        container.RegisterSecretServices();
+
+        Assert.True(container.IsRegistered<ISecretProtector>());
+        Assert.True(container.IsRegistered<ISecretStore>());
     }
 }

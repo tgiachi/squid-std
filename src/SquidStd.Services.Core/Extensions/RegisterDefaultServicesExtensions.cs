@@ -6,14 +6,18 @@ using SquidStd.Abstractions.Extensions.Services;
 using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Data.Jobs;
 using SquidStd.Core.Data.Metrics;
+using SquidStd.Core.Data.Storage;
 using SquidStd.Core.Data.Timing;
 using SquidStd.Core.Interfaces.Config;
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Core.Interfaces.Jobs;
 using SquidStd.Core.Interfaces.Metrics;
+using SquidStd.Core.Interfaces.Secrets;
+using SquidStd.Core.Interfaces.Storage;
 using SquidStd.Core.Interfaces.Threading;
 using SquidStd.Core.Interfaces.Timing;
 using SquidStd.Services.Core.Services;
+using SquidStd.Services.Core.Services.Storage;
 
 namespace SquidStd.Services.Core.Extensions;
 
@@ -65,6 +69,8 @@ public static class RegisterDefaultServicesExtensions
             container.RegisterMainThreadDispatcherService();
             container.RegisterTimerWheelService();
             container.RegisterMetricsCollectionService();
+            container.RegisterStorageServices();
+            container.RegisterSecretServices();
 
             return container;
         }
@@ -79,6 +85,8 @@ public static class RegisterDefaultServicesExtensions
             container.RegisterConfigSection("jobs", static () => new JobsConfig(), -100);
             container.RegisterConfigSection("timerWheel", static () => new TimerWheelConfig(), -90);
             container.RegisterConfigSection("metrics", static () => new MetricsConfig(), -80);
+            container.RegisterConfigSection("storage", static () => new StorageConfig(), -70);
+            container.RegisterConfigSection("secrets", static () => new SecretsConfig(), -60);
 
             return container;
         }
@@ -110,6 +118,32 @@ public static class RegisterDefaultServicesExtensions
             container.RegisterConfigSection("metrics", static () => new MetricsConfig(), -80);
 
             return container.RegisterStdService<IMetricsCollectionService, MetricsCollectionService>(1000);
+        }
+
+        /// <summary>
+        /// Registers default local storage services in the container.
+        /// </summary>
+        /// <returns>The same container for chaining.</returns>
+        public IContainer RegisterStorageServices()
+        {
+            container.RegisterConfigSection("storage", static () => new StorageConfig(), -70);
+            container.Register<IStorageService, FileStorageService>(Reuse.Singleton);
+            container.Register<IObjectStorageService, YamlObjectStorageService>(Reuse.Singleton);
+
+            return container;
+        }
+
+        /// <summary>
+        /// Registers default encrypted local secret services in the container.
+        /// </summary>
+        /// <returns>The same container for chaining.</returns>
+        public IContainer RegisterSecretServices()
+        {
+            container.RegisterConfigSection("secrets", static () => new SecretsConfig(), -60);
+            container.Register<ISecretProtector, AesGcmSecretProtector>(Reuse.Singleton);
+            container.Register<ISecretStore, FileSecretStore>(Reuse.Singleton);
+
+            return container;
         }
 
         /// <summary>
