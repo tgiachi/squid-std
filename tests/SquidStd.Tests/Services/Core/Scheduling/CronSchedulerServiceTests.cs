@@ -120,4 +120,26 @@ public class CronSchedulerServiceTests
         Assert.Equal(1, timer.Count); // still alive
         Assert.Equal(0, Assert.Single(scheduler.Jobs).RunCount); // failures do not count as runs
     }
+
+    [Fact]
+    public void RealTimerWheel_FiresJob_WhenAdvancedPastAMinute()
+    {
+        var timer = new SquidStd.Services.Core.Services.TimerWheelService(
+            new SquidStd.Core.Data.Timing.TimerWheelConfig
+            {
+                TickDuration = TimeSpan.FromMilliseconds(8),
+                WheelSize = 512
+            }
+        );
+        var jobs = new ManualJobSystem();
+        using var scheduler = new CronSchedulerService(timer, jobs);
+        var count = 0;
+        scheduler.Schedule("tick", "* * * * *", _ => { count++; return Task.CompletedTask; });
+
+        timer.UpdateTicksDelta(0);       // baseline
+        timer.UpdateTicksDelta(61_000);  // advance just over one minute
+
+        Assert.True(jobs.RunAll() >= 1);
+        Assert.True(count >= 1);
+    }
 }
