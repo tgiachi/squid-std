@@ -45,4 +45,23 @@ public class SessionTests
         Assert.Equal(1, connection.CloseCount);
         Assert.False(session.IsConnected);
     }
+
+    [Fact]
+    public void SessionEventArgs_CarriesSession()
+    {
+        var session = new Session<string>(1, new FakeNetworkConnection(), "s", CreatedAt);
+        var args = new SquidStd.Network.Data.Events.SquidStdSessionEventArgs<string>(session);
+
+        Assert.Same(session, args.Session);
+    }
+
+    [Fact]
+    public void SessionDataEventArgs_CarriesSessionAndData()
+    {
+        var session = new Session<string>(1, new FakeNetworkConnection(), "s", CreatedAt);
+        var args = new SquidStd.Network.Data.Events.SquidStdSessionDataEventArgs<string>(session, new byte[] { 9 });
+
+        Assert.Same(session, args.Session);
+        Assert.Equal([9], args.Data.ToArray());
+    }
 }
