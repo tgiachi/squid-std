@@ -186,4 +186,36 @@ public class SessionManagerTests
 
         Assert.Equal(0, manager.Count);
     }
+
+    [Fact]
+    public async Task Integration_LifecycleOverLoopback()
+    {
+        var timeout = TimeSpan.FromSeconds(5);
+
+        await using var server = new SquidTcpServer(new IPEndPoint(IPAddress.Loopback, 0));
+        using var manager = NewManager(server);
+
+        var created = new TaskCompletionSource<Session<string>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var dataReceived = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var removed = new TaskCompletionSource<long>(TaskCreationOptions.RunContinuationsAsynchronously);
+        manager.OnSessionCreated += (_, e) => created.TrySetResult(e.Session);
+        manager.OnSessionData += (_, e) => dataReceived.TrySetResult(e.Data.ToArray());
+        manager.OnSessionRemoved += (_, e) => removed.TrySetResult(e.Session.SessionId);
+
+        await server.StartAsync(CancellationToken.None);
+        var port = server.Port;
+
+        var client = await SquidStdTcpClient.ConnectAsync(new IPEndPoint(IPAddress.Loopback, port));
+
+        var session = await created.Task.WaitAsync(timeout);
+        Assert.Equal(1, manager.Count);
+
+        await client.SendAsync(new byte[] { 10, 20, 30 }, CancellationToken.None);
+        Assert.Equal([10, 20, 30], await dataReceived.Task.WaitAsync(timeout));
+
+        await client.DisposeAsync();
+        var removedId = await removed.Task.WaitAsync(timeout);
+
+        Assert.Equal(session.SessionId, removedId);
+    }
 }
