@@ -1,0 +1,74 @@
+name: NuGet Publish
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/dotnet/sdk:10.0
+    defaults:
+      run:
+        shell: bash
+
+    env:
+      NUGET_SOURCE: https://api.nuget.org/v3/index.json
+      NUGET_KEY: ${{ secrets.NUGET_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Validate NuGet key
+        run: |
+          set -euo pipefail
+          if [[ -z "${NUGET_KEY}" ]]; then
+            echo "Missing required secret NUGET_KEY"; exit 1
+          fi
+
+      - name: Restore
+        run: dotnet restore SquidStd.slnx
+
+      - name: Build
+        run: dotnet build SquidStd.slnx -c Release --no-restore
+
+      - name: Pack publishable packages
+        run: |
+          set -euo pipefail
+          packages=(
+            "src/SquidStd.Abstractions/SquidStd.Abstractions.csproj"
+            "src/SquidStd.Core/SquidStd.Core.csproj"
+            "src/SquidStd.Network/SquidStd.Network.csproj"
+            "src/SquidStd.Plugin.Abstractions/SquidStd.Plugin.Abstractions.csproj"
+            "src/SquidStd.Services.Core/SquidStd.Services.Core.csproj"
+          )
+          for project in "${packages[@]}"; do
+            echo "Packing ${project}"
+            dotnet pack "${project}" -c Release --no-build
+          done
+
+      - name: Publish packages
+        run: |
+          set -euo pipefail
+          mapfile -t packages < <(find src -path '*/bin/Release/*.nupkg' ! -name '*.snupkg' | sort)
+          mapfile -t symbols  < <(find src -path '*/bin/Release/*.snupkg' | sort)
+          for package in "${packages[@]}"; do
+            echo "Publishing ${package}"
+            dotnet nuget push "${package}" --api-key "${NUGET_KEY}" --source "${NUGET_SOURCE}" --skip-duplicate
+          done
+          for symbol in "${symbols[@]}"; do
+            echo "Publishing ${symbol}"
+            dotnet nuget push "${symbol}" --api-key "${NUGET_KEY}" --source "${NUGET_SOURCE}" --skip-duplicate
+          done
