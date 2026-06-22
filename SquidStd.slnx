@@ -1,4 +1,7 @@
 <Solution>
+    <Folder Name="/src/">
+        <Project Path="src/SquidStd.AspNetCore/SquidStd.AspNetCore.csproj" />
+    </Folder>
     <Project Path="src/SquidStd.Abstractions/SquidStd.Abstractions.csproj" />
     <Project Path="src/SquidStd.Core/SquidStd.Core.csproj" />
     <Project Path="src/SquidStd.Network/SquidStd.Network.csproj" />
