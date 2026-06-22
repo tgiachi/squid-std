@@ -46,4 +46,65 @@ public class YamlUtilsTests
         => Assert.Throws<FileNotFoundException>(
             () => YamlUtils.DeserializeFromFile<SampleDto>(Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".yaml"))
         );
+
+    [Fact]
+    public void Deserialize_RuntimeType_ReturnsTypedObject()
+    {
+        const string yaml = """
+                            Name: runtime
+                            Count: 8
+                            """;
+
+        var runtimeType = Type.GetType(typeof(SampleDto).AssemblyQualifiedName!)!;
+        var result = YamlUtils.Deserialize(yaml, runtimeType);
+        var dto = Assert.IsType<SampleDto>(result);
+
+        Assert.Equal("runtime", dto.Name);
+        Assert.Equal(8, dto.Count);
+    }
+
+    [Fact]
+    public void DeserializeSection_ExistingSection_ReturnsTypedObject()
+    {
+        const string yaml = """
+                            sample:
+                              Name: section
+                              Count: 11
+                            """;
+
+        var result = YamlUtils.DeserializeSection(yaml, "sample", typeof(SampleDto));
+        var dto = Assert.IsType<SampleDto>(result);
+
+        Assert.Equal("section", dto.Name);
+        Assert.Equal(11, dto.Count);
+    }
+
+    [Fact]
+    public void DeserializeSection_MissingSection_ReturnsNull()
+    {
+        const string yaml = """
+                            other:
+                              Name: section
+                              Count: 11
+                            """;
+
+        var result = YamlUtils.DeserializeSection(yaml, "sample", typeof(SampleDto));
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void SerializeSections_WritesRootSectionNames()
+    {
+        var sections = new Dictionary<string, object>
+        {
+            ["sample"] = new SampleDto { Name = "root", Count = 12 }
+        };
+
+        var yaml = YamlUtils.SerializeSections(sections);
+
+        Assert.Contains("sample:", yaml);
+        Assert.Contains("Name: root", yaml);
+        Assert.Contains("Count: 12", yaml);
+    }
 }

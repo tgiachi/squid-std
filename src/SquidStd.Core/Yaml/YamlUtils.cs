@@ -31,6 +31,44 @@ public static class YamlUtils
     }
 
     /// <summary>
+    /// Deserializes YAML text to the specified runtime type.
+    /// </summary>
+    /// <param name="yaml">The YAML text to deserialize.</param>
+    /// <param name="type">The target type.</param>
+    /// <returns>The deserialized object.</returns>
+    public static object Deserialize(string yaml, Type type)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(yaml);
+        ArgumentNullException.ThrowIfNull(type);
+
+        return Deserializer.Deserialize(yaml, type) ??
+               throw new InvalidDataException($"Deserialization returned null for type {type.Name}");
+    }
+
+    /// <summary>
+    /// Deserializes a top-level YAML section to the specified runtime type.
+    /// </summary>
+    /// <param name="yaml">The YAML document.</param>
+    /// <param name="sectionName">The top-level section name.</param>
+    /// <param name="type">The target section type.</param>
+    /// <returns>The deserialized section, or null when the section is absent.</returns>
+    public static object? DeserializeSection(string yaml, string sectionName, Type type)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(yaml);
+        ArgumentException.ThrowIfNullOrWhiteSpace(sectionName);
+        ArgumentNullException.ThrowIfNull(type);
+
+        var sections = Deserialize<Dictionary<string, object?>>(yaml);
+
+        if (!sections.TryGetValue(sectionName, out var section) || section is null)
+        {
+            return null;
+        }
+
+        return Deserialize(Serializer.Serialize(section), type);
+    }
+
+    /// <summary>
     /// Deserializes YAML from a file using reflection-based metadata.
     /// </summary>
     /// <param name="filePath">The YAML file path.</param>
@@ -56,6 +94,18 @@ public static class YamlUtils
         ArgumentNullException.ThrowIfNull(obj);
 
         return Serializer.Serialize(obj);
+    }
+
+    /// <summary>
+    /// Serializes top-level YAML sections.
+    /// </summary>
+    /// <param name="sections">The section map to serialize.</param>
+    /// <returns>The serialized YAML document.</returns>
+    public static string SerializeSections(IReadOnlyDictionary<string, object> sections)
+    {
+        ArgumentNullException.ThrowIfNull(sections);
+
+        return Serializer.Serialize(sections);
     }
 
     /// <summary>
