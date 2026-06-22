@@ -53,6 +53,8 @@ jobs:
             "src/SquidStd.Network/SquidStd.Network.csproj"
             "src/SquidStd.Plugin.Abstractions/SquidStd.Plugin.Abstractions.csproj"
             "src/SquidStd.Services.Core/SquidStd.Services.Core.csproj"
+            "src/SquidStd.Database.Abstractions/SquidStd.Database.Abstractions.csproj"
+            "src/SquidStd.Database/SquidStd.Database.csproj"
           )
           for project in "${packages[@]}"; do
             echo "Packing ${project}"
