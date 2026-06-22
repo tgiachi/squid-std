@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using FreeSql;
 using SquidStd.Database.Abstractions.Data;
 using SquidStd.Database.Abstractions.Data.Entities;
 
@@ -41,8 +42,8 @@ public interface IDataAccess<TEntity>
     /// <summary>Bulk-deletes entities matching the predicate inside a transaction. Returns affected rows.</summary>
     Task<int> BulkDeleteAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
-    /// <summary>Returns a composable, SQL-translated query over the entity set.</summary>
-    IQueryable<TEntity> Query();
+    /// <summary>Returns a composable, SQL-translated query (FreeSql ISelect) over the entity set.</summary>
+    ISelect<TEntity> Query();
 
     /// <summary>Materializes entities matching the optional predicate.</summary>
     Task<IReadOnlyList<TEntity>> QueryAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default);
