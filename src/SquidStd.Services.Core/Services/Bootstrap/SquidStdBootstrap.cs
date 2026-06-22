@@ -34,18 +34,14 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
     /// Initializes a bootstrapper with default options.
     /// </summary>
     public SquidStdBootstrap()
-        : this(new SquidStdOptions())
-    {
-    }
+        : this(new SquidStdOptions()) { }
 
     /// <summary>
     /// Initializes a bootstrapper with the specified options.
     /// </summary>
     /// <param name="options">Bootstrap options used to register core services.</param>
     public SquidStdBootstrap(SquidStdOptions options)
-        : this(options, new Container())
-    {
-    }
+        : this(options, new Container()) { }
 
     private SquidStdBootstrap(SquidStdOptions options, IContainer container)
     {
@@ -98,12 +94,9 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 
         var configuredContainer = configure(Container);
 
-        if (!ReferenceEquals(configuredContainer, Container))
-        {
-            throw new InvalidOperationException("ConfigureServices must return the bootstrap container instance.");
-        }
-
-        return this;
+        return !ReferenceEquals(configuredContainer, Container)
+                   ? throw new InvalidOperationException("ConfigureServices must return the bootstrap container instance.")
+                   : this;
     }
 
     /// <inheritdoc />
@@ -185,9 +178,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         {
             await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
         finally
         {
             await StopAsync(CancellationToken.None);
