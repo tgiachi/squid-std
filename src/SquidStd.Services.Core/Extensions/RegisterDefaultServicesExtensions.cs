@@ -13,9 +13,11 @@ using SquidStd.Core.Interfaces.Events;
 using SquidStd.Core.Interfaces.Jobs;
 using SquidStd.Core.Interfaces.Metrics;
 using SquidStd.Core.Interfaces.Secrets;
+using SquidStd.Core.Interfaces.Serialization;
 using SquidStd.Core.Interfaces.Storage;
 using SquidStd.Core.Interfaces.Threading;
 using SquidStd.Core.Interfaces.Timing;
+using SquidStd.Core.Json;
 using SquidStd.Services.Core.Services;
 using SquidStd.Services.Core.Services.Storage;
 
@@ -35,6 +37,20 @@ public static class RegisterDefaultServicesExtensions
         /// <param name="configName">The logical config name or YAML file name.</param>
         /// <param name="configDirectory">The directory where the config file is searched.</param>
         /// <returns>The same container for chaining.</returns>
+        /// <summary>
+        /// Registers the default JSON data serializer for <see cref="IDataSerializer" /> and
+        /// <see cref="IDataDeserializer" /> (same singleton instance).
+        /// </summary>
+        /// <returns>The same container for chaining.</returns>
+        public IContainer RegisterDataSerializer()
+        {
+            var serializer = new JsonDataSerializer();
+            container.RegisterInstance<IDataSerializer>(serializer, IfAlreadyRegistered.Keep);
+            container.RegisterInstance<IDataDeserializer>(serializer, IfAlreadyRegistered.Keep);
+
+            return container;
+        }
+
         public IContainer RegisterConfigManagerService(string configName, string configDirectory)
         {
             var service = new ConfigManagerService(container, configName, configDirectory);
@@ -62,6 +78,7 @@ public static class RegisterDefaultServicesExtensions
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterCoreServices(string configName, string configDirectory)
         {
+            container.RegisterDataSerializer();
             container.RegisterDefaultCoreConfigSections();
             container.RegisterConfigManagerService(configName, configDirectory);
             container.RegisterEventBusService();

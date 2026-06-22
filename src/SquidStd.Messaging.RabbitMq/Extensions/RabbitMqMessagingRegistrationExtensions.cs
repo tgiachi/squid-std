@@ -1,5 +1,7 @@
 using DryIoc;
 using SquidStd.Core.Interfaces.Metrics;
+using SquidStd.Core.Interfaces.Serialization;
+using SquidStd.Core.Json;
 using SquidStd.Messaging.Abstractions.Data.Config;
 using SquidStd.Messaging.Abstractions.Interfaces;
 using SquidStd.Messaging.Abstractions.Services;
@@ -28,7 +30,10 @@ public static class RabbitMqMessagingRegistrationExtensions
 
         container.RegisterInstance(resolvedMessaging);
         container.RegisterInstance(options);
-        container.Register<IMessageSerializer, JsonMessageSerializer>(Reuse.Singleton);
+
+        var serializer = new JsonDataSerializer();
+        container.RegisterInstance<IDataSerializer>(serializer, IfAlreadyRegistered.Keep);
+        container.RegisterInstance<IDataDeserializer>(serializer, IfAlreadyRegistered.Keep);
 
         var metrics = new MessagingMetricsProvider();
         container.RegisterInstance<IMessagingMetrics>(metrics);

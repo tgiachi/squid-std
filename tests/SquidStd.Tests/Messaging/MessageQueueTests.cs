@@ -1,3 +1,4 @@
+using SquidStd.Core.Json;
 using SquidStd.Messaging.Extensions;
 using SquidStd.Messaging.Services;
 using SquidStd.Messaging.Abstractions.Data.Config;
@@ -32,7 +33,8 @@ public class MessageQueueTests
     public async Task PublishAsync_DeliversTypedMessageToListener()
     {
         await using var provider = new InMemoryQueueProvider(new MessagingOptions(), new MessagingMetricsProvider());
-        IMessageQueue queue = new MessageQueue(provider, new JsonMessageSerializer());
+        var serializer = new JsonDataSerializer();
+        IMessageQueue queue = new MessageQueue(provider, serializer, serializer);
         var listener = new CapturingListener();
         queue.Subscribe("orders", listener);
 
