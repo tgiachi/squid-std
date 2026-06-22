@@ -1,14 +1,16 @@
 <Solution>
     <Folder Name="/src/">
+        <Project Path="src/SquidStd.Abstractions/SquidStd.Abstractions.csproj" />
         <Project Path="src/SquidStd.AspNetCore/SquidStd.AspNetCore.csproj" />
+        <Project Path="src/SquidStd.Core/SquidStd.Core.csproj" />
         <Project Path="src/SquidStd.Messaging.Abstractions/SquidStd.Messaging.Abstractions.csproj" />
         <Project Path="src/SquidStd.Messaging/SquidStd.Messaging.csproj" />
+        <Project Path="src/SquidStd.Network/SquidStd.Network.csproj" />
+        <Project Path="src/SquidStd.Plugin.Abstractions/SquidStd.Plugin.Abstractions.csproj" />
+        <Project Path="src/SquidStd.Scripting.Lua/SquidStd.Scripting.Lua.csproj" />
+        <Project Path="src/SquidStd.Services.Core/SquidStd.Services.Core.csproj" />
     </Folder>
-    <Project Path="src/SquidStd.Abstractions/SquidStd.Abstractions.csproj" />
-    <Project Path="src/SquidStd.Core/SquidStd.Core.csproj" />
-    <Project Path="src/SquidStd.Network/SquidStd.Network.csproj" />
-    <Project Path="src/SquidStd.Plugin.Abstractions/SquidStd.Plugin.Abstractions.csproj" />
-    <Project Path="src/SquidStd.Scripting.Lua/SquidStd.Scripting.Lua.csproj" />
-    <Project Path="src/SquidStd.Services.Core/SquidStd.Services.Core.csproj" />
-    <Project Path="tests/SquidStd.Tests/SquidStd.Tests.csproj" />
+    <Folder Name="/tests/">
+        <Project Path="tests/SquidStd.Tests/SquidStd.Tests.csproj" />
+    </Folder>
 </Solution>
