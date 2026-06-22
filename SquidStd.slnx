@@ -1,0 +1,8 @@
+<Solution>
+    <Project Path="src/SquidStd.Abstractions/SquidStd.Abstractions.csproj" />
+    <Project Path="src/SquidStd.Core/SquidStd.Core.csproj" />
+    <Project Path="src/SquidStd.Network/SquidStd.Network.csproj" />
+    <Project Path="src/SquidStd.Plugin.Abstractions/SquidStd.Plugin.Abstractions.csproj" />
+    <Project Path="src/SquidStd.Services.Core/SquidStd.Services.Core.csproj" />
+    <Project Path="tests/SquidStd.Tests/SquidStd.Tests.csproj" />
+</Solution>
