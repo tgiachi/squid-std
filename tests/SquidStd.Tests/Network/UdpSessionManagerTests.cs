@@ -1,4 +1,5 @@
 using System.Net;
+using SquidStd.Network.Client;
 using SquidStd.Network.Server;
 using SquidStd.Network.Sessions;
 using SquidStd.Tests.Support;
@@ -142,5 +143,36 @@ public class UdpSessionManagerTests
         manager.Dispose();
 
         Assert.Equal(0, manager.Count);
+    }
+
+    [Fact]
+    public async Task Integration_DatagramCreatesSessionAndManagerCanReply()
+    {
+        var timeout = TimeSpan.FromSeconds(5);
+
+        await using var server = new SquidStdUdpServer(new IPEndPoint(IPAddress.Loopback, 0), bindAllInterfaces: false);
+        using var manager = new UdpSessionManager<string>(server, c => $"state-{c.SessionId}");
+
+        var created = new TaskCompletionSource<Session<string>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var data = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+        manager.OnSessionCreated += (_, e) => created.TrySetResult(e.Session);
+        manager.OnSessionData += (_, e) => data.TrySetResult(e.Data.ToArray());
+
+        await server.StartAsync(CancellationToken.None);
+        var serverPort = server.Port;
+
+        await using var client = new SquidStdUdpClient(new IPEndPoint(IPAddress.Loopback, 0));
+        var clientReceived = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+        client.OnDataReceived += (_, e) => clientReceived.TrySetResult(e.Data.ToArray());
+        await client.StartAsync(CancellationToken.None);
+
+        await client.SendToAsync(new byte[] { 1, 2, 3 }, new IPEndPoint(IPAddress.Loopback, serverPort), CancellationToken.None);
+
+        var session = await created.Task.WaitAsync(timeout);
+        Assert.Equal([1, 2, 3], await data.Task.WaitAsync(timeout));
+        Assert.Equal(1, manager.Count);
+
+        await session.SendAsync(new byte[] { 4, 5 }, CancellationToken.None);
+        Assert.Equal([4, 5], await clientReceived.Task.WaitAsync(timeout));
     }
 }
