@@ -7,6 +7,7 @@
 <p align="center">
   <a href="https://www.nuget.org/packages/SquidStd.Messaging.RabbitMq/"><img src="https://img.shields.io/nuget/v/SquidStd.Messaging.RabbitMq.svg" alt="NuGet" /></a>
   <img src="https://img.shields.io/nuget/dt/SquidStd.Messaging.RabbitMq.svg" alt="Downloads" />
+  <a href="https://tgiachi.github.io/SquidSTD/articles/messaging-rabbitmq.html"><img src="https://img.shields.io/badge/docs-DocFX-1390A3.svg" alt="docs" /></a>
   <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license" />
 </p>
 
