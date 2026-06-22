@@ -56,7 +56,7 @@ public async Task PublishAsync(IMessageQueue queue)
 | `IMessageSerializer` | Payload (de)serialization. |
 | `IQueueMessageListener<T>` | Subscriber callbacks. |
 | `IMessagingMetrics` | Delivery metrics sink. |
-| `MessagingOptions` | DLQ/retry/prefetch configuration. |
+| `MessagingOptions` | Delivery attempts, retry delay, and dead-letter-queue suffix. |
 
 ## License
 

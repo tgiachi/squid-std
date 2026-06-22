@@ -24,8 +24,8 @@ dotnet add package SquidStd.Messaging.RabbitMq
 
 - One-line registration: `container.AddRabbitMqMessaging(connectionString)` or with `RabbitMqOptions`.
 - Broker-backed `IQueueProvider` reusing the shared `IMessageQueue` facade and serializer.
-- Connection via AMQP URI or explicit host/port/vhost/credentials (`RabbitMqOptions`).
-- Configurable consumer prefetch count.
+- Connection via a `rabbitmq://` connection string or explicit `RabbitMqOptions` (host/port/vhost/credentials).
+- Configurable consumer prefetch count (`?prefetch=` on the connection string, or `RabbitMqOptions.PrefetchCount`).
 
 ## Usage
 
@@ -35,7 +35,7 @@ using SquidStd.Messaging.Abstractions.Interfaces;
 using SquidStd.Messaging.RabbitMq.Extensions;
 
 var container = new Container();
-container.AddRabbitMqMessaging("amqp://guest:guest@localhost:5672/");
+container.AddRabbitMqMessaging("rabbitmq://guest:guest@localhost:5672/");
 
 var queue = container.Resolve<IMessageQueue>();
 await queue.PublishAsync("orders", new { Id = 1 });
