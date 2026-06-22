@@ -32,4 +32,24 @@ public static class MessagingRegistrationExtensions
 
         return container;
     }
+
+    /// <summary>
+    /// Registers the in-memory messaging services from a connection string (scheme must be "memory").
+    /// </summary>
+    public static IContainer AddInMemoryMessaging(this IContainer container, string connectionString)
+    {
+        ArgumentNullException.ThrowIfNull(container);
+
+        var cs = MessagingConnectionString.Parse(connectionString);
+
+        if (!string.Equals(cs.Scheme, "memory", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException(
+                $"Expected a 'memory://' connection string but got '{cs.Scheme}://'.",
+                nameof(connectionString)
+            );
+        }
+
+        return container.AddInMemoryMessaging(cs.ToMessagingOptions());
+    }
 }
