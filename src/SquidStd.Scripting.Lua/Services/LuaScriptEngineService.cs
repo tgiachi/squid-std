@@ -35,41 +35,57 @@ namespace SquidStd.Scripting.Lua.Services;
 /// </summary>
 public class LuaScriptEngineService : IScriptEngineService, IDisposable
 {
+    private const string OnReadyFunctionName = "on_ready";
+    private const string OnEngineRunFunctionName = "on_initialize";
+
     private static readonly string[] _completionExcludedGlobals = ["delay", "toString"];
 
     private readonly LuaEngineConfig _engineConfig;
-
-    public event IScriptEngineService.LuaFileChangedHandler? FileChanged;
-
-    private const string OnReadyFunctionName = "on_ready";
-
-    private const string OnEngineRunFunctionName = "on_initialize";
-
-    // Thread-safe collections
     private readonly ConcurrentDictionary<string, Action<object[]>> _callbacks = new();
     private readonly ConcurrentDictionary<string, object> _constants = new();
     private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, byte>> _manualModuleFunctions = new();
-
     private readonly DirectoriesConfig _directoriesConfig;
     private readonly List<string> _initScripts;
     private readonly ConcurrentDictionary<string, object> _loadedModules = new();
     private readonly ILogger _logger = Log.ForContext<LuaScriptEngineService>();
-
-    // Script caching - using hash to avoid re-parsing identical scripts
     private readonly ConcurrentDictionary<string, string> _scriptCache = new();
     private readonly List<ScriptModuleData> _scriptModules;
     private readonly List<ScriptUserData> _loadedUserData;
-
     private readonly IContainer _serviceProvider;
+
     private int _cacheHits;
     private int _cacheMisses;
-
     private bool _disposed;
     private bool _isInitialized;
     private Func<string, string> _nameResolver;
     private LuaScriptLoader _scriptLoader;
-
     private FileSystemWatcher? _watcher;
+
+    /// <summary>
+    /// Gets the MoonSharp script instance.
+    /// </summary>
+    public Script LuaScript { get; }
+
+    /// <summary>
+    /// Gets the script engine instance.
+    /// </summary>
+    public object Engine => LuaScript;
+
+    /// <summary>
+    /// Raised when a watched Lua file changes.
+    /// </summary>
+    public event IScriptEngineService.LuaFileChangedHandler? FileChanged;
+
+    /// <summary>
+    /// Event raised when a script error occurs
+    /// </summary>
+    public event EventHandler<ScriptErrorInfo>? OnScriptError;
+
+    /// <inheritdoc />
+    public event Action<object>? AfterModulesRegistered;
+
+    /// <inheritdoc />
+    public event Action<string>? OnComponentFileChanged;
 
     /// <summary>
     /// Initializes a new instance of the LuaScriptEngineService class.
@@ -78,7 +94,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     /// <param name="scriptModules">The list of script modules.</param>
     /// <param name="loadedUserData">The list of loaded user data.</param>
     /// <param name="serviceProvider">The service provider.</param>
-    /// <param name="versionService">The version service.</param>
+    /// <param name="engineConfig">The Lua engine configuration.</param>
     public LuaScriptEngineService(
         DirectoriesConfig directoriesConfig,
         IContainer serviceProvider,
@@ -91,9 +107,6 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
 
         scriptModules ??= new();
         loadedUserData ??= new();
-
-        ArgumentNullException.ThrowIfNull(directoriesConfig);
-        ArgumentNullException.ThrowIfNull(serviceProvider);
 
         _scriptModules = scriptModules;
         _directoriesConfig = directoriesConfig;
@@ -108,27 +121,6 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
 
         LoadToUserData();
     }
-
-    /// <summary>
-    /// Gets the MoonSharp script instance.
-    /// </summary>
-    public Script LuaScript { get; }
-
-    /// <summary>
-    /// Event raised when a script error occurs
-    /// </summary>
-    public event EventHandler<ScriptErrorInfo>? OnScriptError;
-
-    /// <inheritdoc />
-    public event Action<object>? AfterModulesRegistered;
-
-    /// <inheritdoc />
-    public event Action<string>? OnComponentFileChanged;
-
-    /// <summary>
-    /// Gets the script engine instance.
-    /// </summary>
-    public object Engine => LuaScript;
 
     /// <summary>
     /// Adds a callback function that can be called from Lua scripts.
@@ -295,36 +287,6 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    /// Disposes of the resources used by the LuaScriptEngineService.
-    /// </summary>
-    public void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        try
-        {
-            _loadedModules.Clear();
-            _callbacks.Clear();
-            _constants.Clear();
-
-            GC.SuppressFinalize(this);
-
-            _logger.Debug("Lua engine disposed successfully");
-        }
-        catch (Exception ex)
-        {
-            _logger.Warning(ex, "Error during Lua engine disposal");
-        }
-        finally
-        {
-            _disposed = true;
-        }
-    }
-
-    /// <summary>
     /// Executes a registered callback with the specified arguments.
     /// </summary>
     /// <param name="name">The name of the callback.</param>
@@ -425,9 +387,14 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     /// Executes a Lua function asynchronously and returns the result.
     /// </summary>
     /// <param name="command">The function command to execute.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task<ScriptResult> ExecuteFunctionAsync(string command)
-        => ExecuteFunction(command);
+    public Task<ScriptResult> ExecuteFunctionAsync(string command, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Task.FromResult(ExecuteFunction(command));
+    }
 
     public void ExecuteFunctionFromBootstrap(string name)
     {
@@ -501,8 +468,9 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     /// Executes a script file asynchronously.
     /// </summary>
     /// <param name="scriptFile">The path to the script file.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task ExecuteScriptFileAsync(string scriptFile)
+    public async Task ExecuteScriptFileAsync(string scriptFile, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(scriptFile);
 
@@ -513,7 +481,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
 
         try
         {
-            var content = await File.ReadAllTextAsync(scriptFile).ConfigureAwait(false);
+            var content = await File.ReadAllTextAsync(scriptFile, cancellationToken).ConfigureAwait(false);
             _logger.Debug("Executing script file asynchronously: {FileName}", Path.GetFileName(scriptFile));
             ExecuteScript(content, scriptFile);
         }
@@ -1496,5 +1464,35 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
         }
 
         RegisterEnums();
+    }
+
+    /// <summary>
+    /// Disposes of the resources used by the LuaScriptEngineService.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        try
+        {
+            _loadedModules.Clear();
+            _callbacks.Clear();
+            _constants.Clear();
+
+            GC.SuppressFinalize(this);
+
+            _logger.Debug("Lua engine disposed successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.Warning(ex, "Error during Lua engine disposal");
+        }
+        finally
+        {
+            _disposed = true;
+        }
     }
 }

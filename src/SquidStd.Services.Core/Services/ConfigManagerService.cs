@@ -15,24 +15,6 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
     private readonly Dictionary<Type, object> _values = [];
     private int _started;
 
-    /// <summary>
-    /// Initializes the config manager service.
-    /// </summary>
-    /// <param name="container">Container that receives loaded configuration sections.</param>
-    /// <param name="configName">Logical configuration name or YAML file name.</param>
-    /// <param name="configDirectory">Directory where the configuration file is searched.</param>
-    public ConfigManagerService(IContainer container, string configName, string configDirectory)
-    {
-        ArgumentNullException.ThrowIfNull(container);
-        ArgumentException.ThrowIfNullOrWhiteSpace(configName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(configDirectory);
-
-        _container = container;
-        ConfigName = configName;
-        ConfigDirectory = Path.GetFullPath(configDirectory);
-        ConfigPath = ResolveConfigPath(configName, ConfigDirectory);
-    }
-
     /// <inheritdoc />
     public string ConfigName { get; }
 
@@ -44,6 +26,23 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
 
     /// <inheritdoc />
     public IReadOnlyCollection<IConfigEntry> Entries => GetEntries();
+
+    /// <summary>
+    /// Initializes the config manager service.
+    /// </summary>
+    /// <param name="container">Container that receives loaded configuration sections.</param>
+    /// <param name="configName">Logical configuration name or YAML file name.</param>
+    /// <param name="configDirectory">Directory where the configuration file is searched.</param>
+    public ConfigManagerService(IContainer container, string configName, string configDirectory)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(configName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(configDirectory);
+
+        _container = container;
+        ConfigName = configName;
+        ConfigDirectory = Path.GetFullPath(configDirectory);
+        ConfigPath = ResolveConfigPath(configName, ConfigDirectory);
+    }
 
     /// <inheritdoc />
     public string Compose()

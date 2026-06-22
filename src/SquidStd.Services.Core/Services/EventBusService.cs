@@ -1,5 +1,6 @@
 using System.Threading.Channels;
 using SquidStd.Core.Interfaces.Events;
+using SquidStd.Services.Core.Services.Internal;
 
 namespace SquidStd.Services.Core.Services;
 
@@ -28,54 +29,6 @@ public sealed class EventBusService : IEventBus, IDisposable
             }
         );
         _dispatcher = Task.Run(ProcessDispatchesAsync);
-    }
-
-    private sealed class EventDispatch
-    {
-        private readonly CancellationToken _cancellationToken;
-        private readonly Func<Task> _dispatch;
-        private readonly TaskCompletionSource _completion;
-
-        public Task Completion => _completion.Task;
-
-        public EventDispatch(Func<Task> dispatch, CancellationToken cancellationToken)
-        {
-            _dispatch = dispatch;
-            _cancellationToken = cancellationToken;
-            _completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
-        }
-
-        public async Task ExecuteAsync()
-        {
-            try
-            {
-                await _dispatch();
-                _completion.TrySetResult();
-            }
-            catch (OperationCanceledException)
-            {
-                _completion.TrySetCanceled(_cancellationToken);
-            }
-            catch (Exception exception)
-            {
-                _completion.TrySetException(exception);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Stops the internal dispatcher.
-    /// </summary>
-    public void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        _disposed = true;
-        _dispatches.Writer.TryComplete();
-        _dispatcher.GetAwaiter().GetResult();
     }
 
     /// <inheritdoc />
@@ -201,5 +154,20 @@ public sealed class EventBusService : IEventBus, IDisposable
         {
             throw new ObjectDisposedException(nameof(EventBusService));
         }
+    }
+
+    /// <summary>
+    /// Stops the internal dispatcher.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+        _dispatches.Writer.TryComplete();
+        _dispatcher.GetAwaiter().GetResult();
     }
 }

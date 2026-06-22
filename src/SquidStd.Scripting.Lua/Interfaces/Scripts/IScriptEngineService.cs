@@ -123,8 +123,9 @@ public interface IScriptEngineService : ISquidStdService
     /// Asynchronously executes a Lua function or expression and returns the result.
     /// </summary>
     /// <param name="command">The Lua function call or expression to execute.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task containing a ScriptResult with the execution outcome.</returns>
-    Task<ScriptResult> ExecuteFunctionAsync(string command);
+    Task<ScriptResult> ExecuteFunctionAsync(string command, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes a function defined in the bootstrap script.

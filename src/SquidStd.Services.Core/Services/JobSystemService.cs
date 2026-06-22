@@ -23,6 +23,18 @@ public sealed class JobSystemService : IJobSystem, ISquidStdService
     private int _pendingCount;
     private int _started;
 
+    /// <inheritdoc />
+    public int ActiveCount => Volatile.Read(ref _activeCount);
+
+    /// <inheritdoc />
+    public long CompletedCount => Interlocked.Read(ref _completedCount);
+
+    /// <inheritdoc />
+    public int PendingCount => Volatile.Read(ref _pendingCount);
+
+    /// <inheritdoc />
+    public int WorkerCount { get; }
+
     /// <summary>
     /// Initializes the job system service.
     /// </summary>
@@ -43,25 +55,7 @@ public sealed class JobSystemService : IJobSystem, ISquidStdService
     }
 
     /// <inheritdoc />
-    public int ActiveCount => Volatile.Read(ref _activeCount);
-
-    /// <inheritdoc />
-    public long CompletedCount => Interlocked.Read(ref _completedCount);
-
-    /// <inheritdoc />
-    public int PendingCount => Volatile.Read(ref _pendingCount);
-
-    /// <inheritdoc />
-    public int WorkerCount { get; }
-
-    /// <summary>
-    /// Releases worker resources.
-    /// </summary>
-    public void Dispose()
-        => Stop(CancellationToken.None);
-
-    /// <inheritdoc />
-    public Task Schedule(Action work, CancellationToken cancellationToken = default)
+    public Task ScheduleAsync(Action work, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(work);
         ThrowIfDisposed();
@@ -106,7 +100,7 @@ public sealed class JobSystemService : IJobSystem, ISquidStdService
     }
 
     /// <inheritdoc />
-    public Task<T> Schedule<T>(Func<T> work, CancellationToken cancellationToken = default)
+    public Task<T> ScheduleAsync<T>(Func<T> work, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(work);
         ThrowIfDisposed();
@@ -317,4 +311,10 @@ public sealed class JobSystemService : IJobSystem, ISquidStdService
             _logger.Error(ex, "JobSystemService worker loop terminated unexpectedly");
         }
     }
+
+    /// <summary>
+    /// Releases worker resources.
+    /// </summary>
+    public void Dispose()
+        => Stop(CancellationToken.None);
 }
