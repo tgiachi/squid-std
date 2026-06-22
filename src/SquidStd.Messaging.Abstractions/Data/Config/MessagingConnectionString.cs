@@ -1,7 +1,7 @@
 using System.Collections.Frozen;
 using System.Web;
 
-namespace SquidStd.Messaging.Abstractions;
+namespace SquidStd.Messaging.Abstractions.Data.Config;
 
 /// <summary>
 /// Parsed messaging connection string of the form <c>scheme://[user:pass@]host[:port][/vhost][?params]</c>.

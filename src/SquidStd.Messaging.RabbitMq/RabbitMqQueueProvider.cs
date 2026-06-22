@@ -2,8 +2,9 @@ using System.Collections.Concurrent;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Serilog;
-using SquidStd.Messaging.Abstractions;
+using SquidStd.Messaging.Abstractions.Data.Config;
 using SquidStd.Messaging.Abstractions.Interfaces;
+using SquidStd.Messaging.Abstractions.Services;
 
 namespace SquidStd.Messaging.RabbitMq;
 

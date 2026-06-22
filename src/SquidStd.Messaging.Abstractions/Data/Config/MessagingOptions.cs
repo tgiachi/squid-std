@@ -1,4 +1,4 @@
-namespace SquidStd.Messaging.Abstractions;
+namespace SquidStd.Messaging.Abstractions.Data.Config;
 
 /// <summary>
 /// Configuration for the messaging system.
