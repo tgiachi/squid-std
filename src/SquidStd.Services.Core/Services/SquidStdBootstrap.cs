@@ -8,6 +8,7 @@ using SquidStd.Core.Interfaces.Bootstrap;
 using SquidStd.Core.Interfaces.Config;
 using SquidStd.Core.Types;
 using SquidStd.Services.Core.Extensions;
+using SquidStd.Services.Core.Types;
 
 namespace SquidStd.Services.Core.Services;
 
@@ -20,7 +21,13 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
     private readonly List<ISquidStdService> _startedServices = [];
     private int _disposed;
     private bool _loggerConfigured;
-    private BootstrapState _state;
+    private BootstrapStateType _state;
+
+    /// <inheritdoc />
+    public SquidStdOptions Options { get; }
+
+    /// <inheritdoc />
+    public IContainer Container { get; }
 
     /// <summary>
     /// Initializes a bootstrapper with default options.
@@ -55,12 +62,6 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         Container.RegisterCoreServices(Options.ConfigName, Options.RootDirectory);
     }
 
-    /// <inheritdoc />
-    public SquidStdOptions Options { get; }
-
-    /// <inheritdoc />
-    public IContainer Container { get; }
-
     /// <summary>
     /// Creates a bootstrapper with default options.
     /// </summary>
@@ -88,7 +89,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 
         lock (_syncRoot)
         {
-            if (_state != BootstrapState.Created)
+            if (_state != BootstrapStateType.Created)
             {
                 throw new InvalidOperationException("Services cannot be configured after bootstrap start.");
             }
@@ -192,29 +193,6 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         }
     }
 
-    /// <inheritdoc />
-    public async ValueTask DisposeAsync()
-    {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
-        {
-            return;
-        }
-
-        try
-        {
-            await StopAsync(CancellationToken.None);
-        }
-        finally
-        {
-            if (_loggerConfigured)
-            {
-                Log.CloseAndFlush();
-            }
-
-            Container.Dispose();
-        }
-    }
-
     private void ConfigureLogger()
     {
         if (!Container.IsRegistered<SquidStdLoggerOptions>())
@@ -306,17 +284,17 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
     {
         lock (_syncRoot)
         {
-            if (_state == BootstrapState.Started)
+            if (_state == BootstrapStateType.Started)
             {
                 return;
             }
 
-            if (_state == BootstrapState.Stopped)
+            if (_state == BootstrapStateType.Stopped)
             {
                 throw new InvalidOperationException("Bootstrap cannot be restarted after stop.");
             }
 
-            _state = BootstrapState.Started;
+            _state = BootstrapStateType.Started;
         }
     }
 
@@ -324,7 +302,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
     {
         lock (_syncRoot)
         {
-            _state = BootstrapState.Created;
+            _state = BootstrapStateType.Created;
         }
     }
 
@@ -332,19 +310,19 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
     {
         lock (_syncRoot)
         {
-            if (_state == BootstrapState.Stopped)
+            if (_state == BootstrapStateType.Stopped)
             {
                 return false;
             }
 
-            if (_state == BootstrapState.Created)
+            if (_state == BootstrapStateType.Created)
             {
-                _state = BootstrapState.Stopped;
+                _state = BootstrapStateType.Stopped;
 
                 return false;
             }
 
-            _state = BootstrapState.Stopped;
+            _state = BootstrapStateType.Stopped;
 
             return true;
         }
@@ -358,10 +336,26 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         }
     }
 
-    private enum BootstrapState
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
     {
-        Created,
-        Started,
-        Stopped
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
+        try
+        {
+            await StopAsync(CancellationToken.None);
+        }
+        finally
+        {
+            if (_loggerConfigured)
+            {
+                Log.CloseAndFlush();
+            }
+
+            Container.Dispose();
+        }
     }
 }
