@@ -6,6 +6,7 @@ using SquidStd.Messaging.Abstractions.Data.Config;
 using SquidStd.Messaging.Abstractions.Interfaces;
 using SquidStd.Messaging.Abstractions.Services;
 
+using SquidStd.Messaging.RabbitMq.Data.Config;
 namespace SquidStd.Messaging.RabbitMq;
 
 /// <summary>

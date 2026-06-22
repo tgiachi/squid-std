@@ -1,4 +1,4 @@
-namespace SquidStd.Messaging.RabbitMq;
+namespace SquidStd.Messaging.RabbitMq.Data.Config;
 
 /// <summary>
 /// Connection options for the RabbitMQ queue provider.
