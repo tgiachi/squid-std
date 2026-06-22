@@ -92,7 +92,7 @@ public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDispo
     public event EventHandler<SquidStdTcpExceptionEventArgs>? OnException;
 
     /// <summary>
-    /// Initializes a UDP server bound to the given endpoint on every <see cref="StartAsync" />.
+    /// Initializes a UDP server bound to the given endpoint on every <c>StartAsync</c>.
     /// </summary>
     /// <param name="endPoint">Endpoint supplying the port (and address when not binding all interfaces).</param>
     /// <param name="bindAllInterfaces">

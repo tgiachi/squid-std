@@ -26,7 +26,7 @@ public interface IScriptEngineService : ISquidStdService
     event EventHandler<ScriptErrorInfo>? OnScriptError;
 
     /// <summary>
-    /// Fires once during <see cref="StartAsync" />, after script modules have been registered
+    /// Fires once during <c>StartAsync</c>, after script modules have been registered
     /// but before bootstrap scripts run. Handlers can install additional UserData types, globals,
     /// or scanners that depend on the script runtime being ready. The argument is the underlying
     /// MoonSharp <c>Script</c>, typed as <see cref="object" /> so the interface stays
