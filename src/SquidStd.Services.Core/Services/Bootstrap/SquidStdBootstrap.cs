@@ -217,7 +217,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 
         var logger = loggerConfiguration.CreateLogger();
         Log.Logger = logger;
-        Container.RegisterInstance<Serilog.ILogger>(logger, IfAlreadyRegistered.Replace);
+        Container.RegisterInstance<ILogger>(logger, IfAlreadyRegistered.Replace);
         _loggerConfigured = true;
     }
 
@@ -320,7 +320,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         {
             if (_loggerConfigured)
             {
-                Log.CloseAndFlush();
+                await Log.CloseAndFlushAsync();
             }
 
             Container.Dispose();
