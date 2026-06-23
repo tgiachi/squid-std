@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Squid Development",
+  "classifications": [ "SquidStd", "Web", "WebAPI" ],
+  "identity": "SquidStd.AspNetCoreApp",
+  "name": "SquidStd ASP.NET Minimal API",
+  "shortName": "squidstd-aspnetcore",
+  "tags": { "language": "C#", "type": "project" },
+  "sourceName": "SquidStd.AspNetCoreApp.Template",
+  "preferNameDirectory": true,
+  "symbols": {
+    "skipRestore": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Skip the automatic dotnet restore after creation."
+    }
+  },
+  "postActions": [
+    {
+      "condition": "(!skipRestore)",
+      "description": "Restore NuGet packages.",
+      "manualInstructions": [ { "text": "Run 'dotnet restore'." } ],
+      "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "continueOnError": true
+    }
+  ]
+}
