@@ -1,3 +1,19 @@
+## [0.3.0](https://github.com/tgiachi/squid-std/compare/v0.2.0...v0.3.0) (2026-06-23)
+
+### Features
+
+* **aspnetcore:** add AddSquidStdHealthChecks to bridge health checks to ASP.NET Core ([0d94095](https://github.com/tgiachi/squid-std/commit/0d94095b82c2116b87a0eb526604dc77abdbd1c4))
+* **aspnetcore:** add SquidStdHealthCheckAdapter mapping to standard health checks ([7c1316c](https://github.com/tgiachi/squid-std/commit/7c1316c9188385adb5bfccbee41d285bd9522c39))
+* **health:** add IHealthCheck contracts, HealthCheckResult/HealthReport DTOs and options ([df6ba54](https://github.com/tgiachi/squid-std/commit/df6ba54ca1f2752fd3b60c99c6a26ddf97bf4196))
+* **health:** add parallel HealthCheckService aggregator with per-check timeout ([7df80c4](https://github.com/tgiachi/squid-std/commit/7df80c4b081db722451c331582366195c51db8a0))
+* **health:** add RegisterHealthChecksService DI extension ([a7f7db3](https://github.com/tgiachi/squid-std/commit/a7f7db30c8f69e664daf380943ad20ec75ea0852))
+* **storage:** add ListKeysAsync to IStorageService/IObjectStorageService and providers ([f6b524b](https://github.com/tgiachi/squid-std/commit/f6b524b5617a9277eba77555521ac0f64cf46704))
+* **storage:** add S3/MinIO storage provider and registration ([5332b4d](https://github.com/tgiachi/squid-std/commit/5332b4d68fcbabaa841a4a71463c8b46378963ef))
+
+### Bug Fixes
+
+* **storage:** build the MinIO client in a helper to fix CI build break ([1718ba8](https://github.com/tgiachi/squid-std/commit/1718ba8eb437d3cd8fd963f3841438ba88e7a853))
+
 ## [0.2.0](https://github.com/tgiachi/squid-std/compare/v0.1.0...v0.2.0) (2026-06-22)
 
 ### Features
