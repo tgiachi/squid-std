@@ -1,0 +1,73 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <PackageType>Template</PackageType>
+        <PackageId>SquidStd.Templates</PackageId>
+        <Title>SquidStd project templates</Title>
+        <Description>dotnet new templates for SquidStd: console host, ASP.NET minimal API, worker microservice, and worker manager.</Description>
+        <PackageTags>dotnet-new;templates;squidstd</PackageTags>
+        <PublishNuget>true</PublishNuget>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <IncludeContentInPack>true</IncludeContentInPack>
+        <ContentTargetFolders>content</ContentTargetFolders>
+        <NoDefaultExcludes>true</NoDefaultExcludes>
+        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+        <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+        <IncludeSymbols>false</IncludeSymbols>
+        <NoWarn>$(NoWarn);NU5128</NoWarn>
+        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);AddTemplatesToPackage</TargetsForTfmSpecificContentInPackage>
+    </PropertyGroup>
+
+    <!-- Inline task: replace a literal string in a set of files. -->
+    <UsingTask TaskName="ReplaceFileText" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+        <ParameterGroup>
+            <Files ParameterType="System.String[]" Required="true" />
+            <OldText ParameterType="System.String" Required="true" />
+            <NewText ParameterType="System.String" Required="true" />
+        </ParameterGroup>
+        <Task>
+            <Code Type="Fragment" Language="cs"><![CDATA[
+                foreach (var file in Files)
+                {
+                    var text = System.IO.File.ReadAllText(file);
+                    var replaced = text.Replace(OldText, NewText);
+                    if (text != replaced)
+                    {
+                        System.IO.File.WriteAllText(file, replaced);
+                    }
+                }
+            ]]></Code>
+        </Task>
+    </UsingTask>
+
+    <!-- Copy the template tree to an intermediate dir, replace the version sentinel, and contribute the
+         processed files as package content via the TFM-specific content hook (reliably collected by pack). -->
+    <Target Name="AddTemplatesToPackage">
+        <PropertyGroup>
+            <TemplatesSource>$(MSBuildProjectDirectory)/../../templates</TemplatesSource>
+            <TemplatesProcessed>$(IntermediateOutputPath)templates-processed</TemplatesProcessed>
+        </PropertyGroup>
+
+        <ItemGroup>
+            <RawTemplateFiles Include="$(TemplatesSource)/**/*" Exclude="$(TemplatesSource)/Directory.Build.props" />
+        </ItemGroup>
+
+        <RemoveDir Directories="$(TemplatesProcessed)" />
+        <Copy SourceFiles="@(RawTemplateFiles)"
+              DestinationFiles="@(RawTemplateFiles->'$(TemplatesProcessed)/%(RecursiveDir)%(Filename)%(Extension)')" />
+
+        <ItemGroup>
+            <ProcessedFiles Include="$(TemplatesProcessed)/**/*" />
+        </ItemGroup>
+
+        <ReplaceFileText Files="@(ProcessedFiles)" OldText="$squidstdversion$" NewText="$(Version)" />
+
+        <ItemGroup>
+            <TfmSpecificPackageFile Include="$(TemplatesProcessed)/**/*">
+                <PackagePath>content/%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+            </TfmSpecificPackageFile>
+        </ItemGroup>
+    </Target>
+
+</Project>
