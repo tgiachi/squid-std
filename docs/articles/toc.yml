@@ -36,6 +36,8 @@
   href: storage-s3.md
 - name: SquidStd.Scripting.Lua
   href: scripting-lua.md
+- name: SquidStd.Templating
+  href: templating.md
 - name: Serialization
   href: serialization.md
 - name: Scheduler
