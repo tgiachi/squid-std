@@ -68,4 +68,20 @@ public class ScribanTemplateRendererTests
 
         await Assert.ThrowsAsync<ArgumentException>(async () => await renderer.RenderAsync(string.Empty, null));
     }
+
+    [Fact]
+    public async Task StartAsync_AutoLoadsTemplatesFromDirectory()
+    {
+        using var temp = new TempDirectory();
+        var emails = Path.Combine(temp.Path, "templates", "emails");
+        Directory.CreateDirectory(emails);
+        await File.WriteAllTextAsync(Path.Combine(emails, "welcome.tmpl"), "Welcome {{ user.name }}");
+
+        var renderer = NewRenderer(temp.Path);
+        await renderer.StartAsync();
+
+        var result = await renderer.RenderByNameAsync("emails/welcome", new { User = new { Name = "squid" } });
+
+        Assert.Equal("Welcome squid", result);
+    }
 }
