@@ -145,11 +145,6 @@ public sealed class S3StorageService : IStorageService, IDisposable
 
     private async ValueTask EnsureBucketAsync(CancellationToken cancellationToken)
     {
-        if (_bucketReady)
-        {
-            return;
-        }
-
         await _bucketLock.WaitAsync(cancellationToken);
 
         try
