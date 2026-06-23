@@ -46,6 +46,10 @@
   href: workers-manager.md
 - name: SquidStd.Templates
   href: templates.md
+- name: SquidStd.Search.Abstractions
+  href: search-abstractions.md
+- name: SquidStd.Search.Elasticsearch
+  href: search-elasticsearch.md
 - name: Serialization
   href: serialization.md
 - name: Scheduler
