@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>SquidStd.Manager.Template</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="SquidStd.AspNetCore" Version="$squidstdversion$" />
+        <PackageReference Include="SquidStd.Workers.Manager" Version="$squidstdversion$" />
+        <!--#if (messaging == "rabbitmq") -->
+        <PackageReference Include="SquidStd.Messaging.RabbitMq" Version="$squidstdversion$" />
+        <!--#else -->
+        <PackageReference Include="SquidStd.Messaging" Version="$squidstdversion$" />
+        <!--#endif -->
+    </ItemGroup>
+
+</Project>
