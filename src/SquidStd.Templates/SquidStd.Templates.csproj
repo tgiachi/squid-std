@@ -14,7 +14,9 @@
         <NoDefaultExcludes>true</NoDefaultExcludes>
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
         <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+        <IncludeSymbols>false</IncludeSymbols>
         <NoWarn>$(NoWarn);NU5128</NoWarn>
+        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);AddTemplatesToPackage</TargetsForTfmSpecificContentInPackage>
     </PropertyGroup>
 
     <!-- Inline task: replace a literal string in a set of files. -->
@@ -39,32 +41,32 @@
         </Task>
     </UsingTask>
 
-    <!-- Copy the template tree to an intermediate dir, replace the version sentinel, and pack it as content. -->
-    <Target Name="ProcessTemplatesForPack" BeforeTargets="Pack">
+    <!-- Copy the template tree to an intermediate dir, replace the version sentinel, and contribute the
+         processed files as package content via the TFM-specific content hook (reliably collected by pack). -->
+    <Target Name="AddTemplatesToPackage">
         <PropertyGroup>
-            <TemplatesSource>$(MSBuildProjectDirectory)\..\..\templates</TemplatesSource>
+            <TemplatesSource>$(MSBuildProjectDirectory)/../../templates</TemplatesSource>
             <TemplatesProcessed>$(IntermediateOutputPath)templates-processed</TemplatesProcessed>
         </PropertyGroup>
 
         <ItemGroup>
-            <RawTemplateFiles Include="$(TemplatesSource)\**\*" Exclude="$(TemplatesSource)\Directory.Build.props" />
+            <RawTemplateFiles Include="$(TemplatesSource)/**/*" Exclude="$(TemplatesSource)/Directory.Build.props" />
         </ItemGroup>
 
         <RemoveDir Directories="$(TemplatesProcessed)" />
         <Copy SourceFiles="@(RawTemplateFiles)"
-              DestinationFiles="@(RawTemplateFiles->'$(TemplatesProcessed)\%(RecursiveDir)%(Filename)%(Extension)')" />
+              DestinationFiles="@(RawTemplateFiles->'$(TemplatesProcessed)/%(RecursiveDir)%(Filename)%(Extension)')" />
 
         <ItemGroup>
-            <ProcessedFiles Include="$(TemplatesProcessed)\**\*" />
+            <ProcessedFiles Include="$(TemplatesProcessed)/**/*" />
         </ItemGroup>
 
         <ReplaceFileText Files="@(ProcessedFiles)" OldText="$squidstdversion$" NewText="$(Version)" />
 
         <ItemGroup>
-            <Content Include="$(TemplatesProcessed)\**\*">
-                <Pack>true</Pack>
-                <PackagePath>content</PackagePath>
-            </Content>
+            <TfmSpecificPackageFile Include="$(TemplatesProcessed)/**/*">
+                <PackagePath>content/%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+            </TfmSpecificPackageFile>
         </ItemGroup>
     </Target>
 
