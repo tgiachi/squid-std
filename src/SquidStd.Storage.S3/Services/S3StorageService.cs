@@ -26,7 +26,7 @@ public sealed class S3StorageService : IStorageService, IDisposable
         ArgumentException.ThrowIfNullOrWhiteSpace(options.SecretKey);
         ArgumentException.ThrowIfNullOrWhiteSpace(options.Bucket);
 
-        var builder = new MinioClient()
+        using var builder = new MinioClient()
             .WithEndpoint(options.Endpoint)
             .WithCredentials(options.AccessKey, options.SecretKey)
             .WithSSL(options.UseSsl);
