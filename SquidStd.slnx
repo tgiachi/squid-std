@@ -27,6 +27,7 @@
         <Project Path="src/SquidStd.Search.Elasticsearch/SquidStd.Search.Elasticsearch.csproj" />
         <Project Path="src/SquidStd.Mail.Abstractions/SquidStd.Mail.Abstractions.csproj" />
         <Project Path="src/SquidStd.Mail.MailKit/SquidStd.Mail.MailKit.csproj" />
+        <Project Path="src/SquidStd.Mail.Queue/SquidStd.Mail.Queue.csproj" />
     </Folder>
     <Folder Name="/tests/">
         <Project Path="tests/SquidStd.Tests/SquidStd.Tests.csproj" />
