@@ -50,6 +50,10 @@
   href: search-abstractions.md
 - name: SquidStd.Search.Elasticsearch
   href: search-elasticsearch.md
+- name: SquidStd.Mail.Abstractions
+  href: mail-abstractions.md
+- name: SquidStd.Mail.MailKit
+  href: mail-mailkit.md
 - name: Serialization
   href: serialization.md
 - name: Scheduler
