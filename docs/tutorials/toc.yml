@@ -4,3 +4,5 @@
   href: getting-started.md
 - name: Events, jobs and scheduling
   href: events-jobs-scheduling.md
+- name: Caching
+  href: caching.md
