@@ -14,7 +14,8 @@ public class WorkerContractsTests
     {
         var original = new JobRequest(
             "resize-image",
-            new Dictionary<string, string> { ["width"] = "800", ["height"] = "600" });
+            new Dictionary<string, string> { ["width"] = "800", ["height"] = "600" }
+        );
 
         var bytes = Serializer.Serialize(original);
         var restored = Serializer.Deserialize<JobRequest>(bytes);
@@ -25,36 +26,43 @@ public class WorkerContractsTests
     }
 
     [Fact]
-    public void WorkerHeartbeat_RoundTrips_PreservingAllFields()
+    public void WorkerChannels_NamesAreNonEmptyAndDistinct()
     {
-        var original = new WorkerHeartbeat(
-            "worker-1",
-            new DateTime(2026, 6, 23, 10, 0, 0, DateTimeKind.Utc),
-            WorkerStatusType.Busy,
-            3,
-            8);
-
-        var restored = Serializer.Deserialize<WorkerHeartbeat>(Serializer.Serialize(original));
-
-        Assert.Equal(original, restored);
+        Assert.False(string.IsNullOrWhiteSpace(WorkerChannels.JobQueue));
+        Assert.False(string.IsNullOrWhiteSpace(WorkerChannels.HeartbeatTopic));
+        Assert.NotEqual(WorkerChannels.JobQueue, WorkerChannels.HeartbeatTopic);
     }
 
-    [Theory]
-    [InlineData(WorkerStatusType.Idle)]
-    [InlineData(WorkerStatusType.Busy)]
-    [InlineData(WorkerStatusType.Offline)]
+    [Theory, InlineData(WorkerStatusType.Idle), InlineData(WorkerStatusType.Busy), InlineData(WorkerStatusType.Offline)]
     public void WorkerHeartbeat_RoundTrips_EveryStatus(WorkerStatusType status)
     {
         var original = new WorkerHeartbeat(
             "worker-3",
-            new DateTime(2026, 6, 23, 11, 0, 0, DateTimeKind.Utc),
+            new(2026, 6, 23, 11, 0, 0, DateTimeKind.Utc),
             status,
             0,
-            4);
+            4
+        );
 
         var restored = Serializer.Deserialize<WorkerHeartbeat>(Serializer.Serialize(original));
 
         Assert.Equal(status, restored.Status);
+    }
+
+    [Fact]
+    public void WorkerHeartbeat_RoundTrips_PreservingAllFields()
+    {
+        var original = new WorkerHeartbeat(
+            "worker-1",
+            new(2026, 6, 23, 10, 0, 0, DateTimeKind.Utc),
+            WorkerStatusType.Busy,
+            3,
+            8
+        );
+
+        var restored = Serializer.Deserialize<WorkerHeartbeat>(Serializer.Serialize(original));
+
+        Assert.Equal(original, restored);
     }
 
     [Fact]
@@ -65,19 +73,12 @@ public class WorkerContractsTests
             WorkerStatusType.Offline,
             2,
             8,
-            new DateTime(2026, 6, 23, 9, 0, 0, DateTimeKind.Utc),
-            new DateTime(2026, 6, 23, 9, 30, 0, DateTimeKind.Utc));
+            new(2026, 6, 23, 9, 0, 0, DateTimeKind.Utc),
+            new(2026, 6, 23, 9, 30, 0, DateTimeKind.Utc)
+        );
 
         var restored = Serializer.Deserialize<WorkerInfo>(Serializer.Serialize(original));
 
         Assert.Equal(original, restored);
-    }
-
-    [Fact]
-    public void WorkerChannels_NamesAreNonEmptyAndDistinct()
-    {
-        Assert.False(string.IsNullOrWhiteSpace(WorkerChannels.JobQueue));
-        Assert.False(string.IsNullOrWhiteSpace(WorkerChannels.HeartbeatTopic));
-        Assert.NotEqual(WorkerChannels.JobQueue, WorkerChannels.HeartbeatTopic);
     }
 }

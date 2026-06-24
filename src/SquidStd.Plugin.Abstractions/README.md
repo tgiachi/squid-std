@@ -53,11 +53,11 @@ public sealed class MyPlugin : ISquidStdPlugin
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
+| Type              | Purpose                                       |
+|-------------------|-----------------------------------------------|
 | `ISquidStdPlugin` | Plugin entry point (`Metadata`, `Configure`). |
-| `PluginMetadata` | Plugin identity and dependency declarations. |
-| `PluginContext` | Shared boot data passed to the plugin. |
+| `PluginMetadata`  | Plugin identity and dependency declarations.  |
+| `PluginContext`   | Shared boot data passed to the plugin.        |
 
 ## License
 

@@ -17,4 +17,5 @@ public sealed record WorkerInfo(
     int ActiveJobs,
     int MaxConcurrency,
     DateTime FirstSeenUtc,
-    DateTime LastSeenUtc);
+    DateTime LastSeenUtc
+);

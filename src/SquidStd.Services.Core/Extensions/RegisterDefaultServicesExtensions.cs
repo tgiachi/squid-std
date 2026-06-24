@@ -4,24 +4,23 @@ using SquidStd.Abstractions.Extensions.Config;
 using SquidStd.Abstractions.Extensions.Container;
 using SquidStd.Abstractions.Extensions.Services;
 using SquidStd.Core.Data.Bootstrap;
-using SquidStd.Core.Directories;
 using SquidStd.Core.Data.Jobs;
 using SquidStd.Core.Data.Metrics;
 using SquidStd.Core.Data.Storage;
-using SquidStd.Storage.Abstractions.Data.Config;
 using SquidStd.Core.Data.Timing;
+using SquidStd.Core.Directories;
 using SquidStd.Core.Interfaces.Config;
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Core.Interfaces.Jobs;
 using SquidStd.Core.Interfaces.Metrics;
 using SquidStd.Core.Interfaces.Secrets;
 using SquidStd.Core.Interfaces.Serialization;
-using SquidStd.Storage.Abstractions.Interfaces;
 using SquidStd.Core.Interfaces.Threading;
 using SquidStd.Core.Interfaces.Timing;
 using SquidStd.Core.Json;
 using SquidStd.Services.Core.Services;
 using SquidStd.Services.Core.Services.Storage;
+using SquidStd.Storage.Abstractions.Data.Config;
 
 namespace SquidStd.Services.Core.Extensions;
 
@@ -33,26 +32,6 @@ public static class RegisterDefaultServicesExtensions
     /// <param name="container">Container that receives the core service registrations.</param>
     extension(IContainer container)
     {
-        /// <summary>
-        /// Registers the default config manager service as a singleton instance.
-        /// </summary>
-        /// <param name="configName">The logical config name or YAML file name.</param>
-        /// <param name="configDirectory">The directory where the config file is searched.</param>
-        /// <returns>The same container for chaining.</returns>
-        /// <summary>
-        /// Registers the default JSON data serializer for <see cref="IDataSerializer" /> and
-        /// <see cref="IDataDeserializer" /> (same singleton instance).
-        /// </summary>
-        /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterDataSerializer()
-        {
-            var serializer = new JsonDataSerializer();
-            container.RegisterInstance<IDataSerializer>(serializer, IfAlreadyRegistered.Keep);
-            container.RegisterInstance<IDataDeserializer>(serializer, IfAlreadyRegistered.Keep);
-
-            return container;
-        }
-
         public IContainer RegisterConfigManagerService(string configName, string configDirectory)
         {
             var service = new ConfigManagerService(container, configName, configDirectory);
@@ -95,6 +74,26 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
+        /// Registers the default config manager service as a singleton instance.
+        /// </summary>
+        /// <param name="configName">The logical config name or YAML file name.</param>
+        /// <param name="configDirectory">The directory where the config file is searched.</param>
+        /// <returns>The same container for chaining.</returns>
+        /// <summary>
+        /// Registers the default JSON data serializer for <see cref="IDataSerializer" /> and
+        /// <see cref="IDataDeserializer" /> (same singleton instance).
+        /// </summary>
+        /// <returns>The same container for chaining.</returns>
+        public IContainer RegisterDataSerializer()
+        {
+            var serializer = new JsonDataSerializer();
+            container.RegisterInstance<IDataSerializer>(serializer, IfAlreadyRegistered.Keep);
+            container.RegisterInstance<IDataDeserializer>(serializer, IfAlreadyRegistered.Keep);
+
+            return container;
+        }
+
+        /// <summary>
         /// Registers the default SquidStd core configuration sections.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
@@ -129,6 +128,13 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
+        /// Registers the default main-thread dispatcher service in the container.
+        /// </summary>
+        /// <returns>The same container for chaining.</returns>
+        public IContainer RegisterMainThreadDispatcherService()
+            => container.RegisterStdService<IMainThreadDispatcher, MainThreadDispatcherService>(-1);
+
+        /// <summary>
         /// Registers the default metrics collection service in the container.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
@@ -151,13 +157,6 @@ public static class RegisterDefaultServicesExtensions
 
             return container;
         }
-
-        /// <summary>
-        /// Registers the default main-thread dispatcher service in the container.
-        /// </summary>
-        /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterMainThreadDispatcherService()
-            => container.RegisterStdService<IMainThreadDispatcher, MainThreadDispatcherService>(-1);
 
         /// <summary>
         /// Registers the default timer wheel service in the container.

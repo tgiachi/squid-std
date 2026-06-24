@@ -36,13 +36,11 @@ public sealed class PagedResultData<T>
     /// <param name="totalCount">The total matching row count.</param>
     /// <returns>The paged result.</returns>
     public static PagedResultData<T> Create(IReadOnlyList<T> items, int page, int pageSize, long totalCount)
-    {
-        return new PagedResultData<T>
+        => new()
         {
             Items = items,
             Page = page,
             PageSize = pageSize,
             TotalCount = totalCount
         };
-    }
 }

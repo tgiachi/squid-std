@@ -1,6 +1,5 @@
 using System.Text;
 using SquidStd.Messaging.Abstractions.Data.Config;
-using SquidStd.Messaging.RabbitMq.Data.Config;
 using SquidStd.Messaging.RabbitMq.Services;
 
 namespace SquidStd.Tests.Messaging.RabbitMq;
@@ -17,12 +16,29 @@ public class RabbitMqQueueProviderTests
         _fixture = fixture;
     }
 
-    private RabbitMqQueueProvider NewProvider(MessagingOptions? options = null)
-        => new(new RabbitMqOptions { Uri = new Uri(_fixture.AmqpUri) }, options ?? new MessagingOptions());
+    [Fact]
+    public async Task AlwaysFailing_IsDeadLettered()
+    {
+        await using var provider = NewProvider(new() { MaxDeliveryAttempts = 2 });
+        await provider.StartAsync();
+        var queue = Queue();
+        provider.Subscribe(queue, (_, _) => throw new InvalidOperationException("always"));
 
-    private static ReadOnlyMemory<byte> Bytes(string s) => Encoding.UTF8.GetBytes(s);
-    private static string Text(ReadOnlyMemory<byte> b) => Encoding.UTF8.GetString(b.Span);
-    private static string Queue() => "q-" + Guid.NewGuid().ToString("N");
+        var deadLettered = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+        provider.Subscribe(
+            queue + ".dlq",
+            (payload, _) =>
+            {
+                deadLettered.TrySetResult(Text(payload));
+
+                return Task.CompletedTask;
+            }
+        );
+
+        await provider.PublishAsync(queue, Bytes("poison"));
+
+        Assert.Equal("poison", await deadLettered.Task.WaitAsync(Timeout));
+    }
 
     [Fact]
     public async Task Publish_DeliversToSubscriber()
@@ -31,7 +47,15 @@ public class RabbitMqQueueProviderTests
         await provider.StartAsync();
         var queue = Queue();
         var received = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
-        provider.Subscribe(queue, (payload, _) => { received.TrySetResult(Text(payload)); return Task.CompletedTask; });
+        provider.Subscribe(
+            queue,
+            (payload, _) =>
+            {
+                received.TrySetResult(Text(payload));
+
+                return Task.CompletedTask;
+            }
+        );
 
         await provider.PublishAsync(queue, Bytes("hello"));
 
@@ -48,8 +72,26 @@ public class RabbitMqQueueProviderTests
         var a = 0;
         var b = 0;
         using var done = new CountdownEvent(total);
-        provider.Subscribe(queue, (_, _) => { Interlocked.Increment(ref a); done.Signal(); return Task.CompletedTask; });
-        provider.Subscribe(queue, (_, _) => { Interlocked.Increment(ref b); done.Signal(); return Task.CompletedTask; });
+        provider.Subscribe(
+            queue,
+            (_, _) =>
+            {
+                Interlocked.Increment(ref a);
+                done.Signal();
+
+                return Task.CompletedTask;
+            }
+        );
+        provider.Subscribe(
+            queue,
+            (_, _) =>
+            {
+                Interlocked.Increment(ref b);
+                done.Signal();
+
+                return Task.CompletedTask;
+            }
+        );
 
         for (var i = 0; i < total; i++)
         {
@@ -62,19 +104,15 @@ public class RabbitMqQueueProviderTests
         Assert.True(b > 0);
     }
 
-    [Fact]
-    public async Task AlwaysFailing_IsDeadLettered()
-    {
-        await using var provider = NewProvider(new MessagingOptions { MaxDeliveryAttempts = 2 });
-        await provider.StartAsync();
-        var queue = Queue();
-        provider.Subscribe(queue, (_, _) => throw new InvalidOperationException("always"));
+    private static ReadOnlyMemory<byte> Bytes(string s)
+        => Encoding.UTF8.GetBytes(s);
 
-        var deadLettered = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
-        provider.Subscribe(queue + ".dlq", (payload, _) => { deadLettered.TrySetResult(Text(payload)); return Task.CompletedTask; });
+    private RabbitMqQueueProvider NewProvider(MessagingOptions? options = null)
+        => new(new() { Uri = new(_fixture.AmqpUri) }, options ?? new MessagingOptions());
 
-        await provider.PublishAsync(queue, Bytes("poison"));
+    private static string Queue()
+        => "q-" + Guid.NewGuid().ToString("N");
 
-        Assert.Equal("poison", await deadLettered.Task.WaitAsync(Timeout));
-    }
+    private static string Text(ReadOnlyMemory<byte> b)
+        => Encoding.UTF8.GetString(b.Span);
 }

@@ -26,6 +26,15 @@ public class CacheConnectionStringTests
     }
 
     [Fact]
+    public void ToCacheOptions_Defaults_WhenNoParams()
+    {
+        var options = CacheConnectionString.Parse("memory://localhost").ToCacheOptions();
+
+        Assert.Null(options.DefaultTtl);
+        Assert.Equal(string.Empty, options.KeyPrefix);
+    }
+
+    [Fact]
     public void ToCacheOptions_ReadsTtlAndPrefix()
     {
         var cs = CacheConnectionString.Parse("memory://localhost?defaultTtlSeconds=30&keyPrefix=app:");
@@ -34,14 +43,5 @@ public class CacheConnectionStringTests
 
         Assert.Equal(TimeSpan.FromSeconds(30), options.DefaultTtl);
         Assert.Equal("app:", options.KeyPrefix);
-    }
-
-    [Fact]
-    public void ToCacheOptions_Defaults_WhenNoParams()
-    {
-        var options = CacheConnectionString.Parse("memory://localhost").ToCacheOptions();
-
-        Assert.Null(options.DefaultTtl);
-        Assert.Equal(string.Empty, options.KeyPrefix);
     }
 }

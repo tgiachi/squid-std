@@ -29,26 +29,8 @@ public sealed class WorkerConsumerService : ISquidStdService, IQueueMessageListe
         _queue = queue;
         _dispatcher = dispatcher;
         _state = state;
-        _semaphore = new SemaphoreSlim(state.MaxConcurrency);
+        _semaphore = new(state.MaxConcurrency);
         _queueName = string.IsNullOrWhiteSpace(config.JobQueue) ? WorkerChannels.JobQueue : config.JobQueue;
-    }
-
-    /// <inheritdoc />
-    public ValueTask StartAsync(CancellationToken cancellationToken = default)
-    {
-        _subscription = _queue.Subscribe(_queueName, this);
-        _logger.Information("Worker consuming jobs from queue '{Queue}'.", _queueName);
-
-        return ValueTask.CompletedTask;
-    }
-
-    /// <inheritdoc />
-    public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        _subscription?.Dispose();
-        _subscription = null;
-
-        return ValueTask.CompletedTask;
     }
 
     /// <inheritdoc />
@@ -82,5 +64,23 @@ public sealed class WorkerConsumerService : ISquidStdService, IQueueMessageListe
             _state.JobFinished();
             _semaphore.Release();
         }
+    }
+
+    /// <inheritdoc />
+    public ValueTask StartAsync(CancellationToken cancellationToken = default)
+    {
+        _subscription = _queue.Subscribe(_queueName, this);
+        _logger.Information("Worker consuming jobs from queue '{Queue}'.", _queueName);
+
+        return ValueTask.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public ValueTask StopAsync(CancellationToken cancellationToken = default)
+    {
+        _subscription?.Dispose();
+        _subscription = null;
+
+        return ValueTask.CompletedTask;
     }
 }

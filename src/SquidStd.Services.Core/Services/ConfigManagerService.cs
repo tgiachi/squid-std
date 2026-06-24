@@ -70,7 +70,7 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
                             : YamlUtils.DeserializeSection(yaml, entry.SectionName, entry.ConfigType) ??
                               entry.CreateDefault();
 
-            ApplyEnvSubstitution(value, new HashSet<object>(ReferenceEqualityComparer.Instance));
+            ApplyEnvSubstitution(value, new(ReferenceEqualityComparer.Instance));
 
             _values[entry.ConfigType] = value;
             _container.RegisterInstance(entry.ConfigType, value, IfAlreadyRegistered.Replace);
@@ -107,44 +107,6 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
         cancellationToken.ThrowIfCancellationRequested();
 
         return ValueTask.CompletedTask;
-    }
-
-    private Dictionary<string, object> BuildSectionMap()
-    {
-        var sections = new Dictionary<string, object>(StringComparer.Ordinal);
-        var entries = GetRegistrations();
-
-        for (var i = 0; i < entries.Count; i++)
-        {
-            var entry = entries[i];
-
-            if (!_values.TryGetValue(entry.ConfigType, out var value))
-            {
-                value = entry.CreateDefault();
-            }
-
-            sections[entry.SectionName] = value;
-        }
-
-        return sections;
-    }
-
-    private IReadOnlyCollection<IConfigEntry> GetEntries()
-        => GetRegistrations().Cast<IConfigEntry>().ToArray();
-
-    private List<ConfigRegistrationData> GetRegistrations()
-    {
-        if (!_container.IsRegistered<List<ConfigRegistrationData>>())
-        {
-            return [];
-        }
-
-        return
-        [
-            .. _container.Resolve<List<ConfigRegistrationData>>()
-                         .OrderBy(entry => entry.Priority)
-                         .ThenBy(entry => entry.SectionName, StringComparer.Ordinal)
-        ];
     }
 
     private static void ApplyEnvSubstitution(object? instance, HashSet<object> visited)
@@ -185,6 +147,44 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
                 ApplyEnvSubstitution(property.GetValue(instance), visited);
             }
         }
+    }
+
+    private Dictionary<string, object> BuildSectionMap()
+    {
+        var sections = new Dictionary<string, object>(StringComparer.Ordinal);
+        var entries = GetRegistrations();
+
+        for (var i = 0; i < entries.Count; i++)
+        {
+            var entry = entries[i];
+
+            if (!_values.TryGetValue(entry.ConfigType, out var value))
+            {
+                value = entry.CreateDefault();
+            }
+
+            sections[entry.SectionName] = value;
+        }
+
+        return sections;
+    }
+
+    private IReadOnlyCollection<IConfigEntry> GetEntries()
+        => GetRegistrations().Cast<IConfigEntry>().ToArray();
+
+    private List<ConfigRegistrationData> GetRegistrations()
+    {
+        if (!_container.IsRegistered<List<ConfigRegistrationData>>())
+        {
+            return [];
+        }
+
+        return
+        [
+            .. _container.Resolve<List<ConfigRegistrationData>>()
+                         .OrderBy(entry => entry.Priority)
+                         .ThenBy(entry => entry.SectionName, StringComparer.Ordinal)
+        ];
     }
 
     private static string ResolveConfigPath(string configName, string configDirectory)

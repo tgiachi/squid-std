@@ -74,6 +74,9 @@ public sealed class AesGcmSecretProtector : ISecretProtector
         return plaintext;
     }
 
+    private static byte[] CreateDefaultKey()
+        => SHA256.HashData(Encoding.UTF8.GetBytes(DefaultKeyMaterial));
+
     private static byte[] ResolveKey(string environmentVariable)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(environmentVariable);
@@ -105,7 +108,4 @@ public sealed class AesGcmSecretProtector : ISecretProtector
                    ? key
                    : throw new InvalidOperationException("Secret key must be 16, 24, or 32 bytes after base64 decoding.");
     }
-
-    private static byte[] CreateDefaultKey()
-        => SHA256.HashData(Encoding.UTF8.GetBytes(DefaultKeyMaterial));
 }

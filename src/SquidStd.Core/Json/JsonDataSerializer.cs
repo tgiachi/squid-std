@@ -18,14 +18,14 @@ public sealed class JsonDataSerializer : IDataSerializer, IDataDeserializer
         _options = new(JsonSerializerDefaults.Web);
     }
 
-    [RequiresUnreferencedCode("JSON serialization may require types that cannot be statically analyzed."),
-     RequiresDynamicCode("JSON serialization may require runtime code generation.")]
-    public ReadOnlyMemory<byte> Serialize<T>(T value)
-        => JsonSerializer.SerializeToUtf8Bytes(value, _options);
-
     [RequiresUnreferencedCode("JSON deserialization may require types that cannot be statically analyzed."),
      RequiresDynamicCode("JSON deserialization may require runtime code generation.")]
     public T Deserialize<T>(ReadOnlyMemory<byte> data)
         => JsonSerializer.Deserialize<T>(data.Span, _options) ??
            throw new InvalidOperationException($"Deserialization returned null for type {typeof(T).Name}.");
+
+    [RequiresUnreferencedCode("JSON serialization may require types that cannot be statically analyzed."),
+     RequiresDynamicCode("JSON serialization may require runtime code generation.")]
+    public ReadOnlyMemory<byte> Serialize<T>(T value)
+        => JsonSerializer.SerializeToUtf8Bytes(value, _options);
 }

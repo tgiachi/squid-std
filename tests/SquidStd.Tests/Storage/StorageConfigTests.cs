@@ -1,21 +1,11 @@
 using SquidStd.Core.Data.Storage;
-using SquidStd.Storage.Abstractions.Data.Config;
 using SquidStd.Core.Interfaces.Config;
+using SquidStd.Storage.Abstractions.Data.Config;
 
 namespace SquidStd.Tests.Storage;
 
 public class StorageConfigTests
 {
-    [Fact]
-    public void StorageConfig_ImplementsConfigEntry()
-    {
-        IConfigEntry entry = new StorageConfig();
-
-        Assert.Equal("storage", entry.SectionName);
-        Assert.Equal(typeof(StorageConfig), entry.ConfigType);
-        Assert.IsType<StorageConfig>(entry.CreateDefault());
-    }
-
     [Fact]
     public void SecretsConfig_ImplementsConfigEntry()
     {
@@ -24,5 +14,15 @@ public class StorageConfigTests
         Assert.Equal("secrets", entry.SectionName);
         Assert.Equal(typeof(SecretsConfig), entry.ConfigType);
         Assert.IsType<SecretsConfig>(entry.CreateDefault());
+    }
+
+    [Fact]
+    public void StorageConfig_ImplementsConfigEntry()
+    {
+        IConfigEntry entry = new StorageConfig();
+
+        Assert.Equal("storage", entry.SectionName);
+        Assert.Equal(typeof(StorageConfig), entry.ConfigType);
+        Assert.IsType<StorageConfig>(entry.CreateDefault());
     }
 }

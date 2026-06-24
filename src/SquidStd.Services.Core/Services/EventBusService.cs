@@ -31,6 +31,21 @@ public sealed class EventBusService : IEventBus, IDisposable
         _dispatcher = Task.Run(ProcessDispatchesAsync);
     }
 
+    /// <summary>
+    /// Stops the internal dispatcher.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+        _dispatches.Writer.TryComplete();
+        _dispatcher.GetAwaiter().GetResult();
+    }
+
     /// <inheritdoc />
     public void Publish<TEvent>(TEvent eventData)
         where TEvent : IEvent
@@ -154,20 +169,5 @@ public sealed class EventBusService : IEventBus, IDisposable
         {
             throw new ObjectDisposedException(nameof(EventBusService));
         }
-    }
-
-    /// <summary>
-    /// Stops the internal dispatcher.
-    /// </summary>
-    public void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        _disposed = true;
-        _dispatches.Writer.TryComplete();
-        _dispatcher.GetAwaiter().GetResult();
     }
 }

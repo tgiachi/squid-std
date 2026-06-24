@@ -19,8 +19,7 @@ public sealed class DatabaseService : IDatabaseService
     private int _started;
 
     /// <inheritdoc />
-    public IFreeSql Orm
-        => _orm ?? throw new InvalidOperationException("Database service is not started.");
+    public IFreeSql Orm => _orm ?? throw new InvalidOperationException("Database service is not started.");
 
     /// <summary>
     /// Initializes the database service.
@@ -45,18 +44,19 @@ public sealed class DatabaseService : IDatabaseService
         Logger.Verbose("Building FreeSql for provider {Provider}", parsed.Provider);
 
         var builder = new FreeSqlBuilder()
-            .UseConnectionString(MapDataType(parsed.Provider), parsed.NativeConnectionString)
-            .UseAutoSyncStructure(_config.AutoMigrate)
-            .UseMonitorCommand(cmd => Logger.Verbose("SQL {Sql}", cmd.CommandText));
+                      .UseConnectionString(MapDataType(parsed.Provider), parsed.NativeConnectionString)
+                      .UseAutoSyncStructure(_config.AutoMigrate)
+                      .UseMonitorCommand(cmd => Logger.Verbose("SQL {Sql}", cmd.CommandText));
 
         _orm = builder.Build();
         _orm.Aop.SyncStructureAfter += (_, e) =>
-            Logger.Verbose("Migrated {Entities} -> {Sql}", e.EntityTypes, e.Sql);
+                                           Logger.Verbose("Migrated {Entities} -> {Sql}", e.EntityTypes, e.Sql);
 
         Logger.Information(
             "Database service started ({Provider}, autoMigrate={AutoMigrate})",
             parsed.Provider,
-            _config.AutoMigrate);
+            _config.AutoMigrate
+        );
 
         return ValueTask.CompletedTask;
     }
@@ -75,10 +75,10 @@ public sealed class DatabaseService : IDatabaseService
     private static DataType MapDataType(DatabaseProviderType provider)
         => provider switch
         {
-            DatabaseProviderType.Sqlite => DataType.Sqlite,
-            DatabaseProviderType.Postgres => DataType.PostgreSQL,
+            DatabaseProviderType.Sqlite    => DataType.Sqlite,
+            DatabaseProviderType.Postgres  => DataType.PostgreSQL,
             DatabaseProviderType.SqlServer => DataType.SqlServer,
-            DatabaseProviderType.MySql => DataType.MySql,
-            _ => throw new NotSupportedException($"Unsupported provider {provider}.")
+            DatabaseProviderType.MySql     => DataType.MySql,
+            _                              => throw new NotSupportedException($"Unsupported provider {provider}.")
         };
 }

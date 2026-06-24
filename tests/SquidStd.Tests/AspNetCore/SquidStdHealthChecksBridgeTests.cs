@@ -1,6 +1,5 @@
 using DryIoc;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -23,7 +22,10 @@ public class SquidStdHealthChecksBridgeTests
             options => options.ConfigName = "app",
             container =>
             {
-                container.RegisterInstance<SquidHealthCheck>(new FakeHealthCheck("alpha"), IfAlreadyRegistered.AppendNotKeyed);
+                container.RegisterInstance<SquidHealthCheck>(
+                    new FakeHealthCheck("alpha"),
+                    IfAlreadyRegistered.AppendNotKeyed
+                );
                 container.RegisterInstance<SquidHealthCheck>(
                     new FakeHealthCheck("beta", SquidHealthResult.Unhealthy("bad")),
                     IfAlreadyRegistered.AppendNotKeyed

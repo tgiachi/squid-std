@@ -2,15 +2,24 @@ using DryIoc;
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Core.Interfaces.Metrics;
 using SquidStd.Core.Interfaces.Serialization;
-using SquidStd.Messaging.Extensions;
-using SquidStd.Messaging.Services;
 using SquidStd.Messaging.Abstractions.Interfaces;
+using SquidStd.Messaging.Extensions;
 using SquidStd.Services.Core.Services;
 
 namespace SquidStd.Tests.Messaging;
 
 public class MessagingRegistrationExtensionsTests
 {
+    [Fact]
+    public void AddInMemoryMessaging_MetricsAndProviderShareInstance()
+    {
+        using var container = new Container();
+
+        container.AddInMemoryMessaging();
+
+        Assert.Same(container.Resolve<IMessagingMetrics>(), container.Resolve<IMetricProvider>());
+    }
+
     [Fact]
     public void AddInMemoryMessaging_RegistersResolvableServices()
     {
@@ -25,16 +34,6 @@ public class MessagingRegistrationExtensionsTests
         Assert.NotNull(container.Resolve<IMessagingMetrics>());
 
         Assert.Contains(container.Resolve<IEnumerable<IMetricProvider>>(), p => p.ProviderName == "messaging");
-    }
-
-    [Fact]
-    public void AddInMemoryMessaging_MetricsAndProviderShareInstance()
-    {
-        using var container = new Container();
-
-        container.AddInMemoryMessaging();
-
-        Assert.Same(container.Resolve<IMessagingMetrics>(), container.Resolve<IMetricProvider>());
     }
 
     [Fact]

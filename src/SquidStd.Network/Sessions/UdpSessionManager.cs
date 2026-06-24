@@ -21,7 +21,6 @@ public sealed class UdpSessionManager<TState> : ISessionManager<TState>, IDispos
     private readonly Lock _createLock = new();
     private readonly SquidStdUdpServer _server;
     private readonly Func<INetworkConnection, TState> _stateFactory;
-    private readonly TimeSpan _idleTimeout;
     private readonly TimeProvider _timeProvider;
     private readonly ITimer _sweepTimer;
     private long _sessionIdSequence;
@@ -31,11 +30,10 @@ public sealed class UdpSessionManager<TState> : ISessionManager<TState>, IDispos
     public int Count => _byEndpoint.Count;
 
     /// <inheritdoc />
-    public IReadOnlyCollection<Session<TState>> Sessions
-        => _byEndpoint.Values.Select(entry => entry.Session).ToArray();
+    public IReadOnlyCollection<Session<TState>> Sessions => _byEndpoint.Values.Select(entry => entry.Session).ToArray();
 
     /// <summary>Idle period after which an inactive session is removed.</summary>
-    public TimeSpan IdleTimeout => _idleTimeout;
+    public TimeSpan IdleTimeout { get; }
 
     /// <inheritdoc />
     public event EventHandler<SquidStdSessionEventArgs<TState>>? OnSessionCreated;
@@ -59,7 +57,7 @@ public sealed class UdpSessionManager<TState> : ISessionManager<TState>, IDispos
 
         _server = server;
         _stateFactory = stateFactory;
-        _idleTimeout = idleTimeout ?? TimeSpan.FromSeconds(30);
+        IdleTimeout = idleTimeout ?? TimeSpan.FromSeconds(30);
         _timeProvider = timeProvider ?? TimeProvider.System;
 
         // Suppress the server's default echo while sessions are managed here.
@@ -69,6 +67,57 @@ public sealed class UdpSessionManager<TState> : ISessionManager<TState>, IDispos
         var interval = sweepInterval ?? TimeSpan.FromSeconds(10);
         _sweepTimer = _timeProvider.CreateTimer(_ => SafeSweep(), null, interval, interval);
     }
+
+    /// <inheritdoc />
+    public async Task BroadcastAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
+    {
+        var snapshot = _byEndpoint.Values.ToArray();
+        var tasks = new List<Task>(snapshot.Length);
+
+        foreach (var entry in snapshot)
+        {
+            tasks.Add(SendSafelyAsync(entry.Session, payload, cancellationToken));
+        }
+
+        await Task.WhenAll(tasks);
+    }
+
+    /// <inheritdoc />
+    public Task DisconnectAsync(long sessionId, CancellationToken cancellationToken = default)
+        => TryGetSession(sessionId, out var session)
+               ? session!.CloseAsync(cancellationToken)
+               : Task.CompletedTask;
+
+    /// <summary>Closes the session for the given endpoint. No-op when unknown.</summary>
+    public Task DisconnectAsync(IPEndPoint endPoint, CancellationToken cancellationToken = default)
+        => TryGetSession(endPoint, out var session)
+               ? session!.CloseAsync(cancellationToken)
+               : Task.CompletedTask;
+
+    public void Dispose()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
+        _server.OnDatagramReceived -= HandleServerDatagram;
+        _sweepTimer.Dispose();
+        _byEndpoint.Clear();
+        _byId.Clear();
+    }
+
+    /// <inheritdoc />
+    public Task SendAsync(long sessionId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
+        => TryGetSession(sessionId, out var session)
+               ? session!.SendAsync(payload, cancellationToken)
+               : Task.CompletedTask;
+
+    /// <summary>Sends a payload to the session for the given endpoint. No-op when unknown.</summary>
+    public Task SendToAsync(IPEndPoint endPoint, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
+        => TryGetSession(endPoint, out var session)
+               ? session!.SendAsync(payload, cancellationToken)
+               : Task.CompletedTask;
 
     /// <inheritdoc />
     public bool TryGetSession(long sessionId, out Session<TState>? session)
@@ -100,44 +149,6 @@ public sealed class UdpSessionManager<TState> : ISessionManager<TState>, IDispos
         return false;
     }
 
-    /// <inheritdoc />
-    public Task SendAsync(long sessionId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
-        => TryGetSession(sessionId, out var session)
-               ? session!.SendAsync(payload, cancellationToken)
-               : Task.CompletedTask;
-
-    /// <summary>Sends a payload to the session for the given endpoint. No-op when unknown.</summary>
-    public Task SendToAsync(IPEndPoint endPoint, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
-        => TryGetSession(endPoint, out var session)
-               ? session!.SendAsync(payload, cancellationToken)
-               : Task.CompletedTask;
-
-    /// <inheritdoc />
-    public async Task BroadcastAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
-    {
-        var snapshot = _byEndpoint.Values.ToArray();
-        var tasks = new List<Task>(snapshot.Length);
-
-        foreach (var entry in snapshot)
-        {
-            tasks.Add(SendSafelyAsync(entry.Session, payload, cancellationToken));
-        }
-
-        await Task.WhenAll(tasks);
-    }
-
-    /// <inheritdoc />
-    public Task DisconnectAsync(long sessionId, CancellationToken cancellationToken = default)
-        => TryGetSession(sessionId, out var session)
-               ? session!.CloseAsync(cancellationToken)
-               : Task.CompletedTask;
-
-    /// <summary>Closes the session for the given endpoint. No-op when unknown.</summary>
-    public Task DisconnectAsync(IPEndPoint endPoint, CancellationToken cancellationToken = default)
-        => TryGetSession(endPoint, out var session)
-               ? session!.CloseAsync(cancellationToken)
-               : Task.CompletedTask;
-
     internal void HandleDatagram(IPEndPoint remoteEndPoint, ReadOnlyMemory<byte> data)
     {
         var entry = GetOrCreate(remoteEndPoint, out var created);
@@ -157,7 +168,7 @@ public sealed class UdpSessionManager<TState> : ISessionManager<TState>, IDispos
 
         foreach (var kvp in _byEndpoint.ToArray())
         {
-            if (now - kvp.Value.LastActivityUtc > _idleTimeout)
+            if (now - kvp.Value.LastActivityUtc > IdleTimeout)
             {
                 RemoveSession(kvp.Key);
             }
@@ -183,7 +194,12 @@ public sealed class UdpSessionManager<TState> : ISessionManager<TState>, IDispos
             }
 
             var sessionId = Interlocked.Increment(ref _sessionIdSequence);
-            var connection = new UdpSessionConnection(_server, remoteEndPoint, sessionId, () => RemoveSession(remoteEndPoint));
+            var connection = new UdpSessionConnection(
+                _server,
+                remoteEndPoint,
+                sessionId,
+                () => RemoveSession(remoteEndPoint)
+            );
             var session = new Session<TState>(sessionId, connection, _stateFactory(connection), _timeProvider.GetUtcNow());
             var entry = new UdpSessionEntry<TState>(session, _timeProvider.GetUtcNow());
 
@@ -192,6 +208,45 @@ public sealed class UdpSessionManager<TState> : ISessionManager<TState>, IDispos
             created = true;
 
             return entry;
+        }
+    }
+
+    private void HandleServerDatagram(object? sender, SquidStdUdpDatagramReceivedEventArgs e)
+        => HandleDatagram(e.RemoteEndPoint, e.Data);
+
+    private void RaiseSessionCreated(Session<TState> session)
+    {
+        try
+        {
+            OnSessionCreated?.Invoke(this, new(session));
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "OnSessionCreated handler failed for session {SessionId}", session.SessionId);
+        }
+    }
+
+    private void RaiseSessionData(Session<TState> session, ReadOnlyMemory<byte> data)
+    {
+        try
+        {
+            OnSessionData?.Invoke(this, new(session, data));
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "OnSessionData handler failed for session {SessionId}", session.SessionId);
+        }
+    }
+
+    private void RaiseSessionRemoved(Session<TState> session)
+    {
+        try
+        {
+            OnSessionRemoved?.Invoke(this, new(session));
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "OnSessionRemoved handler failed for session {SessionId}", session.SessionId);
         }
     }
 
@@ -216,7 +271,11 @@ public sealed class UdpSessionManager<TState> : ISessionManager<TState>, IDispos
         }
     }
 
-    private async Task SendSafelyAsync(Session<TState> session, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+    private async Task SendSafelyAsync(
+        Session<TState> session,
+        ReadOnlyMemory<byte> payload,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
@@ -226,57 +285,5 @@ public sealed class UdpSessionManager<TState> : ISessionManager<TState>, IDispos
         {
             _logger.Warning(ex, "Broadcast send failed for session {SessionId}", session.SessionId);
         }
-    }
-
-    private void HandleServerDatagram(object? sender, SquidStdUdpDatagramReceivedEventArgs e)
-        => HandleDatagram(e.RemoteEndPoint, e.Data);
-
-    private void RaiseSessionCreated(Session<TState> session)
-    {
-        try
-        {
-            OnSessionCreated?.Invoke(this, new(session));
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "OnSessionCreated handler failed for session {SessionId}", session.SessionId);
-        }
-    }
-
-    private void RaiseSessionRemoved(Session<TState> session)
-    {
-        try
-        {
-            OnSessionRemoved?.Invoke(this, new(session));
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "OnSessionRemoved handler failed for session {SessionId}", session.SessionId);
-        }
-    }
-
-    private void RaiseSessionData(Session<TState> session, ReadOnlyMemory<byte> data)
-    {
-        try
-        {
-            OnSessionData?.Invoke(this, new(session, data));
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "OnSessionData handler failed for session {SessionId}", session.SessionId);
-        }
-    }
-
-    public void Dispose()
-    {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
-        {
-            return;
-        }
-
-        _server.OnDatagramReceived -= HandleServerDatagram;
-        _sweepTimer.Dispose();
-        _byEndpoint.Clear();
-        _byId.Clear();
     }
 }

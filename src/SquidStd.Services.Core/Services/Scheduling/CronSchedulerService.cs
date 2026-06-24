@@ -33,19 +33,31 @@ public sealed class CronSchedulerService : ICronScheduler, ISquidStdService, IDi
     /// <inheritdoc />
     public IReadOnlyCollection<CronJobInfo> Jobs
         => _entries.Values
-            .Select(
-                entry => new CronJobInfo
-                {
-                    JobId = entry.JobId,
-                    Name = entry.Name,
-                    CronExpression = entry.CronText,
-                    NextOccurrenceUtc = entry.NextOccurrenceUtc,
-                    IsRunning = Volatile.Read(ref entry.Running) == 1,
-                    LastRunUtc = entry.LastRunUtc,
-                    RunCount = Interlocked.Read(ref entry.RunCount)
-                }
-            )
-            .ToArray();
+                   .Select(
+                       entry => new CronJobInfo
+                       {
+                           JobId = entry.JobId,
+                           Name = entry.Name,
+                           CronExpression = entry.CronText,
+                           NextOccurrenceUtc = entry.NextOccurrenceUtc,
+                           IsRunning = Volatile.Read(ref entry.Running) == 1,
+                           LastRunUtc = entry.LastRunUtc,
+                           RunCount = Interlocked.Read(ref entry.RunCount)
+                       }
+                   )
+                   .ToArray();
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
+        _cts.Cancel();
+        _cts.Dispose();
+    }
 
     /// <inheritdoc />
     public string Schedule(string name, string cronExpression, Func<CancellationToken, Task> handler)
@@ -69,6 +81,28 @@ public sealed class CronSchedulerService : ICronScheduler, ISquidStdService, IDi
         ScheduleNext(entry);
 
         return entry.JobId;
+    }
+
+    /// <inheritdoc />
+    public ValueTask StartAsync(CancellationToken cancellationToken = default)
+        => ValueTask.CompletedTask;
+
+    /// <inheritdoc />
+    public ValueTask StopAsync(CancellationToken cancellationToken = default)
+    {
+        _cts.Cancel();
+
+        foreach (var entry in _entries.Values)
+        {
+            if (entry.TimerId is not null)
+            {
+                _timer.UnregisterTimer(entry.TimerId);
+            }
+        }
+
+        _entries.Clear();
+
+        return ValueTask.CompletedTask;
     }
 
     /// <inheritdoc />
@@ -102,53 +136,6 @@ public sealed class CronSchedulerService : ICronScheduler, ISquidStdService, IDi
         }
 
         return removed;
-    }
-
-    /// <inheritdoc />
-    public ValueTask StartAsync(CancellationToken cancellationToken = default)
-        => ValueTask.CompletedTask;
-
-    /// <inheritdoc />
-    public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        _cts.Cancel();
-
-        foreach (var entry in _entries.Values)
-        {
-            if (entry.TimerId is not null)
-            {
-                _timer.UnregisterTimer(entry.TimerId);
-            }
-        }
-
-        _entries.Clear();
-
-        return ValueTask.CompletedTask;
-    }
-
-    private void ScheduleNext(CronJobEntry entry)
-    {
-        var now = DateTime.UtcNow;
-        var next = entry.Expression.GetNextOccurrence(now);
-
-        if (next is null)
-        {
-            _logger.Information("Cron job '{Name}' ({JobId}) has no further occurrences", entry.Name, entry.JobId);
-            entry.TimerId = null;
-            entry.NextOccurrenceUtc = null;
-
-            return;
-        }
-
-        var delay = next.Value - now;
-
-        if (delay <= TimeSpan.Zero)
-        {
-            delay = TimeSpan.FromMilliseconds(1);
-        }
-
-        entry.NextOccurrenceUtc = next.Value;
-        entry.TimerId = _timer.RegisterTimer(entry.Name, delay, () => OnTimer(entry));
     }
 
     private void OnTimer(CronJobEntry entry)
@@ -192,15 +179,28 @@ public sealed class CronSchedulerService : ICronScheduler, ISquidStdService, IDi
         }
     }
 
-    /// <inheritdoc />
-    public void Dispose()
+    private void ScheduleNext(CronJobEntry entry)
     {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        var now = DateTime.UtcNow;
+        var next = entry.Expression.GetNextOccurrence(now);
+
+        if (next is null)
         {
+            _logger.Information("Cron job '{Name}' ({JobId}) has no further occurrences", entry.Name, entry.JobId);
+            entry.TimerId = null;
+            entry.NextOccurrenceUtc = null;
+
             return;
         }
 
-        _cts.Cancel();
-        _cts.Dispose();
+        var delay = next.Value - now;
+
+        if (delay <= TimeSpan.Zero)
+        {
+            delay = TimeSpan.FromMilliseconds(1);
+        }
+
+        entry.NextOccurrenceUtc = next.Value;
+        entry.TimerId = _timer.RegisterTimer(entry.Name, delay, () => OnTimer(entry));
     }
 }

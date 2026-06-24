@@ -7,6 +7,9 @@ namespace SquidStd.Core.Interfaces.Scheduling;
 /// </summary>
 public interface ICronScheduler
 {
+    /// <summary>Gets a snapshot of all registered jobs.</summary>
+    IReadOnlyCollection<CronJobInfo> Jobs { get; }
+
     /// <summary>
     /// Registers a cron job.
     /// </summary>
@@ -25,7 +28,4 @@ public interface ICronScheduler
     /// <param name="name">The job name.</param>
     /// <returns>The number of removed jobs.</returns>
     int UnscheduleByName(string name);
-
-    /// <summary>Gets a snapshot of all registered jobs.</summary>
-    IReadOnlyCollection<CronJobInfo> Jobs { get; }
 }

@@ -36,7 +36,7 @@ public sealed class HealthCheckService : IHealthCheckService
 
         if (_checks.Length == 0)
         {
-            return new HealthReport
+            return new()
             {
                 Status = HealthStatus.Healthy,
                 Entries = new Dictionary<string, HealthCheckResult>(StringComparer.Ordinal),
@@ -77,7 +77,7 @@ public sealed class HealthCheckService : IHealthCheckService
             }
         }
 
-        return new HealthReport
+        return new()
         {
             Status = overall,
             Entries = entries,
@@ -86,7 +86,10 @@ public sealed class HealthCheckService : IHealthCheckService
         };
     }
 
-    private async Task<(string Name, HealthCheckResult Result)> RunCheckAsync(IHealthCheck check, CancellationToken cancellationToken)
+    private async Task<(string Name, HealthCheckResult Result)> RunCheckAsync(
+        IHealthCheck check,
+        CancellationToken cancellationToken
+    )
     {
         var stopwatch = Stopwatch.StartNew();
 
@@ -101,7 +104,8 @@ public sealed class HealthCheckService : IHealthCheckService
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
-            return (check.Name, HealthCheckResult.Unhealthy($"Timed out after {_checkTimeout}.") with { Duration = stopwatch.Elapsed });
+            return (check.Name,
+                    HealthCheckResult.Unhealthy($"Timed out after {_checkTimeout}.") with { Duration = stopwatch.Elapsed });
         }
         catch (OperationCanceledException)
         {

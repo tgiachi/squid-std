@@ -22,13 +22,13 @@ dotnet add package SquidStd.Workers.Abstractions
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `JobRequest` | A job (name + string parameters) enqueued by the manager and consumed by a worker. |
-| `WorkerHeartbeat` | Liveness signal a worker publishes (status, active jobs, max concurrency). |
-| `WorkerInfo` | The manager-side view of a worker, folded from heartbeats. |
-| `WorkerStatusType` | `Idle` / `Busy` / `Offline`. |
-| `WorkerChannels` | Default jobs-queue and heartbeat-topic names. |
+| Type               | Purpose                                                                            |
+|--------------------|------------------------------------------------------------------------------------|
+| `JobRequest`       | A job (name + string parameters) enqueued by the manager and consumed by a worker. |
+| `WorkerHeartbeat`  | Liveness signal a worker publishes (status, active jobs, max concurrency).         |
+| `WorkerInfo`       | The manager-side view of a worker, folded from heartbeats.                         |
+| `WorkerStatusType` | `Idle` / `Busy` / `Offline`.                                                       |
+| `WorkerChannels`   | Default jobs-queue and heartbeat-topic names.                                      |
 
 ## License
 

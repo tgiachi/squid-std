@@ -46,15 +46,15 @@ container.RegisterCoreServices("squidstd", Directory.GetCurrentDirectory());
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
+| Type                                | Purpose                                                                   |
+|-------------------------------------|---------------------------------------------------------------------------|
 | `RegisterDefaultServicesExtensions` | `RegisterCoreServices()` / `RegisterConfigManagerService()` entry points. |
-| `ConfigManagerService` | YAML config load/save with env-var substitution. |
-| `EventBusService` | In-process event bus implementation. |
-| `JobSystemService` | Background job execution. |
-| `TimerWheelService` | Timer-wheel scheduling. |
-| `MainThreadDispatcherService` | Main-thread work dispatch. |
-| `MetricsCollectionService` | Metric sample aggregation. |
+| `ConfigManagerService`              | YAML config load/save with env-var substitution.                          |
+| `EventBusService`                   | In-process event bus implementation.                                      |
+| `JobSystemService`                  | Background job execution.                                                 |
+| `TimerWheelService`                 | Timer-wheel scheduling.                                                   |
+| `MainThreadDispatcherService`       | Main-thread work dispatch.                                                |
+| `MetricsCollectionService`          | Metric sample aggregation.                                                |
 
 ## License
 

@@ -13,18 +13,10 @@ internal sealed class InMemoryQueue
     private int _depth;
 
     public Channel<QueuedMessage> Channel { get; } = System.Threading.Channels.Channel.CreateUnbounded<QueuedMessage>(
-        new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }
+        new() { SingleReader = true, SingleWriter = false }
     );
 
     public Task? ConsumerLoop { get; set; }
-
-    /// <summary>Increments the buffered depth and returns the new value.</summary>
-    public int IncrementDepth()
-        => Interlocked.Increment(ref _depth);
-
-    /// <summary>Decrements the buffered depth and returns the new value.</summary>
-    public int DecrementDepth()
-        => Interlocked.Decrement(ref _depth);
 
     public int HandlerCount
     {
@@ -45,13 +37,13 @@ internal sealed class InMemoryQueue
         }
     }
 
-    public void RemoveHandler(Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler)
-    {
-        lock (_handlerSync)
-        {
-            _handlers.Remove(handler);
-        }
-    }
+    /// <summary>Decrements the buffered depth and returns the new value.</summary>
+    public int DecrementDepth()
+        => Interlocked.Decrement(ref _depth);
+
+    /// <summary>Increments the buffered depth and returns the new value.</summary>
+    public int IncrementDepth()
+        => Interlocked.Increment(ref _depth);
 
     /// <summary>Returns the next handler in round-robin order, or null when none are registered.</summary>
     public Func<ReadOnlyMemory<byte>, CancellationToken, Task>? NextHandler()
@@ -67,6 +59,14 @@ internal sealed class InMemoryQueue
             _roundRobinIndex = (_roundRobinIndex + 1) % _handlers.Count;
 
             return handler;
+        }
+    }
+
+    public void RemoveHandler(Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler)
+    {
+        lock (_handlerSync)
+        {
+            _handlers.Remove(handler);
         }
     }
 }

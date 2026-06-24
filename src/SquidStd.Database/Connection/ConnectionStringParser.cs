@@ -1,3 +1,4 @@
+using System.Globalization;
 using SquidStd.Database.Abstractions.Types.Data;
 
 namespace SquidStd.Database.Connection;
@@ -28,30 +29,10 @@ public static class ConnectionStringParser
         var provider = ResolveProvider(scheme);
 
         var native = provider == DatabaseProviderType.Sqlite
-            ? BuildSqlite(remainder)
-            : BuildServer(provider, remainder);
+                         ? BuildSqlite(remainder)
+                         : BuildServer(provider, remainder);
 
-        return new ParsedConnection(provider, native);
-    }
-
-    private static DatabaseProviderType ResolveProvider(string scheme)
-        => scheme switch
-        {
-            "sqlite" => DatabaseProviderType.Sqlite,
-            "postgres" or "postgresql" => DatabaseProviderType.Postgres,
-            "sqlserver" or "mssql" => DatabaseProviderType.SqlServer,
-            "mysql" => DatabaseProviderType.MySql,
-            _ => throw new NotSupportedException($"Unsupported database scheme '{scheme}'.")
-        };
-
-    private static string BuildSqlite(string remainder)
-    {
-        if (string.IsNullOrWhiteSpace(remainder))
-        {
-            throw new FormatException("SQLite connection string requires a file path or ':memory:'.");
-        }
-
-        return $"Data Source={remainder}";
+        return new(provider, native);
     }
 
     private static string BuildServer(DatabaseProviderType provider, string remainder)
@@ -95,6 +76,26 @@ public static class ConnectionStringParser
         };
     }
 
+    private static string BuildSqlite(string remainder)
+    {
+        if (string.IsNullOrWhiteSpace(remainder))
+        {
+            throw new FormatException("SQLite connection string requires a file path or ':memory:'.");
+        }
+
+        return $"Data Source={remainder}";
+    }
+
+    private static DatabaseProviderType ResolveProvider(string scheme)
+        => scheme switch
+        {
+            "sqlite"                   => DatabaseProviderType.Sqlite,
+            "postgres" or "postgresql" => DatabaseProviderType.Postgres,
+            "sqlserver" or "mssql"     => DatabaseProviderType.SqlServer,
+            "mysql"                    => DatabaseProviderType.MySql,
+            _                          => throw new NotSupportedException($"Unsupported database scheme '{scheme}'.")
+        };
+
     private static (string User, string Password, string HostPort) SplitAuthority(string authority)
     {
         var at = authority.LastIndexOf('@');
@@ -129,7 +130,7 @@ public static class ConnectionStringParser
         }
 
         var host = hostPort[..separator];
-        var port = int.Parse(hostPort[(separator + 1)..], System.Globalization.CultureInfo.InvariantCulture);
+        var port = int.Parse(hostPort[(separator + 1)..], CultureInfo.InvariantCulture);
 
         return (host, port);
     }

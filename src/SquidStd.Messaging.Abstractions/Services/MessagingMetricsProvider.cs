@@ -16,33 +16,16 @@ public sealed class MessagingMetricsProvider : IMessagingMetrics, IMetricProvide
     /// <inheritdoc />
     public string ProviderName => "messaging";
 
-    /// <inheritdoc />
-    public void OnPublished(string queueName)
-        => Interlocked.Increment(ref Counters(queueName).Published);
-
-    /// <inheritdoc />
-    public void OnDelivered(string queueName)
-        => Interlocked.Increment(ref Counters(queueName).Delivered);
-
-    /// <inheritdoc />
-    public void OnFailed(string queueName)
-        => Interlocked.Increment(ref Counters(queueName).Failed);
-
-    /// <inheritdoc />
-    public void OnRetried(string queueName)
-        => Interlocked.Increment(ref Counters(queueName).Retried);
-
-    /// <inheritdoc />
-    public void OnDeadLettered(string queueName)
-        => Interlocked.Increment(ref Counters(queueName).DeadLettered);
-
-    /// <inheritdoc />
-    public void SetQueueDepth(string queueName, int depth)
-        => Volatile.Write(ref Counters(queueName).Depth, depth);
-
-    /// <inheritdoc />
-    public void SetSubscriberCount(string queueName, int count)
-        => Volatile.Write(ref Counters(queueName).Subscribers, count);
+    private sealed class QueueCounters
+    {
+        public long Published;
+        public long Delivered;
+        public long Failed;
+        public long Retried;
+        public long DeadLettered;
+        public int Depth;
+        public int Subscribers;
+    }
 
     /// <inheritdoc />
     public ValueTask<IReadOnlyList<MetricSample>> CollectAsync(CancellationToken cancellationToken = default)
@@ -57,7 +40,9 @@ public sealed class MessagingMetricsProvider : IMessagingMetrics, IMetricProvide
             samples.Add(new("delivered", Interlocked.Read(ref counters.Delivered), Tags: tags, Type: MetricType.Counter));
             samples.Add(new("failed", Interlocked.Read(ref counters.Failed), Tags: tags, Type: MetricType.Counter));
             samples.Add(new("retried", Interlocked.Read(ref counters.Retried), Tags: tags, Type: MetricType.Counter));
-            samples.Add(new("dead_lettered", Interlocked.Read(ref counters.DeadLettered), Tags: tags, Type: MetricType.Counter));
+            samples.Add(
+                new("dead_lettered", Interlocked.Read(ref counters.DeadLettered), Tags: tags, Type: MetricType.Counter)
+            );
             samples.Add(new("queue_depth", Volatile.Read(ref counters.Depth), Tags: tags));
             samples.Add(new("subscribers", Volatile.Read(ref counters.Subscribers), Tags: tags));
         }
@@ -65,17 +50,34 @@ public sealed class MessagingMetricsProvider : IMessagingMetrics, IMetricProvide
         return ValueTask.FromResult<IReadOnlyList<MetricSample>>(samples);
     }
 
-    private QueueCounters Counters(string queueName)
-        => _queues.GetOrAdd(queueName, static _ => new QueueCounters());
+    /// <inheritdoc />
+    public void OnDeadLettered(string queueName)
+        => Interlocked.Increment(ref Counters(queueName).DeadLettered);
 
-    private sealed class QueueCounters
-    {
-        public long Published;
-        public long Delivered;
-        public long Failed;
-        public long Retried;
-        public long DeadLettered;
-        public int Depth;
-        public int Subscribers;
-    }
+    /// <inheritdoc />
+    public void OnDelivered(string queueName)
+        => Interlocked.Increment(ref Counters(queueName).Delivered);
+
+    /// <inheritdoc />
+    public void OnFailed(string queueName)
+        => Interlocked.Increment(ref Counters(queueName).Failed);
+
+    /// <inheritdoc />
+    public void OnPublished(string queueName)
+        => Interlocked.Increment(ref Counters(queueName).Published);
+
+    /// <inheritdoc />
+    public void OnRetried(string queueName)
+        => Interlocked.Increment(ref Counters(queueName).Retried);
+
+    /// <inheritdoc />
+    public void SetQueueDepth(string queueName, int depth)
+        => Volatile.Write(ref Counters(queueName).Depth, depth);
+
+    /// <inheritdoc />
+    public void SetSubscriberCount(string queueName, int count)
+        => Volatile.Write(ref Counters(queueName).Subscribers, count);
+
+    private QueueCounters Counters(string queueName)
+        => _queues.GetOrAdd(queueName, static _ => new());
 }

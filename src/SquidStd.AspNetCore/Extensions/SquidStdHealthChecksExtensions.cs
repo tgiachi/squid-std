@@ -2,7 +2,6 @@ using DryIoc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Hosting;
 using SquidStd.AspNetCore.Services;
 using SquidHealthCheck = SquidStd.Core.Interfaces.Health.IHealthCheck;
 
@@ -26,8 +25,11 @@ public static class SquidStdHealthChecksExtensions
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            if (!builder.Host.Properties.TryGetValue(SquidStdAspNetCoreBuilderExtensions.ContainerPropertyKey, out var value)
-                || value is not IContainer container)
+            if (!builder.Host.Properties.TryGetValue(
+                    SquidStdAspNetCoreBuilderExtensions.ContainerPropertyKey,
+                    out var value
+                ) ||
+                value is not IContainer container)
             {
                 throw new InvalidOperationException("Call UseSquidStd before AddSquidStdHealthChecks.");
             }
@@ -38,11 +40,11 @@ public static class SquidStdHealthChecksExtensions
             foreach (var check in checks)
             {
                 healthChecks.Add(
-                    new HealthCheckRegistration(
+                    new(
                         check.Name,
                         _ => new SquidStdHealthCheckAdapter(check),
-                        failureStatus: HealthStatus.Unhealthy,
-                        tags: null
+                        HealthStatus.Unhealthy,
+                        null
                     )
                 );
             }

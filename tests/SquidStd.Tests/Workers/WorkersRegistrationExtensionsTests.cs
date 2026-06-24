@@ -2,6 +2,7 @@ using DryIoc;
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Messaging.Extensions;
 using SquidStd.Services.Core.Services;
+using SquidStd.Workers.Abstractions.Data;
 using SquidStd.Workers.Data.Config;
 using SquidStd.Workers.Extensions;
 using SquidStd.Workers.Interfaces;
@@ -11,28 +12,18 @@ namespace SquidStd.Tests.Workers;
 
 public class WorkersRegistrationExtensionsTests
 {
-    private static Container NewContainer()
+    private sealed class EchoJobHandler : IJobHandler
     {
-        var container = new Container();
-        container.RegisterInstance<IEventBus>(new EventBusService());
-        container.AddInMemoryMessaging();
-        // ConfigManager normally registers config instances; register one directly for the test.
-        container.RegisterInstance(new WorkersConfig { WorkerId = "w1", MaxConcurrency = 4 });
+        public static int Calls;
 
-        return container;
-    }
+        public string JobName => "echo";
 
-    [Fact]
-    public void AddWorkers_RegistersResolvableServices()
-    {
-        using var container = NewContainer();
+        public Task HandleAsync(JobRequest job, CancellationToken cancellationToken)
+        {
+            Interlocked.Increment(ref Calls);
 
-        container.AddWorkers();
-
-        Assert.NotNull(container.Resolve<IWorkerState>());
-        Assert.NotNull(container.Resolve<IJobDispatcher>());
-        Assert.NotNull(container.Resolve<WorkerConsumerService>());
-        Assert.NotNull(container.Resolve<WorkerHeartbeatService>());
+            return Task.CompletedTask;
+        }
     }
 
     [Fact]
@@ -49,17 +40,28 @@ public class WorkersRegistrationExtensionsTests
         Assert.Equal(1, EchoJobHandler.Calls);
     }
 
-    private sealed class EchoJobHandler : IJobHandler
+    [Fact]
+    public void AddWorkers_RegistersResolvableServices()
     {
-        public static int Calls;
+        using var container = NewContainer();
 
-        public string JobName => "echo";
+        container.AddWorkers();
 
-        public Task HandleAsync(SquidStd.Workers.Abstractions.Data.JobRequest job, CancellationToken cancellationToken)
-        {
-            Interlocked.Increment(ref Calls);
+        Assert.NotNull(container.Resolve<IWorkerState>());
+        Assert.NotNull(container.Resolve<IJobDispatcher>());
+        Assert.NotNull(container.Resolve<WorkerConsumerService>());
+        Assert.NotNull(container.Resolve<WorkerHeartbeatService>());
+    }
 
-            return Task.CompletedTask;
-        }
+    private static Container NewContainer()
+    {
+        var container = new Container();
+        container.RegisterInstance<IEventBus>(new EventBusService());
+        container.AddInMemoryMessaging();
+
+        // ConfigManager normally registers config instances; register one directly for the test.
+        container.RegisterInstance(new WorkersConfig { WorkerId = "w1", MaxConcurrency = 4 });
+
+        return container;
     }
 }

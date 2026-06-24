@@ -21,7 +21,11 @@ public sealed class JobScheduler : IJobScheduler
     }
 
     /// <inheritdoc />
-    public Task EnqueueAsync(string jobName, IReadOnlyDictionary<string, string> parameters, CancellationToken cancellationToken = default)
+    public Task EnqueueAsync(
+        string jobName,
+        IReadOnlyDictionary<string, string> parameters,
+        CancellationToken cancellationToken = default
+    )
         => _queue.PublishAsync(_queueName, new JobRequest(jobName, parameters), cancellationToken);
 
     /// <inheritdoc />

@@ -21,12 +21,19 @@ public sealed class HeartbeatCollectorService : ISquidStdService
     private readonly string _topicName;
     private IDisposable? _subscription;
 
-    public HeartbeatCollectorService(IMessageTopic topic, WorkerRegistry registry, IEventBus eventBus, WorkerManagerConfig config)
+    public HeartbeatCollectorService(
+        IMessageTopic topic,
+        WorkerRegistry registry,
+        IEventBus eventBus,
+        WorkerManagerConfig config
+    )
     {
         _topic = topic;
         _registry = registry;
         _eventBus = eventBus;
-        _topicName = string.IsNullOrWhiteSpace(config.HeartbeatTopic) ? WorkerChannels.HeartbeatTopic : config.HeartbeatTopic;
+        _topicName = string.IsNullOrWhiteSpace(config.HeartbeatTopic)
+                         ? WorkerChannels.HeartbeatTopic
+                         : config.HeartbeatTopic;
     }
 
     /// <inheritdoc />
@@ -52,6 +59,7 @@ public sealed class HeartbeatCollectorService : ISquidStdService
         try
         {
             var change = _registry.Record(heartbeat);
+
             if (change is not null)
             {
                 await _eventBus.PublishAsync(change, cancellationToken);

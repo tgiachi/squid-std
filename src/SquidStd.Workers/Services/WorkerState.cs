@@ -31,10 +31,10 @@ public sealed class WorkerState : IWorkerState
     public WorkerStatusType Status => ActiveJobs == 0 ? WorkerStatusType.Idle : WorkerStatusType.Busy;
 
     /// <inheritdoc />
-    public void JobStarted()
-        => Interlocked.Increment(ref _activeJobs);
-
-    /// <inheritdoc />
     public void JobFinished()
         => Interlocked.Decrement(ref _activeJobs);
+
+    /// <inheritdoc />
+    public void JobStarted()
+        => Interlocked.Increment(ref _activeJobs);
 }

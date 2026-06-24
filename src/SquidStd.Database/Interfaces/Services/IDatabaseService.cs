@@ -1,4 +1,3 @@
-using FreeSql;
 using SquidStd.Abstractions.Interfaces.Services;
 
 namespace SquidStd.Database.Interfaces.Services;

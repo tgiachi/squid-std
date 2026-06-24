@@ -1,6 +1,6 @@
 using System.Text;
-using SquidStd.Storage.Abstractions.Interfaces;
 using SquidStd.Core.Yaml;
+using SquidStd.Storage.Abstractions.Interfaces;
 
 namespace SquidStd.Storage.Services;
 
@@ -29,6 +29,10 @@ public sealed class YamlObjectStorageService : IObjectStorageService
         => _storageService.ExistsAsync(key, cancellationToken);
 
     /// <inheritdoc />
+    public IAsyncEnumerable<string> ListKeysAsync(string? prefix = null, CancellationToken cancellationToken = default)
+        => _storageService.ListKeysAsync(prefix, cancellationToken);
+
+    /// <inheritdoc />
     public async ValueTask<T?> LoadAsync<T>(string key, CancellationToken cancellationToken = default)
     {
         var data = await _storageService.LoadAsync(key, cancellationToken);
@@ -51,8 +55,4 @@ public sealed class YamlObjectStorageService : IObjectStorageService
         var yaml = YamlUtils.Serialize(value);
         await _storageService.SaveAsync(key, Encoding.UTF8.GetBytes(yaml), cancellationToken);
     }
-
-    /// <inheritdoc />
-    public IAsyncEnumerable<string> ListKeysAsync(string? prefix = null, CancellationToken cancellationToken = default)
-        => _storageService.ListKeysAsync(prefix, cancellationToken);
 }

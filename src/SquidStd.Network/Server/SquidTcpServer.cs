@@ -109,6 +109,14 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
         return this;
     }
 
+    /// <inheritdoc />
+    public void Dispose()
+        => DisposeAsync().AsTask().GetAwaiter().GetResult();
+
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+        => await StopAsync(CancellationToken.None);
+
     /// <summary>
     /// Starts accepting clients. Recreates the listening socket on every call,
     /// so Stop/Start cycles are supported.
@@ -304,12 +312,4 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
                                      OnClientDisconnect?.Invoke(this, args);
                                  };
     }
-
-    /// <inheritdoc />
-    public void Dispose()
-        => DisposeAsync().AsTask().GetAwaiter().GetResult();
-
-    /// <inheritdoc />
-    public async ValueTask DisposeAsync()
-        => await StopAsync(CancellationToken.None);
 }

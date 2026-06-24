@@ -1,0 +1,5 @@
+logger:
+  minimumLevel: Information
+workers:
+  maxConcurrency: 4
+  heartbeatIntervalSeconds: 10

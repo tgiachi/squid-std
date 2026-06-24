@@ -7,14 +7,15 @@ namespace SquidStd.Tests.Caching;
 public class CacheRegistrationTests
 {
     [Fact]
-    public void AddInMemoryCache_ResolvesService()
+    public async Task AddInMemoryCache_FromUrl_ResolvesAndWorks()
     {
         var container = new Container();
 
-        container.AddInMemoryCache();
+        container.AddInMemoryCache("memory://localhost?keyPrefix=app:");
+        var cache = container.Resolve<ICacheService>();
 
-        Assert.NotNull(container.Resolve<ICacheService>());
-        Assert.NotNull(container.Resolve<ICacheProvider>());
+        await cache.SetAsync("k", 5);
+        Assert.Equal(5, await cache.GetAsync<int>("k"));
     }
 
     [Fact]
@@ -26,14 +27,13 @@ public class CacheRegistrationTests
     }
 
     [Fact]
-    public async Task AddInMemoryCache_FromUrl_ResolvesAndWorks()
+    public void AddInMemoryCache_ResolvesService()
     {
         var container = new Container();
 
-        container.AddInMemoryCache("memory://localhost?keyPrefix=app:");
-        var cache = container.Resolve<ICacheService>();
+        container.AddInMemoryCache();
 
-        await cache.SetAsync("k", 5);
-        Assert.Equal(5, await cache.GetAsync<int>("k"));
+        Assert.NotNull(container.Resolve<ICacheService>());
+        Assert.NotNull(container.Resolve<ICacheProvider>());
     }
 }

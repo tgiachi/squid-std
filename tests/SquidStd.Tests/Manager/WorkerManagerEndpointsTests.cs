@@ -6,8 +6,6 @@ using SquidStd.Messaging.Extensions;
 using SquidStd.Services.Core.Services;
 using SquidStd.Workers.Abstractions.Data;
 using SquidStd.Workers.Abstractions.Types;
-using SquidStd.Workers.Manager.Data;
-using SquidStd.Workers.Manager.Data.Config;
 using SquidStd.Workers.Manager.Endpoints;
 using SquidStd.Workers.Manager.Services;
 
@@ -15,40 +13,28 @@ namespace SquidStd.Tests.Manager;
 
 public class WorkerManagerEndpointsTests
 {
-    private static WorkerRegistry RegistryWith(params string[] workerIds)
+    [Fact]
+    public async Task EnqueueJob_ReturnsAccepted_AndSchedulesJob()
     {
-        var registry = new WorkerRegistry(new WorkerManagerConfig());
-        foreach (var id in workerIds)
-        {
-            registry.Record(new WorkerHeartbeat(id, DateTime.UtcNow, WorkerStatusType.Idle, 0, 8));
-        }
+        var result = await WorkerManagerEndpoints.EnqueueJob(
+                         new("resize", new Dictionary<string, string>()),
+                         NewScheduler(),
+                         CancellationToken.None
+                     );
 
-        return registry;
-    }
-
-    private static JobScheduler NewScheduler()
-    {
-        var container = new Container();
-        container.RegisterInstance<IEventBus>(new EventBusService());
-        container.AddInMemoryMessaging();
-
-        return new JobScheduler(container.Resolve<IMessageQueue>(), new WorkerManagerConfig());
+        Assert.IsType<Accepted>(result.Result);
     }
 
     [Fact]
-    public void GetWorkers_ReturnsOkWithAll()
+    public async Task EnqueueJob_ReturnsBadRequest_WhenJobNameBlank()
     {
-        var result = WorkerManagerEndpoints.GetWorkers(RegistryWith("w1", "w2"));
+        var result = await WorkerManagerEndpoints.EnqueueJob(
+                         new("   ", null),
+                         NewScheduler(),
+                         CancellationToken.None
+                     );
 
-        Assert.Equal(2, result.Value!.Count);
-    }
-
-    [Fact]
-    public void GetWorker_ReturnsOk_WhenPresent()
-    {
-        var result = WorkerManagerEndpoints.GetWorker("w1", RegistryWith("w1"));
-
-        Assert.IsType<Ok<WorkerInfo>>(result.Result);
+        Assert.IsType<BadRequest<string>>(result.Result);
     }
 
     [Fact]
@@ -60,24 +46,39 @@ public class WorkerManagerEndpointsTests
     }
 
     [Fact]
-    public async Task EnqueueJob_ReturnsAccepted_AndSchedulesJob()
+    public void GetWorker_ReturnsOk_WhenPresent()
     {
-        var result = await WorkerManagerEndpoints.EnqueueJob(
-            new EnqueueJobRequest("resize", new Dictionary<string, string>()),
-            NewScheduler(),
-            CancellationToken.None);
+        var result = WorkerManagerEndpoints.GetWorker("w1", RegistryWith("w1"));
 
-        Assert.IsType<Accepted>(result.Result);
+        Assert.IsType<Ok<WorkerInfo>>(result.Result);
     }
 
     [Fact]
-    public async Task EnqueueJob_ReturnsBadRequest_WhenJobNameBlank()
+    public void GetWorkers_ReturnsOkWithAll()
     {
-        var result = await WorkerManagerEndpoints.EnqueueJob(
-            new EnqueueJobRequest("   ", null),
-            NewScheduler(),
-            CancellationToken.None);
+        var result = WorkerManagerEndpoints.GetWorkers(RegistryWith("w1", "w2"));
 
-        Assert.IsType<BadRequest<string>>(result.Result);
+        Assert.Equal(2, result.Value!.Count);
+    }
+
+    private static JobScheduler NewScheduler()
+    {
+        var container = new Container();
+        container.RegisterInstance<IEventBus>(new EventBusService());
+        container.AddInMemoryMessaging();
+
+        return new(container.Resolve<IMessageQueue>(), new());
+    }
+
+    private static WorkerRegistry RegistryWith(params string[] workerIds)
+    {
+        var registry = new WorkerRegistry(new());
+
+        foreach (var id in workerIds)
+        {
+            registry.Record(new(id, DateTime.UtcNow, WorkerStatusType.Idle, 0, 8));
+        }
+
+        return registry;
     }
 }

@@ -13,11 +13,13 @@ public class ConfigManagerServiceEnvTests
         var dir = Path.Combine(Path.GetTempPath(), "squidstd-cfg-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(dir);
         Environment.SetEnvironmentVariable("SQUID_DB_PASS", "p@ss");
+
         try
         {
             File.WriteAllText(
                 Path.Combine(dir, "app.yaml"),
-                "database:\n  ConnectionString: postgres://u:$SQUID_DB_PASS@h:5432/db\n  AutoMigrate: true\n");
+                "database:\n  ConnectionString: postgres://u:$SQUID_DB_PASS@h:5432/db\n  AutoMigrate: true\n"
+            );
 
             var container = new Container();
             container.RegisterConfigSection<DatabaseConfig>("database");
@@ -31,7 +33,7 @@ public class ConfigManagerServiceEnvTests
         finally
         {
             Environment.SetEnvironmentVariable("SQUID_DB_PASS", null);
-            Directory.Delete(dir, recursive: true);
+            Directory.Delete(dir, true);
         }
     }
 }

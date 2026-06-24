@@ -50,14 +50,14 @@ public async Task PublishAsync(IMessageQueue queue)
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `IMessageQueue` | Typed publish/subscribe facade. |
-| `IQueueProvider` | Transport contract (per backend). |
-| `IMessageSerializer` | Payload (de)serialization. |
-| `IQueueMessageListener<T>` | Subscriber callbacks. |
-| `IMessagingMetrics` | Delivery metrics sink. |
-| `MessagingOptions` | Delivery attempts, retry delay, and dead-letter-queue suffix. |
+| Type                       | Purpose                                                       |
+|----------------------------|---------------------------------------------------------------|
+| `IMessageQueue`            | Typed publish/subscribe facade.                               |
+| `IQueueProvider`           | Transport contract (per backend).                             |
+| `IMessageSerializer`       | Payload (de)serialization.                                    |
+| `IQueueMessageListener<T>` | Subscriber callbacks.                                         |
+| `IMessagingMetrics`        | Delivery metrics sink.                                        |
+| `MessagingOptions`         | Delivery attempts, retry delay, and dead-letter-queue suffix. |
 
 ## License
 

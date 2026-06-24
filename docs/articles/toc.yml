@@ -44,6 +44,18 @@
   href: workers.md
 - name: SquidStd.Workers.Manager
   href: workers-manager.md
+- name: SquidStd.Templates
+  href: templates.md
+- name: SquidStd.Search.Abstractions
+  href: search-abstractions.md
+- name: SquidStd.Search.Elasticsearch
+  href: search-elasticsearch.md
+- name: SquidStd.Mail.Abstractions
+  href: mail-abstractions.md
+- name: SquidStd.Mail.MailKit
+  href: mail-mailkit.md
+- name: SquidStd.Mail.Queue
+  href: mail-queue.md
 - name: Serialization
   href: serialization.md
 - name: Scheduler

@@ -1,3 +1,4 @@
+using System.Data.Common;
 using System.Linq.Expressions;
 using FreeSql;
 using Serilog;
@@ -9,7 +10,7 @@ using SquidStd.Database.Interfaces.Services;
 namespace SquidStd.Database.Data;
 
 /// <summary>
-/// FreeSql-backed <see cref="IDataAccess{TEntity}"/>. Writes run inside a unit of work with rollback.
+/// FreeSql-backed <see cref="IDataAccess{TEntity}" />. Writes run inside a unit of work with rollback.
 /// </summary>
 /// <typeparam name="TEntity">The entity type.</typeparam>
 public sealed class FreeSqlDataAccess<TEntity> : IDataAccess<TEntity>
@@ -29,88 +30,31 @@ public sealed class FreeSqlDataAccess<TEntity> : IDataAccess<TEntity>
     }
 
     /// <inheritdoc />
-    public async Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default)
-    {
-        var now = DateTimeOffset.UtcNow;
-
-        if (entity.Id == Guid.Empty)
-        {
-            entity.Id = Guid.CreateVersion7();
-        }
-
-        entity.Created = now;
-        entity.Updated = now;
-
-        await RunInTransactionAsync(
-            transaction => _orm.Insert(entity).WithTransaction(transaction).ExecuteAffrowsAsync(cancellationToken),
-            "Insert",
-            1,
-            cancellationToken);
-
-        return entity;
-    }
-
-    /// <inheritdoc />
-    public Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-        => _orm.Select<TEntity>().Where(e => e.Id == id).FirstAsync(cancellationToken)!;
-
-    /// <inheritdoc />
-    public async Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
-    {
-        entity.Updated = DateTimeOffset.UtcNow;
-
-        await RunInTransactionAsync(
-            transaction => _orm.Update<TEntity>().SetSource(entity).WithTransaction(transaction).ExecuteAffrowsAsync(cancellationToken),
-            "Update",
-            1,
-            cancellationToken);
-
-        return entity;
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        var affected = await RunInTransactionAsync(
-            transaction => _orm.Delete<TEntity>().Where(e => e.Id == id).WithTransaction(transaction).ExecuteAffrowsAsync(cancellationToken),
-            "Delete",
+    public Task<int> BulkDeleteAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken cancellationToken = default
+    )
+        => RunInTransactionAsync(
+            transaction => _orm.Delete<TEntity>()
+                               .Where(predicate)
+                               .WithTransaction(transaction)
+                               .ExecuteAffrowsAsync(cancellationToken),
+            "BulkDelete",
             null,
-            cancellationToken);
-
-        return affected > 0;
-    }
-
-    /// <inheritdoc />
-    public Task<bool> DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
-        => DeleteAsync(entity.Id, cancellationToken);
-
-    /// <inheritdoc />
-    public Task<long> CountAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
-    {
-        var select = _orm.Select<TEntity>();
-
-        if (predicate is not null)
-        {
-            select = select.Where(predicate);
-        }
-
-        return select.CountAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
-        => _orm.Select<TEntity>().Where(predicate).AnyAsync(cancellationToken);
+            cancellationToken
+        );
 
     /// <inheritdoc />
     public Task<int> BulkInsertAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
-        var list = Materialize(entities, stampUpdated: true);
+        var list = Materialize(entities, true);
 
         return RunInTransactionAsync(
             transaction => _orm.Insert(list).WithTransaction(transaction).ExecuteAffrowsAsync(cancellationToken),
             "BulkInsert",
             list.Count,
-            cancellationToken);
+            cancellationToken
+        );
     }
 
     /// <inheritdoc />
@@ -125,26 +69,21 @@ public sealed class FreeSqlDataAccess<TEntity> : IDataAccess<TEntity>
         }
 
         return RunInTransactionAsync(
-            transaction => _orm.Update<TEntity>().SetSource(list).WithTransaction(transaction).ExecuteAffrowsAsync(cancellationToken),
+            transaction => _orm.Update<TEntity>()
+                               .SetSource(list)
+                               .WithTransaction(transaction)
+                               .ExecuteAffrowsAsync(cancellationToken),
             "BulkUpdate",
             list.Count,
-            cancellationToken);
+            cancellationToken
+        );
     }
 
     /// <inheritdoc />
-    public Task<int> BulkDeleteAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
-        => RunInTransactionAsync(
-            transaction => _orm.Delete<TEntity>().Where(predicate).WithTransaction(transaction).ExecuteAffrowsAsync(cancellationToken),
-            "BulkDelete",
-            null,
-            cancellationToken);
-
-    /// <inheritdoc />
-    public ISelect<TEntity> Query()
-        => _orm.Select<TEntity>();
-
-    /// <inheritdoc />
-    public async Task<IReadOnlyList<TEntity>> QueryAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
+    public Task<long> CountAsync(
+        Expression<Func<TEntity, bool>>? predicate = null,
+        CancellationToken cancellationToken = default
+    )
     {
         var select = _orm.Select<TEntity>();
 
@@ -153,8 +92,36 @@ public sealed class FreeSqlDataAccess<TEntity> : IDataAccess<TEntity>
             select = select.Where(predicate);
         }
 
-        return await select.ToListAsync(cancellationToken);
+        return select.CountAsync(cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var affected = await RunInTransactionAsync(
+                           transaction => _orm.Delete<TEntity>()
+                                              .Where(e => e.Id == id)
+                                              .WithTransaction(transaction)
+                                              .ExecuteAffrowsAsync(cancellationToken),
+                           "Delete",
+                           null,
+                           cancellationToken
+                       );
+
+        return affected > 0;
+    }
+
+    /// <inheritdoc />
+    public Task<bool> DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
+        => DeleteAsync(entity.Id, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+        => _orm.Select<TEntity>().Where(predicate).AnyAsync(cancellationToken);
+
+    /// <inheritdoc />
+    public Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        => _orm.Select<TEntity>().Where(e => e.Id == id).FirstAsync(cancellationToken)!;
 
     /// <inheritdoc />
     public async Task<PagedResultData<TEntity>> GetPagedAsync(
@@ -163,7 +130,8 @@ public sealed class FreeSqlDataAccess<TEntity> : IDataAccess<TEntity>
         Expression<Func<TEntity, bool>>? predicate = null,
         Expression<Func<TEntity, object>>? orderBy = null,
         bool descending = false,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var select = _orm.Select<TEntity>();
 
@@ -182,6 +150,67 @@ public sealed class FreeSqlDataAccess<TEntity> : IDataAccess<TEntity>
         var items = await select.Page(page, pageSize).ToListAsync(cancellationToken);
 
         return PagedResultData<TEntity>.Create(items, page, pageSize, total);
+    }
+
+    /// <inheritdoc />
+    public async Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default)
+    {
+        var now = DateTimeOffset.UtcNow;
+
+        if (entity.Id == Guid.Empty)
+        {
+            entity.Id = Guid.CreateVersion7();
+        }
+
+        entity.Created = now;
+        entity.Updated = now;
+
+        await RunInTransactionAsync(
+            transaction => _orm.Insert(entity).WithTransaction(transaction).ExecuteAffrowsAsync(cancellationToken),
+            "Insert",
+            1,
+            cancellationToken
+        );
+
+        return entity;
+    }
+
+    /// <inheritdoc />
+    public ISelect<TEntity> Query()
+        => _orm.Select<TEntity>();
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<TEntity>> QueryAsync(
+        Expression<Func<TEntity, bool>>? predicate = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var select = _orm.Select<TEntity>();
+
+        if (predicate is not null)
+        {
+            select = select.Where(predicate);
+        }
+
+        return await select.ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
+    {
+        entity.Updated = DateTimeOffset.UtcNow;
+
+        await RunInTransactionAsync(
+            transaction => _orm.Update<TEntity>()
+                               .SetSource(entity)
+                               .WithTransaction(transaction)
+                               .ExecuteAffrowsAsync(cancellationToken),
+            "Update",
+            1,
+            cancellationToken
+        );
+
+        return entity;
     }
 
     private void EnsureSynced()
@@ -218,10 +247,11 @@ public sealed class FreeSqlDataAccess<TEntity> : IDataAccess<TEntity>
     }
 
     private async Task<int> RunInTransactionAsync(
-        Func<System.Data.Common.DbTransaction, Task<int>> action,
+        Func<DbTransaction, Task<int>> action,
         string operation,
         int? expectedCount,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -245,6 +275,7 @@ public sealed class FreeSqlDataAccess<TEntity> : IDataAccess<TEntity>
         {
             uow.Rollback();
             Logger.Error(ex, "{Operation} rolled back", operation);
+
             throw;
         }
     }

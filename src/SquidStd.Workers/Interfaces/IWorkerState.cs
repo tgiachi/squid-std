@@ -19,9 +19,9 @@ public interface IWorkerState
     /// <summary><see cref="WorkerStatusType.Busy" /> while any job is active, otherwise <see cref="WorkerStatusType.Idle" />.</summary>
     WorkerStatusType Status { get; }
 
-    /// <summary>Records that a job started (increments <see cref="ActiveJobs" />).</summary>
-    void JobStarted();
-
     /// <summary>Records that a job finished (decrements <see cref="ActiveJobs" />).</summary>
     void JobFinished();
+
+    /// <summary>Records that a job started (increments <see cref="ActiveJobs" />).</summary>
+    void JobStarted();
 }

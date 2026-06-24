@@ -24,14 +24,6 @@ public sealed class ScribanTemplateRenderer : ITemplateRenderer, ISquidStdServic
     }
 
     /// <inheritdoc />
-    public async ValueTask<string> RenderAsync(string template, object? model, CancellationToken cancellationToken = default)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(template);
-
-        return await RenderCompiledAsync(Parse(template, "(inline)"), model, "(inline)");
-    }
-
-    /// <inheritdoc />
     public void Register(string name, string template)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -41,7 +33,19 @@ public sealed class ScribanTemplateRenderer : ITemplateRenderer, ISquidStdServic
     }
 
     /// <inheritdoc />
-    public async ValueTask<string> RenderByNameAsync(string name, object? model, CancellationToken cancellationToken = default)
+    public async ValueTask<string> RenderAsync(string template, object? model, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(template);
+
+        return await RenderCompiledAsync(Parse(template, "(inline)"), model, "(inline)");
+    }
+
+    /// <inheritdoc />
+    public async ValueTask<string> RenderByNameAsync(
+        string name,
+        object? model,
+        CancellationToken cancellationToken = default
+    )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
 

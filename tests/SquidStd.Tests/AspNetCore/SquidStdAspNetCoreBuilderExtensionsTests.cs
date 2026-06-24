@@ -1,7 +1,6 @@
 using System.Net;
 using DryIoc;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,44 +16,6 @@ namespace SquidStd.Tests.AspNetCore;
 
 public class SquidStdAspNetCoreBuilderExtensionsTests
 {
-    [Fact]
-    public async Task UseSquidStd_RegistersBootstrapWithContentRootDefaults()
-    {
-        using var temp = new TempDirectory();
-        var builder = CreateBuilder(temp.Path);
-
-        var returned = builder.UseSquidStd(options => options.ConfigName = "app");
-
-        await using var app = builder.Build();
-        var bootstrap = app.Services.GetRequiredService<ISquidStdBootstrap>();
-
-        Assert.Same(builder, returned);
-        Assert.Equal("app", bootstrap.Options.ConfigName);
-        Assert.Equal(Path.GetFullPath(temp.Path), Path.GetFullPath(bootstrap.Options.RootDirectory));
-    }
-
-    [Fact]
-    public async Task UseSquidStd_ResolvesSquidStdServicesAfterHostStart()
-    {
-        using var temp = new TempDirectory();
-        var builder = CreateBuilder(temp.Path);
-        builder.UseSquidStd(options => options.ConfigName = "app");
-
-        await using var app = builder.Build();
-        await app.StartAsync();
-
-        try
-        {
-            Assert.NotNull(app.Services.GetRequiredService<ITimerService>());
-            Assert.NotNull(app.Services.GetRequiredService<IEventBus>());
-            Assert.NotNull(app.Services.GetRequiredService<IMetricsCollectionService>());
-        }
-        finally
-        {
-            await app.StopAsync();
-        }
-    }
-
     [Fact]
     public async Task UseSquidStd_AllowsMinimalApiInjection()
     {
@@ -104,6 +65,44 @@ public class SquidStdAspNetCoreBuilderExtensionsTests
     }
 
     [Fact]
+    public async Task UseSquidStd_RegistersBootstrapWithContentRootDefaults()
+    {
+        using var temp = new TempDirectory();
+        var builder = CreateBuilder(temp.Path);
+
+        var returned = builder.UseSquidStd(options => options.ConfigName = "app");
+
+        await using var app = builder.Build();
+        var bootstrap = app.Services.GetRequiredService<ISquidStdBootstrap>();
+
+        Assert.Same(builder, returned);
+        Assert.Equal("app", bootstrap.Options.ConfigName);
+        Assert.Equal(Path.GetFullPath(temp.Path), Path.GetFullPath(bootstrap.Options.RootDirectory));
+    }
+
+    [Fact]
+    public async Task UseSquidStd_ResolvesSquidStdServicesAfterHostStart()
+    {
+        using var temp = new TempDirectory();
+        var builder = CreateBuilder(temp.Path);
+        builder.UseSquidStd(options => options.ConfigName = "app");
+
+        await using var app = builder.Build();
+        await app.StartAsync();
+
+        try
+        {
+            Assert.NotNull(app.Services.GetRequiredService<ITimerService>());
+            Assert.NotNull(app.Services.GetRequiredService<IEventBus>());
+            Assert.NotNull(app.Services.GetRequiredService<IMetricsCollectionService>());
+        }
+        finally
+        {
+            await app.StopAsync();
+        }
+    }
+
+    [Fact]
     public void UseSquidStd_WhenContainerCallbackReturnsDifferentContainer_Throws()
     {
         using var temp = new TempDirectory();
@@ -125,9 +124,7 @@ public class SquidStdAspNetCoreBuilderExtensionsTests
         using var temp = new TempDirectory();
         var builder = CreateBuilder(temp.Path);
 
-        Assert.Throws<ArgumentException>(
-            () => builder.UseSquidStd(options => options.ConfigName = string.Empty)
-        );
+        Assert.Throws<ArgumentException>(() => builder.UseSquidStd(options => options.ConfigName = string.Empty));
     }
 
     private static WebApplicationBuilder CreateBuilder(string contentRootPath)

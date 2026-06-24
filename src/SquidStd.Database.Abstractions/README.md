@@ -51,13 +51,13 @@ public async Task ExampleAsync(IDataAccess<User> users)
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
+| Type                   | Purpose                                          |
+|------------------------|--------------------------------------------------|
 | `IDataAccess<TEntity>` | CRUD + bulk + paged + composable query contract. |
-| `BaseEntity` | Guid id + UTC created/updated base entity. |
-| `PagedResultData<T>` | Paginated result with metadata. |
-| `DatabaseConfig` | Connection string + auto-migrate config section. |
-| `DatabaseProviderType` | Supported provider enum. |
+| `BaseEntity`           | Guid id + UTC created/updated base entity.       |
+| `PagedResultData<T>`   | Paginated result with metadata.                  |
+| `DatabaseConfig`       | Connection string + auto-migrate config section. |
+| `DatabaseProviderType` | Supported provider enum.                         |
 
 ## License
 

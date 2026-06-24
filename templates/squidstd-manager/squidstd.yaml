@@ -1,0 +1,5 @@
+logger:
+  minimumLevel: Information
+workerManager:
+  offlineTimeoutSeconds: 30
+  sweepIntervalSeconds: 10

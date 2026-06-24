@@ -2,19 +2,18 @@ using DryIoc;
 using SquidStd.Abstractions.Data.Internal.Config;
 using SquidStd.Abstractions.Data.Internal.Services;
 using SquidStd.Core.Data.Bootstrap;
-using SquidStd.Core.Directories;
 using SquidStd.Core.Data.Jobs;
 using SquidStd.Core.Data.Metrics;
 using SquidStd.Core.Data.Storage;
-using SquidStd.Storage.Abstractions.Data.Config;
 using SquidStd.Core.Data.Timing;
+using SquidStd.Core.Directories;
 using SquidStd.Core.Interfaces.Config;
 using SquidStd.Core.Interfaces.Metrics;
 using SquidStd.Core.Interfaces.Secrets;
-using SquidStd.Storage.Abstractions.Interfaces;
 using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services;
-using SquidStd.Services.Core.Services.Storage;
+using SquidStd.Storage.Abstractions.Data.Config;
+using SquidStd.Storage.Abstractions.Interfaces;
 using SquidStd.Tests.Support;
 
 namespace SquidStd.Tests.Services.Core;
@@ -51,6 +50,43 @@ public class RegisterDefaultServicesExtensionsTests
 
         Assert.Same(first, second);
         Assert.Equal(Path.Combine(temp.Path, "app.yaml"), first.ConfigPath);
+    }
+
+    [Fact]
+    public void RegisterCoreServices_RegistersDirectoriesConfig()
+    {
+        using var temp = new TempDirectory();
+        using var container = new Container();
+
+        container.RegisterCoreServices("app", temp.Path);
+
+        Assert.True(container.IsRegistered<DirectoriesConfig>());
+    }
+
+    [Fact]
+    public void RegisterCoreServices_RegistersMetricsCollectionService()
+    {
+        using var temp = new TempDirectory();
+        using var container = new Container();
+
+        container.RegisterCoreServices("app", temp.Path);
+
+        Assert.True(container.IsRegistered<IMetricsCollectionService>());
+    }
+
+    [Fact]
+    public void RegisterCoreServices_RegistersSecretServices()
+    {
+        using var temp = new TempDirectory();
+        using var container = new Container();
+
+        container.RegisterCoreServices("app", temp.Path);
+
+        // Storage is opt-in (AddFileStorage); core no longer registers it.
+        Assert.False(container.IsRegistered<IStorageService>());
+        Assert.False(container.IsRegistered<IObjectStorageService>());
+        Assert.True(container.IsRegistered<ISecretProtector>());
+        Assert.True(container.IsRegistered<ISecretStore>());
     }
 
     [Fact]
@@ -153,43 +189,6 @@ public class RegisterDefaultServicesExtensionsTests
 
         Assert.Equal(typeof(MetricsCollectionService), entry.ImplementationType);
         Assert.Equal(1000, entry.Priority);
-    }
-
-    [Fact]
-    public void RegisterCoreServices_RegistersMetricsCollectionService()
-    {
-        using var temp = new TempDirectory();
-        using var container = new Container();
-
-        container.RegisterCoreServices("app", temp.Path);
-
-        Assert.True(container.IsRegistered<IMetricsCollectionService>());
-    }
-
-    [Fact]
-    public void RegisterCoreServices_RegistersSecretServices()
-    {
-        using var temp = new TempDirectory();
-        using var container = new Container();
-
-        container.RegisterCoreServices("app", temp.Path);
-
-        // Storage is opt-in (AddFileStorage); core no longer registers it.
-        Assert.False(container.IsRegistered<IStorageService>());
-        Assert.False(container.IsRegistered<IObjectStorageService>());
-        Assert.True(container.IsRegistered<ISecretProtector>());
-        Assert.True(container.IsRegistered<ISecretStore>());
-    }
-
-    [Fact]
-    public void RegisterCoreServices_RegistersDirectoriesConfig()
-    {
-        using var temp = new TempDirectory();
-        using var container = new Container();
-
-        container.RegisterCoreServices("app", temp.Path);
-
-        Assert.True(container.IsRegistered<DirectoriesConfig>());
     }
 
     [Fact]

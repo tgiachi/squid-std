@@ -13,8 +13,16 @@ public sealed class FakeTimeProvider : TimeProvider
         _utcNow = start;
     }
 
-    public override DateTimeOffset GetUtcNow()
-        => _utcNow;
+    private sealed class InertTimer : ITimer
+    {
+        public bool Change(TimeSpan dueTime, TimeSpan period)
+            => true;
+
+        public void Dispose() { }
+
+        public ValueTask DisposeAsync()
+            => ValueTask.CompletedTask;
+    }
 
     public void Advance(TimeSpan delta)
         => _utcNow = _utcNow.Add(delta);
@@ -22,16 +30,6 @@ public sealed class FakeTimeProvider : TimeProvider
     public override ITimer CreateTimer(TimerCallback callback, object? state, TimeSpan dueTime, TimeSpan period)
         => new InertTimer();
 
-    private sealed class InertTimer : ITimer
-    {
-        public bool Change(TimeSpan dueTime, TimeSpan period)
-            => true;
-
-        public void Dispose()
-        {
-        }
-
-        public ValueTask DisposeAsync()
-            => ValueTask.CompletedTask;
-    }
+    public override DateTimeOffset GetUtcNow()
+        => _utcNow;
 }

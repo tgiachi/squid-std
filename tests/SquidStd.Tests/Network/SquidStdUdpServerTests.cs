@@ -57,31 +57,6 @@ public class SquidStdUdpServerTests
     }
 
     [Fact]
-    public void ServerType_IsUdp()
-    {
-        using var server = new SquidStdUdpServer(new(IPAddress.Loopback, 0), false);
-
-        Assert.Equal(ServerType.UDP, server.ServerType);
-    }
-
-    [Fact]
-    public async Task StartStop_TogglesIsRunning()
-    {
-        await using var server = new SquidStdUdpServer(new(IPAddress.Loopback, 0), false);
-
-        Assert.False(server.IsRunning);
-        await server.StartAsync(CancellationToken.None);
-        Assert.True(server.IsRunning);
-
-        await server.StopAsync(CancellationToken.None);
-        Assert.False(server.IsRunning);
-
-        // Start/Stop/Start cycle is supported.
-        await server.StartAsync(CancellationToken.None);
-        Assert.True(server.IsRunning);
-    }
-
-    [Fact]
     public async Task OnDatagramReceived_RaisedForIncomingDatagram()
     {
         await using var server = new SquidStdUdpServer(new(IPAddress.Loopback, 0), false);
@@ -121,5 +96,30 @@ public class SquidStdUdpServerTests
         await server.SendToAsync(clientEndpoint, new byte[] { 9, 9 }, CancellationToken.None);
 
         Assert.Equal([9, 9], await clientReceived.Task.WaitAsync(Timeout));
+    }
+
+    [Fact]
+    public void ServerType_IsUdp()
+    {
+        using var server = new SquidStdUdpServer(new(IPAddress.Loopback, 0), false);
+
+        Assert.Equal(ServerType.UDP, server.ServerType);
+    }
+
+    [Fact]
+    public async Task StartStop_TogglesIsRunning()
+    {
+        await using var server = new SquidStdUdpServer(new(IPAddress.Loopback, 0), false);
+
+        Assert.False(server.IsRunning);
+        await server.StartAsync(CancellationToken.None);
+        Assert.True(server.IsRunning);
+
+        await server.StopAsync(CancellationToken.None);
+        Assert.False(server.IsRunning);
+
+        // Start/Stop/Start cycle is supported.
+        await server.StartAsync(CancellationToken.None);
+        Assert.True(server.IsRunning);
     }
 }

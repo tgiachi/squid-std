@@ -10,19 +10,11 @@ public sealed class NoOpCacheMetrics : ICacheMetrics
     /// <summary>Shared instance.</summary>
     public static NoOpCacheMetrics Instance { get; } = new();
 
-    public void OnHit(string key)
-    {
-    }
+    public void OnHit(string key) { }
 
-    public void OnMiss(string key)
-    {
-    }
+    public void OnMiss(string key) { }
 
-    public void OnSet(string key)
-    {
-    }
+    public void OnRemove(string key) { }
 
-    public void OnRemove(string key)
-    {
-    }
+    public void OnSet(string key) { }
 }

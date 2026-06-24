@@ -47,7 +47,10 @@ public sealed class MessageQueue : IMessageQueue
 
         return _provider.Subscribe(
             queueName,
-            (payload, cancellationToken) => listener.HandleAsync(_deserializer.Deserialize<TMessage>(payload), cancellationToken)
+            (payload, cancellationToken) => listener.HandleAsync(
+                _deserializer.Deserialize<TMessage>(payload),
+                cancellationToken
+            )
         );
     }
 }

@@ -45,11 +45,11 @@ await storage.SaveAsync("profiles/main.bin", new byte[] { 1, 2, 3 });
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `StorageRegistrationExtensions` | `AddFileStorage(...)` registration. |
-| `FileStorageService` | Filesystem-backed `IStorageService`. |
-| `YamlObjectStorageService` | YAML-backed `IObjectStorageService` over a blob store. |
+| Type                            | Purpose                                                |
+|---------------------------------|--------------------------------------------------------|
+| `StorageRegistrationExtensions` | `AddFileStorage(...)` registration.                    |
+| `FileStorageService`            | Filesystem-backed `IStorageService`.                   |
+| `YamlObjectStorageService`      | YAML-backed `IObjectStorageService` over a blob store. |
 
 ## License
 

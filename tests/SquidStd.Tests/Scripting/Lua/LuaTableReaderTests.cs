@@ -5,22 +5,10 @@ namespace SquidStd.Tests.Scripting.Lua;
 
 public class LuaTableReaderTests
 {
-    [Fact]
-    public void Readers_ReturnTypedValues()
+    private enum TestMode
     {
-        var script = new Script();
-        var table = new Table(script);
-        table["name"] = "squid";
-        table["count"] = 3;
-        table["ratio"] = 1.5;
-        table["enabled"] = true;
-        table["mode"] = "Second";
-
-        Assert.Equal("squid", LuaTableReader.GetString(table, "name"));
-        Assert.Equal(3, LuaTableReader.GetInt(table, "count"));
-        Assert.Equal(1.5f, LuaTableReader.GetFloat(table, "ratio"));
-        Assert.True(LuaTableReader.GetBool(table, "enabled"));
-        Assert.Equal(TestMode.Second, LuaTableReader.GetEnum(table, "mode", TestMode.First));
+        First = 1,
+        Second = 2
     }
 
     [Fact]
@@ -39,9 +27,21 @@ public class LuaTableReaderTests
         Assert.Equal(TestMode.First, LuaTableReader.GetEnum(table, "mode", TestMode.First));
     }
 
-    private enum TestMode
+    [Fact]
+    public void Readers_ReturnTypedValues()
     {
-        First = 1,
-        Second = 2
+        var script = new Script();
+        var table = new Table(script);
+        table["name"] = "squid";
+        table["count"] = 3;
+        table["ratio"] = 1.5;
+        table["enabled"] = true;
+        table["mode"] = "Second";
+
+        Assert.Equal("squid", LuaTableReader.GetString(table, "name"));
+        Assert.Equal(3, LuaTableReader.GetInt(table, "count"));
+        Assert.Equal(1.5f, LuaTableReader.GetFloat(table, "ratio"));
+        Assert.True(LuaTableReader.GetBool(table, "enabled"));
+        Assert.Equal(TestMode.Second, LuaTableReader.GetEnum(table, "mode", TestMode.First));
     }
 }

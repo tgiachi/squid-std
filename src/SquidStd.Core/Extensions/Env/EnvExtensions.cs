@@ -8,6 +8,11 @@ namespace SquidStd.Core.Extensions.Env;
 /// </summary>
 public static class EnvExtensions
 {
+    private static readonly Regex EnvTokenRegex = new(
+        @"\$([A-Za-z_][A-Za-z0-9_]*)",
+        RegexOptions.Compiled
+    );
+
     /// <summary>
     /// Expands environment variables in a string using custom $VARIABLE syntax
     /// </summary>
@@ -51,10 +56,7 @@ public static class EnvExtensions
                 var value = Environment.GetEnvironmentVariable(name);
 
                 return value ?? match.Value;
-            });
+            }
+        );
     }
-
-    private static readonly Regex EnvTokenRegex = new(
-        @"\$([A-Za-z_][A-Za-z0-9_]*)",
-        RegexOptions.Compiled);
 }

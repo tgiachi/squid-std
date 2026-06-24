@@ -15,7 +15,7 @@ public class SessionManagerTests
         using var server = NewServer();
         using var manager = NewManager(server);
 
-        var good = new FakeNetworkConnection(1);
+        var good = new FakeNetworkConnection();
         var faulty = new FakeNetworkConnection(2)
         {
             SendCallback = _ => throw new InvalidOperationException("boom")
@@ -58,7 +58,7 @@ public class SessionManagerTests
     {
         using var server = NewServer();
         var manager = NewManager(server);
-        manager.HandleConnected(new FakeNetworkConnection(1));
+        manager.HandleConnected(new FakeNetworkConnection());
 
         manager.Dispose();
         manager.Dispose(); // idempotent, no throw

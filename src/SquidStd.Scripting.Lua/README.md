@@ -50,12 +50,12 @@ container.RegisterScriptModule<MathModule>();
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `IScriptEngineService` | Lua engine: load/run scripts, register modules/constants/callbacks. |
-| `ILuaEventBridge` | Bridges Lua scripts to the event bus. |
-| `ScriptModuleAttribute` / `ScriptFunctionAttribute` | Expose .NET classes/methods to Lua. |
-| `AddScriptModuleExtension` | `RegisterScriptModule<T>()` / `RegisterLuaUserData<T>()`. |
+| Type                                                | Purpose                                                             |
+|-----------------------------------------------------|---------------------------------------------------------------------|
+| `IScriptEngineService`                              | Lua engine: load/run scripts, register modules/constants/callbacks. |
+| `ILuaEventBridge`                                   | Bridges Lua scripts to the event bus.                               |
+| `ScriptModuleAttribute` / `ScriptFunctionAttribute` | Expose .NET classes/methods to Lua.                                 |
+| `AddScriptModuleExtension`                          | `RegisterScriptModule<T>()` / `RegisterLuaUserData<T>()`.           |
 
 ## License
 

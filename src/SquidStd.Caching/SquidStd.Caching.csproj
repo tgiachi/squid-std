@@ -8,12 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\SquidStd.Caching.Abstractions\SquidStd.Caching.Abstractions.csproj" />
+        <ProjectReference Include="..\SquidStd.Caching.Abstractions\SquidStd.Caching.Abstractions.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="DryIoc.dll" Version="5.4.3" />
-        <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.9" />
+        <PackageReference Include="DryIoc.dll" Version="5.4.3"/>
+        <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.9"/>
     </ItemGroup>
 
 </Project>

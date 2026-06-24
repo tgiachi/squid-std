@@ -10,31 +10,17 @@ public sealed class NoOpMessagingMetrics : IMessagingMetrics
     /// <summary>Shared instance.</summary>
     public static NoOpMessagingMetrics Instance { get; } = new();
 
-    public void OnPublished(string queueName)
-    {
-    }
+    public void OnDeadLettered(string queueName) { }
 
-    public void OnDelivered(string queueName)
-    {
-    }
+    public void OnDelivered(string queueName) { }
 
-    public void OnFailed(string queueName)
-    {
-    }
+    public void OnFailed(string queueName) { }
 
-    public void OnRetried(string queueName)
-    {
-    }
+    public void OnPublished(string queueName) { }
 
-    public void OnDeadLettered(string queueName)
-    {
-    }
+    public void OnRetried(string queueName) { }
 
-    public void SetQueueDepth(string queueName, int depth)
-    {
-    }
+    public void SetQueueDepth(string queueName, int depth) { }
 
-    public void SetSubscriberCount(string queueName, int count)
-    {
-    }
+    public void SetSubscriberCount(string queueName, int count) { }
 }

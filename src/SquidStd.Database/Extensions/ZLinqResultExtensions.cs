@@ -17,10 +17,9 @@ public static class ZLinqResultExtensions
     /// <returns>The projected list.</returns>
     public static List<TResult> MapToList<TSource, TResult>(
         this IReadOnlyList<TSource> source,
-        Func<TSource, TResult> selector)
-    {
-        return source.AsValueEnumerable().Select(selector).ToList();
-    }
+        Func<TSource, TResult> selector
+    )
+        => source.AsValueEnumerable().Select(selector).ToList();
 
     /// <summary>
     /// Takes an in-memory page of a materialized list using ZLinq (no SQL involved).

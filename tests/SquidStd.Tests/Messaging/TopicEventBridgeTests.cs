@@ -17,7 +17,8 @@ public class TopicEventBridgeTests
 
     private sealed class CapturingListener : IAsyncEventListener<TopicMessageEvent>
     {
-        public TaskCompletionSource<TopicMessageEvent> Received { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource<TopicMessageEvent> Received { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public Task HandleAsync(TopicMessageEvent eventData, CancellationToken cancellationToken)
         {

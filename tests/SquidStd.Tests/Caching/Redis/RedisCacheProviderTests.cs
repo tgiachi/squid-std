@@ -1,5 +1,4 @@
 using System.Text;
-using SquidStd.Caching.Redis.Data.Config;
 using SquidStd.Caching.Redis.Services;
 
 namespace SquidStd.Tests.Caching.Redis;
@@ -16,12 +15,18 @@ public class RedisCacheProviderTests
         _fixture = fixture;
     }
 
-    private RedisCacheProvider NewProvider()
-        => new(new RedisCacheOptions { Configuration = _fixture.ConnectionString });
+    [Fact]
+    public async Task Exists_And_Remove()
+    {
+        await using var provider = NewProvider();
+        await provider.StartAsync();
+        var key = Key();
+        await provider.SetAsync(key, Bytes("v"), null);
 
-    private static ReadOnlyMemory<byte> Bytes(string s) => Encoding.UTF8.GetBytes(s);
-    private static string Text(ReadOnlyMemory<byte> b) => Encoding.UTF8.GetString(b.Span);
-    private static string Key() => "k-" + Guid.NewGuid().ToString("N");
+        Assert.True(await provider.ExistsAsync(key));
+        Assert.True(await provider.RemoveAsync(key));
+        Assert.False(await provider.ExistsAsync(key));
+    }
 
     [Fact]
     public async Task SetThenGet_RoundTrips()
@@ -38,19 +43,6 @@ public class RedisCacheProviderTests
     }
 
     [Fact]
-    public async Task Exists_And_Remove()
-    {
-        await using var provider = NewProvider();
-        await provider.StartAsync();
-        var key = Key();
-        await provider.SetAsync(key, Bytes("v"), null);
-
-        Assert.True(await provider.ExistsAsync(key));
-        Assert.True(await provider.RemoveAsync(key));
-        Assert.False(await provider.ExistsAsync(key));
-    }
-
-    [Fact]
     public async Task Ttl_Expires()
     {
         await using var provider = NewProvider();
@@ -62,4 +54,16 @@ public class RedisCacheProviderTests
 
         Assert.Null(await provider.GetAsync(key).WaitAsync(Timeout));
     }
+
+    private static ReadOnlyMemory<byte> Bytes(string s)
+        => Encoding.UTF8.GetBytes(s);
+
+    private static string Key()
+        => "k-" + Guid.NewGuid().ToString("N");
+
+    private RedisCacheProvider NewProvider()
+        => new(new() { Configuration = _fixture.ConnectionString });
+
+    private static string Text(ReadOnlyMemory<byte> b)
+        => Encoding.UTF8.GetString(b.Span);
 }

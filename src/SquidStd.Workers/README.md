@@ -47,11 +47,11 @@ public sealed class ResizeImageHandler : IJobHandler
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `IJobHandler` | Handles jobs of one named kind. |
-| `WorkersConfig` | `WorkerId`, `HeartbeatIntervalSeconds`, `MaxConcurrency`, queue/topic names. |
-| `WorkersRegistrationExtensions` | `AddWorkers()` and `AddJobHandler<T>()`. |
+| Type                            | Purpose                                                                      |
+|---------------------------------|------------------------------------------------------------------------------|
+| `IJobHandler`                   | Handles jobs of one named kind.                                              |
+| `WorkersConfig`                 | `WorkerId`, `HeartbeatIntervalSeconds`, `MaxConcurrency`, queue/topic names. |
+| `WorkersRegistrationExtensions` | `AddWorkers()` and `AddJobHandler<T>()`.                                     |
 
 ## License
 

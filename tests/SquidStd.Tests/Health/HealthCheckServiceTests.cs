@@ -9,21 +9,6 @@ namespace SquidStd.Tests.Health;
 
 public class HealthCheckServiceTests
 {
-    private static HealthCheckService NewService(HealthCheckOptions options, params IHealthCheck[] checks)
-        => new(checks, options);
-
-    private static HealthCheckOptions Options(double timeoutSeconds = 5)
-        => new() { CheckTimeout = TimeSpan.FromSeconds(timeoutSeconds) };
-
-    [Fact]
-    public async Task NoChecks_ReturnsHealthyEmptyReport()
-    {
-        var report = await NewService(Options()).CheckHealthAsync();
-
-        Assert.Equal(HealthStatus.Healthy, report.Status);
-        Assert.Empty(report.Entries);
-    }
-
     [Fact]
     public async Task AllHealthy_ReportsHealthyWithEntries()
     {
@@ -37,19 +22,19 @@ public class HealthCheckServiceTests
     }
 
     [Fact]
-    public async Task OneUnhealthy_MakesOverallUnhealthy()
+    public async Task CheckThatExceedsTimeout_IsUnhealthy_OthersUnaffected()
     {
         var service = NewService(
-            Options(),
-            new FakeHealthCheck("ok"),
-            new FakeHealthCheck("bad", HealthCheckResult.Unhealthy("nope"))
+            Options(0.05),
+            new FakeHealthCheck("slow", delay: TimeSpan.FromSeconds(2)),
+            new FakeHealthCheck("fast")
         );
 
         var report = await service.CheckHealthAsync();
 
-        Assert.Equal(HealthStatus.Unhealthy, report.Status);
-        Assert.Equal(HealthStatus.Unhealthy, report.Entries["bad"].Status);
-        Assert.Equal(HealthStatus.Healthy, report.Entries["ok"].Status);
+        Assert.Equal(HealthStatus.Unhealthy, report.Entries["slow"].Status);
+        Assert.Contains("imed out", report.Entries["slow"].Description);
+        Assert.Equal(HealthStatus.Healthy, report.Entries["fast"].Status);
     }
 
     [Fact]
@@ -71,20 +56,10 @@ public class HealthCheckServiceTests
     }
 
     [Fact]
-    public async Task CheckThatExceedsTimeout_IsUnhealthy_OthersUnaffected()
-    {
-        var service = NewService(
-            Options(timeoutSeconds: 0.05),
-            new FakeHealthCheck("slow", delay: TimeSpan.FromSeconds(2)),
-            new FakeHealthCheck("fast")
+    public void Ctor_NonPositiveTimeout_Throws()
+        => Assert.Throws<ArgumentOutOfRangeException>(
+            () => new HealthCheckService([], new() { CheckTimeout = TimeSpan.Zero })
         );
-
-        var report = await service.CheckHealthAsync();
-
-        Assert.Equal(HealthStatus.Unhealthy, report.Entries["slow"].Status);
-        Assert.Contains("imed out", report.Entries["slow"].Description);
-        Assert.Equal(HealthStatus.Healthy, report.Entries["fast"].Status);
-    }
 
     [Fact]
     public async Task DuplicateNames_AreMadeUnique()
@@ -109,10 +84,33 @@ public class HealthCheckServiceTests
     }
 
     [Fact]
-    public void Ctor_NonPositiveTimeout_Throws()
+    public async Task NoChecks_ReturnsHealthyEmptyReport()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(
-            () => new HealthCheckService([], new HealthCheckOptions { CheckTimeout = TimeSpan.Zero })
-        );
+        var report = await NewService(Options()).CheckHealthAsync();
+
+        Assert.Equal(HealthStatus.Healthy, report.Status);
+        Assert.Empty(report.Entries);
     }
+
+    [Fact]
+    public async Task OneUnhealthy_MakesOverallUnhealthy()
+    {
+        var service = NewService(
+            Options(),
+            new FakeHealthCheck("ok"),
+            new FakeHealthCheck("bad", HealthCheckResult.Unhealthy("nope"))
+        );
+
+        var report = await service.CheckHealthAsync();
+
+        Assert.Equal(HealthStatus.Unhealthy, report.Status);
+        Assert.Equal(HealthStatus.Unhealthy, report.Entries["bad"].Status);
+        Assert.Equal(HealthStatus.Healthy, report.Entries["ok"].Status);
+    }
+
+    private static HealthCheckService NewService(HealthCheckOptions options, params IHealthCheck[] checks)
+        => new(checks, options);
+
+    private static HealthCheckOptions Options(double timeoutSeconds = 5)
+        => new() { CheckTimeout = TimeSpan.FromSeconds(timeoutSeconds) };
 }

@@ -14,19 +14,6 @@ namespace SquidStd.Tests.Manager;
 
 public class WorkerManagerRegistrationExtensionsTests
 {
-    private static Container NewContainer()
-    {
-        var container = new Container();
-        container.RegisterInstance<IEventBus>(new EventBusService());
-        container.AddInMemoryMessaging();
-        // RegisterCoreServices normally provides ITimerService; supply a fake so the sweep service resolves.
-        container.RegisterInstance<ITimerService>(new FakeTimerService());
-        // ConfigManager normally registers config instances; register one directly for the test.
-        container.RegisterInstance(new WorkerManagerConfig());
-
-        return container;
-    }
-
     [Fact]
     public void AddWorkerManager_RegistersResolvableServices()
     {
@@ -58,5 +45,20 @@ public class WorkerManagerRegistrationExtensionsTests
         container.AddWorkerManager();
 
         Assert.Same(container.Resolve<IWorkerRegistry>(), container.Resolve<WorkerRegistry>());
+    }
+
+    private static Container NewContainer()
+    {
+        var container = new Container();
+        container.RegisterInstance<IEventBus>(new EventBusService());
+        container.AddInMemoryMessaging();
+
+        // RegisterCoreServices normally provides ITimerService; supply a fake so the sweep service resolves.
+        container.RegisterInstance<ITimerService>(new FakeTimerService());
+
+        // ConfigManager normally registers config instances; register one directly for the test.
+        container.RegisterInstance(new WorkerManagerConfig());
+
+        return container;
     }
 }

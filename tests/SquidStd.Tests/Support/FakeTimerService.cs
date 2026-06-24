@@ -17,6 +17,24 @@ public sealed class FakeTimerService : ITimerService
 
     public ManualResetEventSlim Pumped { get; } = new(false);
 
+    /// <summary>Invokes and removes every currently-registered timer; returns how many fired.</summary>
+    public int FireDue()
+    {
+        var snapshot = _timers.ToArray();
+
+        foreach (var kv in snapshot)
+        {
+            _timers.Remove(kv.Key);
+        }
+
+        foreach (var kv in snapshot)
+        {
+            kv.Value.Callback();
+        }
+
+        return snapshot.Length;
+    }
+
     public string RegisterTimer(string name, TimeSpan interval, Action callback, TimeSpan? delay = null, bool repeat = false)
     {
         var id = Guid.NewGuid().ToString("N");
@@ -49,23 +67,5 @@ public sealed class FakeTimerService : ITimerService
         Pumped.Set();
 
         return 0;
-    }
-
-    /// <summary>Invokes and removes every currently-registered timer; returns how many fired.</summary>
-    public int FireDue()
-    {
-        var snapshot = _timers.ToArray();
-
-        foreach (var kv in snapshot)
-        {
-            _timers.Remove(kv.Key);
-        }
-
-        foreach (var kv in snapshot)
-        {
-            kv.Value.Callback();
-        }
-
-        return snapshot.Length;
     }
 }
