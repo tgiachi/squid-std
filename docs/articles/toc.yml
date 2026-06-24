@@ -54,6 +54,8 @@
   href: mail-abstractions.md
 - name: SquidStd.Mail.MailKit
   href: mail-mailkit.md
+- name: SquidStd.Mail.Queue
+  href: mail-queue.md
 - name: Serialization
   href: serialization.md
 - name: Scheduler
