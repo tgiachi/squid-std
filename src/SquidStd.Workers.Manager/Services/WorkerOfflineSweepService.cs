@@ -21,42 +21,29 @@ public sealed class WorkerOfflineSweepService : ISquidStdService
     private readonly TimeSpan _interval;
     private string? _timerId;
 
-    public WorkerOfflineSweepService(ITimerService timer, WorkerRegistry registry, IEventBus eventBus, WorkerManagerConfig config)
+    public WorkerOfflineSweepService(
+        ITimerService timer,
+        WorkerRegistry registry,
+        IEventBus eventBus,
+        WorkerManagerConfig config
+    )
     {
         _timer = timer;
         _registry = registry;
         _eventBus = eventBus;
 
         var seconds = config.SweepIntervalSeconds > 0 ? config.SweepIntervalSeconds : DefaultIntervalSeconds;
+
         if (config.SweepIntervalSeconds <= 0)
         {
             _logger.Warning(
                 "SweepIntervalSeconds was {Value}; falling back to {Default}s.",
                 config.SweepIntervalSeconds,
-                DefaultIntervalSeconds);
+                DefaultIntervalSeconds
+            );
         }
 
         _interval = TimeSpan.FromSeconds(seconds);
-    }
-
-    /// <inheritdoc />
-    public ValueTask StartAsync(CancellationToken cancellationToken = default)
-    {
-        _timerId = _timer.RegisterTimer("worker-offline-sweep", _interval, OnTick, delay: _interval, repeat: true);
-
-        return ValueTask.CompletedTask;
-    }
-
-    /// <inheritdoc />
-    public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        if (_timerId is not null)
-        {
-            _timer.UnregisterTimer(_timerId);
-            _timerId = null;
-        }
-
-        return ValueTask.CompletedTask;
     }
 
     /// <summary>Runs one sweep and publishes the transitions. Public so it can be driven directly in tests.</summary>
@@ -73,6 +60,26 @@ public sealed class WorkerOfflineSweepService : ISquidStdService
         {
             _logger.Error(ex, "Worker offline sweep failed.");
         }
+    }
+
+    /// <inheritdoc />
+    public ValueTask StartAsync(CancellationToken cancellationToken = default)
+    {
+        _timerId = _timer.RegisterTimer("worker-offline-sweep", _interval, OnTick, _interval, true);
+
+        return ValueTask.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public ValueTask StopAsync(CancellationToken cancellationToken = default)
+    {
+        if (_timerId is not null)
+        {
+            _timer.UnregisterTimer(_timerId);
+            _timerId = null;
+        }
+
+        return ValueTask.CompletedTask;
     }
 
     private void OnTick()

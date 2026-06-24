@@ -27,9 +27,6 @@ internal sealed class UdpSessionConnection : INetworkConnection
         _onClose = onClose;
     }
 
-    public Task SendAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
-        => _server.SendToAsync(_remoteEndPoint, payload, cancellationToken);
-
     public Task CloseAsync(CancellationToken cancellationToken = default)
     {
         if (Interlocked.Exchange(ref _closed, 1) == 0)
@@ -39,4 +36,7 @@ internal sealed class UdpSessionConnection : INetworkConnection
 
         return Task.CompletedTask;
     }
+
+    public Task SendAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+        => _server.SendToAsync(_remoteEndPoint, payload, cancellationToken);
 }

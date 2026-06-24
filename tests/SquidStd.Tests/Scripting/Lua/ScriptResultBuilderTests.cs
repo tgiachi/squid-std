@@ -5,6 +5,18 @@ namespace SquidStd.Tests.Scripting.Lua;
 public class ScriptResultBuilderTests
 {
     [Fact]
+    public void CreateError_BuildsFailedResult()
+    {
+        var result = ScriptResultBuilder.CreateError()
+                                        .WithMessage("failed")
+                                        .Build();
+
+        Assert.False(result.Success);
+        Assert.Equal("failed", result.Message);
+        Assert.Null(result.Data);
+    }
+
+    [Fact]
     public void CreateSuccess_BuildsSuccessfulResult()
     {
         var result = ScriptResultBuilder.CreateSuccess()
@@ -15,17 +27,5 @@ public class ScriptResultBuilderTests
         Assert.True(result.Success);
         Assert.Equal("ok", result.Message);
         Assert.Equal(42, result.Data);
-    }
-
-    [Fact]
-    public void CreateError_BuildsFailedResult()
-    {
-        var result = ScriptResultBuilder.CreateError()
-                                        .WithMessage("failed")
-                                        .Build();
-
-        Assert.False(result.Success);
-        Assert.Equal("failed", result.Message);
-        Assert.Null(result.Data);
     }
 }

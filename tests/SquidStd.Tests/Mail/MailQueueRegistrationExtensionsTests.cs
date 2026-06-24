@@ -1,12 +1,12 @@
 using DryIoc;
 using SquidStd.Core.Interfaces.Events;
-using SquidStd.Messaging.Extensions;
-using SquidStd.Services.Core.Services;
-using SquidStd.Tests.Mail.Support;
 using SquidStd.Mail.Abstractions.Interfaces;
 using SquidStd.Mail.Queue.Extensions;
 using SquidStd.Mail.Queue.Interfaces;
 using SquidStd.Mail.Queue.Services;
+using SquidStd.Messaging.Extensions;
+using SquidStd.Services.Core.Services;
+using SquidStd.Tests.Mail.Support;
 
 namespace SquidStd.Tests.Mail;
 

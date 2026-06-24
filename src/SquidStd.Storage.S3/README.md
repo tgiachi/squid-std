@@ -51,11 +51,11 @@ await storage.SaveAsync("reports/2026.json", "{}"u8.ToArray());
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `S3StorageRegistrationExtensions` | `AddS3Storage(...)` registration. |
-| `S3StorageService` | MinIO-backed `IStorageService`. |
-| `S3StorageOptions` | Endpoint, credentials, bucket, TLS, region. |
+| Type                              | Purpose                                     |
+|-----------------------------------|---------------------------------------------|
+| `S3StorageRegistrationExtensions` | `AddS3Storage(...)` registration.           |
+| `S3StorageService`                | MinIO-backed `IStorageService`.             |
+| `S3StorageOptions`                | Endpoint, credentials, bucket, TLS, region. |
 
 ## License
 

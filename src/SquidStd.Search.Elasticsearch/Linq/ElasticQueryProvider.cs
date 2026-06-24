@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using System.Text.Json.Nodes;
-using Elastic.Transport;
 using SquidStd.Search.Elasticsearch.Services;
 using HttpMethod = Elastic.Transport.HttpMethod;
 
@@ -23,6 +22,16 @@ public sealed class ElasticQueryProvider : IQueryProvider
         _elementType = elementType;
     }
 
+    /// <summary>Runs a count and returns the total.</summary>
+    public async Task<long> CountAsync(Expression expression, CancellationToken cancellationToken)
+    {
+        var query = ElasticExpressionTranslator.Translate(expression, _elementType);
+        var body = new JsonObject { ["query"] = query.Query.DeepClone() };
+        var (status, response) = await _transport.SendAsync(HttpMethod.POST, $"/{_index}/_count", body, cancellationToken);
+
+        return status == 404 ? 0 : response?["count"]?.GetValue<long>() ?? 0;
+    }
+
     public IQueryable CreateQuery(Expression expression)
         => (IQueryable)Activator.CreateInstance(typeof(ElasticQueryable<>).MakeGenericType(_elementType), this, expression)!;
 
@@ -39,7 +48,12 @@ public sealed class ElasticQueryProvider : IQueryProvider
     public async Task<List<T>> ToListAsync<T>(Expression expression, CancellationToken cancellationToken)
     {
         var query = ElasticExpressionTranslator.Translate(expression, _elementType);
-        var (status, body) = await _transport.SendAsync(HttpMethod.POST, $"/{_index}/_search", query.ToRequestBody(), cancellationToken);
+        var (status, body) = await _transport.SendAsync(
+                                 HttpMethod.POST,
+                                 $"/{_index}/_search",
+                                 query.ToRequestBody(),
+                                 cancellationToken
+                             );
 
         if (status == 404)
         {
@@ -54,6 +68,7 @@ public sealed class ElasticQueryProvider : IQueryProvider
             foreach (var hit in hits)
             {
                 var source = hit?["_source"];
+
                 if (source is not null)
                 {
                     results.Add(ElasticTransport.DeserializeDocument<T>(source));
@@ -62,15 +77,5 @@ public sealed class ElasticQueryProvider : IQueryProvider
         }
 
         return results;
-    }
-
-    /// <summary>Runs a count and returns the total.</summary>
-    public async Task<long> CountAsync(Expression expression, CancellationToken cancellationToken)
-    {
-        var query = ElasticExpressionTranslator.Translate(expression, _elementType);
-        var body = new JsonObject { ["query"] = query.Query.DeepClone() };
-        var (status, response) = await _transport.SendAsync(HttpMethod.POST, $"/{_index}/_count", body, cancellationToken);
-
-        return status == 404 ? 0 : response?["count"]?.GetValue<long>() ?? 0;
     }
 }

@@ -1,7 +1,6 @@
 using DryIoc;
 using SquidStd.Search.Abstractions.Attributes;
 using SquidStd.Search.Abstractions.Interfaces;
-using SquidStd.Search.Elasticsearch.Data.Config;
 using SquidStd.Search.Elasticsearch.Extensions;
 using SquidStd.Search.Elasticsearch.Linq;
 
@@ -25,59 +24,17 @@ public class ElasticSearchServiceTests
         public string IndexId => Id;
     }
 
-    private ISearchService NewService()
+    [SearchIndex("it_unused_index")]
+    private sealed record UnusedDoc(string Id, string Status) : IIndexableEntity
     {
-        var container = new Container();
-        container.AddElasticsearch(new ElasticsearchOptions { Uri = new Uri(_fixture.ConnectionString) });
-
-        return container.Resolve<ISearchService>();
-    }
-
-    [Fact]
-    public async Task Index_Then_Query_FindsDocument()
-    {
-        var search = NewService();
-        await search.IndexAsync(new Order("1", "open", 150, "Laptop"), refresh: true).WaitAsync(Timeout);
-
-        var results = await search.Query<Order>().Where(o => o.Status == "open").ToListAsync();
-
-        Assert.Contains(results, o => o.Id == "1");
-    }
-
-    [Fact]
-    public async Task Query_Range_Order_Take()
-    {
-        var search = NewService();
-        await search.IndexManyAsync(
-            [new Order("a", "open", 50, "A"), new Order("b", "open", 200, "B"), new Order("c", "open", 300, "C")],
-            refresh: true).WaitAsync(Timeout);
-
-        var results = await search.Query<Order>()
-            .Where(o => o.Total > 100)
-            .OrderByDescending(o => o.Total)
-            .Take(1)
-            .ToListAsync();
-
-        Assert.Single(results);
-        Assert.Equal("c", results[0].Id);
-    }
-
-    [Fact]
-    public async Task FullText_Match()
-    {
-        var search = NewService();
-        await search.IndexAsync(new Order("ft1", "open", 10, "Gaming Laptop Pro"), refresh: true).WaitAsync(Timeout);
-
-        var results = await search.Query<Order>().Match("name", "laptop").ToListAsync();
-
-        Assert.Contains(results, o => o.Id == "ft1");
+        public string IndexId => Id;
     }
 
     [Fact]
     public async Task Count_And_FirstOrDefault()
     {
         var search = NewService();
-        await search.IndexAsync(new Order("cnt", "counted", 1, "X"), refresh: true).WaitAsync(Timeout);
+        await search.IndexAsync(new Order("cnt", "counted", 1, "X"), true).WaitAsync(Timeout);
 
         var count = await search.Query<Order>().Where(o => o.Status == "counted").CountAsync();
         var first = await search.Query<Order>().Where(o => o.Status == "counted").FirstOrDefaultAsync();
@@ -92,15 +49,37 @@ public class ElasticSearchServiceTests
     public async Task Delete_RemovesDocument()
     {
         var search = NewService();
-        await search.IndexAsync(new Order("del", "open", 1, "Y"), refresh: true).WaitAsync(Timeout);
+        await search.IndexAsync(new Order("del", "open", 1, "Y"), true).WaitAsync(Timeout);
 
-        var deleted = await search.DeleteAsync<Order>("del", refresh: true).WaitAsync(Timeout);
-        var missing = await search.DeleteAsync<Order>("does-not-exist", refresh: true).WaitAsync(Timeout);
+        var deleted = await search.DeleteAsync<Order>("del", true).WaitAsync(Timeout);
+        var missing = await search.DeleteAsync<Order>("does-not-exist", true).WaitAsync(Timeout);
         var results = await search.Query<Order>().Where(o => o.Id == "del").ToListAsync();
 
         Assert.True(deleted);
         Assert.False(missing);
         Assert.DoesNotContain(results, o => o.Id == "del");
+    }
+
+    [Fact]
+    public async Task FullText_Match()
+    {
+        var search = NewService();
+        await search.IndexAsync(new Order("ft1", "open", 10, "Gaming Laptop Pro"), true).WaitAsync(Timeout);
+
+        var results = await search.Query<Order>().Match("name", "laptop").ToListAsync();
+
+        Assert.Contains(results, o => o.Id == "ft1");
+    }
+
+    [Fact]
+    public async Task Index_Then_Query_FindsDocument()
+    {
+        var search = NewService();
+        await search.IndexAsync(new Order("1", "open", 150, "Laptop"), true).WaitAsync(Timeout);
+
+        var results = await search.Query<Order>().Where(o => o.Status == "open").ToListAsync();
+
+        Assert.Contains(results, o => o.Id == "1");
     }
 
     [Fact]
@@ -113,9 +92,31 @@ public class ElasticSearchServiceTests
         Assert.Empty(results);
     }
 
-    [SearchIndex("it_unused_index")]
-    private sealed record UnusedDoc(string Id, string Status) : IIndexableEntity
+    [Fact]
+    public async Task Query_Range_Order_Take()
     {
-        public string IndexId => Id;
+        var search = NewService();
+        await search.IndexManyAsync(
+                        [new("a", "open", 50, "A"), new("b", "open", 200, "B"), new Order("c", "open", 300, "C")],
+                        true
+                    )
+                    .WaitAsync(Timeout);
+
+        var results = await search.Query<Order>()
+                                  .Where(o => o.Total > 100)
+                                  .OrderByDescending(o => o.Total)
+                                  .Take(1)
+                                  .ToListAsync();
+
+        Assert.Single(results);
+        Assert.Equal("c", results[0].Id);
+    }
+
+    private ISearchService NewService()
+    {
+        var container = new Container();
+        container.AddElasticsearch(new() { Uri = new(_fixture.ConnectionString) });
+
+        return container.Resolve<ISearchService>();
     }
 }

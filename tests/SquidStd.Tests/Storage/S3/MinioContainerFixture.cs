@@ -15,11 +15,11 @@ public sealed class MinioContainerFixture : IAsyncLifetime
 
     public string SecretKey => _container.GetSecretKey();
 
-    public Task InitializeAsync()
-        => _container.StartAsync();
-
     public Task DisposeAsync()
         => _container.DisposeAsync().AsTask();
+
+    public Task InitializeAsync()
+        => _container.StartAsync();
 }
 
 [CollectionDefinition(Name)]

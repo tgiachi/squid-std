@@ -22,11 +22,11 @@ dotnet add package SquidStd.Search.Abstractions
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `IIndexableEntity` | Marks an entity indexable and supplies its `IndexId`. |
-| `SearchIndexAttribute` | Declares the index name (env-expanded). |
-| `ISearchService` | Index / delete / ensure-index / `Query<T>()`. |
+| Type                      | Purpose                                                        |
+|---------------------------|----------------------------------------------------------------|
+| `IIndexableEntity`        | Marks an entity indexable and supplies its `IndexId`.          |
+| `SearchIndexAttribute`    | Declares the index name (env-expanded).                        |
+| `ISearchService`          | Index / delete / ensure-index / `Query<T>()`.                  |
 | `SearchIndexNameResolver` | Resolves the index name from the attribute/type + environment. |
 
 ## License

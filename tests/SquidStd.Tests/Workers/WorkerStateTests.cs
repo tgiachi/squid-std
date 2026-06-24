@@ -1,24 +1,22 @@
-using SquidStd.Workers.Data.Config;
-using SquidStd.Workers.Services;
 using SquidStd.Workers.Abstractions.Types;
+using SquidStd.Workers.Services;
 
 namespace SquidStd.Tests.Workers;
 
 public class WorkerStateTests
 {
     [Fact]
-    public void Status_IsIdleWhenNoActiveJobs()
+    public void MaxConcurrency_FallsBackToProcessorCountWhenNotPositive()
     {
-        var state = new WorkerState(new WorkersConfig { WorkerId = "w1", MaxConcurrency = 4 });
+        var state = new WorkerState(new() { WorkerId = "w1", MaxConcurrency = 0 });
 
-        Assert.Equal(WorkerStatusType.Idle, state.Status);
-        Assert.Equal(0, state.ActiveJobs);
+        Assert.Equal(Environment.ProcessorCount, state.MaxConcurrency);
     }
 
     [Fact]
     public void Status_IsBusyWhileJobsActive()
     {
-        var state = new WorkerState(new WorkersConfig { WorkerId = "w1", MaxConcurrency = 4 });
+        var state = new WorkerState(new() { WorkerId = "w1", MaxConcurrency = 4 });
 
         state.JobStarted();
         state.JobStarted();
@@ -34,18 +32,19 @@ public class WorkerStateTests
     }
 
     [Fact]
-    public void WorkerId_FallsBackToMachineNameWhenBlank()
+    public void Status_IsIdleWhenNoActiveJobs()
     {
-        var state = new WorkerState(new WorkersConfig { WorkerId = "   ", MaxConcurrency = 4 });
+        var state = new WorkerState(new() { WorkerId = "w1", MaxConcurrency = 4 });
 
-        Assert.Equal(Environment.MachineName, state.WorkerId);
+        Assert.Equal(WorkerStatusType.Idle, state.Status);
+        Assert.Equal(0, state.ActiveJobs);
     }
 
     [Fact]
-    public void MaxConcurrency_FallsBackToProcessorCountWhenNotPositive()
+    public void WorkerId_FallsBackToMachineNameWhenBlank()
     {
-        var state = new WorkerState(new WorkersConfig { WorkerId = "w1", MaxConcurrency = 0 });
+        var state = new WorkerState(new() { WorkerId = "   ", MaxConcurrency = 4 });
 
-        Assert.Equal(Environment.ProcessorCount, state.MaxConcurrency);
+        Assert.Equal(Environment.MachineName, state.WorkerId);
     }
 }

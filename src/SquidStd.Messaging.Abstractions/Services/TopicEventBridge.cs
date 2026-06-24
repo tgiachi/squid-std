@@ -21,5 +21,8 @@ public sealed class TopicEventBridge : ITopicEventBridge
 
     /// <inheritdoc />
     public IDisposable Bridge<T>(string topic)
-        => _topic.Subscribe<T>(topic, (data, cancellationToken) => _eventBus.PublishAsync(new TopicMessageEvent(topic, data!), cancellationToken));
+        => _topic.Subscribe<T>(
+            topic,
+            (data, cancellationToken) => _eventBus.PublishAsync(new TopicMessageEvent(topic, data!), cancellationToken)
+        );
 }

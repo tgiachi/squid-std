@@ -30,16 +30,20 @@ public sealed class WorkerHeartbeatService : ISquidStdService
         _state = state;
 
         var seconds = config.HeartbeatIntervalSeconds > 0 ? config.HeartbeatIntervalSeconds : DefaultIntervalSeconds;
+
         if (config.HeartbeatIntervalSeconds <= 0)
         {
             _logger.Warning(
                 "HeartbeatIntervalSeconds was {Value}; falling back to {Default}s.",
                 config.HeartbeatIntervalSeconds,
-                DefaultIntervalSeconds);
+                DefaultIntervalSeconds
+            );
         }
 
         _interval = TimeSpan.FromSeconds(seconds);
-        _topicName = string.IsNullOrWhiteSpace(config.HeartbeatTopic) ? WorkerChannels.HeartbeatTopic : config.HeartbeatTopic;
+        _topicName = string.IsNullOrWhiteSpace(config.HeartbeatTopic)
+                         ? WorkerChannels.HeartbeatTopic
+                         : config.HeartbeatTopic;
     }
 
     /// <inheritdoc />
@@ -80,18 +84,6 @@ public sealed class WorkerHeartbeatService : ISquidStdService
         }
     }
 
-    private async Task RunLoopAsync(CancellationToken cancellationToken)
-    {
-        using var timer = new PeriodicTimer(_interval);
-
-        await PublishAsync(cancellationToken);
-
-        while (await timer.WaitForNextTickAsync(cancellationToken))
-        {
-            await PublishAsync(cancellationToken);
-        }
-    }
-
     private async Task PublishAsync(CancellationToken cancellationToken)
     {
         try
@@ -101,7 +93,8 @@ public sealed class WorkerHeartbeatService : ISquidStdService
                 DateTime.UtcNow,
                 _state.Status,
                 _state.ActiveJobs,
-                _state.MaxConcurrency);
+                _state.MaxConcurrency
+            );
 
             await _topic.PublishAsync(_topicName, heartbeat, cancellationToken);
         }
@@ -112,6 +105,18 @@ public sealed class WorkerHeartbeatService : ISquidStdService
         catch (Exception ex)
         {
             _logger.Error(ex, "Failed to publish heartbeat; will retry on the next tick.");
+        }
+    }
+
+    private async Task RunLoopAsync(CancellationToken cancellationToken)
+    {
+        using var timer = new PeriodicTimer(_interval);
+
+        await PublishAsync(cancellationToken);
+
+        while (await timer.WaitForNextTickAsync(cancellationToken))
+        {
+            await PublishAsync(cancellationToken);
         }
     }
 }

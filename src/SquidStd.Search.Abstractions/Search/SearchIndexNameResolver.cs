@@ -15,36 +15,39 @@ public static partial class SearchIndexNameResolver
     {
         ArgumentNullException.ThrowIfNull(type);
 
-        var template = type.GetCustomAttributes(typeof(SearchIndexAttribute), inherit: false) is { Length: > 0 } attributes
-            && attributes[0] is SearchIndexAttribute attribute
-                ? attribute.Name
-                : type.Name;
+        var template = type.GetCustomAttributes(typeof(SearchIndexAttribute), false) is { Length: > 0 } attributes &&
+                       attributes[0] is SearchIndexAttribute attribute
+                           ? attribute.Name
+                           : type.Name;
 
         return ExpandEnvironment(template).ToLowerInvariant();
     }
 
     private static string ExpandEnvironment(string template)
-        => PlaceholderRegex().Replace(
-            template,
-            match =>
-            {
-                var name = match.Groups["name"].Value;
-                var hasDefault = match.Groups["default"].Success;
-                var value = Environment.GetEnvironmentVariable(name);
-
-                if (!string.IsNullOrEmpty(value))
+        => PlaceholderRegex()
+            .Replace(
+                template,
+                match =>
                 {
-                    return value;
-                }
+                    var name = match.Groups["name"].Value;
+                    var hasDefault = match.Groups["default"].Success;
+                    var value = Environment.GetEnvironmentVariable(name);
 
-                if (hasDefault)
-                {
-                    return match.Groups["default"].Value;
-                }
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        return value;
+                    }
 
-                throw new InvalidOperationException(
-                    $"Environment variable '{name}' is not set for index template '{template}'.");
-            });
+                    if (hasDefault)
+                    {
+                        return match.Groups["default"].Value;
+                    }
+
+                    throw new InvalidOperationException(
+                        $"Environment variable '{name}' is not set for index template '{template}'."
+                    );
+                }
+            );
 
     [GeneratedRegex(@"\$\{(?<name>[A-Za-z_][A-Za-z0-9_]*)(:-(?<default>[^}]*))?\}")]
     private static partial Regex PlaceholderRegex();

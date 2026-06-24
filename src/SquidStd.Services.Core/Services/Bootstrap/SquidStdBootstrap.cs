@@ -35,18 +35,14 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
     /// Initializes a bootstrapper with default options.
     /// </summary>
     public SquidStdBootstrap()
-        : this(new SquidStdOptions())
-    {
-    }
+        : this(new()) { }
 
     /// <summary>
     /// Initializes a bootstrapper with the specified options.
     /// </summary>
     /// <param name="options">Bootstrap options used to register core services.</param>
     public SquidStdBootstrap(SquidStdOptions options)
-        : this(options, new Container(), true)
-    {
-    }
+        : this(options, new Container(), true) { }
 
     private SquidStdBootstrap(SquidStdOptions options, IContainer container, bool ownsContainer)
     {
@@ -63,6 +59,31 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         Container.RegisterInstance(this, IfAlreadyRegistered.Replace);
         Container.RegisterInstance(Options, IfAlreadyRegistered.Replace);
         Container.RegisterCoreServices(Options.ConfigName, Options.RootDirectory);
+    }
+
+    /// <inheritdoc />
+    public ISquidStdBootstrap ConfigureService(Func<IContainer, IContainer> configure)
+        => ConfigureServices(configure);
+
+    /// <inheritdoc />
+    public ISquidStdBootstrap ConfigureServices(Func<IContainer, IContainer> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        ThrowIfDisposed();
+
+        lock (_syncRoot)
+        {
+            if (_state != BootstrapStateType.Created)
+            {
+                throw new InvalidOperationException("Services cannot be configured after bootstrap start.");
+            }
+        }
+
+        var configuredContainer = configure(Container);
+
+        return !ReferenceEquals(configuredContainer, Container)
+                   ? throw new InvalidOperationException("ConfigureServices must return the bootstrap container instance.")
+                   : this;
     }
 
     /// <summary>
@@ -90,28 +111,29 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         => new(options, container, false);
 
     /// <inheritdoc />
-    public ISquidStdBootstrap ConfigureService(Func<IContainer, IContainer> configure)
-        => ConfigureServices(configure);
-
-    /// <inheritdoc />
-    public ISquidStdBootstrap ConfigureServices(Func<IContainer, IContainer> configure)
+    public async ValueTask DisposeAsync()
     {
-        ArgumentNullException.ThrowIfNull(configure);
-        ThrowIfDisposed();
-
-        lock (_syncRoot)
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
         {
-            if (_state != BootstrapStateType.Created)
-            {
-                throw new InvalidOperationException("Services cannot be configured after bootstrap start.");
-            }
+            return;
         }
 
-        var configuredContainer = configure(Container);
+        try
+        {
+            await StopAsync(CancellationToken.None);
+        }
+        finally
+        {
+            if (_loggerConfigured)
+            {
+                await Log.CloseAndFlushAsync();
+            }
 
-        return !ReferenceEquals(configuredContainer, Container)
-                   ? throw new InvalidOperationException("ConfigureServices must return the bootstrap container instance.")
-                   : this;
+            if (_ownsContainer)
+            {
+                Container.Dispose();
+            }
+        }
     }
 
     /// <inheritdoc />
@@ -120,6 +142,22 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         ThrowIfDisposed();
 
         return Container.Resolve<TService>();
+    }
+
+    /// <inheritdoc />
+    public async Task RunAsync(CancellationToken cancellationToken = default)
+    {
+        await StartAsync(cancellationToken);
+
+        try
+        {
+            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
+        finally
+        {
+            await StopAsync(CancellationToken.None);
+        }
     }
 
     /// <inheritdoc />
@@ -184,22 +222,6 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         }
     }
 
-    /// <inheritdoc />
-    public async Task RunAsync(CancellationToken cancellationToken = default)
-    {
-        await StartAsync(cancellationToken);
-
-        try
-        {
-            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
-        finally
-        {
-            await StopAsync(CancellationToken.None);
-        }
-    }
-
     private void ConfigureLogger()
     {
         if (!Container.IsRegistered<SquidStdLoggerOptions>())
@@ -217,7 +239,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 
             if (options.EnableConsole)
             {
-                loggerConfiguration.WriteTo.Console(restrictedToMinimumLevel: minimumLevel);
+                loggerConfiguration.WriteTo.Console(minimumLevel);
             }
 
             if (options.EnableFile)
@@ -252,15 +274,12 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         ];
     }
 
-    private string ResolveLogPath(SquidStdLoggerOptions options)
+    private void MarkCreated()
     {
-        var logDirectory = string.IsNullOrWhiteSpace(options.LogDirectory) ? "logs" : options.LogDirectory;
-        var fileName = string.IsNullOrWhiteSpace(options.FileName) ? "squidstd-.log" : options.FileName;
-        var directory = Path.IsPathRooted(logDirectory)
-                            ? logDirectory
-                            : Path.Combine(Options.RootDirectory, logDirectory);
-
-        return Path.Combine(directory, fileName);
+        lock (_syncRoot)
+        {
+            _state = BootstrapStateType.Created;
+        }
     }
 
     private void MarkStarting()
@@ -278,14 +297,6 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
             }
 
             _state = BootstrapStateType.Started;
-        }
-    }
-
-    private void MarkCreated()
-    {
-        lock (_syncRoot)
-        {
-            _state = BootstrapStateType.Created;
         }
     }
 
@@ -311,37 +322,22 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         }
     }
 
+    private string ResolveLogPath(SquidStdLoggerOptions options)
+    {
+        var logDirectory = string.IsNullOrWhiteSpace(options.LogDirectory) ? "logs" : options.LogDirectory;
+        var fileName = string.IsNullOrWhiteSpace(options.FileName) ? "squidstd-.log" : options.FileName;
+        var directory = Path.IsPathRooted(logDirectory)
+                            ? logDirectory
+                            : Path.Combine(Options.RootDirectory, logDirectory);
+
+        return Path.Combine(directory, fileName);
+    }
+
     private void ThrowIfDisposed()
     {
         if (Volatile.Read(ref _disposed) != 0)
         {
             throw new ObjectDisposedException(nameof(SquidStdBootstrap));
-        }
-    }
-
-    /// <inheritdoc />
-    public async ValueTask DisposeAsync()
-    {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
-        {
-            return;
-        }
-
-        try
-        {
-            await StopAsync(CancellationToken.None);
-        }
-        finally
-        {
-            if (_loggerConfigured)
-            {
-                await Log.CloseAndFlushAsync();
-            }
-
-            if (_ownsContainer)
-            {
-                Container.Dispose();
-            }
         }
     }
 }

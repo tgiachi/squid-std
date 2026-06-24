@@ -27,8 +27,18 @@ internal sealed class FakeSquidStdBootstrap : ISquidStdBootstrap
                    : throw new InvalidOperationException("ConfigureServices must return the bootstrap container instance.");
     }
 
+    public ValueTask DisposeAsync()
+    {
+        Container.Dispose();
+
+        return ValueTask.CompletedTask;
+    }
+
     public TService Resolve<TService>()
         => Container.Resolve<TService>();
+
+    public async Task RunAsync(CancellationToken cancellationToken = default)
+        => await StartAsync(cancellationToken);
 
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
     {
@@ -42,18 +52,6 @@ internal sealed class FakeSquidStdBootstrap : ISquidStdBootstrap
     {
         cancellationToken.ThrowIfCancellationRequested();
         StopCount++;
-
-        return ValueTask.CompletedTask;
-    }
-
-    public async Task RunAsync(CancellationToken cancellationToken = default)
-    {
-        await StartAsync(cancellationToken);
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        Container.Dispose();
 
         return ValueTask.CompletedTask;
     }

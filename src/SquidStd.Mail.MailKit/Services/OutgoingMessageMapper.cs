@@ -13,8 +13,12 @@ public static class OutgoingMessageMapper
         ArgumentNullException.ThrowIfNull(message);
         ArgumentNullException.ThrowIfNull(options);
 
-        var from = message.From ?? options.DefaultFrom
-            ?? throw new ArgumentException("No sender: set OutgoingMailMessage.From or SmtpOptions.DefaultFrom.", nameof(message));
+        var from = message.From ??
+                   options.DefaultFrom ??
+                   throw new ArgumentException(
+                       "No sender: set OutgoingMailMessage.From or SmtpOptions.DefaultFrom.",
+                       nameof(message)
+                   );
 
         var mime = new MimeMessage();
         mime.From.Add(ToMailbox(from));

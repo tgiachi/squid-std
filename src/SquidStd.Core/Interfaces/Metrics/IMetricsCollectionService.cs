@@ -14,14 +14,14 @@ public interface IMetricsCollectionService
     IReadOnlyDictionary<string, MetricSample> GetAllMetrics();
 
     /// <summary>
-    /// Gets the current metrics status.
-    /// </summary>
-    /// <returns>The current metrics snapshot.</returns>
-    MetricsSnapshot GetStatus();
-
-    /// <summary>
     /// Gets the latest collected metrics snapshot.
     /// </summary>
     /// <returns>The current metrics snapshot.</returns>
     MetricsSnapshot GetSnapshot();
+
+    /// <summary>
+    /// Gets the current metrics status.
+    /// </summary>
+    /// <returns>The current metrics snapshot.</returns>
+    MetricsSnapshot GetStatus();
 }

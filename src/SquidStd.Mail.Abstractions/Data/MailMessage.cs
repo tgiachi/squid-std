@@ -11,4 +11,5 @@ public sealed record MailMessage(
     string? TextBody,
     string? HtmlBody,
     IReadOnlyList<MailAttachment> Attachments,
-    byte[]? RawEml);
+    byte[]? RawEml
+);

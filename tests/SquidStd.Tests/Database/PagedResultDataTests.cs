@@ -9,7 +9,7 @@ public class PagedResultDataTests
     {
         var items = new[] { 1, 2, 3 };
 
-        var result = PagedResultData<int>.Create(items, page: 2, pageSize: 3, totalCount: 10);
+        var result = PagedResultData<int>.Create(items, 2, 3, 10);
 
         Assert.Equal(items, result.Items);
         Assert.Equal(2, result.Page);
@@ -21,22 +21,22 @@ public class PagedResultDataTests
     }
 
     [Fact]
-    public void Create_FirstPageHasNoPrevious()
+    public void Create_EmptyResultHasZeroPages()
     {
-        var result = PagedResultData<int>.Create(new[] { 1 }, page: 1, pageSize: 10, totalCount: 1);
+        var result = PagedResultData<int>.Create(Array.Empty<int>(), 1, 10, 0);
 
-        Assert.Equal(1, result.TotalPages);
+        Assert.Empty(result.Items);
+        Assert.Equal(0, result.TotalPages);
         Assert.False(result.HasNext);
         Assert.False(result.HasPrevious);
     }
 
     [Fact]
-    public void Create_EmptyResultHasZeroPages()
+    public void Create_FirstPageHasNoPrevious()
     {
-        var result = PagedResultData<int>.Create(Array.Empty<int>(), page: 1, pageSize: 10, totalCount: 0);
+        var result = PagedResultData<int>.Create(new[] { 1 }, 1, 10, 1);
 
-        Assert.Empty(result.Items);
-        Assert.Equal(0, result.TotalPages);
+        Assert.Equal(1, result.TotalPages);
         Assert.False(result.HasNext);
         Assert.False(result.HasPrevious);
     }

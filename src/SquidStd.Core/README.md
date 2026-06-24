@@ -47,15 +47,15 @@ var yaml = YamlUtils.Serialize(new { name = "squid", port = 9000 });
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `IConfigEntry` | A registrable YAML configuration section. |
+| Type                    | Purpose                                       |
+|-------------------------|-----------------------------------------------|
+| `IConfigEntry`          | A registrable YAML configuration section.     |
 | `IConfigManagerService` | Loads YAML config and exposes typed sections. |
-| `IEventBus` | Publish/subscribe in-process event bus. |
-| `IJobSystem` | Background job scheduling/execution. |
-| `ITimerService` | Timer-wheel based scheduling. |
-| `IMetricProvider` | Source of metric samples for collection. |
-| `IStorageService` | File/object storage abstraction. |
+| `IEventBus`             | Publish/subscribe in-process event bus.       |
+| `IJobSystem`            | Background job scheduling/execution.          |
+| `ITimerService`         | Timer-wheel based scheduling.                 |
+| `IMetricProvider`       | Source of metric samples for collection.      |
+| `IStorageService`       | File/object storage abstraction.              |
 
 ## License
 

@@ -23,20 +23,20 @@ public sealed class WorkerRegistry : IWorkerRegistry
     }
 
     /// <inheritdoc />
-    public IReadOnlyCollection<WorkerInfo> GetAll()
-    {
-        lock (_sync)
-        {
-            return _workers.Values.ToArray();
-        }
-    }
-
-    /// <inheritdoc />
     public WorkerInfo? Get(string workerId)
     {
         lock (_sync)
         {
             return _workers.GetValueOrDefault(workerId);
+        }
+    }
+
+    /// <inheritdoc />
+    public IReadOnlyCollection<WorkerInfo> GetAll()
+    {
+        lock (_sync)
+        {
+            return _workers.Values.ToArray();
         }
     }
 
@@ -52,15 +52,16 @@ public sealed class WorkerRegistry : IWorkerRegistry
         {
             if (!_workers.TryGetValue(heartbeat.WorkerId, out var existing))
             {
-                _workers[heartbeat.WorkerId] = new WorkerInfo(
+                _workers[heartbeat.WorkerId] = new(
                     heartbeat.WorkerId,
                     heartbeat.Status,
                     heartbeat.ActiveJobs,
                     heartbeat.MaxConcurrency,
                     now,
-                    now);
+                    now
+                );
 
-                return new WorkerStatusChangedEvent(heartbeat.WorkerId, null, heartbeat.Status);
+                return new(heartbeat.WorkerId, null, heartbeat.Status);
             }
 
             var old = existing.Status;
@@ -73,8 +74,8 @@ public sealed class WorkerRegistry : IWorkerRegistry
             };
 
             return old == WorkerStatusType.Offline && heartbeat.Status != WorkerStatusType.Offline
-                ? new WorkerStatusChangedEvent(heartbeat.WorkerId, old, heartbeat.Status)
-                : null;
+                       ? new WorkerStatusChangedEvent(heartbeat.WorkerId, old, heartbeat.Status)
+                       : null;
         }
     }
 
@@ -96,7 +97,7 @@ public sealed class WorkerRegistry : IWorkerRegistry
                 }
 
                 _workers[id] = info with { Status = WorkerStatusType.Offline };
-                changes.Add(new WorkerStatusChangedEvent(id, info.Status, WorkerStatusType.Offline));
+                changes.Add(new(id, info.Status, WorkerStatusType.Offline));
             }
         }
 

@@ -28,33 +28,22 @@ public sealed class MailPollingService : ISquidStdService, IDisposable
         _timer = timer;
 
         var seconds = options.PollIntervalSeconds > 0 ? options.PollIntervalSeconds : DefaultIntervalSeconds;
+
         if (options.PollIntervalSeconds <= 0)
         {
-            _logger.Warning("PollIntervalSeconds was {Value}; falling back to {Default}s.", options.PollIntervalSeconds, DefaultIntervalSeconds);
+            _logger.Warning(
+                "PollIntervalSeconds was {Value}; falling back to {Default}s.",
+                options.PollIntervalSeconds,
+                DefaultIntervalSeconds
+            );
         }
 
         _interval = TimeSpan.FromSeconds(seconds);
     }
 
     /// <inheritdoc />
-    public ValueTask StartAsync(CancellationToken cancellationToken = default)
-    {
-        _timerId = _timer.RegisterTimer("mail-poll", _interval, OnTick, delay: _interval, repeat: true);
-
-        return ValueTask.CompletedTask;
-    }
-
-    /// <inheritdoc />
-    public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        if (_timerId is not null)
-        {
-            _timer.UnregisterTimer(_timerId);
-            _timerId = null;
-        }
-
-        return ValueTask.CompletedTask;
-    }
+    public void Dispose()
+        => _gate.Dispose();
 
     /// <summary>Runs one poll and publishes events. Public so tests can drive it without the timer wheel.</summary>
     public async Task PollOnceAsync()
@@ -83,10 +72,26 @@ public sealed class MailPollingService : ISquidStdService, IDisposable
         }
     }
 
-    private void OnTick()
-        => _ = PollOnceAsync();
+    /// <inheritdoc />
+    public ValueTask StartAsync(CancellationToken cancellationToken = default)
+    {
+        _timerId = _timer.RegisterTimer("mail-poll", _interval, OnTick, _interval, true);
+
+        return ValueTask.CompletedTask;
+    }
 
     /// <inheritdoc />
-    public void Dispose()
-        => _gate.Dispose();
+    public ValueTask StopAsync(CancellationToken cancellationToken = default)
+    {
+        if (_timerId is not null)
+        {
+            _timer.UnregisterTimer(_timerId);
+            _timerId = null;
+        }
+
+        return ValueTask.CompletedTask;
+    }
+
+    private void OnTick()
+        => _ = PollOnceAsync();
 }

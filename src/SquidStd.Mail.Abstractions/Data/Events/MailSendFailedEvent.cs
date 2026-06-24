@@ -1,5 +1,4 @@
 using SquidStd.Core.Interfaces.Events;
-using SquidStd.Mail.Abstractions.Data;
 
 namespace SquidStd.Mail.Abstractions.Data.Events;
 

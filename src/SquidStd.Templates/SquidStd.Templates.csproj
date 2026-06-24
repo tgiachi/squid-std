@@ -22,9 +22,9 @@
     <!-- Inline task: replace a literal string in a set of files. -->
     <UsingTask TaskName="ReplaceFileText" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
         <ParameterGroup>
-            <Files ParameterType="System.String[]" Required="true" />
-            <OldText ParameterType="System.String" Required="true" />
-            <NewText ParameterType="System.String" Required="true" />
+            <Files ParameterType="System.String[]" Required="true"/>
+            <OldText ParameterType="System.String" Required="true"/>
+            <NewText ParameterType="System.String" Required="true"/>
         </ParameterGroup>
         <Task>
             <Code Type="Fragment" Language="cs"><![CDATA[
@@ -50,18 +50,18 @@
         </PropertyGroup>
 
         <ItemGroup>
-            <RawTemplateFiles Include="$(TemplatesSource)/**/*" Exclude="$(TemplatesSource)/Directory.Build.props" />
+            <RawTemplateFiles Include="$(TemplatesSource)/**/*" Exclude="$(TemplatesSource)/Directory.Build.props"/>
         </ItemGroup>
 
-        <RemoveDir Directories="$(TemplatesProcessed)" />
+        <RemoveDir Directories="$(TemplatesProcessed)"/>
         <Copy SourceFiles="@(RawTemplateFiles)"
-              DestinationFiles="@(RawTemplateFiles->'$(TemplatesProcessed)/%(RecursiveDir)%(Filename)%(Extension)')" />
+              DestinationFiles="@(RawTemplateFiles->'$(TemplatesProcessed)/%(RecursiveDir)%(Filename)%(Extension)')"/>
 
         <ItemGroup>
-            <ProcessedFiles Include="$(TemplatesProcessed)/**/*" />
+            <ProcessedFiles Include="$(TemplatesProcessed)/**/*"/>
         </ItemGroup>
 
-        <ReplaceFileText Files="@(ProcessedFiles)" OldText="$squidstdversion$" NewText="$(Version)" />
+        <ReplaceFileText Files="@(ProcessedFiles)" OldText="$squidstdversion$" NewText="$(Version)"/>
 
         <ItemGroup>
             <TfmSpecificPackageFile Include="$(TemplatesProcessed)/**/*">

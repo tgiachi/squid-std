@@ -1,5 +1,4 @@
 using DryIoc;
-using SquidStd.Abstractions.Extensions.Container;
 using SquidStd.Scripting.Lua.Data.Internal;
 using SquidStd.Scripting.Lua.Extensions.Scripts;
 
@@ -7,6 +6,10 @@ namespace SquidStd.Tests.Scripting.Lua;
 
 public class AddScriptModuleExtensionTests
 {
+    public sealed class TestUserData;
+
+    public sealed class TestModule;
+
     [Fact]
     public void RegisterLuaUserData_AddsUserDataMetadata()
     {
@@ -16,6 +19,14 @@ public class AddScriptModuleExtensionTests
 
         var registration = Assert.Single(container.Resolve<List<ScriptUserData>>());
         Assert.Equal(typeof(TestUserData), registration.UserType);
+    }
+
+    [Fact]
+    public void RegisterLuaUserData_NullTypeThrows()
+    {
+        using var container = new Container();
+
+        Assert.Throws<ArgumentNullException>(() => container.RegisterLuaUserData(null!));
     }
 
     [Fact]
@@ -29,16 +40,4 @@ public class AddScriptModuleExtensionTests
         Assert.Equal(typeof(TestModule), registration.ModuleType);
         Assert.Same(container.Resolve<TestModule>(), container.Resolve<TestModule>());
     }
-
-    [Fact]
-    public void RegisterLuaUserData_NullTypeThrows()
-    {
-        using var container = new Container();
-
-        Assert.Throws<ArgumentNullException>(() => container.RegisterLuaUserData(null!));
-    }
-
-    public sealed class TestUserData;
-
-    public sealed class TestModule;
 }

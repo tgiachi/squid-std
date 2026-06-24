@@ -287,6 +287,36 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
+    /// Disposes of the resources used by the LuaScriptEngineService.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        try
+        {
+            _loadedModules.Clear();
+            _callbacks.Clear();
+            _constants.Clear();
+
+            GC.SuppressFinalize(this);
+
+            _logger.Debug("Lua engine disposed successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.Warning(ex, "Error during Lua engine disposal");
+        }
+        finally
+        {
+            _disposed = true;
+        }
+    }
+
+    /// <summary>
     /// Executes a registered callback with the specified arguments.
     /// </summary>
     /// <param name="name">The name of the callback.</param>
@@ -580,13 +610,6 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    /// Stops the script engine asynchronously.
-    /// </summary>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    public ValueTask StopAsync(CancellationToken cancellationToken = default)
-        => ValueTask.CompletedTask;
-
-    /// <summary>
     /// Starts the script engine asynchronously.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -641,6 +664,13 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
             throw;
         }
     }
+
+    /// <summary>
+    /// Stops the script engine asynchronously.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public ValueTask StopAsync(CancellationToken cancellationToken = default)
+        => ValueTask.CompletedTask;
 
     /// <summary>
     /// Converts a name to the script engine function name format.
@@ -1464,35 +1494,5 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
         }
 
         RegisterEnums();
-    }
-
-    /// <summary>
-    /// Disposes of the resources used by the LuaScriptEngineService.
-    /// </summary>
-    public void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        try
-        {
-            _loadedModules.Clear();
-            _callbacks.Clear();
-            _constants.Clear();
-
-            GC.SuppressFinalize(this);
-
-            _logger.Debug("Lua engine disposed successfully");
-        }
-        catch (Exception ex)
-        {
-            _logger.Warning(ex, "Error during Lua engine disposal");
-        }
-        finally
-        {
-            _disposed = true;
-        }
     }
 }

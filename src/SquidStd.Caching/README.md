@@ -46,10 +46,10 @@ var user = await cache.GetAsync<object>("user:1");
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `CacheRegistrationExtensions` | `AddInMemoryCache(...)` registration. |
-| `InMemoryCacheProvider` | `IMemoryCache`-backed `ICacheProvider`. |
+| Type                          | Purpose                                 |
+|-------------------------------|-----------------------------------------|
+| `CacheRegistrationExtensions` | `AddInMemoryCache(...)` registration.   |
+| `InMemoryCacheProvider`       | `IMemoryCache`-backed `ICacheProvider`. |
 
 ## License
 

@@ -19,7 +19,15 @@ public class MessageTopicTests
         var serializer = new JsonDataSerializer();
         IMessageTopic topic = new MessageTopic(provider, serializer, serializer);
         var received = new TaskCompletionSource<Ping>(TaskCreationOptions.RunContinuationsAsynchronously);
-        topic.Subscribe<Ping>("pings", (ping, _) => { received.TrySetResult(ping); return Task.CompletedTask; });
+        topic.Subscribe<Ping>(
+            "pings",
+            (ping, _) =>
+            {
+                received.TrySetResult(ping);
+
+                return Task.CompletedTask;
+            }
+        );
 
         await topic.PublishAsync("pings", new Ping { Source = "w1" });
 

@@ -32,7 +32,8 @@ public sealed class ImapMailReader : IMailReader
                 _options.Host,
                 _options.Port,
                 _options.UseSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTlsWhenAvailable,
-                cancellationToken);
+                cancellationToken
+            );
             await client.AuthenticateAsync(_options.Username, _options.Password, cancellationToken);
 
             var folder = await client.GetFolderAsync(_options.Folder, cancellationToken);
@@ -49,7 +50,7 @@ public sealed class ImapMailReader : IMailReader
 
                     if (_options.MarkAsSeen)
                     {
-                        await folder.AddFlagsAsync(uid, MessageFlags.Seen, silent: true, cancellationToken);
+                        await folder.AddFlagsAsync(uid, MessageFlags.Seen, true, cancellationToken);
                     }
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)

@@ -8,9 +8,9 @@ using SquidStd.Tests.Messaging.RabbitMq;
 using SquidStd.Workers.Abstractions.Data;
 using SquidStd.Workers.Data.Config;
 using SquidStd.Workers.Interfaces;
-using SquidStd.Workers.Services;
 using SquidStd.Workers.Manager.Data.Config;
 using SquidStd.Workers.Manager.Services;
+using SquidStd.Workers.Services;
 
 namespace SquidStd.Tests.Integration.Workers;
 
@@ -31,12 +31,32 @@ public class WorkerSystemIntegrationTests
         _fixture = fixture;
     }
 
+    private sealed class CapturingJobHandler : IJobHandler
+    {
+        private readonly TaskCompletionSource<JobRequest> _completion;
+
+        public CapturingJobHandler(string jobName, TaskCompletionSource<JobRequest> completion)
+        {
+            JobName = jobName;
+            _completion = completion;
+        }
+
+        public string JobName { get; }
+
+        public Task HandleAsync(JobRequest job, CancellationToken cancellationToken)
+        {
+            _completion.TrySetResult(job);
+
+            return Task.CompletedTask;
+        }
+    }
+
     [Fact]
     public async Task Manager_EnqueuesJob_WorkerRunsIt_AndHeartbeatReachesRegistry()
     {
         using var container = new Container();
         container.RegisterInstance<IEventBus>(new EventBusService());
-        container.AddRabbitMqMessaging(new RabbitMqOptions { Uri = new Uri(_fixture.AmqpUri) });
+        container.AddRabbitMqMessaging(new RabbitMqOptions { Uri = new(_fixture.AmqpUri) });
 
         // Unique channel names per run so parallel/other tests on the shared broker do not interfere.
         var suffix = Guid.NewGuid().ToString("N");
@@ -115,9 +135,11 @@ public class WorkerSystemIntegrationTests
     private static async Task<WorkerInfo?> PollForWorker(WorkerRegistry registry, string workerId)
     {
         var deadline = DateTime.UtcNow + Timeout;
+
         while (DateTime.UtcNow < deadline)
         {
             var info = registry.Get(workerId);
+
             if (info is not null)
             {
                 return info;
@@ -127,25 +149,5 @@ public class WorkerSystemIntegrationTests
         }
 
         return null;
-    }
-
-    private sealed class CapturingJobHandler : IJobHandler
-    {
-        private readonly TaskCompletionSource<JobRequest> _completion;
-
-        public CapturingJobHandler(string jobName, TaskCompletionSource<JobRequest> completion)
-        {
-            JobName = jobName;
-            _completion = completion;
-        }
-
-        public string JobName { get; }
-
-        public Task HandleAsync(JobRequest job, CancellationToken cancellationToken)
-        {
-            _completion.TrySetResult(job);
-
-            return Task.CompletedTask;
-        }
     }
 }

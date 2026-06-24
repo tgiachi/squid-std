@@ -1,4 +1,3 @@
-using SquidStd.Messaging.Abstractions;
 using SquidStd.Messaging.Abstractions.Data.Config;
 
 namespace SquidStd.Tests.Messaging;
@@ -14,6 +13,10 @@ public class MessagingConnectionStringTests
         Assert.Equal("localhost", cs.Host);
         Assert.Null(cs.Port);
     }
+
+    [Fact]
+    public void Parse_NullOrWhitespace_Throws()
+        => Assert.Throws<ArgumentException>(() => MessagingConnectionString.Parse("  "));
 
     [Fact]
     public void Parse_RabbitMq_ReadsCredentialsHostPortVhost()
@@ -40,7 +43,9 @@ public class MessagingConnectionStringTests
     [Fact]
     public void ToMessagingOptions_ReadsParameters()
     {
-        var cs = MessagingConnectionString.Parse("rabbitmq://broker/?maxDeliveryAttempts=5&deadLetterSuffix=.dead&retryDelayMs=250");
+        var cs = MessagingConnectionString.Parse(
+            "rabbitmq://broker/?maxDeliveryAttempts=5&deadLetterSuffix=.dead&retryDelayMs=250"
+        );
 
         var options = cs.ToMessagingOptions();
 
@@ -48,8 +53,4 @@ public class MessagingConnectionStringTests
         Assert.Equal(".dead", options.DeadLetterQueueSuffix);
         Assert.Equal(TimeSpan.FromMilliseconds(250), options.RetryDelay);
     }
-
-    [Fact]
-    public void Parse_NullOrWhitespace_Throws()
-        => Assert.Throws<ArgumentException>(() => MessagingConnectionString.Parse("  "));
 }

@@ -12,6 +12,16 @@ namespace SquidStd.Tests.Security;
 [Collection(SerilogEventSinkCollection.Name)]
 public class SecretsTests
 {
+    private sealed class CapturingSink : ILogEventSink
+    {
+        private readonly List<LogEvent> _events = [];
+
+        public IReadOnlyList<LogEvent> Events => _events;
+
+        public void Emit(LogEvent logEvent)
+            => _events.Add(logEvent);
+    }
+
     [Fact]
     public void AesGcmSecretProtector_Protect_Unprotect_RoundTripsWithoutPlaintext()
     {
@@ -101,15 +111,5 @@ public class SecretsTests
         {
             Environment.SetEnvironmentVariable(variableName, previous);
         }
-    }
-
-    private sealed class CapturingSink : ILogEventSink
-    {
-        private readonly List<LogEvent> _events = [];
-
-        public IReadOnlyList<LogEvent> Events => _events;
-
-        public void Emit(LogEvent logEvent)
-            => _events.Add(logEvent);
     }
 }

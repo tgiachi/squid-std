@@ -63,7 +63,11 @@ public sealed class CacheConnectionString
         var query = HttpUtility.ParseQueryString(uri.Query);
         var parameters = query.AllKeys
                               .Where(static key => key is not null)
-                              .ToFrozenDictionary(key => key!, key => query[key] ?? string.Empty, StringComparer.OrdinalIgnoreCase);
+                              .ToFrozenDictionary(
+                                  key => key!,
+                                  key => query[key] ?? string.Empty,
+                                  StringComparer.OrdinalIgnoreCase
+                              );
 
         return new(
             uri.Scheme,

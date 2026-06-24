@@ -7,9 +7,9 @@ namespace SquidStd.Workers.Manager.Interfaces;
 /// </summary>
 public interface IWorkerRegistry
 {
-    /// <summary>Returns a snapshot of all known workers.</summary>
-    IReadOnlyCollection<WorkerInfo> GetAll();
-
     /// <summary>Returns the worker with the given id, or <c>null</c> when unknown.</summary>
     WorkerInfo? Get(string workerId);
+
+    /// <summary>Returns a snapshot of all known workers.</summary>
+    IReadOnlyCollection<WorkerInfo> GetAll();
 }

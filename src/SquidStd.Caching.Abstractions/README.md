@@ -42,14 +42,14 @@ public Task<int> GetOrComputeAsync(ICacheService cache)
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `ICacheService` | Typed cache-aside facade. |
-| `ICacheProvider` | Byte-level backend contract (per provider). |
-| `CacheService` | Shared facade: serialization, key prefix, default TTL, cache-aside. |
-| `ICacheMetrics` | Hit/miss/set/remove metrics sink. |
-| `CacheOptions` | Default TTL and key prefix. |
-| `CacheConnectionString` | `scheme://host[?params]` parsing into `CacheOptions`. |
+| Type                    | Purpose                                                             |
+|-------------------------|---------------------------------------------------------------------|
+| `ICacheService`         | Typed cache-aside facade.                                           |
+| `ICacheProvider`        | Byte-level backend contract (per provider).                         |
+| `CacheService`          | Shared facade: serialization, key prefix, default TTL, cache-aside. |
+| `ICacheMetrics`         | Hit/miss/set/remove metrics sink.                                   |
+| `CacheOptions`          | Default TTL and key prefix.                                         |
+| `CacheConnectionString` | `scheme://host[?params]` parsing into `CacheOptions`.               |
 
 ## License
 

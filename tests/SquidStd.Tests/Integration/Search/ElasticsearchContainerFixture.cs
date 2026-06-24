@@ -12,25 +12,30 @@ namespace SquidStd.Tests.Integration.Search;
 public sealed class ElasticsearchContainerFixture : IAsyncLifetime
 {
     private readonly ElasticsearchContainer _container = new ElasticsearchBuilder()
-        .WithEnvironment("xpack.security.enabled", "false")
-        .WithWaitStrategy(
-            Wait.ForUnixContainer()
-                .UntilHttpRequestIsSucceeded(request =>
-                    request.ForPort(9200).ForPath("/_cluster/health").ForStatusCode(HttpStatusCode.OK)))
-        .Build();
+                                                         .WithEnvironment("xpack.security.enabled", "false")
+                                                         .WithWaitStrategy(
+                                                             Wait.ForUnixContainer()
+                                                                 .UntilHttpRequestIsSucceeded(
+                                                                     request =>
+                                                                         request.ForPort(9200)
+                                                                                .ForPath("/_cluster/health")
+                                                                                .ForStatusCode(HttpStatusCode.OK)
+                                                                 )
+                                                         )
+                                                         .Build();
 
     // Security is disabled, so the node serves plain HTTP with no auth. GetConnectionString() still returns
     // an https:// URL with credentials for 8.x images, so build the endpoint explicitly instead.
     public string ConnectionString => $"http://{_container.Hostname}:{_container.GetMappedPublicPort(9200)}";
 
-    public Task InitializeAsync()
-        => _container.StartAsync();
-
     public Task DisposeAsync()
         => _container.DisposeAsync().AsTask();
+
+    public Task InitializeAsync()
+        => _container.StartAsync();
 }
 
-[CollectionDefinition(ElasticsearchCollection.Name)]
+[CollectionDefinition(Name)]
 public sealed class ElasticsearchCollection : ICollectionFixture<ElasticsearchContainerFixture>
 {
     public const string Name = "Elasticsearch";

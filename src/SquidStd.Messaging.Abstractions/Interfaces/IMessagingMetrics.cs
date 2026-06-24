@@ -5,8 +5,8 @@ namespace SquidStd.Messaging.Abstractions.Interfaces;
 /// </summary>
 public interface IMessagingMetrics
 {
-    /// <summary>Records a message published to a queue.</summary>
-    void OnPublished(string queueName);
+    /// <summary>Records a message moved to the dead-letter queue.</summary>
+    void OnDeadLettered(string queueName);
 
     /// <summary>Records a message delivered successfully.</summary>
     void OnDelivered(string queueName);
@@ -14,11 +14,11 @@ public interface IMessagingMetrics
     /// <summary>Records a failed delivery attempt.</summary>
     void OnFailed(string queueName);
 
+    /// <summary>Records a message published to a queue.</summary>
+    void OnPublished(string queueName);
+
     /// <summary>Records a retry of a message.</summary>
     void OnRetried(string queueName);
-
-    /// <summary>Records a message moved to the dead-letter queue.</summary>
-    void OnDeadLettered(string queueName);
 
     /// <summary>Sets the current buffered depth of a queue.</summary>
     void SetQueueDepth(string queueName, int depth);

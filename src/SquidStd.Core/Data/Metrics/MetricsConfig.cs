@@ -1,5 +1,5 @@
-using SquidStd.Core.Types;
 using SquidStd.Core.Interfaces.Config;
+using SquidStd.Core.Types;
 
 namespace SquidStd.Core.Data.Metrics;
 

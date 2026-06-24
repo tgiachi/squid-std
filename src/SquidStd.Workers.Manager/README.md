@@ -36,14 +36,14 @@ app.MapWorkerManagerEndpoints(); // GET /workers, GET /workers/{id}, POST /jobs
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `IJobScheduler` | `EnqueueAsync(jobName, parameters)` onto the jobs queue. |
-| `IWorkerRegistry` | `GetAll()` / `Get(id)` over the live worker view. |
-| `WorkerStatusChangedEvent` | Published on the event bus on discover / offline / return. |
-| `WorkerManagerConfig` | `OfflineTimeoutSeconds`, `SweepIntervalSeconds`, queue/topic names. |
-| `WorkerManagerRegistrationExtensions` | `AddWorkerManager()`. |
-| `WorkerManagerEndpointsExtensions` | `MapWorkerManagerEndpoints()`. |
+| Type                                  | Purpose                                                             |
+|---------------------------------------|---------------------------------------------------------------------|
+| `IJobScheduler`                       | `EnqueueAsync(jobName, parameters)` onto the jobs queue.            |
+| `IWorkerRegistry`                     | `GetAll()` / `Get(id)` over the live worker view.                   |
+| `WorkerStatusChangedEvent`            | Published on the event bus on discover / offline / return.          |
+| `WorkerManagerConfig`                 | `OfflineTimeoutSeconds`, `SweepIntervalSeconds`, queue/topic names. |
+| `WorkerManagerRegistrationExtensions` | `AddWorkerManager()`.                                               |
+| `WorkerManagerEndpointsExtensions`    | `MapWorkerManagerEndpoints()`.                                      |
 
 ## License
 

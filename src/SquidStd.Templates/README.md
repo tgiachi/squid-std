@@ -22,12 +22,12 @@ dotnet new install SquidStd.Templates
 
 ## Templates
 
-| Template | Short name | What you get |
-|----------|------------|--------------|
-| Console host | `squidstd-host` | A `SquidStdBootstrap` console host. |
+| Template            | Short name            | What you get                                                    |
+|---------------------|-----------------------|-----------------------------------------------------------------|
+| Console host        | `squidstd-host`       | A `SquidStdBootstrap` console host.                             |
 | ASP.NET minimal API | `squidstd-aspnetcore` | `UseSquidStd` + health checks + a sample endpoint + Dockerfile. |
-| Worker microservice | `squidstd-worker` | `AddWorkers` + a sample `IJobHandler` + Dockerfile. |
-| Worker manager | `squidstd-manager` | `AddWorkerManager` + `MapWorkerManagerEndpoints` + Dockerfile. |
+| Worker microservice | `squidstd-worker`     | `AddWorkers` + a sample `IJobHandler` + Dockerfile.             |
+| Worker manager      | `squidstd-manager`    | `AddWorkerManager` + `MapWorkerManagerEndpoints` + Dockerfile.  |
 
 ## Usage
 

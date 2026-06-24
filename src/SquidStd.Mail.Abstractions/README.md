@@ -22,16 +22,16 @@ dotnet add package SquidStd.Mail.Abstractions
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `MailMessage` | Parsed email (headers, bodies, attachments, optional raw .eml). |
-| `MailReceivedEvent` | Published on the event bus per new message. |
-| `IMailReader` | Fetches new messages from a mailbox. |
-| `MailOptions` | Host/port/credentials, protocol, polling and fetch options. |
-| `IMailSender` | Sends outbound email. |
-| `OutgoingMailMessage` | An email to send (recipients, subject, bodies, attachments). |
-| `SmtpOptions` | SMTP host/port/SSL/credentials and a default sender. |
-| `MailSentEvent` / `MailSendFailedEvent` | Published on the event bus on send success/failure. |
+| Type                                    | Purpose                                                         |
+|-----------------------------------------|-----------------------------------------------------------------|
+| `MailMessage`                           | Parsed email (headers, bodies, attachments, optional raw .eml). |
+| `MailReceivedEvent`                     | Published on the event bus per new message.                     |
+| `IMailReader`                           | Fetches new messages from a mailbox.                            |
+| `MailOptions`                           | Host/port/credentials, protocol, polling and fetch options.     |
+| `IMailSender`                           | Sends outbound email.                                           |
+| `OutgoingMailMessage`                   | An email to send (recipients, subject, bodies, attachments).    |
+| `SmtpOptions`                           | SMTP host/port/SSL/credentials and a default sender.            |
+| `MailSentEvent` / `MailSendFailedEvent` | Published on the event bus on send success/failure.             |
 
 ## License
 

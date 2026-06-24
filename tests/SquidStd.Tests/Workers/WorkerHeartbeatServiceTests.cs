@@ -13,13 +13,32 @@ namespace SquidStd.Tests.Workers;
 
 public class WorkerHeartbeatServiceTests
 {
-    private static (IMessageTopic topic, WorkerState state) NewMessaging(WorkersConfig config)
+    [Fact]
+    public async Task Heartbeat_ReflectsBusyStateWithActiveJobs()
     {
-        var container = new Container();
-        container.RegisterInstance<IEventBus>(new EventBusService());
-        container.AddInMemoryMessaging();
+        var config = new WorkersConfig { WorkerId = "w1", MaxConcurrency = 8, HeartbeatIntervalSeconds = 60 };
+        var (topic, state) = NewMessaging(config);
+        state.JobStarted();
 
-        return (container.Resolve<IMessageTopic>(), new WorkerState(config));
+        var received = new TaskCompletionSource<WorkerHeartbeat>();
+        using var _ = topic.Subscribe<WorkerHeartbeat>(
+            WorkerChannels.HeartbeatTopic,
+            (hb, _) =>
+            {
+                received.TrySetResult(hb);
+
+                return Task.CompletedTask;
+            }
+        );
+
+        var service = new WorkerHeartbeatService(topic, state, config);
+        await service.StartAsync();
+
+        var heartbeat = await received.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        await service.StopAsync();
+
+        Assert.Equal(1, heartbeat.ActiveJobs);
+        Assert.Equal(WorkerStatusType.Busy, heartbeat.Status);
     }
 
     [Fact]
@@ -31,7 +50,13 @@ public class WorkerHeartbeatServiceTests
         var received = new TaskCompletionSource<WorkerHeartbeat>();
         using var _ = topic.Subscribe<WorkerHeartbeat>(
             WorkerChannels.HeartbeatTopic,
-            (hb, _) => { received.TrySetResult(hb); return Task.CompletedTask; });
+            (hb, _) =>
+            {
+                received.TrySetResult(hb);
+
+                return Task.CompletedTask;
+            }
+        );
 
         var service = new WorkerHeartbeatService(topic, state, config);
         await service.StartAsync();
@@ -45,25 +70,12 @@ public class WorkerHeartbeatServiceTests
         Assert.Equal(WorkerStatusType.Idle, heartbeat.Status);
     }
 
-    [Fact]
-    public async Task Heartbeat_ReflectsBusyStateWithActiveJobs()
+    private static (IMessageTopic topic, WorkerState state) NewMessaging(WorkersConfig config)
     {
-        var config = new WorkersConfig { WorkerId = "w1", MaxConcurrency = 8, HeartbeatIntervalSeconds = 60 };
-        var (topic, state) = NewMessaging(config);
-        state.JobStarted();
+        var container = new Container();
+        container.RegisterInstance<IEventBus>(new EventBusService());
+        container.AddInMemoryMessaging();
 
-        var received = new TaskCompletionSource<WorkerHeartbeat>();
-        using var _ = topic.Subscribe<WorkerHeartbeat>(
-            WorkerChannels.HeartbeatTopic,
-            (hb, _) => { received.TrySetResult(hb); return Task.CompletedTask; });
-
-        var service = new WorkerHeartbeatService(topic, state, config);
-        await service.StartAsync();
-
-        var heartbeat = await received.Task.WaitAsync(TimeSpan.FromSeconds(5));
-        await service.StopAsync();
-
-        Assert.Equal(1, heartbeat.ActiveJobs);
-        Assert.Equal(WorkerStatusType.Busy, heartbeat.Status);
+        return (container.Resolve<IMessageTopic>(), new(config));
     }
 }

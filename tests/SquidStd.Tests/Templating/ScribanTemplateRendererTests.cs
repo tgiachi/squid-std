@@ -1,4 +1,3 @@
-using SquidStd.Core.Directories;
 using SquidStd.Templating;
 using SquidStd.Templating.Services;
 using SquidStd.Tests.Support;
@@ -7,18 +6,13 @@ namespace SquidStd.Tests.Templating;
 
 public class ScribanTemplateRendererTests
 {
-    private static ScribanTemplateRenderer NewRenderer(string root)
-        => new(new DirectoriesConfig(root, []));
-
     [Fact]
-    public async Task RenderAsync_RendersModel()
+    public void Register_MalformedTemplate_Throws()
     {
         using var temp = new TempDirectory();
         var renderer = NewRenderer(temp.Path);
 
-        var result = await renderer.RenderAsync("Hi {{ user.name }}", new { User = new { Name = "squid" } });
-
-        Assert.Equal("Hi squid", result);
+        Assert.Throws<TemplateException>(() => renderer.Register("bad", "{{ for x in }}"));
     }
 
     [Fact]
@@ -34,12 +28,12 @@ public class ScribanTemplateRendererTests
     }
 
     [Fact]
-    public async Task RenderByNameAsync_UnknownName_Throws()
+    public async Task RenderAsync_EmptyTemplate_Throws()
     {
         using var temp = new TempDirectory();
         var renderer = NewRenderer(temp.Path);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(async () => await renderer.RenderByNameAsync("nope", null));
+        await Assert.ThrowsAsync<ArgumentException>(async () => await renderer.RenderAsync(string.Empty, null));
     }
 
     [Fact]
@@ -52,21 +46,23 @@ public class ScribanTemplateRendererTests
     }
 
     [Fact]
-    public void Register_MalformedTemplate_Throws()
+    public async Task RenderAsync_RendersModel()
     {
         using var temp = new TempDirectory();
         var renderer = NewRenderer(temp.Path);
 
-        Assert.Throws<TemplateException>(() => renderer.Register("bad", "{{ for x in }}"));
+        var result = await renderer.RenderAsync("Hi {{ user.name }}", new { User = new { Name = "squid" } });
+
+        Assert.Equal("Hi squid", result);
     }
 
     [Fact]
-    public async Task RenderAsync_EmptyTemplate_Throws()
+    public async Task RenderByNameAsync_UnknownName_Throws()
     {
         using var temp = new TempDirectory();
         var renderer = NewRenderer(temp.Path);
 
-        await Assert.ThrowsAsync<ArgumentException>(async () => await renderer.RenderAsync(string.Empty, null));
+        await Assert.ThrowsAsync<InvalidOperationException>(async () => await renderer.RenderByNameAsync("nope", null));
     }
 
     [Fact]
@@ -84,4 +80,7 @@ public class ScribanTemplateRendererTests
 
         Assert.Equal("Welcome squid", result);
     }
+
+    private static ScribanTemplateRenderer NewRenderer(string root)
+        => new(new(root, []));
 }

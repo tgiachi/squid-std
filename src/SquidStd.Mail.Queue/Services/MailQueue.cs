@@ -1,7 +1,7 @@
-using SquidStd.Messaging.Abstractions.Interfaces;
 using SquidStd.Mail.Abstractions.Data;
 using SquidStd.Mail.Queue.Data.Config;
 using SquidStd.Mail.Queue.Interfaces;
+using SquidStd.Messaging.Abstractions.Interfaces;
 
 namespace SquidStd.Mail.Queue.Services;
 

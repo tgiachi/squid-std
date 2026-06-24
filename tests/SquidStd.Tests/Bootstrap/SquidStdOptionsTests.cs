@@ -6,15 +6,6 @@ namespace SquidStd.Tests.Bootstrap;
 public class SquidStdOptionsTests
 {
     [Fact]
-    public void SquidStdOptions_Defaults_AreUsable()
-    {
-        var options = new SquidStdOptions();
-
-        Assert.False(string.IsNullOrWhiteSpace(options.RootDirectory));
-        Assert.Equal("squidstd", options.ConfigName);
-    }
-
-    [Fact]
     public void SquidStdLoggerOptions_Defaults_EnableConsoleAndDisableFile()
     {
         var options = new SquidStdLoggerOptions();
@@ -25,5 +16,14 @@ public class SquidStdOptionsTests
         Assert.Equal("logs", options.LogDirectory);
         Assert.Equal("squidstd-.log", options.FileName);
         Assert.Equal(SquidStdLogRollingIntervalType.Day, options.RollingInterval);
+    }
+
+    [Fact]
+    public void SquidStdOptions_Defaults_AreUsable()
+    {
+        var options = new SquidStdOptions();
+
+        Assert.False(string.IsNullOrWhiteSpace(options.RootDirectory));
+        Assert.Equal("squidstd", options.ConfigName);
     }
 }

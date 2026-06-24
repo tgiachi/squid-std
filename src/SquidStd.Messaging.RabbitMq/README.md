@@ -44,11 +44,11 @@ await queue.PublishAsync("orders", new { Id = 1 });
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
+| Type                                      | Purpose                                   |
+|-------------------------------------------|-------------------------------------------|
 | `RabbitMqMessagingRegistrationExtensions` | `AddRabbitMqMessaging(...)` registration. |
-| `RabbitMqQueueProvider` | RabbitMQ-backed `IQueueProvider`. |
-| `RabbitMqOptions` | Connection + prefetch configuration. |
+| `RabbitMqQueueProvider`                   | RabbitMQ-backed `IQueueProvider`.         |
+| `RabbitMqOptions`                         | Connection + prefetch configuration.      |
 
 ## License
 

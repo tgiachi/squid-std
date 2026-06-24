@@ -45,10 +45,10 @@ await queue.PublishAsync("orders", new { Id = 1 });
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
+| Type                              | Purpose                                   |
+|-----------------------------------|-------------------------------------------|
 | `MessagingRegistrationExtensions` | `AddInMemoryMessaging(...)` registration. |
-| `InMemoryQueueProvider` | Channel-based in-memory `IQueueProvider`. |
+| `InMemoryQueueProvider`           | Channel-based in-memory `IQueueProvider`. |
 
 ## License
 

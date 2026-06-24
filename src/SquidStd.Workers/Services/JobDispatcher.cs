@@ -21,7 +21,8 @@ public sealed class JobDispatcher : IJobDispatcher
             {
                 _logger.Warning(
                     "Duplicate job handler for '{JobName}'; the last registration wins.",
-                    handler.JobName);
+                    handler.JobName
+                );
             }
 
             _handlers[handler.JobName] = handler;

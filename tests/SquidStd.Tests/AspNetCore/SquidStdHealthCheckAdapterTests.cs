@@ -12,7 +12,7 @@ public class SquidStdHealthCheckAdapterTests
     {
         var adapter = new SquidStdHealthCheckAdapter(new FakeHealthCheck("ok", SquidHealthResult.Healthy("all good")));
 
-        var result = await adapter.CheckHealthAsync(new HealthCheckContext());
+        var result = await adapter.CheckHealthAsync(new());
 
         Assert.Equal(HealthStatus.Healthy, result.Status);
         Assert.Equal("all good", result.Description);
@@ -24,7 +24,7 @@ public class SquidStdHealthCheckAdapterTests
         var ex = new InvalidOperationException("boom");
         var adapter = new SquidStdHealthCheckAdapter(new FakeHealthCheck("bad", SquidHealthResult.Unhealthy("down", ex)));
 
-        var result = await adapter.CheckHealthAsync(new HealthCheckContext());
+        var result = await adapter.CheckHealthAsync(new());
 
         Assert.Equal(HealthStatus.Unhealthy, result.Status);
         Assert.Equal("down", result.Description);

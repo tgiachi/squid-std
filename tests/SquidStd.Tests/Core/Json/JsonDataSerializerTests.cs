@@ -11,6 +11,15 @@ public class JsonDataSerializerTests
     }
 
     [Fact]
+    public void Deserialize_NullJson_Throws()
+    {
+        var serializer = new JsonDataSerializer();
+        var bytes = serializer.Serialize<Sample?>(null);
+
+        Assert.Throws<InvalidOperationException>(() => serializer.Deserialize<Sample>(bytes));
+    }
+
+    [Fact]
     public void RoundTrip_PreservesValue()
     {
         var serializer = new JsonDataSerializer();
@@ -20,14 +29,5 @@ public class JsonDataSerializerTests
 
         Assert.Equal("abc", result.Name);
         Assert.Equal(7, result.Count);
-    }
-
-    [Fact]
-    public void Deserialize_NullJson_Throws()
-    {
-        var serializer = new JsonDataSerializer();
-        var bytes = serializer.Serialize<Sample?>(null);
-
-        Assert.Throws<InvalidOperationException>(() => serializer.Deserialize<Sample>(bytes));
     }
 }

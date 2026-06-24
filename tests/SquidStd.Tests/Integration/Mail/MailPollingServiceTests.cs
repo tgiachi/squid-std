@@ -2,12 +2,11 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
 using SquidStd.Core.Interfaces.Events;
-using SquidStd.Services.Core.Services;
-using SquidStd.Tests.Mail.Support;
-using SquidStd.Mail.Abstractions.Data.Config;
 using SquidStd.Mail.Abstractions.Data.Events;
 using SquidStd.Mail.Abstractions.Types.Mail;
 using SquidStd.Mail.MailKit.Services;
+using SquidStd.Services.Core.Services;
+using SquidStd.Tests.Mail.Support;
 
 namespace SquidStd.Tests.Integration.Mail;
 
@@ -61,17 +60,24 @@ public class MailPollingServiceTests
         var received = new TaskCompletionSource<MailReceivedEvent>(TaskCreationOptions.RunContinuationsAsynchronously);
         eventBus.RegisterAsyncListener(new DelegateListener(e => received.TrySetResult(e)));
 
-        var reader = new ImapMailReader(new MailOptions
-        {
-            Protocol = MailProtocolType.Imap,
-            Host = _fixture.Host,
-            Port = _fixture.ImapPort,
-            UseSsl = false,
-            Username = user,
-            Password = "pwd"
-        });
+        var reader = new ImapMailReader(
+            new()
+            {
+                Protocol = MailProtocolType.Imap,
+                Host = _fixture.Host,
+                Port = _fixture.ImapPort,
+                UseSsl = false,
+                Username = user,
+                Password = "pwd"
+            }
+        );
 
-        using var service = new MailPollingService(reader, eventBus, new FakeTimerService(), new MailOptions { PollIntervalSeconds = 60 });
+        using var service = new MailPollingService(
+            reader,
+            eventBus,
+            new FakeTimerService(),
+            new() { PollIntervalSeconds = 60 }
+        );
         await service.PollOnceAsync();
 
         var evt = await received.Task.WaitAsync(Timeout);

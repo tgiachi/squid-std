@@ -12,6 +12,9 @@ public sealed class FakeCacheProvider : ICacheProvider
 
     public TimeSpan? LastTtl { get; private set; }
 
+    public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
+        => Task.FromResult(_store.ContainsKey(key));
+
     public Task<ReadOnlyMemory<byte>?> GetAsync(string key, CancellationToken cancellationToken = default)
     {
         if (_store.TryGetValue(key, out var value))
@@ -22,19 +25,21 @@ public sealed class FakeCacheProvider : ICacheProvider
         return Task.FromResult<ReadOnlyMemory<byte>?>(null);
     }
 
-    public Task SetAsync(string key, ReadOnlyMemory<byte> value, TimeSpan? ttl, CancellationToken cancellationToken = default)
+    public Task<bool> RemoveAsync(string key, CancellationToken cancellationToken = default)
+        => Task.FromResult(_store.TryRemove(key, out _));
+
+    public Task SetAsync(
+        string key,
+        ReadOnlyMemory<byte> value,
+        TimeSpan? ttl,
+        CancellationToken cancellationToken = default
+    )
     {
         LastTtl = ttl;
         _store[key] = value.ToArray();
 
         return Task.CompletedTask;
     }
-
-    public Task<bool> RemoveAsync(string key, CancellationToken cancellationToken = default)
-        => Task.FromResult(_store.TryRemove(key, out _));
-
-    public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
-        => Task.FromResult(_store.ContainsKey(key));
 
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
         => ValueTask.CompletedTask;

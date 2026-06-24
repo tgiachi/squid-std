@@ -34,6 +34,10 @@ public sealed class CacheService : ICacheService
     }
 
     /// <inheritdoc />
+    public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
+        => _provider.ExistsAsync(Prefixed(key), cancellationToken);
+
+    /// <inheritdoc />
     public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
     {
         var bytes = await _provider.GetAsync(Prefixed(key), cancellationToken);
@@ -49,31 +53,6 @@ public sealed class CacheService : ICacheService
 
         return _deserializer.Deserialize<T>(bytes.Value);
     }
-
-    /// <inheritdoc />
-    public async Task SetAsync<T>(string key, T value, TimeSpan? ttl = null, CancellationToken cancellationToken = default)
-    {
-        var bytes = _serializer.Serialize(value);
-        await _provider.SetAsync(Prefixed(key), bytes, ttl ?? _defaultTtl, cancellationToken);
-        _metrics.OnSet(key);
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> RemoveAsync(string key, CancellationToken cancellationToken = default)
-    {
-        var removed = await _provider.RemoveAsync(Prefixed(key), cancellationToken);
-
-        if (removed)
-        {
-            _metrics.OnRemove(key);
-        }
-
-        return removed;
-    }
-
-    /// <inheritdoc />
-    public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
-        => _provider.ExistsAsync(Prefixed(key), cancellationToken);
 
     /// <inheritdoc />
     public async Task<T> GetOrSetAsync<T>(
@@ -99,6 +78,27 @@ public sealed class CacheService : ICacheService
         await SetAsync(key, value, ttl, cancellationToken);
 
         return value;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> RemoveAsync(string key, CancellationToken cancellationToken = default)
+    {
+        var removed = await _provider.RemoveAsync(Prefixed(key), cancellationToken);
+
+        if (removed)
+        {
+            _metrics.OnRemove(key);
+        }
+
+        return removed;
+    }
+
+    /// <inheritdoc />
+    public async Task SetAsync<T>(string key, T value, TimeSpan? ttl = null, CancellationToken cancellationToken = default)
+    {
+        var bytes = _serializer.Serialize(value);
+        await _provider.SetAsync(Prefixed(key), bytes, ttl ?? _defaultTtl, cancellationToken);
+        _metrics.OnSet(key);
     }
 
     private string Prefixed(string key)

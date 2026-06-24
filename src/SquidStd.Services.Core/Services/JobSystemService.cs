@@ -54,6 +54,12 @@ public sealed class JobSystemService : IJobSystem, ISquidStdService
         _workers = new Thread[WorkerCount];
     }
 
+    /// <summary>
+    /// Releases worker resources.
+    /// </summary>
+    public void Dispose()
+        => Stop(CancellationToken.None);
+
     /// <inheritdoc />
     public Task ScheduleAsync(Action work, CancellationToken cancellationToken = default)
     {
@@ -311,10 +317,4 @@ public sealed class JobSystemService : IJobSystem, ISquidStdService
             _logger.Error(ex, "JobSystemService worker loop terminated unexpectedly");
         }
     }
-
-    /// <summary>
-    /// Releases worker resources.
-    /// </summary>
-    public void Dispose()
-        => Stop(CancellationToken.None);
 }

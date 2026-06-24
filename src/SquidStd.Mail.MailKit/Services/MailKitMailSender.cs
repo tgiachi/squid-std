@@ -45,7 +45,8 @@ public sealed class MailKitMailSender : IMailSender
                     _options.Host,
                     _options.Port,
                     _options.UseSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTlsWhenAvailable,
-                    cancellationToken);
+                    cancellationToken
+                );
 
                 if (!string.IsNullOrWhiteSpace(_options.Username))
                 {
@@ -68,7 +69,10 @@ public sealed class MailKitMailSender : IMailSender
         }
         catch (Exception ex)
         {
-            await PublishSafelyAsync(new MailSendFailedEvent(message.To, message.Subject, ex.Message), CancellationToken.None);
+            await PublishSafelyAsync(
+                new MailSendFailedEvent(message.To, message.Subject, ex.Message),
+                CancellationToken.None
+            );
             _logger.Error(ex, "Failed to send mail '{Subject}'.", message.Subject);
 
             throw new MailSendException($"Failed to send mail '{message.Subject}'.", ex);

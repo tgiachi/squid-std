@@ -107,6 +107,50 @@ public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDispo
         _bindAllInterfaces = bindAllInterfaces;
     }
 
+    /// <inheritdoc />
+    public void Dispose()
+        => DisposeAsync().AsTask().GetAwaiter().GetResult();
+
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+        => await StopAsync(CancellationToken.None);
+
+    /// <summary>
+    /// Sends a datagram to a specific endpoint, using the listener that last received from it
+    /// (falling back to the first listener). No-op when no listener is available.
+    /// </summary>
+    public async Task SendToAsync(
+        IPEndPoint endPoint,
+        ReadOnlyMemory<byte> payload,
+        CancellationToken cancellationToken = default
+    )
+    {
+        ArgumentNullException.ThrowIfNull(endPoint);
+
+        if (!_endpointListeners.TryGetValue(endPoint, out var listener))
+        {
+            lock (_sync)
+            {
+                listener = _listeners.FirstOrDefault();
+            }
+        }
+
+        if (listener is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await listener.SendAsync(payload, endPoint, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.Warning(ex, "UDP SendToAsync failed for {EndPoint}", endPoint);
+            OnException?.Invoke(this, new(ex));
+        }
+    }
+
     /// <summary>
     /// Starts listening, binding sockets and launching a receive loop per socket. Recreates the
     /// sockets on every call, so Stop/Start cycles are supported.
@@ -268,38 +312,6 @@ public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDispo
         }
     }
 
-    /// <summary>
-    /// Sends a datagram to a specific endpoint, using the listener that last received from it
-    /// (falling back to the first listener). No-op when no listener is available.
-    /// </summary>
-    public async Task SendToAsync(IPEndPoint endPoint, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(endPoint);
-
-        if (!_endpointListeners.TryGetValue(endPoint, out var listener))
-        {
-            lock (_sync)
-            {
-                listener = _listeners.FirstOrDefault();
-            }
-        }
-
-        if (listener is null)
-        {
-            return;
-        }
-
-        try
-        {
-            await listener.SendAsync(payload, endPoint, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.Warning(ex, "UDP SendToAsync failed for {EndPoint}", endPoint);
-            OnException?.Invoke(this, new(ex));
-        }
-    }
-
     private IEnumerable<IPEndPoint> ResolveBindEndPoints()
     {
         if (!_bindAllInterfaces)
@@ -313,12 +325,4 @@ public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDispo
                            .Select(address => new IPEndPoint(address.Address, _endPoint.Port))
         ];
     }
-
-    /// <inheritdoc />
-    public void Dispose()
-        => DisposeAsync().AsTask().GetAwaiter().GetResult();
-
-    /// <inheritdoc />
-    public async ValueTask DisposeAsync()
-        => await StopAsync(CancellationToken.None);
 }

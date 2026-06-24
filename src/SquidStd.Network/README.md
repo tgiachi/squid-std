@@ -43,14 +43,14 @@ await server.StopAsync(CancellationToken.None);
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `INetworkServer` | TCP/UDP server contract (`StartAsync`/`StopAsync`). |
-| `INetworkConnection` | A single client connection. |
-| `ISessionManager<TState>` | Tracks sessions and their typed state. |
-| `INetFramer` | Splits the byte stream into messages. |
-| `INetMiddleware` | Pipeline stage over inbound/outbound data. |
-| `SpanReader` / `SpanWriter` | Allocation-free binary read/write. |
+| Type                        | Purpose                                             |
+|-----------------------------|-----------------------------------------------------|
+| `INetworkServer`            | TCP/UDP server contract (`StartAsync`/`StopAsync`). |
+| `INetworkConnection`        | A single client connection.                         |
+| `ISessionManager<TState>`   | Tracks sessions and their typed state.              |
+| `INetFramer`                | Splits the byte stream into messages.               |
+| `INetMiddleware`            | Pipeline stage over inbound/outbound data.          |
+| `SpanReader` / `SpanWriter` | Allocation-free binary read/write.                  |
 
 ## License
 

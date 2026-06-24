@@ -44,13 +44,13 @@ container.RegisterConfigSection<MyConfig>("my");
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `ISquidStdService` | Async start/stop lifecycle for managed services. |
-| `RegisterStdServiceExtension` | `RegisterStdService<,>` container extension. |
-| `RegisterConfigSectionExtension` | `RegisterConfigSection<>` container extension. |
-| `ServiceRegistrationData` | Ordered service registration record. |
-| `ConfigRegistrationData` | Config section registration record. |
+| Type                             | Purpose                                          |
+|----------------------------------|--------------------------------------------------|
+| `ISquidStdService`               | Async start/stop lifecycle for managed services. |
+| `RegisterStdServiceExtension`    | `RegisterStdService<,>` container extension.     |
+| `RegisterConfigSectionExtension` | `RegisterConfigSection<>` container extension.   |
+| `ServiceRegistrationData`        | Ordered service registration record.             |
+| `ConfigRegistrationData`         | Config section registration record.              |
 
 ## License
 

@@ -8,12 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\SquidStd.Storage.Abstractions\SquidStd.Storage.Abstractions.csproj" />
+        <ProjectReference Include="..\SquidStd.Storage.Abstractions\SquidStd.Storage.Abstractions.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="DryIoc.dll" Version="5.4.3" />
-        <PackageReference Include="Minio" Version="7.0.0" />
+        <PackageReference Include="DryIoc.dll" Version="5.4.3"/>
+        <PackageReference Include="Minio" Version="7.0.0"/>
     </ItemGroup>
 
 </Project>

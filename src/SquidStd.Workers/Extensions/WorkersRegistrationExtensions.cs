@@ -13,6 +13,19 @@ namespace SquidStd.Workers.Extensions;
 public static class WorkersRegistrationExtensions
 {
     /// <summary>
+    /// Registers a job handler so the dispatcher can route jobs to it by name.
+    /// </summary>
+    public static IContainer AddJobHandler<THandler>(this IContainer container)
+        where THandler : class, IJobHandler
+    {
+        ArgumentNullException.ThrowIfNull(container);
+
+        container.Register<IJobHandler, THandler>(Reuse.Singleton);
+
+        return container;
+    }
+
+    /// <summary>
     /// Registers the worker runtime: the "workers" config section, shared state, job dispatcher, and the
     /// consumer + heartbeat lifecycle services.
     /// </summary>
@@ -27,19 +40,6 @@ public static class WorkersRegistrationExtensions
 
         container.RegisterStdService<WorkerConsumerService, WorkerConsumerService>(100);
         container.RegisterStdService<WorkerHeartbeatService, WorkerHeartbeatService>(110);
-
-        return container;
-    }
-
-    /// <summary>
-    /// Registers a job handler so the dispatcher can route jobs to it by name.
-    /// </summary>
-    public static IContainer AddJobHandler<THandler>(this IContainer container)
-        where THandler : class, IJobHandler
-    {
-        ArgumentNullException.ThrowIfNull(container);
-
-        container.Register<IJobHandler, THandler>(Reuse.Singleton);
 
         return container;
     }

@@ -32,7 +32,8 @@ public sealed class Pop3MailReader : IMailReader
                 _options.Host,
                 _options.Port,
                 _options.UseSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTlsWhenAvailable,
-                cancellationToken);
+                cancellationToken
+            );
             await client.AuthenticateAsync(_options.Username, _options.Password, cancellationToken);
 
             var uids = await client.GetMessageUidsAsync(cancellationToken);

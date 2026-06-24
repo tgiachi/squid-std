@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Linq.Expressions;
 using SquidStd.Search.Abstractions.Interfaces;
 using SquidStd.Search.Elasticsearch.Linq;
@@ -11,13 +12,53 @@ public class ElasticExpressionTranslatorTests
         public string IndexId => Name;
     }
 
-    private static ElasticQuery Translate(Func<IQueryable<Doc>, IQueryable<Doc>> build)
+    private sealed class TranslateOnlyQueryable<T> : IOrderedQueryable<T>, IQueryProvider
     {
-        IQueryable<Doc> root = new TranslateOnlyQueryable<Doc>();
-        var query = build(root);
+        public TranslateOnlyQueryable()
+        {
+            Expression = Expression.Constant(this);
+        }
 
-        return ElasticExpressionTranslator.Translate(query.Expression, typeof(Doc));
+        private TranslateOnlyQueryable(Expression expression)
+        {
+            Expression = expression;
+        }
+
+        public Type ElementType => typeof(T);
+        public Expression Expression { get; }
+        public IQueryProvider Provider => this;
+
+        public IQueryable CreateQuery(Expression expression)
+            => new TranslateOnlyQueryable<T>(expression);
+
+        public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
+            => new TranslateOnlyQueryable<TElement>(expression);
+
+        public object? Execute(Expression expression)
+            => throw new NotSupportedException();
+
+        public TResult Execute<TResult>(Expression expression)
+            => throw new NotSupportedException();
+
+        public IEnumerator<T> GetEnumerator()
+            => throw new NotSupportedException();
+
+        IEnumerator IEnumerable.GetEnumerator()
+            => throw new NotSupportedException();
     }
+
+    [Fact]
+    public void Match_ProducesMatchClause()
+    {
+        var q = Translate(s => s.Match("name", "laptop"));
+
+        var match = q.Query["bool"]!["must"]!.AsArray()[0]!["match"]!.AsObject();
+        Assert.Equal("laptop", match["name"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public void UnsupportedExpression_Throws()
+        => Assert.Throws<NotSupportedException>(() => Translate(s => s.Where(d => d.Name.ToUpperInvariant() == "X")));
 
     [Fact]
     public void Where_Equality_ProducesTermOnKeyword()
@@ -40,42 +81,11 @@ public class ElasticExpressionTranslatorTests
         Assert.Equal(100, range["gt"]!.GetValue<int>());
     }
 
-    [Fact]
-    public void Match_ProducesMatchClause()
+    private static ElasticQuery Translate(Func<IQueryable<Doc>, IQueryable<Doc>> build)
     {
-        var q = Translate(s => s.Match("name", "laptop"));
+        IQueryable<Doc> root = new TranslateOnlyQueryable<Doc>();
+        var query = build(root);
 
-        var match = q.Query["bool"]!["must"]!.AsArray()[0]!["match"]!.AsObject();
-        Assert.Equal("laptop", match["name"]!.GetValue<string>());
-    }
-
-    [Fact]
-    public void UnsupportedExpression_Throws()
-    {
-        Assert.Throws<NotSupportedException>(() => Translate(s => s.Where(d => d.Name.ToUpperInvariant() == "X")));
-    }
-
-    private sealed class TranslateOnlyQueryable<T> : IOrderedQueryable<T>, IQueryProvider
-    {
-        public TranslateOnlyQueryable()
-        {
-            Expression = Expression.Constant(this);
-        }
-
-        private TranslateOnlyQueryable(Expression expression)
-        {
-            Expression = expression;
-        }
-
-        public Type ElementType => typeof(T);
-        public Expression Expression { get; }
-        public IQueryProvider Provider => this;
-
-        public IQueryable CreateQuery(Expression expression) => new TranslateOnlyQueryable<T>(expression);
-        public IQueryable<TElement> CreateQuery<TElement>(Expression expression) => new TranslateOnlyQueryable<TElement>(expression);
-        public object? Execute(Expression expression) => throw new NotSupportedException();
-        public TResult Execute<TResult>(Expression expression) => throw new NotSupportedException();
-        public IEnumerator<T> GetEnumerator() => throw new NotSupportedException();
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => throw new NotSupportedException();
+        return ElasticExpressionTranslator.Translate(query.Expression, typeof(Doc));
     }
 }

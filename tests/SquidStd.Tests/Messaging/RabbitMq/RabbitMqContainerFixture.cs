@@ -11,11 +11,11 @@ public sealed class RabbitMqContainerFixture : IAsyncLifetime
 
     public string AmqpUri => _container.GetConnectionString();
 
-    public Task InitializeAsync()
-        => _container.StartAsync();
-
     public Task DisposeAsync()
         => _container.DisposeAsync().AsTask();
+
+    public Task InitializeAsync()
+        => _container.StartAsync();
 }
 
 [CollectionDefinition(Name)]

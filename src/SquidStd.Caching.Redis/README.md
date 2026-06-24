@@ -46,11 +46,11 @@ var user = await cache.GetAsync<object>("user:1");
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `RedisCacheRegistrationExtensions` | `AddRedisCache(...)` registration. |
-| `RedisCacheProvider` | StackExchange.Redis-backed `ICacheProvider`. |
-| `RedisCacheOptions` | StackExchange.Redis connection configuration. |
+| Type                               | Purpose                                       |
+|------------------------------------|-----------------------------------------------|
+| `RedisCacheRegistrationExtensions` | `AddRedisCache(...)` registration.            |
+| `RedisCacheProvider`               | StackExchange.Redis-backed `ICacheProvider`.  |
+| `RedisCacheOptions`                | StackExchange.Redis connection configuration. |
 
 ## License
 

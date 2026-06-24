@@ -6,19 +6,11 @@ namespace SquidStd.Tests.Storage;
 
 public class FileStorageServiceTests
 {
-    [Fact]
-    public async Task SaveAsync_LoadAsync_RoundTripsBytes()
+    private sealed class SampleObject
     {
-        using var temp = new TempDirectory();
-        var service = new FileStorageService(new() { RootDirectory = temp.Path });
-        var data = Encoding.UTF8.GetBytes("hello storage");
+        public string Name { get; set; } = string.Empty;
 
-        await service.SaveAsync("profiles/main.bin", data);
-
-        var loaded = await service.LoadAsync("profiles/main.bin");
-
-        Assert.Equal(data, loaded);
-        Assert.True(await service.ExistsAsync("profiles/main.bin"));
+        public int Value { get; set; }
     }
 
     [Fact]
@@ -35,13 +27,42 @@ public class FileStorageServiceTests
         Assert.Null(await service.LoadAsync("cache/value.bin"));
     }
 
-    [Theory, InlineData("../escape.bin"), InlineData("/absolute.bin"), InlineData("nested/../../escape.bin")]
-    public async Task SaveAsync_RejectsUnsafeKeys(string key)
+    [Fact]
+    public async Task ListKeysAsync_EmptyStore_ReturnsEmpty()
     {
         using var temp = new TempDirectory();
         var service = new FileStorageService(new() { RootDirectory = temp.Path });
 
-        await Assert.ThrowsAsync<ArgumentException>(() => service.SaveAsync(key, new byte[] { 1 }).AsTask());
+        Assert.Empty(await ToListAsync(service.ListKeysAsync()));
+    }
+
+    [Fact]
+    public async Task ListKeysAsync_ReturnsSavedKeys_AndFiltersByPrefix()
+    {
+        using var temp = new TempDirectory();
+        var service = new FileStorageService(new() { RootDirectory = temp.Path });
+        await service.SaveAsync("a/one.bin", new byte[] { 1 });
+        await service.SaveAsync("a/two.bin", new byte[] { 2 });
+        await service.SaveAsync("b/three.bin", new byte[] { 3 });
+
+        var all = (await ToListAsync(service.ListKeysAsync())).OrderBy(k => k, StringComparer.Ordinal).ToArray();
+        var aOnly = (await ToListAsync(service.ListKeysAsync("a/"))).OrderBy(k => k, StringComparer.Ordinal).ToArray();
+
+        Assert.Equal(new[] { "a/one.bin", "a/two.bin", "b/three.bin" }, all);
+        Assert.Equal(new[] { "a/one.bin", "a/two.bin" }, aOnly);
+    }
+
+    [Fact]
+    public async Task ObjectStorage_ListKeysAsync_ReturnsSavedKeys()
+    {
+        using var temp = new TempDirectory();
+        var storage = new FileStorageService(new() { RootDirectory = temp.Path });
+        var objects = new YamlObjectStorageService(storage);
+        await objects.SaveAsync("objects/x.yaml", new SampleObject { Name = "x", Value = 1 });
+
+        var keys = await ToListAsync(objects.ListKeysAsync("objects/"));
+
+        Assert.Contains("objects/x.yaml", keys);
     }
 
     [Fact]
@@ -65,11 +86,28 @@ public class FileStorageServiceTests
         Assert.Equal(expected.Value, actual.Value);
     }
 
-    private sealed class SampleObject
+    [Fact]
+    public async Task SaveAsync_LoadAsync_RoundTripsBytes()
     {
-        public string Name { get; set; } = string.Empty;
+        using var temp = new TempDirectory();
+        var service = new FileStorageService(new() { RootDirectory = temp.Path });
+        var data = Encoding.UTF8.GetBytes("hello storage");
 
-        public int Value { get; set; }
+        await service.SaveAsync("profiles/main.bin", data);
+
+        var loaded = await service.LoadAsync("profiles/main.bin");
+
+        Assert.Equal(data, loaded);
+        Assert.True(await service.ExistsAsync("profiles/main.bin"));
+    }
+
+    [Theory, InlineData("../escape.bin"), InlineData("/absolute.bin"), InlineData("nested/../../escape.bin")]
+    public async Task SaveAsync_RejectsUnsafeKeys(string key)
+    {
+        using var temp = new TempDirectory();
+        var service = new FileStorageService(new() { RootDirectory = temp.Path });
+
+        await Assert.ThrowsAsync<ArgumentException>(() => service.SaveAsync(key, new byte[] { 1 }).AsTask());
     }
 
     private static async Task<List<string>> ToListAsync(IAsyncEnumerable<string> source)
@@ -82,43 +120,5 @@ public class FileStorageServiceTests
         }
 
         return list;
-    }
-
-    [Fact]
-    public async Task ListKeysAsync_ReturnsSavedKeys_AndFiltersByPrefix()
-    {
-        using var temp = new TempDirectory();
-        var service = new FileStorageService(new() { RootDirectory = temp.Path });
-        await service.SaveAsync("a/one.bin", new byte[] { 1 });
-        await service.SaveAsync("a/two.bin", new byte[] { 2 });
-        await service.SaveAsync("b/three.bin", new byte[] { 3 });
-
-        var all = (await ToListAsync(service.ListKeysAsync())).OrderBy(k => k, StringComparer.Ordinal).ToArray();
-        var aOnly = (await ToListAsync(service.ListKeysAsync("a/"))).OrderBy(k => k, StringComparer.Ordinal).ToArray();
-
-        Assert.Equal(new[] { "a/one.bin", "a/two.bin", "b/three.bin" }, all);
-        Assert.Equal(new[] { "a/one.bin", "a/two.bin" }, aOnly);
-    }
-
-    [Fact]
-    public async Task ListKeysAsync_EmptyStore_ReturnsEmpty()
-    {
-        using var temp = new TempDirectory();
-        var service = new FileStorageService(new() { RootDirectory = temp.Path });
-
-        Assert.Empty(await ToListAsync(service.ListKeysAsync()));
-    }
-
-    [Fact]
-    public async Task ObjectStorage_ListKeysAsync_ReturnsSavedKeys()
-    {
-        using var temp = new TempDirectory();
-        var storage = new FileStorageService(new() { RootDirectory = temp.Path });
-        var objects = new YamlObjectStorageService(storage);
-        await objects.SaveAsync("objects/x.yaml", new SampleObject { Name = "x", Value = 1 });
-
-        var keys = await ToListAsync(objects.ListKeysAsync("objects/"));
-
-        Assert.Contains("objects/x.yaml", keys);
     }
 }

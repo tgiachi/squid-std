@@ -25,7 +25,8 @@ dotnet add package SquidStd.Templating
 
 - `ITemplateRenderer.RenderAsync(template, model)` — render an ad-hoc template string.
 - `Register(name, template)` + `RenderByNameAsync(name, model)` — compiled, cached named templates.
-- Startup auto-load: every `templates/**/*.tmpl` is registered by relative path without extension (`emails/welcome.tmpl` → `emails/welcome`).
+- Startup auto-load: every `templates/**/*.tmpl` is registered by relative path without extension (`emails/welcome.tmpl` →
+  `emails/welcome`).
 - Scriban default member naming (`snake_case`): a `UserName` property is `{{ user.user_name }}`.
 - Parse/render failures surface as `TemplateException`; unknown names as `InvalidOperationException`.
 
@@ -50,12 +51,12 @@ var welcome = await renderer.RenderByNameAsync("welcome", new { User = new { Nam
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `ITemplateRenderer` | Render ad-hoc and named templates. |
-| `ScribanTemplateRenderer` | Scriban implementation; compiles/caches named templates and auto-loads `templates/*.tmpl`. |
-| `TemplateException` | Raised on parse/render failures. |
-| `TemplatingRegistrationExtensions` | `AddTemplating(...)` registration. |
+| Type                               | Purpose                                                                                    |
+|------------------------------------|--------------------------------------------------------------------------------------------|
+| `ITemplateRenderer`                | Render ad-hoc and named templates.                                                         |
+| `ScribanTemplateRenderer`          | Scriban implementation; compiles/caches named templates and auto-loads `templates/*.tmpl`. |
+| `TemplateException`                | Raised on parse/render failures.                                                           |
+| `TemplatingRegistrationExtensions` | `AddTemplating(...)` registration.                                                         |
 
 ## License
 

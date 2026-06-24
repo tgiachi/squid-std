@@ -31,21 +31,75 @@ public sealed class S3StorageService : IStorageService, IDisposable
     }
 
     /// <inheritdoc />
-    public async ValueTask SaveAsync(string key, ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
+    public async ValueTask<bool> DeleteAsync(string key, CancellationToken cancellationToken = default)
+    {
+        if (!await ExistsAsync(key, cancellationToken))
+        {
+            return false;
+        }
+
+        await _client.RemoveObjectAsync(
+            new RemoveObjectArgs().WithBucket(_bucket).WithObject(key),
+            cancellationToken
+        );
+
+        return true;
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
+        _client.Dispose();
+        _bucketLock.Dispose();
+    }
+
+    /// <inheritdoc />
+    public async ValueTask<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
     {
         await EnsureBucketAsync(cancellationToken);
 
-        var bytes = data.ToArray();
-        using var stream = new MemoryStream(bytes, writable: false);
+        try
+        {
+            await _client.StatObjectAsync(
+                new StatObjectArgs().WithBucket(_bucket).WithObject(key),
+                cancellationToken
+            );
 
-        await _client.PutObjectAsync(
-            new PutObjectArgs()
-                .WithBucket(_bucket)
-                .WithObject(key)
-                .WithStreamData(stream)
-                .WithObjectSize(bytes.LongLength),
-            cancellationToken
-        );
+            return true;
+        }
+        catch (ObjectNotFoundException)
+        {
+            return false;
+        }
+    }
+
+    /// <inheritdoc />
+    public async IAsyncEnumerable<string> ListKeysAsync(
+        string? prefix = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
+    )
+    {
+        await EnsureBucketAsync(cancellationToken);
+
+        var args = new ListObjectsArgs().WithBucket(_bucket).WithRecursive(true);
+
+        if (!string.IsNullOrEmpty(prefix))
+        {
+            args = args.WithPrefix(prefix);
+        }
+
+        await foreach (var item in _client.ListObjectsEnumAsync(args, cancellationToken))
+        {
+            if (!item.IsDir)
+            {
+                yield return item.Key;
+            }
+        }
     }
 
     /// <inheritdoc />
@@ -74,71 +128,29 @@ public sealed class S3StorageService : IStorageService, IDisposable
     }
 
     /// <inheritdoc />
-    public async ValueTask<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
+    public async ValueTask SaveAsync(string key, ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
     {
         await EnsureBucketAsync(cancellationToken);
 
-        try
-        {
-            await _client.StatObjectAsync(
-                new StatObjectArgs().WithBucket(_bucket).WithObject(key),
-                cancellationToken
-            );
+        var bytes = data.ToArray();
+        using var stream = new MemoryStream(bytes, false);
 
-            return true;
-        }
-        catch (ObjectNotFoundException)
-        {
-            return false;
-        }
-    }
-
-    /// <inheritdoc />
-    public async ValueTask<bool> DeleteAsync(string key, CancellationToken cancellationToken = default)
-    {
-        if (!await ExistsAsync(key, cancellationToken))
-        {
-            return false;
-        }
-
-        await _client.RemoveObjectAsync(
-            new RemoveObjectArgs().WithBucket(_bucket).WithObject(key),
+        await _client.PutObjectAsync(
+            new PutObjectArgs()
+                .WithBucket(_bucket)
+                .WithObject(key)
+                .WithStreamData(stream)
+                .WithObjectSize(bytes.LongLength),
             cancellationToken
         );
-
-        return true;
-    }
-
-    /// <inheritdoc />
-    public async IAsyncEnumerable<string> ListKeysAsync(
-        string? prefix = null,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default
-    )
-    {
-        await EnsureBucketAsync(cancellationToken);
-
-        var args = new ListObjectsArgs().WithBucket(_bucket).WithRecursive(true);
-
-        if (!string.IsNullOrEmpty(prefix))
-        {
-            args = args.WithPrefix(prefix);
-        }
-
-        await foreach (var item in _client.ListObjectsEnumAsync(args, cancellationToken))
-        {
-            if (!item.IsDir)
-            {
-                yield return item.Key;
-            }
-        }
     }
 
     private static IMinioClient CreateClient(S3StorageOptions options)
     {
         var minio = new MinioClient()
-            .WithEndpoint(options.Endpoint)
-            .WithCredentials(options.AccessKey, options.SecretKey)
-            .WithSSL(options.UseSsl);
+                    .WithEndpoint(options.Endpoint)
+                    .WithCredentials(options.AccessKey, options.SecretKey)
+                    .WithSSL(options.UseSsl);
 
         if (!string.IsNullOrWhiteSpace(options.Region))
         {
@@ -172,17 +184,5 @@ public sealed class S3StorageService : IStorageService, IDisposable
         {
             _bucketLock.Release();
         }
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
-        {
-            return;
-        }
-
-        _client.Dispose();
-        _bucketLock.Dispose();
     }
 }

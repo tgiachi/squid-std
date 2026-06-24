@@ -40,6 +40,13 @@ public interface ISquidStdBootstrap : IAsyncDisposable
     TService Resolve<TService>();
 
     /// <summary>
+    /// Starts services, waits until cancellation, and then stops services.
+    /// </summary>
+    /// <param name="cancellationToken">Token that controls the run lifetime.</param>
+    /// <returns>A task that completes after services have stopped.</returns>
+    Task RunAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Starts registered lifecycle services in priority order.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the start operation.</param>
@@ -52,11 +59,4 @@ public interface ISquidStdBootstrap : IAsyncDisposable
     /// <param name="cancellationToken">Token used to cancel the stop operation.</param>
     /// <returns>A task that represents the asynchronous stop operation.</returns>
     ValueTask StopAsync(CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Starts services, waits until cancellation, and then stops services.
-    /// </summary>
-    /// <param name="cancellationToken">Token that controls the run lifetime.</param>
-    /// <returns>A task that completes after services have stopped.</returns>
-    Task RunAsync(CancellationToken cancellationToken = default);
 }

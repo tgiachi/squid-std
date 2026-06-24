@@ -45,6 +45,30 @@ public sealed class MetricsCollectionService : IMetricsCollectionService, ISquid
         _eventBus = eventBus;
     }
 
+    /// <summary>
+    /// Releases metrics collection resources.
+    /// </summary>
+    public void Dispose()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
+        if (Volatile.Read(ref _started) != 0)
+        {
+            _lifetimeCts.Cancel();
+
+            try
+            {
+                _collectionTask.GetAwaiter().GetResult();
+            }
+            catch (OperationCanceledException) { }
+        }
+
+        _lifetimeCts.Dispose();
+    }
+
     /// <inheritdoc />
     public IReadOnlyDictionary<string, MetricSample> GetAllMetrics()
     {
@@ -55,10 +79,6 @@ public sealed class MetricsCollectionService : IMetricsCollectionService, ISquid
     }
 
     /// <inheritdoc />
-    public MetricsSnapshot GetStatus()
-        => GetSnapshot();
-
-    /// <inheritdoc />
     public MetricsSnapshot GetSnapshot()
     {
         lock (_syncRoot)
@@ -66,6 +86,10 @@ public sealed class MetricsCollectionService : IMetricsCollectionService, ISquid
             return _snapshot;
         }
     }
+
+    /// <inheritdoc />
+    public MetricsSnapshot GetStatus()
+        => GetSnapshot();
 
     /// <inheritdoc />
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
@@ -110,9 +134,7 @@ public sealed class MetricsCollectionService : IMetricsCollectionService, ISquid
         {
             await _collectionTask;
         }
-        catch (OperationCanceledException)
-        {
-        }
+        catch (OperationCanceledException) { }
     }
 
     private async Task CollectOnceAsync(CancellationToken cancellationToken)
@@ -226,31 +248,5 @@ public sealed class MetricsCollectionService : IMetricsCollectionService, ISquid
         {
             throw new ObjectDisposedException(nameof(MetricsCollectionService));
         }
-    }
-
-    /// <summary>
-    /// Releases metrics collection resources.
-    /// </summary>
-    public void Dispose()
-    {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
-        {
-            return;
-        }
-
-        if (Volatile.Read(ref _started) != 0)
-        {
-            _lifetimeCts.Cancel();
-
-            try
-            {
-                _collectionTask.GetAwaiter().GetResult();
-            }
-            catch (OperationCanceledException)
-            {
-            }
-        }
-
-        _lifetimeCts.Dispose();
     }
 }

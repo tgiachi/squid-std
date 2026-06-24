@@ -19,20 +19,7 @@ public sealed class ManualJobSystem : IJobSystem
 
     public long CompletedCount { get; private set; }
 
-    public Task ScheduleAsync(Action work, CancellationToken cancellationToken = default)
-    {
-        _pending.Add(work);
-
-        return Task.CompletedTask;
-    }
-
-    public Task<T> ScheduleAsync<T>(Func<T> work, CancellationToken cancellationToken = default)
-    {
-        var result = work();
-        CompletedCount++;
-
-        return Task.FromResult(result);
-    }
+    public void Dispose() { }
 
     /// <summary>Runs and clears all queued work; returns how many items ran.</summary>
     public int RunAll()
@@ -49,7 +36,18 @@ public sealed class ManualJobSystem : IJobSystem
         return snapshot.Length;
     }
 
-    public void Dispose()
+    public Task ScheduleAsync(Action work, CancellationToken cancellationToken = default)
     {
+        _pending.Add(work);
+
+        return Task.CompletedTask;
+    }
+
+    public Task<T> ScheduleAsync<T>(Func<T> work, CancellationToken cancellationToken = default)
+    {
+        var result = work();
+        CompletedCount++;
+
+        return Task.FromResult(result);
     }
 }

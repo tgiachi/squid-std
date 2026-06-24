@@ -45,11 +45,11 @@ public async Task DumpKeysAsync(IStorageService storage)
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `IStorageService` | Binary blob store (save/load/delete/exists/list). |
-| `IObjectStorageService` | Typed object store over a blob backend. |
-| `StorageConfig` | Root directory for file storage. |
+| Type                    | Purpose                                           |
+|-------------------------|---------------------------------------------------|
+| `IStorageService`       | Binary blob store (save/load/delete/exists/list). |
+| `IObjectStorageService` | Typed object store over a blob backend.           |
+| `StorageConfig`         | Root directory for file storage.                  |
 
 ## License
 

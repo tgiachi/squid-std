@@ -1,5 +1,3 @@
-using SquidStd.Mail.Abstractions.Data;
-
 namespace SquidStd.Mail.Abstractions.Data.Config;
 
 /// <summary>Plain options for the SMTP sender (passed directly to AddMailSender).</summary>

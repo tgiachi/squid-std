@@ -13,7 +13,12 @@ public sealed class FakeHealthCheck : IHealthCheck
     private readonly Exception? _throw;
     private readonly TimeSpan _delay;
 
-    public FakeHealthCheck(string name, HealthCheckResult? result = null, TimeSpan? delay = null, Exception? throwException = null)
+    public FakeHealthCheck(
+        string name,
+        HealthCheckResult? result = null,
+        TimeSpan? delay = null,
+        Exception? throwException = null
+    )
     {
         Name = name;
         _result = result;

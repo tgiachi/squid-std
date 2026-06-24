@@ -1,12 +1,10 @@
 using System.Text;
 using SquidStd.Core.Interfaces.Events;
-using SquidStd.Services.Core.Services;
-using SquidStd.Mail.Abstractions.Data;
-using SquidStd.Mail.Abstractions.Data.Config;
 using SquidStd.Mail.Abstractions.Data.Events;
 using SquidStd.Mail.Abstractions.Exceptions;
 using SquidStd.Mail.Abstractions.Types.Mail;
 using SquidStd.Mail.MailKit.Services;
+using SquidStd.Services.Core.Services;
 
 namespace SquidStd.Tests.Integration.Mail;
 
@@ -49,30 +47,36 @@ public class MailSenderTests
         eventBus.RegisterAsyncListener(new DelegateListener<MailSentEvent>(e => sent.TrySetResult(e)));
 
         var sender = new MailKitMailSender(
-            new SmtpOptions { Host = _fixture.Host, Port = _fixture.SmtpPort, UseSsl = false },
-            eventBus);
+            new() { Host = _fixture.Host, Port = _fixture.SmtpPort, UseSsl = false },
+            eventBus
+        );
 
-        await sender.SendAsync(new OutgoingMailMessage
-        {
-            From = new MailAddress("Sender", "sender@example.com"),
-            To = [new MailAddress("Target", recipient)],
-            Subject = "sent-subject",
-            TextBody = "hello",
-            Attachments = [new OutgoingAttachment("a.txt", "text/plain", Encoding.UTF8.GetBytes("xyz"))]
-        }).WaitAsync(Timeout);
+        await sender.SendAsync(
+                        new()
+                        {
+                            From = new("Sender", "sender@example.com"),
+                            To = [new("Target", recipient)],
+                            Subject = "sent-subject",
+                            TextBody = "hello",
+                            Attachments = [new("a.txt", "text/plain", Encoding.UTF8.GetBytes("xyz"))]
+                        }
+                    )
+                    .WaitAsync(Timeout);
 
         var sentEvent = await sent.Task.WaitAsync(Timeout);
         Assert.Equal("sent-subject", sentEvent.Subject);
 
-        var reader = new ImapMailReader(new MailOptions
-        {
-            Protocol = MailProtocolType.Imap,
-            Host = _fixture.Host,
-            Port = _fixture.ImapPort,
-            UseSsl = false,
-            Username = recipient,
-            Password = "pwd"
-        });
+        var reader = new ImapMailReader(
+            new()
+            {
+                Protocol = MailProtocolType.Imap,
+                Host = _fixture.Host,
+                Port = _fixture.ImapPort,
+                UseSsl = false,
+                Username = recipient,
+                Password = "pwd"
+            }
+        );
 
         var received = await reader.FetchNewAsync().WaitAsync(Timeout);
         Assert.Contains(received, m => m.Subject == "sent-subject");
@@ -85,14 +89,19 @@ public class MailSenderTests
         var failed = new TaskCompletionSource<MailSendFailedEvent>(TaskCreationOptions.RunContinuationsAsynchronously);
         eventBus.RegisterAsyncListener(new DelegateListener<MailSendFailedEvent>(e => failed.TrySetResult(e)));
 
-        var sender = new MailKitMailSender(new SmtpOptions { Host = _fixture.Host, Port = 1, UseSsl = false }, eventBus);
+        var sender = new MailKitMailSender(new() { Host = _fixture.Host, Port = 1, UseSsl = false }, eventBus);
 
-        await Assert.ThrowsAsync<MailSendException>(() => sender.SendAsync(new OutgoingMailMessage
-        {
-            From = new MailAddress("Sender", "sender@example.com"),
-            To = [new MailAddress("Target", "x@example.com")],
-            Subject = "fail-subject"
-        }).WaitAsync(Timeout));
+        await Assert.ThrowsAsync<MailSendException>(
+            () => sender.SendAsync(
+                            new()
+                            {
+                                From = new("Sender", "sender@example.com"),
+                                To = [new("Target", "x@example.com")],
+                                Subject = "fail-subject"
+                            }
+                        )
+                        .WaitAsync(Timeout)
+        );
 
         var failedEvent = await failed.Task.WaitAsync(Timeout);
         Assert.Equal("fail-subject", failedEvent.Subject);

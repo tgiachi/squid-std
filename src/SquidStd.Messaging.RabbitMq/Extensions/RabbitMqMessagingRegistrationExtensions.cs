@@ -5,7 +5,6 @@ using SquidStd.Core.Json;
 using SquidStd.Messaging.Abstractions.Data.Config;
 using SquidStd.Messaging.Abstractions.Interfaces;
 using SquidStd.Messaging.Abstractions.Services;
-
 using SquidStd.Messaging.RabbitMq.Data.Config;
 using SquidStd.Messaging.RabbitMq.Services;
 
@@ -78,7 +77,8 @@ public static class RabbitMqMessagingRegistrationExtensions
             VirtualHost = cs.VirtualHost,
             UserName = cs.UserName ?? "guest",
             Password = cs.Password ?? "guest",
-            PrefetchCount = cs.Parameters.TryGetValue("prefetch", out var prefetch) && ushort.TryParse(prefetch, out var parsed)
+            PrefetchCount = cs.Parameters.TryGetValue("prefetch", out var prefetch) &&
+                            ushort.TryParse(prefetch, out var parsed)
                                 ? parsed
                                 : (ushort)10
         };

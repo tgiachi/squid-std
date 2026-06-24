@@ -1,9 +1,9 @@
 using Serilog;
 using SquidStd.Abstractions.Interfaces.Services;
-using SquidStd.Messaging.Abstractions.Interfaces;
 using SquidStd.Mail.Abstractions.Data;
 using SquidStd.Mail.Abstractions.Interfaces;
 using SquidStd.Mail.Queue.Data.Config;
+using SquidStd.Messaging.Abstractions.Interfaces;
 
 namespace SquidStd.Mail.Queue.Services;
 
@@ -27,6 +27,10 @@ public sealed class MailSendConsumerService : ISquidStdService, IQueueMessageLis
     }
 
     /// <inheritdoc />
+    public Task HandleAsync(OutgoingMailMessage message, CancellationToken cancellationToken)
+        => _sender.SendAsync(message, cancellationToken);
+
+    /// <inheritdoc />
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
     {
         _subscription = _queue.Subscribe(_queueName, this);
@@ -43,8 +47,4 @@ public sealed class MailSendConsumerService : ISquidStdService, IQueueMessageLis
 
         return ValueTask.CompletedTask;
     }
-
-    /// <inheritdoc />
-    public Task HandleAsync(OutgoingMailMessage message, CancellationToken cancellationToken)
-        => _sender.SendAsync(message, cancellationToken);
 }

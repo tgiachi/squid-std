@@ -1,6 +1,5 @@
 using System.Text;
 using System.Text.Json.Nodes;
-using Elastic.Transport;
 using Serilog;
 using SquidStd.Search.Abstractions.Exceptions;
 using SquidStd.Search.Abstractions.Interfaces;
@@ -27,63 +26,12 @@ public sealed class ElasticSearchService : ISearchService
         _indexPrefix = options.IndexPrefix;
     }
 
-    /// <summary>Resolves the (prefixed, lowercased) index name for a type.</summary>
-    public string ResolveIndex<T>()
-    {
-        var name = SearchIndexNameResolver.Resolve(typeof(T));
-
-        return string.IsNullOrWhiteSpace(_indexPrefix) ? name : $"{_indexPrefix}{name}".ToLowerInvariant();
-    }
-
     /// <inheritdoc />
-    public async Task IndexAsync<T>(T entity, bool refresh = false, CancellationToken cancellationToken = default)
-        where T : IIndexableEntity
-    {
-        ArgumentNullException.ThrowIfNull(entity);
-        ArgumentException.ThrowIfNullOrWhiteSpace(entity.IndexId);
-
-        var index = ResolveIndex<T>();
-        var path = $"/{index}/_doc/{Uri.EscapeDataString(entity.IndexId)}{RefreshQuery(refresh)}";
-        var (status, body) = await _transport.SendAsync(HttpMethod.PUT, path, ElasticTransport.SerializeDocument(entity), cancellationToken);
-
-        EnsureSuccess(status, body, $"index document '{entity.IndexId}' into '{index}'");
-    }
-
-    /// <inheritdoc />
-    public async Task IndexManyAsync<T>(IEnumerable<T> entities, bool refresh = false, CancellationToken cancellationToken = default)
-        where T : IIndexableEntity
-    {
-        ArgumentNullException.ThrowIfNull(entities);
-
-        var index = ResolveIndex<T>();
-        var lines = new StringBuilder();
-
-        foreach (var entity in entities)
-        {
-            ArgumentException.ThrowIfNullOrWhiteSpace(entity.IndexId);
-            var action = new JsonObject { ["index"] = new JsonObject { ["_id"] = entity.IndexId } };
-            lines.Append(action.ToJsonString()).Append('\n');
-            lines.Append(ElasticTransport.SerializeDocument(entity).ToJsonString()).Append('\n');
-        }
-
-        if (lines.Length == 0)
-        {
-            return;
-        }
-
-        var path = $"/{index}/_bulk{RefreshQuery(refresh)}";
-        var (status, body) = await _transport.SendRawAsync(HttpMethod.POST, path, lines.ToString(), cancellationToken);
-
-        EnsureSuccess(status, body, $"bulk index into '{index}'");
-
-        if (body?["errors"]?.GetValue<bool>() == true)
-        {
-            throw new SearchException($"Bulk index into '{index}' reported item errors.");
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> DeleteAsync<T>(string indexId, bool refresh = false, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteAsync<T>(
+        string indexId,
+        bool refresh = false,
+        CancellationToken cancellationToken = default
+    )
         where T : IIndexableEntity
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(indexId);
@@ -125,11 +73,72 @@ public sealed class ElasticSearchService : ISearchService
     }
 
     /// <inheritdoc />
-    public IQueryable<T> Query<T>() where T : IIndexableEntity
-        => new ElasticQueryable<T>(new ElasticQueryProvider(_transport, ResolveIndex<T>(), typeof(T)));
+    public async Task IndexAsync<T>(T entity, bool refresh = false, CancellationToken cancellationToken = default)
+        where T : IIndexableEntity
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+        ArgumentException.ThrowIfNullOrWhiteSpace(entity.IndexId);
 
-    private static string RefreshQuery(bool refresh)
-        => refresh ? "?refresh=wait_for" : string.Empty;
+        var index = ResolveIndex<T>();
+        var path = $"/{index}/_doc/{Uri.EscapeDataString(entity.IndexId)}{RefreshQuery(refresh)}";
+        var (status, body) = await _transport.SendAsync(
+                                 HttpMethod.PUT,
+                                 path,
+                                 ElasticTransport.SerializeDocument(entity),
+                                 cancellationToken
+                             );
+
+        EnsureSuccess(status, body, $"index document '{entity.IndexId}' into '{index}'");
+    }
+
+    /// <inheritdoc />
+    public async Task IndexManyAsync<T>(
+        IEnumerable<T> entities,
+        bool refresh = false,
+        CancellationToken cancellationToken = default
+    )
+        where T : IIndexableEntity
+    {
+        ArgumentNullException.ThrowIfNull(entities);
+
+        var index = ResolveIndex<T>();
+        var lines = new StringBuilder();
+
+        foreach (var entity in entities)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(entity.IndexId);
+            var action = new JsonObject { ["index"] = new JsonObject { ["_id"] = entity.IndexId } };
+            lines.Append(action.ToJsonString()).Append('\n');
+            lines.Append(ElasticTransport.SerializeDocument(entity).ToJsonString()).Append('\n');
+        }
+
+        if (lines.Length == 0)
+        {
+            return;
+        }
+
+        var path = $"/{index}/_bulk{RefreshQuery(refresh)}";
+        var (status, body) = await _transport.SendRawAsync(HttpMethod.POST, path, lines.ToString(), cancellationToken);
+
+        EnsureSuccess(status, body, $"bulk index into '{index}'");
+
+        if (body?["errors"]?.GetValue<bool>() == true)
+        {
+            throw new SearchException($"Bulk index into '{index}' reported item errors.");
+        }
+    }
+
+    /// <inheritdoc />
+    public IQueryable<T> Query<T>() where T : IIndexableEntity
+        => new ElasticQueryable<T>(new(_transport, ResolveIndex<T>(), typeof(T)));
+
+    /// <summary>Resolves the (prefixed, lowercased) index name for a type.</summary>
+    public string ResolveIndex<T>()
+    {
+        var name = SearchIndexNameResolver.Resolve(typeof(T));
+
+        return string.IsNullOrWhiteSpace(_indexPrefix) ? name : $"{_indexPrefix}{name}".ToLowerInvariant();
+    }
 
     private void EnsureSuccess(int status, JsonNode? body, string operation)
     {
@@ -143,4 +152,7 @@ public sealed class ElasticSearchService : ISearchService
 
         throw new SearchException($"Elasticsearch failed to {operation}: {reason}");
     }
+
+    private static string RefreshQuery(bool refresh)
+        => refresh ? "?refresh=wait_for" : string.Empty;
 }

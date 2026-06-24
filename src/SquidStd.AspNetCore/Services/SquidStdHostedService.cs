@@ -21,13 +21,9 @@ internal sealed class SquidStdHostedService : IHostedService
 
     /// <inheritdoc />
     public async Task StartAsync(CancellationToken cancellationToken)
-    {
-        await _bootstrap.StartAsync(cancellationToken);
-    }
+        => await _bootstrap.StartAsync(cancellationToken);
 
     /// <inheritdoc />
     public async Task StopAsync(CancellationToken cancellationToken)
-    {
-        await _bootstrap.StopAsync(cancellationToken);
-    }
+        => await _bootstrap.StopAsync(cancellationToken);
 }

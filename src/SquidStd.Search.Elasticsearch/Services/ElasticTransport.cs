@@ -35,12 +35,17 @@ public sealed class ElasticTransport
         _client = client;
     }
 
+    /// <summary>Deserializes a document body (an Elasticsearch <c>_source</c>) to <typeparamref name="T" />.</summary>
+    public static T DeserializeDocument<T>(JsonNode source)
+        => source.Deserialize<T>(WebOptions)!;
+
     /// <summary>Sends a request with an optional JSON body and returns (statusCode, bodyJson).</summary>
     public Task<(int Status, JsonNode? Body)> SendAsync(
         HttpMethod method,
         string path,
         JsonNode? body,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
         => SendCoreAsync(method, path, body?.ToJsonString(), JsonRequest, cancellationToken);
 
     /// <summary>Sends a raw (already-serialized) NDJSON body for the bulk API.</summary>
@@ -48,21 +53,33 @@ public sealed class ElasticTransport
         HttpMethod method,
         string path,
         string? body,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
         => SendCoreAsync(method, path, body, NdjsonRequest, cancellationToken);
+
+    /// <summary>Serializes a value to a <see cref="JsonNode" /> using Web (camelCase) defaults.</summary>
+    public static JsonNode SerializeDocument<T>(T value)
+        => JsonSerializer.SerializeToNode(value, WebOptions)!;
 
     private async Task<(int Status, JsonNode? Body)> SendCoreAsync(
         HttpMethod method,
         string path,
         string? body,
         RequestConfiguration requestConfiguration,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var postData = body is null ? null : PostData.String(body);
 
         var response = await _client.Transport
-            .RequestAsync<StringResponse>(method, path, postData, requestConfiguration, cancellationToken)
-            .ConfigureAwait(false);
+                                    .RequestAsync<StringResponse>(
+                                        method,
+                                        path,
+                                        postData,
+                                        requestConfiguration,
+                                        cancellationToken
+                                    )
+                                    .ConfigureAwait(false);
 
         var status = response.ApiCallDetails.HttpStatusCode ?? 0;
         var text = response.Body;
@@ -70,12 +87,4 @@ public sealed class ElasticTransport
 
         return (status, node);
     }
-
-    /// <summary>Serializes a value to a <see cref="JsonNode" /> using Web (camelCase) defaults.</summary>
-    public static JsonNode SerializeDocument<T>(T value)
-        => JsonSerializer.SerializeToNode(value, WebOptions)!;
-
-    /// <summary>Deserializes a document body (an Elasticsearch <c>_source</c>) to <typeparamref name="T" />.</summary>
-    public static T DeserializeDocument<T>(JsonNode source)
-        => source.Deserialize<T>(WebOptions)!;
 }

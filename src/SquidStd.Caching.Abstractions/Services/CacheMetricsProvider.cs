@@ -19,22 +19,6 @@ public sealed class CacheMetricsProvider : ICacheMetrics, IMetricProvider
     public string ProviderName => "cache";
 
     /// <inheritdoc />
-    public void OnHit(string key)
-        => Interlocked.Increment(ref _hits);
-
-    /// <inheritdoc />
-    public void OnMiss(string key)
-        => Interlocked.Increment(ref _misses);
-
-    /// <inheritdoc />
-    public void OnSet(string key)
-        => Interlocked.Increment(ref _sets);
-
-    /// <inheritdoc />
-    public void OnRemove(string key)
-        => Interlocked.Increment(ref _removes);
-
-    /// <inheritdoc />
     public ValueTask<IReadOnlyList<MetricSample>> CollectAsync(CancellationToken cancellationToken = default)
     {
         var hits = Interlocked.Read(ref _hits);
@@ -53,4 +37,20 @@ public sealed class CacheMetricsProvider : ICacheMetrics, IMetricProvider
 
         return ValueTask.FromResult<IReadOnlyList<MetricSample>>(samples);
     }
+
+    /// <inheritdoc />
+    public void OnHit(string key)
+        => Interlocked.Increment(ref _hits);
+
+    /// <inheritdoc />
+    public void OnMiss(string key)
+        => Interlocked.Increment(ref _misses);
+
+    /// <inheritdoc />
+    public void OnRemove(string key)
+        => Interlocked.Increment(ref _removes);
+
+    /// <inheritdoc />
+    public void OnSet(string key)
+        => Interlocked.Increment(ref _sets);
 }

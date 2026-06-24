@@ -49,13 +49,13 @@ var page = await users.GetPagedAsync(page: 1, pageSize: 20, orderBy: u => u.Name
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `RegisterDatabaseExtension` | `RegisterDatabase()` DI registration. |
-| `DatabaseService` | Owns the singleton `IFreeSql`; builds it and (optionally) migrates. |
-| `FreeSqlDataAccess<TEntity>` | FreeSql `IDataAccess<TEntity>` implementation. |
-| `ConnectionStringParser` | URI → provider + native connection string. |
-| `ZLinqResultExtensions` | Zero-alloc in-memory result helpers. |
+| Type                         | Purpose                                                             |
+|------------------------------|---------------------------------------------------------------------|
+| `RegisterDatabaseExtension`  | `RegisterDatabase()` DI registration.                               |
+| `DatabaseService`            | Owns the singleton `IFreeSql`; builds it and (optionally) migrates. |
+| `FreeSqlDataAccess<TEntity>` | FreeSql `IDataAccess<TEntity>` implementation.                      |
+| `ConnectionStringParser`     | URI → provider + native connection string.                          |
+| `ZLinqResultExtensions`      | Zero-alloc in-memory result helpers.                                |
 
 ## License
 

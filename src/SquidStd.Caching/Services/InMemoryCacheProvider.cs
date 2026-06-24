@@ -16,6 +16,10 @@ public sealed class InMemoryCacheProvider : ICacheProvider
     }
 
     /// <inheritdoc />
+    public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
+        => Task.FromResult(_cache.TryGetValue(key, out _));
+
+    /// <inheritdoc />
     public Task<ReadOnlyMemory<byte>?> GetAsync(string key, CancellationToken cancellationToken = default)
     {
         if (_cache.TryGetValue(key, out byte[]? value) && value is not null)
@@ -24,21 +28,6 @@ public sealed class InMemoryCacheProvider : ICacheProvider
         }
 
         return Task.FromResult<ReadOnlyMemory<byte>?>(null);
-    }
-
-    /// <inheritdoc />
-    public Task SetAsync(string key, ReadOnlyMemory<byte> value, TimeSpan? ttl, CancellationToken cancellationToken = default)
-    {
-        var options = new MemoryCacheEntryOptions();
-
-        if (ttl is not null)
-        {
-            options.AbsoluteExpirationRelativeToNow = ttl;
-        }
-
-        _cache.Set(key, value.ToArray(), options);
-
-        return Task.CompletedTask;
     }
 
     /// <inheritdoc />
@@ -51,8 +40,24 @@ public sealed class InMemoryCacheProvider : ICacheProvider
     }
 
     /// <inheritdoc />
-    public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
-        => Task.FromResult(_cache.TryGetValue(key, out _));
+    public Task SetAsync(
+        string key,
+        ReadOnlyMemory<byte> value,
+        TimeSpan? ttl,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var options = new MemoryCacheEntryOptions();
+
+        if (ttl is not null)
+        {
+            options.AbsoluteExpirationRelativeToNow = ttl;
+        }
+
+        _cache.Set(key, value.ToArray(), options);
+
+        return Task.CompletedTask;
+    }
 
     /// <inheritdoc />
     public ValueTask StartAsync(CancellationToken cancellationToken = default)

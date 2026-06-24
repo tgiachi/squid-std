@@ -10,4 +10,8 @@ namespace SquidStd.Workers.Manager.Data.Events;
 /// <param name="WorkerId">The worker whose status changed.</param>
 /// <param name="OldStatus">Previous status, or <c>null</c> when the worker was just discovered.</param>
 /// <param name="NewStatus">The new status.</param>
-public sealed record WorkerStatusChangedEvent(string WorkerId, WorkerStatusType? OldStatus, WorkerStatusType NewStatus) : IEvent;
+public sealed record WorkerStatusChangedEvent(
+    string WorkerId,
+    WorkerStatusType? OldStatus,
+    WorkerStatusType NewStatus
+) : IEvent;

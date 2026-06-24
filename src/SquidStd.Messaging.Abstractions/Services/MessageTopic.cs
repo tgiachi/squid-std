@@ -29,6 +29,9 @@ public sealed class MessageTopic : IMessageTopic
     {
         ArgumentNullException.ThrowIfNull(handler);
 
-        return _provider.Subscribe(topic, (payload, cancellationToken) => handler(_deserializer.Deserialize<TMessage>(payload), cancellationToken));
+        return _provider.Subscribe(
+            topic,
+            (payload, cancellationToken) => handler(_deserializer.Deserialize<TMessage>(payload), cancellationToken)
+        );
     }
 }

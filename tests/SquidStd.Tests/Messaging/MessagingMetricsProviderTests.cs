@@ -5,10 +5,6 @@ namespace SquidStd.Tests.Messaging;
 public class MessagingMetricsProviderTests
 {
     [Fact]
-    public void ProviderName_IsMessaging()
-        => Assert.Equal("messaging", new MessagingMetricsProvider().ProviderName);
-
-    [Fact]
     public async Task CollectAsync_ReportsCountersAndGaugesPerQueue()
     {
         var metrics = new MessagingMetricsProvider();
@@ -24,8 +20,8 @@ public class MessagingMetricsProviderTests
 
         var samples = await metrics.CollectAsync();
 
-        double Value(string name) => samples.Single(
-            s => s.Name == name && s.Tags != null && s.Tags["queue"] == "orders").Value;
+        double Value(string name)
+            => samples.Single(s => s.Name == name && s.Tags != null && s.Tags["queue"] == "orders").Value;
 
         Assert.Equal(2, Value("published"));
         Assert.Equal(1, Value("delivered"));
@@ -35,4 +31,8 @@ public class MessagingMetricsProviderTests
         Assert.Equal(5, Value("queue_depth"));
         Assert.Equal(2, Value("subscribers"));
     }
+
+    [Fact]
+    public void ProviderName_IsMessaging()
+        => Assert.Equal("messaging", new MessagingMetricsProvider().ProviderName);
 }

@@ -69,7 +69,11 @@ public sealed class MessagingConnectionString
         var query = HttpUtility.ParseQueryString(uri.Query);
         var parameters = query.AllKeys
                               .Where(static key => key is not null)
-                              .ToFrozenDictionary(key => key!, key => query[key] ?? string.Empty, StringComparer.OrdinalIgnoreCase);
+                              .ToFrozenDictionary(
+                                  key => key!,
+                                  key => query[key] ?? string.Empty,
+                                  StringComparer.OrdinalIgnoreCase
+                              );
 
         return new(
             uri.Scheme,
@@ -86,7 +90,8 @@ public sealed class MessagingConnectionString
     public MessagingOptions ToMessagingOptions()
         => new()
         {
-            MaxDeliveryAttempts = Parameters.TryGetValue("maxDeliveryAttempts", out var max) && int.TryParse(max, out var parsedMax)
+            MaxDeliveryAttempts = Parameters.TryGetValue("maxDeliveryAttempts", out var max) &&
+                                  int.TryParse(max, out var parsedMax)
                                       ? parsedMax
                                       : 3,
             DeadLetterQueueSuffix = Parameters.TryGetValue("deadLetterSuffix", out var suffix) ? suffix : ".dlq",

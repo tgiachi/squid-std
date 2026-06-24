@@ -27,7 +27,8 @@ dotnet add package SquidStd.AspNetCore
 - Configures DryIoc as the host's service-provider factory.
 - Registers `SquidStdHostedService` to start/stop SquidStd services with the host.
 - Optional `SquidStdOptions` configuration callback.
-- `WebApplicationBuilder.AddSquidStdHealthChecks()` — bridges every SquidStd `IHealthCheck` into the standard ASP.NET Core health-check system (one entry per check), exposed via the standard `app.MapHealthChecks(...)`.
+- `WebApplicationBuilder.AddSquidStdHealthChecks()` — bridges every SquidStd `IHealthCheck` into the standard ASP.NET Core
+  health-check system (one entry per check), exposed via the standard `app.MapHealthChecks(...)`.
 
 ## Usage
 
@@ -64,11 +65,11 @@ Each registered `IHealthCheck` appears as its own entry in the report. Check nam
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `SquidStdAspNetCoreBuilderExtensions` | `UseSquidStd(...)` builder extension. |
-| `SquidStdHostedService` | Hosted service bridging SquidStd service lifecycle to the host. |
-| `SquidStdHealthChecksExtensions` | `AddSquidStdHealthChecks(...)` — bridge to ASP.NET Core health checks. |
+| Type                                  | Purpose                                                                |
+|---------------------------------------|------------------------------------------------------------------------|
+| `SquidStdAspNetCoreBuilderExtensions` | `UseSquidStd(...)` builder extension.                                  |
+| `SquidStdHostedService`               | Hosted service bridging SquidStd service lifecycle to the host.        |
+| `SquidStdHealthChecksExtensions`      | `AddSquidStdHealthChecks(...)` — bridge to ASP.NET Core health checks. |
 
 ## License
 
