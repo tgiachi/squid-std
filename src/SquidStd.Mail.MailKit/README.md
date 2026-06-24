@@ -44,6 +44,36 @@ container.AddMail(new MailOptions
 Listen with an `IAsyncEventListener<MailReceivedEvent>` registered on the `IEventBus`. IMAP marks messages
 `\Seen` after fetch (configurable); POP3 dedups by UIDL and can delete after download.
 
+## Sending (SMTP)
+
+```csharp
+using DryIoc;
+using SquidStd.Mail.Abstractions.Data;
+using SquidStd.Mail.Abstractions.Data.Config;
+using SquidStd.Mail.Abstractions.Interfaces;
+using SquidStd.Mail.MailKit.Extensions;
+
+container.AddMailSender(new SmtpOptions
+{
+    Host = "smtp.example.com",
+    Port = 587,
+    UseSsl = false,
+    Username = "user@example.com",
+    Password = "secret",
+    DefaultFrom = new MailAddress("App", "app@example.com")
+});
+
+var sender = container.Resolve<IMailSender>();
+await sender.SendAsync(new OutgoingMailMessage
+{
+    To = [new MailAddress("Bob", "bob@example.com")],
+    Subject = "Welcome",
+    HtmlBody = "<p>Hello!</p>"
+});
+```
+
+`MailSentEvent` / `MailSendFailedEvent` are published on the `IEventBus`; failures throw `MailSendException`.
+
 ## License
 
 MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
