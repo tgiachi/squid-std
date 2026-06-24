@@ -95,6 +95,7 @@ block until cancellation for long-running hosts.
 | `SquidStd.Search.Elasticsearch` | Elasticsearch indexing + constrained LINQ query provider (`AddElasticsearch`). | [![readme](https://img.shields.io/badge/readme-1390A3.svg)](src/SquidStd.Search.Elasticsearch/README.md) · [![NuGet](https://img.shields.io/nuget/v/SquidStd.Search.Elasticsearch.svg)](https://www.nuget.org/packages/SquidStd.Search.Elasticsearch/) |
 | `SquidStd.Mail.Abstractions` | Mail contracts (`MailMessage`, `MailReceivedEvent`, `IMailReader`, `MailOptions`). | [![readme](https://img.shields.io/badge/readme-1390A3.svg)](src/SquidStd.Mail.Abstractions/README.md) · [![NuGet](https://img.shields.io/nuget/v/SquidStd.Mail.Abstractions.svg)](https://www.nuget.org/packages/SquidStd.Mail.Abstractions/) |
 | `SquidStd.Mail.MailKit` | IMAP/POP3 mail poller that publishes `MailReceivedEvent` (`AddMail`). | [![readme](https://img.shields.io/badge/readme-1390A3.svg)](src/SquidStd.Mail.MailKit/README.md) · [![NuGet](https://img.shields.io/nuget/v/SquidStd.Mail.MailKit.svg)](https://www.nuget.org/packages/SquidStd.Mail.MailKit/) |
+| `SquidStd.Mail.Queue` | Outbound mail send queue over the messaging queue (`AddMailQueue`, `IMailQueue`). | [![readme](https://img.shields.io/badge/readme-1390A3.svg)](src/SquidStd.Mail.Queue/README.md) · [![NuGet](https://img.shields.io/nuget/v/SquidStd.Mail.Queue.svg)](https://www.nuget.org/packages/SquidStd.Mail.Queue/) |
 
 ## Architecture
 
