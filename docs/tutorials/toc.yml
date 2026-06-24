@@ -2,3 +2,5 @@
   href: index.md
 - name: Getting started
   href: getting-started.md
+- name: Events, jobs and scheduling
+  href: events-jobs-scheduling.md
