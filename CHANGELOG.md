@@ -1,3 +1,34 @@
+## [0.5.0](https://github.com/tgiachi/squid-std/compare/v0.4.0...v0.5.0) (2026-06-24)
+
+### Features
+
+* **mail:** add AddMail registration with protocol-specific reader and timer-wheel pump ([839c85a](https://github.com/tgiachi/squid-std/commit/839c85a05b9149cc6babbf53635b9cc1ed19312f))
+* **mail:** add AddMailSender registration for the SMTP sender ([f2458c4](https://github.com/tgiachi/squid-std/commit/f2458c44d9f6047f725eff2cb0ab2c281d0db5b8))
+* **mail:** add IMailQueue and MailQueue publishing to the messaging queue ([1e626e0](https://github.com/tgiachi/squid-std/commit/1e626e088669e5dfe56c276d093c1695be33a485))
+* **mail:** add ImapMailReader fetching unseen messages ([2e48a79](https://github.com/tgiachi/squid-std/commit/2e48a797687317f8144f8280b2cadf934ae2dd72))
+* **mail:** add MailKitMailSender sending via SMTP with send events ([0d3d7e2](https://github.com/tgiachi/squid-std/commit/0d3d7e21a10ab292c87c3c8a093fa4d578808a93))
+* **mail:** add MailMessage, MailReceivedEvent, IMailReader and MailOptions contracts ([ebb7ffa](https://github.com/tgiachi/squid-std/commit/ebb7ffa2f5202578ed7dea3c09bfd6156a74f447))
+* **mail:** add MailPollingService publishing MailReceivedEvent on the timer wheel ([935c7be](https://github.com/tgiachi/squid-std/commit/935c7be0b4811c8847a989a33d0f09f19e626f3f))
+* **mail:** add MailSendConsumerService and AddMailQueue registration ([226d0f1](https://github.com/tgiachi/squid-std/commit/226d0f11bcc33d38f7a28ce7d5272a0757245d37))
+* **mail:** add MimeMessageMapper from MimeMessage to MailMessage ([92d18c0](https://github.com/tgiachi/squid-std/commit/92d18c01dea233e5b75bbba3f94699da44fb510f))
+* **mail:** add outbound contracts (IMailSender, OutgoingMailMessage, SmtpOptions, send events) ([65cd6f4](https://github.com/tgiachi/squid-std/commit/65cd6f4eff7b9d0a21c253c8ab6ded56430d18fd))
+* **mail:** add OutgoingMessageMapper to MimeMessage ([5943e83](https://github.com/tgiachi/squid-std/commit/5943e831d4d015f141de9bf8806b072d0ca6a351))
+* **mail:** add Pop3MailReader with UIDL dedup and optional delete ([bf9e315](https://github.com/tgiachi/squid-std/commit/bf9e3155b4a7de71df8e9205d29e0ee1a7bf250b))
+* **search:** add Elasticsearch IQueryable provider with async terminals ([a13e14f](https://github.com/tgiachi/squid-std/commit/a13e14fc5116955f84031217364833f4043f0cfa))
+* **search:** add Elasticsearch options, transport helper, registration and index/delete/bulk service ([98d5a5a](https://github.com/tgiachi/squid-std/commit/98d5a5ae3c2816a0fee86167f076b9c4666cee5b))
+* **search:** add IIndexableEntity, SearchIndexAttribute, ISearchService and SearchException ([df6daa2](https://github.com/tgiachi/squid-std/commit/df6daa2be5e337ff6729a14784598cae5e67f4d3))
+* **search:** add LINQ-to-Elasticsearch expression translator ([f9f16a3](https://github.com/tgiachi/squid-std/commit/f9f16a3fb61bad6901f315ea2039026f48e43f32))
+* **search:** add SearchIndexNameResolver with env-variable expansion ([d9f70e0](https://github.com/tgiachi/squid-std/commit/d9f70e0fd5a11777742946101d395be14a0c3901))
+* **templates:** add squidstd-aspnetcore minimal API template ([58ec1a4](https://github.com/tgiachi/squid-std/commit/58ec1a4fdca7d52ae0b872f0a49c47bb3735bf10))
+* **templates:** add squidstd-host console template ([5aacc48](https://github.com/tgiachi/squid-std/commit/5aacc483c05bab2649050386f7a756e4db3002c3))
+* **templates:** add squidstd-manager ASP.NET template with messaging choice ([54f6958](https://github.com/tgiachi/squid-std/commit/54f69582a313536f780283fcaa4e48bc9b0d1759))
+* **templates:** add squidstd-worker microservice template with messaging choice ([9642944](https://github.com/tgiachi/squid-std/commit/96429446940d796b83e00a0cbe46dca4d127f71a))
+
+### Bug Fixes
+
+* **mail:** pass explicit CancellationToken.None on failure-event publish ([ec121ad](https://github.com/tgiachi/squid-std/commit/ec121adeb8e76f38daf1248948ea6215ad848a63))
+* **templates:** emit template content in pack (disable symbols, TFM content hook, posix paths) ([8881f32](https://github.com/tgiachi/squid-std/commit/8881f321444e066833749cf49e3a59cda7d25c04))
+
 ## [0.4.0](https://github.com/tgiachi/squid-std/compare/v0.3.0...v0.4.0) (2026-06-23)
 
 ### Features
