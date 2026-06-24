@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\SquidStd.Mail.Abstractions\SquidStd.Mail.Abstractions.csproj" />
+        <ProjectReference Include="..\SquidStd.Services.Core\SquidStd.Services.Core.csproj" />
     </ItemGroup>
 
 </Project>
