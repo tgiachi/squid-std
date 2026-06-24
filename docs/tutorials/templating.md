@@ -48,4 +48,4 @@ Scriban's case-insensitive member access.
 
 ## See also
 
-- [SquidStd.Templating reference](../articles/templating.html)
+- [SquidStd.Templating reference](../articles/templating.md)

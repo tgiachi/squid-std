@@ -48,4 +48,4 @@ frame instead of per socket read, and `INetMiddleware` components can transform 
 
 ## See also
 
-- [SquidStd.Network reference](../articles/network.html)
+- [SquidStd.Network reference](../articles/network.md)

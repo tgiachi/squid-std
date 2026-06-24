@@ -48,5 +48,5 @@ Redis). Values are serialized with the shared `IDataSerializer`, so the same cod
 
 ## See also
 
-- [SquidStd.Caching reference](../articles/caching.html)
-- [SquidStd.Caching.Redis reference](../articles/caching-redis.html)
+- [SquidStd.Caching reference](../articles/caching.md)
+- [SquidStd.Caching.Redis reference](../articles/caching-redis.md)

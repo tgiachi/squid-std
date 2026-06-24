@@ -51,6 +51,6 @@ container through its `Add…` extension methods.
 
 ## See also
 
-- [SquidStd.Services.Core reference](../articles/services-core.html)
-- [SquidStd.Core reference](../articles/core.html)
+- [SquidStd.Services.Core reference](../articles/services-core.md)
+- [SquidStd.Core reference](../articles/core.md)
 - Next: [Events, jobs and scheduling](events-jobs-scheduling.md)

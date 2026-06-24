@@ -48,5 +48,5 @@ page + total-count reads. Every entity gets a `Guid` id plus UTC `Created`/`Upda
 
 ## See also
 
-- [SquidStd.Database reference](../articles/database.html)
-- [SquidStd.Database.Abstractions reference](../articles/database-abstractions.html)
+- [SquidStd.Database reference](../articles/database.md)
+- [SquidStd.Database.Abstractions reference](../articles/database-abstractions.md)

@@ -46,6 +46,6 @@ Queues use competing-consumers with retry and dead-lettering (`MessagingOptions`
 
 ## See also
 
-- [SquidStd.Messaging reference](../articles/messaging.html)
-- [SquidStd.Messaging.RabbitMq reference](../articles/messaging-rabbitmq.html)
+- [SquidStd.Messaging reference](../articles/messaging.md)
+- [SquidStd.Messaging.RabbitMq reference](../articles/messaging-rabbitmq.md)
 - Related: [A worker system end-to-end](worker-system.md)

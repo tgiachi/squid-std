@@ -64,5 +64,5 @@ always lines up with the libraries it targets.
 
 ## See also
 
-- [SquidStd.Templates reference](../articles/templates.html)
+- [SquidStd.Templates reference](../articles/templates.md)
 - Related: [A worker system end-to-end](worker-system.md)

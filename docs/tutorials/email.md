@@ -55,6 +55,6 @@ consumer (`MailSendConsumerService`) drains it through `IMailSender`, decoupling
 
 ## See also
 
-- [SquidStd.Mail.MailKit reference](../articles/mail-mailkit.html)
-- [SquidStd.Mail.Queue reference](../articles/mail-queue.html)
-- [SquidStd.Mail.Abstractions reference](../articles/mail-abstractions.html)
+- [SquidStd.Mail.MailKit reference](../articles/mail-mailkit.md)
+- [SquidStd.Mail.Queue reference](../articles/mail-queue.md)
+- [SquidStd.Mail.Abstractions reference](../articles/mail-abstractions.md)

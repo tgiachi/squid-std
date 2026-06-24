@@ -48,5 +48,5 @@ serialized with the shared `IDataSerializer`, so the same `SaveAsync`/`LoadAsync
 
 ## See also
 
-- [SquidStd.Storage reference](../articles/storage.html)
-- [SquidStd.Storage.S3 reference](../articles/storage-s3.html)
+- [SquidStd.Storage reference](../articles/storage.md)
+- [SquidStd.Storage.S3 reference](../articles/storage-s3.md)

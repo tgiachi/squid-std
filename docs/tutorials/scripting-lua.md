@@ -51,4 +51,4 @@ configured scripts directory. Globals you register become Lua variables, and `Ex
 
 ## See also
 
-- [SquidStd.Scripting.Lua reference](../articles/scripting-lua.html)
+- [SquidStd.Scripting.Lua reference](../articles/scripting-lua.md)

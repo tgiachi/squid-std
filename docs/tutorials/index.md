@@ -1,7 +1,7 @@
 # Tutorials
 
-Task-oriented, step-by-step guides. For per-type API details, see the [Articles](../articles/) and
-[API](../api/) sections.
+Task-oriented, step-by-step guides. For per-type API details, see the Articles and
+API sections.
 
 ## Fundamentals
 - [Getting started: host, config, logging](getting-started.md)

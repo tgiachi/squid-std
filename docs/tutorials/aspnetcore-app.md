@@ -51,5 +51,5 @@ SquidStd lifecycle into the ASP.NET Core host via a hosted service. `AddSquidStd
 
 ## See also
 
-- [SquidStd.AspNetCore reference](../articles/aspnetcore.html)
+- [SquidStd.AspNetCore reference](../articles/aspnetcore.md)
 - Previous: [Getting started](getting-started.md)

@@ -59,7 +59,7 @@ DryIoc container.
 
 ## See also
 
-- [SquidStd.Workers reference](../articles/workers.html)
-- [SquidStd.Workers.Manager reference](../articles/workers-manager.html)
-- [SquidStd.Workers.Abstractions reference](../articles/workers-abstractions.html)
+- [SquidStd.Workers reference](../articles/workers.md)
+- [SquidStd.Workers.Manager reference](../articles/workers-manager.md)
+- [SquidStd.Workers.Abstractions reference](../articles/workers-abstractions.md)
 - Previous: [Events, jobs and scheduling](events-jobs-scheduling.md)

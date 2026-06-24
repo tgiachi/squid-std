@@ -56,5 +56,5 @@ the `[SearchIndex]` attribute (with `${VAR}` expansion) or the lowercased type n
 
 ## See also
 
-- [SquidStd.Search.Elasticsearch reference](../articles/search-elasticsearch.html)
-- [SquidStd.Search.Abstractions reference](../articles/search-abstractions.html)
+- [SquidStd.Search.Elasticsearch reference](../articles/search-elasticsearch.md)
+- [SquidStd.Search.Abstractions reference](../articles/search-abstractions.md)

@@ -51,4 +51,4 @@ one plugin by hand so the contract is fully runnable without external assemblies
 
 ## See also
 
-- [SquidStd.Plugin.Abstractions reference](../articles/plugin-abstractions.html)
+- [SquidStd.Plugin.Abstractions reference](../articles/plugin-abstractions.md)

@@ -53,6 +53,6 @@ scheduler is driven by the timer wheel (registered by `RegisterSchedulerServices
 
 ## See also
 
-- [SquidStd.Services.Core reference](../articles/services-core.html)
-- [SquidStd.Core reference](../articles/core.html)
+- [SquidStd.Services.Core reference](../articles/services-core.md)
+- [SquidStd.Core reference](../articles/core.md)
 - Previous: [Getting started](getting-started.md)
