@@ -1,8 +1,10 @@
 using DryIoc;
+using Microsoft.Extensions.DependencyInjection;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 using SquidStd.Abstractions.Interfaces.Services;
 using SquidStd.Core.Data.Metrics;
 using SquidStd.Core.Interfaces.Metrics;
-using SquidStd.Telemetry.Abstractions.Data.Config;
 using SquidStd.Telemetry.OpenTelemetry.Extensions;
 using SquidStd.Telemetry.OpenTelemetry.Services;
 using SquidStd.Tests.Telemetry.Support;
@@ -19,7 +21,7 @@ public class TelemetryRegistrationTests
             new FakeMetricsCollectionService(new Dictionary<string, MetricSample>())
         );
 
-        container.AddSquidStdTelemetry(new TelemetryOptions { EnableConsoleExporter = false });
+        container.AddSquidStdTelemetry(new() { EnableConsoleExporter = false });
 
         var service = container.Resolve<TelemetryService>();
         Assert.IsAssignableFrom<ISquidStdService>(service);
@@ -31,17 +33,17 @@ public class TelemetryRegistrationTests
     [Fact]
     public void ServiceCollection_RegistersTracerAndMeterProviders()
     {
-        var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
-        Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<IMetricsCollectionService>(
+        var services = new ServiceCollection();
+        ServiceCollectionServiceExtensions.AddSingleton<IMetricsCollectionService>(
             services,
             new FakeMetricsCollectionService(new Dictionary<string, MetricSample>())
         );
 
-        services.AddSquidStdTelemetry(new TelemetryOptions());
+        services.AddSquidStdTelemetry(new());
 
-        using var provider = Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(services);
+        using var provider = ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(services);
 
-        Assert.NotNull(provider.GetService(typeof(global::OpenTelemetry.Trace.TracerProvider)));
-        Assert.NotNull(provider.GetService(typeof(global::OpenTelemetry.Metrics.MeterProvider)));
+        Assert.NotNull(provider.GetService(typeof(TracerProvider)));
+        Assert.NotNull(provider.GetService(typeof(MeterProvider)));
     }
 }

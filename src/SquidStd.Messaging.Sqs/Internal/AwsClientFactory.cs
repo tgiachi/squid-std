@@ -16,24 +16,24 @@ internal static class AwsClientFactory
         if (!string.IsNullOrWhiteSpace(aws.AccessKey) && !string.IsNullOrWhiteSpace(aws.SecretKey))
         {
             return string.IsNullOrWhiteSpace(aws.SessionToken)
-                ? new BasicAWSCredentials(aws.AccessKey, aws.SecretKey)
-                : new SessionAWSCredentials(aws.AccessKey, aws.SecretKey, aws.SessionToken);
+                       ? new BasicAWSCredentials(aws.AccessKey, aws.SecretKey)
+                       : new SessionAWSCredentials(aws.AccessKey, aws.SecretKey, aws.SessionToken);
         }
 
         return FallbackCredentialsFactory.GetCredentials();
     }
 
-    public static AmazonSQSConfig SqsConfig(AwsConfigEntry aws)
+    public static AmazonSimpleNotificationServiceConfig SnsConfig(AwsConfigEntry aws)
     {
-        var config = new AmazonSQSConfig();
+        var config = new AmazonSimpleNotificationServiceConfig();
         Configure(config, aws);
 
         return config;
     }
 
-    public static AmazonSimpleNotificationServiceConfig SnsConfig(AwsConfigEntry aws)
+    public static AmazonSQSConfig SqsConfig(AwsConfigEntry aws)
     {
-        var config = new AmazonSimpleNotificationServiceConfig();
+        var config = new AmazonSQSConfig();
         Configure(config, aws);
 
         return config;

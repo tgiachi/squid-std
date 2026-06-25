@@ -27,6 +27,18 @@ public sealed class TelemetryService : ISquidStdService, IDisposable
         _bridge = bridge;
     }
 
+    public void Dispose()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
+        _meterProvider?.Dispose();
+        _tracerProvider?.Dispose();
+        _bridge.Dispose();
+    }
+
     /// <inheritdoc />
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
     {
@@ -35,7 +47,7 @@ public sealed class TelemetryService : ISquidStdService, IDisposable
             if (_options.EnableTracing)
             {
                 var tracing = Sdk.CreateTracerProviderBuilder();
-                TelemetryPipeline.ConfigureTracing(tracing, _options, includeAspNetCore: false);
+                TelemetryPipeline.ConfigureTracing(tracing, _options, false);
                 TelemetryPipeline.AddTraceExporters(tracing, _options);
                 _tracerProvider = tracing.Build();
             }
@@ -63,17 +75,5 @@ public sealed class TelemetryService : ISquidStdService, IDisposable
         Dispose();
 
         return ValueTask.CompletedTask;
-    }
-
-    public void Dispose()
-    {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
-        {
-            return;
-        }
-
-        _meterProvider?.Dispose();
-        _tracerProvider?.Dispose();
-        _bridge.Dispose();
     }
 }

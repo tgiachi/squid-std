@@ -57,10 +57,58 @@ public sealed class SqsTopicProvider : ITopicProvider
             _handler = handler;
         }
 
-        public void Start()
+        public void Dispose()
         {
-            _loop = Task.Run(() => RunAsync(_cts.Token));
+            if (Interlocked.Exchange(ref _disposed, 1) != 0)
+            {
+                return;
+            }
+
+            _cts.Cancel();
+
+            try
+            {
+                _loop?.GetAwaiter().GetResult();
+
+                if (_subscriptionArn is not null)
+                {
+                    _provider._sns!.UnsubscribeAsync(_subscriptionArn).GetAwaiter().GetResult();
+                }
+
+                if (_queueUrl is not null)
+                {
+                    _provider._sqs!.DeleteQueueAsync(_queueUrl).GetAwaiter().GetResult();
+                }
+            }
+            catch
+            {
+                // Best-effort teardown.
+            }
+
+            _cts.Dispose();
         }
+
+        public void Start()
+            => _loop = Task.Run(() => RunAsync(_cts.Token));
+
+        private static string BuildPolicy(string queueArn, string topicArn)
+            => JsonSerializer.Serialize(
+                new
+                {
+                    Version = "2012-10-17",
+                    Statement = new[]
+                    {
+                        new
+                        {
+                            Effect = "Allow",
+                            Principal = new { Service = "sns.amazonaws.com" },
+                            Action = "sqs:SendMessage",
+                            Resource = queueArn,
+                            Condition = new { ArnEquals = new Dictionary<string, string> { ["aws:SourceArn"] = topicArn } }
+                        }
+                    }
+                }
+            );
 
         private async Task RunAsync(CancellationToken cancellationToken)
         {
@@ -70,35 +118,38 @@ public sealed class SqsTopicProvider : ITopicProvider
             {
                 var topicArn = await _provider.EnsureTopicAsync(_topic, cancellationToken);
                 var queueName = SqsNames.Sanitize(_topic) + "-sub-" + _index;
-                queueUrl = (await _provider._sqs!.CreateQueueAsync(new CreateQueueRequest { QueueName = queueName }, cancellationToken)).QueueUrl;
+                queueUrl = (await _provider._sqs!.CreateQueueAsync(
+                                new CreateQueueRequest { QueueName = queueName },
+                                cancellationToken
+                            )).QueueUrl;
                 _queueUrl = queueUrl;
 
                 var attributes = await _provider._sqs.GetQueueAttributesAsync(
-                    new GetQueueAttributesRequest { QueueUrl = queueUrl, AttributeNames = ["QueueArn"] },
-                    cancellationToken
-                );
+                                     new() { QueueUrl = queueUrl, AttributeNames = ["QueueArn"] },
+                                     cancellationToken
+                                 );
                 var queueArn = attributes.Attributes["QueueArn"];
 
                 await _provider._sqs.SetQueueAttributesAsync(
-                    new SetQueueAttributesRequest
+                    new()
                     {
                         QueueUrl = queueUrl,
-                        Attributes = new Dictionary<string, string> { ["Policy"] = BuildPolicy(queueArn, topicArn) }
+                        Attributes = new() { ["Policy"] = BuildPolicy(queueArn, topicArn) }
                     },
                     cancellationToken
                 );
 
                 _subscriptionArn = (await _provider._sns!.SubscribeAsync(
-                    new SubscribeRequest
-                    {
-                        TopicArn = topicArn,
-                        Protocol = "sqs",
-                        Endpoint = queueArn,
-                        ReturnSubscriptionArn = true,
-                        Attributes = new Dictionary<string, string> { ["RawMessageDelivery"] = "true" }
-                    },
-                    cancellationToken
-                )).SubscriptionArn;
+                                        new()
+                                        {
+                                            TopicArn = topicArn,
+                                            Protocol = "sqs",
+                                            Endpoint = queueArn,
+                                            ReturnSubscriptionArn = true,
+                                            Attributes = new() { ["RawMessageDelivery"] = "true" }
+                                        },
+                                        cancellationToken
+                                    )).SubscriptionArn;
             }
             catch (OperationCanceledException)
             {
@@ -118,14 +169,14 @@ public sealed class SqsTopicProvider : ITopicProvider
                 try
                 {
                     response = await _provider._sqs!.ReceiveMessageAsync(
-                        new ReceiveMessageRequest
-                        {
-                            QueueUrl = queueUrl,
-                            MaxNumberOfMessages = _provider._options.MaxNumberOfMessages,
-                            WaitTimeSeconds = _provider._options.WaitTimeSeconds
-                        },
-                        cancellationToken
-                    );
+                                   new ReceiveMessageRequest
+                                   {
+                                       QueueUrl = queueUrl,
+                                       MaxNumberOfMessages = _provider._options.MaxNumberOfMessages,
+                                       WaitTimeSeconds = _provider._options.WaitTimeSeconds
+                                   },
+                                   cancellationToken
+                               );
                 }
                 catch (OperationCanceledException)
                 {
@@ -167,56 +218,21 @@ public sealed class SqsTopicProvider : ITopicProvider
                 }
             }
         }
+    }
 
-        private static string BuildPolicy(string queueArn, string topicArn)
-            => JsonSerializer.Serialize(
-                new
-                {
-                    Version = "2012-10-17",
-                    Statement = new[]
-                    {
-                        new
-                        {
-                            Effect = "Allow",
-                            Principal = new { Service = "sns.amazonaws.com" },
-                            Action = "sqs:SendMessage",
-                            Resource = queueArn,
-                            Condition = new { ArnEquals = new Dictionary<string, string> { ["aws:SourceArn"] = topicArn } }
-                        }
-                    }
-                }
-            );
-
-        public void Dispose()
+    /// <inheritdoc />
+    public ValueTask DisposeAsync()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
         {
-            if (Interlocked.Exchange(ref _disposed, 1) != 0)
-            {
-                return;
-            }
-
-            _cts.Cancel();
-
-            try
-            {
-                _loop?.GetAwaiter().GetResult();
-
-                if (_subscriptionArn is not null)
-                {
-                    _provider._sns!.UnsubscribeAsync(_subscriptionArn).GetAwaiter().GetResult();
-                }
-
-                if (_queueUrl is not null)
-                {
-                    _provider._sqs!.DeleteQueueAsync(_queueUrl).GetAwaiter().GetResult();
-                }
-            }
-            catch
-            {
-                // Best-effort teardown.
-            }
-
-            _cts.Dispose();
+            return ValueTask.CompletedTask;
         }
+
+        _sqs?.Dispose();
+        _sns?.Dispose();
+        _topicLock.Dispose();
+
+        return ValueTask.CompletedTask;
     }
 
     /// <inheritdoc />
@@ -228,10 +244,24 @@ public sealed class SqsTopicProvider : ITopicProvider
         var arn = await EnsureTopicAsync(topic, cancellationToken);
 
         await sns.PublishAsync(
-            new PublishRequest { TopicArn = arn, Message = Convert.ToBase64String(payload.Span) },
+            new() { TopicArn = arn, Message = Convert.ToBase64String(payload.Span) },
             cancellationToken
         );
     }
+
+    /// <inheritdoc />
+    public ValueTask StartAsync(CancellationToken cancellationToken = default)
+    {
+        var credentials = AwsClientFactory.Credentials(_options.Aws);
+        _sqs = new AmazonSQSClient(credentials, AwsClientFactory.SqsConfig(_options.Aws));
+        _sns = new AmazonSimpleNotificationServiceClient(credentials, AwsClientFactory.SnsConfig(_options.Aws));
+
+        return ValueTask.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public ValueTask StopAsync(CancellationToken cancellationToken = default)
+        => DisposeAsync();
 
     /// <inheritdoc />
     public IDisposable Subscribe(string topic, Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler)
@@ -250,20 +280,6 @@ public sealed class SqsTopicProvider : ITopicProvider
 
         return subscription;
     }
-
-    /// <inheritdoc />
-    public ValueTask StartAsync(CancellationToken cancellationToken = default)
-    {
-        var credentials = AwsClientFactory.Credentials(_options.Aws);
-        _sqs = new AmazonSQSClient(credentials, AwsClientFactory.SqsConfig(_options.Aws));
-        _sns = new AmazonSimpleNotificationServiceClient(credentials, AwsClientFactory.SnsConfig(_options.Aws));
-
-        return ValueTask.CompletedTask;
-    }
-
-    /// <inheritdoc />
-    public ValueTask StopAsync(CancellationToken cancellationToken = default)
-        => DisposeAsync();
 
     private async Task<string> EnsureTopicAsync(string topic, CancellationToken cancellationToken)
     {
@@ -294,20 +310,5 @@ public sealed class SqsTopicProvider : ITopicProvider
         {
             _topicLock.Release();
         }
-    }
-
-    /// <inheritdoc />
-    public ValueTask DisposeAsync()
-    {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
-        {
-            return ValueTask.CompletedTask;
-        }
-
-        _sqs?.Dispose();
-        _sns?.Dispose();
-        _topicLock.Dispose();
-
-        return ValueTask.CompletedTask;
     }
 }

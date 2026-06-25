@@ -23,8 +23,18 @@ public sealed class MetricsSnapshotBridge : IDisposable
     public MetricsSnapshotBridge(IMetricsCollectionService metrics)
     {
         _metrics = metrics;
-        _meter = new Meter(MeterName);
+        _meter = new(MeterName);
         EnsureInstruments();
+    }
+
+    public void Dispose()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
+        _meter.Dispose();
     }
 
     /// <summary>Creates observable instruments for any snapshot metric names not yet registered.</summary>
@@ -56,19 +66,9 @@ public sealed class MetricsSnapshotBridge : IDisposable
         }
 
         var tags = sample.Tags is { Count: > 0 }
-            ? sample.Tags.Select(kv => new KeyValuePair<string, object?>(kv.Key, kv.Value)).ToArray()
-            : [];
+                       ? sample.Tags.Select(kv => new KeyValuePair<string, object?>(kv.Key, kv.Value)).ToArray()
+                       : [];
 
-        return [new Measurement<double>(sample.Value, tags)];
-    }
-
-    public void Dispose()
-    {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
-        {
-            return;
-        }
-
-        _meter.Dispose();
+        return [new(sample.Value, tags)];
     }
 }

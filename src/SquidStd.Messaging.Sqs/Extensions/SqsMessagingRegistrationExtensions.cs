@@ -1,6 +1,5 @@
 using System.Globalization;
 using DryIoc;
-using SquidStd.Aws.Abstractions.Data.Config;
 using SquidStd.Core.Interfaces.Metrics;
 using SquidStd.Core.Interfaces.Serialization;
 using SquidStd.Core.Json;
@@ -80,9 +79,9 @@ public static class SqsMessagingRegistrationExtensions
             );
         }
 
-        return new SqsOptions
+        return new()
         {
-            Aws = new AwsConfigEntry
+            Aws = new()
             {
                 Region = string.IsNullOrEmpty(cs.Host) ? "us-east-1" : cs.Host,
                 AccessKey = cs.UserName,

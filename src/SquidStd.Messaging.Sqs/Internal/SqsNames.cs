@@ -17,6 +17,6 @@ internal static class SqsNames
             buffer[i] = char.IsAsciiLetterOrDigit(c) || c is '-' or '_' ? c : '-';
         }
 
-        return new string(buffer);
+        return new(buffer);
     }
 }

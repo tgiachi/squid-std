@@ -17,11 +17,41 @@ namespace SquidStd.Telemetry.OpenTelemetry.Internal;
 /// </summary>
 internal static class TelemetryPipeline
 {
+    public static void AddMetricExporters(MeterProviderBuilder builder, TelemetryOptions options)
+    {
+        builder.AddOtlpExporter(
+            o =>
+            {
+                o.Endpoint = new(options.OtlpEndpoint);
+                o.Protocol = Map(options.OtlpProtocol);
+            }
+        );
+
+        if (options.EnableConsoleExporter)
+        {
+            builder.AddConsoleExporter();
+        }
+    }
+
+    public static void AddTraceExporters(TracerProviderBuilder builder, TelemetryOptions options)
+    {
+        builder.AddOtlpExporter(
+            o =>
+            {
+                o.Endpoint = new(options.OtlpEndpoint);
+                o.Protocol = Map(options.OtlpProtocol);
+            }
+        );
+
+        if (options.EnableConsoleExporter)
+        {
+            builder.AddConsoleExporter();
+        }
+    }
+
     public static ResourceBuilder BuildResource(TelemetryOptions options)
     {
-        var version = options.ServiceVersion
-                      ?? Assembly.GetEntryAssembly()?.GetName().Version?.ToString()
-                      ?? "unknown";
+        var version = options.ServiceVersion ?? Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "unknown";
 
         var builder = ResourceBuilder.CreateDefault().AddService(options.ServiceName, serviceVersion: version);
 
@@ -35,6 +65,12 @@ internal static class TelemetryPipeline
         return builder;
     }
 
+    public static void ConfigureMetrics(MeterProviderBuilder builder, TelemetryOptions options)
+        => builder
+           .SetResourceBuilder(BuildResource(options))
+           .AddRuntimeInstrumentation()
+           .AddMeter(MetricsSnapshotBridge.MeterName);
+
     public static void ConfigureTracing(TracerProviderBuilder builder, TelemetryOptions options, bool includeAspNetCore)
     {
         builder
@@ -47,42 +83,6 @@ internal static class TelemetryPipeline
         if (includeAspNetCore)
         {
             builder.AddAspNetCoreInstrumentation();
-        }
-    }
-
-    public static void ConfigureMetrics(MeterProviderBuilder builder, TelemetryOptions options)
-    {
-        builder
-            .SetResourceBuilder(BuildResource(options))
-            .AddRuntimeInstrumentation()
-            .AddMeter(MetricsSnapshotBridge.MeterName);
-    }
-
-    public static void AddTraceExporters(TracerProviderBuilder builder, TelemetryOptions options)
-    {
-        builder.AddOtlpExporter(o =>
-        {
-            o.Endpoint = new Uri(options.OtlpEndpoint);
-            o.Protocol = Map(options.OtlpProtocol);
-        });
-
-        if (options.EnableConsoleExporter)
-        {
-            builder.AddConsoleExporter();
-        }
-    }
-
-    public static void AddMetricExporters(MeterProviderBuilder builder, TelemetryOptions options)
-    {
-        builder.AddOtlpExporter(o =>
-        {
-            o.Endpoint = new Uri(options.OtlpEndpoint);
-            o.Protocol = Map(options.OtlpProtocol);
-        });
-
-        if (options.EnableConsoleExporter)
-        {
-            builder.AddConsoleExporter();
         }
     }
 

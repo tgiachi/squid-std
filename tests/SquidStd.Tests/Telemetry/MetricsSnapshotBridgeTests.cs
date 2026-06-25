@@ -43,8 +43,8 @@ public class MetricsSnapshotBridgeTests
         foreach (ref readonly var point in metric.GetMetricPoints())
         {
             return metric.MetricType == OtelMetricType.DoubleGauge
-                ? point.GetGaugeLastValueDouble()
-                : point.GetSumDouble();
+                       ? point.GetGaugeLastValueDouble()
+                       : point.GetSumDouble();
         }
 
         return double.NaN;

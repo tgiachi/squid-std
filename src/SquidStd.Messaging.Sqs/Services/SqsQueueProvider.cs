@@ -62,10 +62,33 @@ public sealed class SqsQueueProvider : IQueueProvider
             _handler = handler;
         }
 
-        public void Start()
+        public void Dispose()
         {
-            _loop = Task.Run(() => RunAsync(_cts.Token));
+            if (Interlocked.Exchange(ref _disposed, 1) != 0)
+            {
+                return;
+            }
+
+            _cts.Cancel();
+
+            try
+            {
+                _loop?.GetAwaiter().GetResult();
+            }
+            catch
+            {
+                // Best-effort teardown.
+            }
+
+            _cts.Dispose();
+            _provider._metrics.SetSubscriberCount(
+                _queueName,
+                _provider._subscriberCounts.AddOrUpdate(_queueName, 0, static (_, count) => Math.Max(0, count - 1))
+            );
         }
+
+        public void Start()
+            => _loop = Task.Run(() => RunAsync(_cts.Token));
 
         private async Task RunAsync(CancellationToken cancellationToken)
         {
@@ -135,31 +158,20 @@ public sealed class SqsQueueProvider : IQueueProvider
                 }
             }
         }
+    }
 
-        public void Dispose()
+    /// <inheritdoc />
+    public ValueTask DisposeAsync()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
         {
-            if (Interlocked.Exchange(ref _disposed, 1) != 0)
-            {
-                return;
-            }
-
-            _cts.Cancel();
-
-            try
-            {
-                _loop?.GetAwaiter().GetResult();
-            }
-            catch
-            {
-                // Best-effort teardown.
-            }
-
-            _cts.Dispose();
-            _provider._metrics.SetSubscriberCount(
-                _queueName,
-                _provider._subscriberCounts.AddOrUpdate(_queueName, 0, static (_, count) => Math.Max(0, count - 1))
-            );
+            return ValueTask.CompletedTask;
         }
+
+        _client?.Dispose();
+        _topologyLock.Dispose();
+
+        return ValueTask.CompletedTask;
     }
 
     /// <inheritdoc />
@@ -175,12 +187,24 @@ public sealed class SqsQueueProvider : IQueueProvider
         var url = await EnsureQueueAsync(queueName, cancellationToken);
 
         await client.SendMessageAsync(
-            new SendMessageRequest { QueueUrl = url, MessageBody = Convert.ToBase64String(payload.Span) },
+            new() { QueueUrl = url, MessageBody = Convert.ToBase64String(payload.Span) },
             cancellationToken
         );
 
         _metrics.OnPublished(queueName);
     }
+
+    /// <inheritdoc />
+    public ValueTask StartAsync(CancellationToken cancellationToken = default)
+    {
+        _client = new AmazonSQSClient(AwsClientFactory.Credentials(_options.Aws), AwsClientFactory.SqsConfig(_options.Aws));
+
+        return ValueTask.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public ValueTask StopAsync(CancellationToken cancellationToken = default)
+        => DisposeAsync();
 
     /// <inheritdoc />
     public IDisposable Subscribe(string queueName, Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler)
@@ -195,18 +219,6 @@ public sealed class SqsQueueProvider : IQueueProvider
 
         return subscription;
     }
-
-    /// <inheritdoc />
-    public ValueTask StartAsync(CancellationToken cancellationToken = default)
-    {
-        _client = new AmazonSQSClient(AwsClientFactory.Credentials(_options.Aws), AwsClientFactory.SqsConfig(_options.Aws));
-
-        return ValueTask.CompletedTask;
-    }
-
-    /// <inheritdoc />
-    public ValueTask StopAsync(CancellationToken cancellationToken = default)
-        => DisposeAsync();
 
     private async Task<string> EnsureQueueAsync(string queueName, CancellationToken cancellationToken)
     {
@@ -256,7 +268,7 @@ public sealed class SqsQueueProvider : IQueueProvider
                            new CreateQueueRequest
                            {
                                QueueName = name,
-                               Attributes = new Dictionary<string, string> { ["RedrivePolicy"] = redrivePolicy }
+                               Attributes = new() { ["RedrivePolicy"] = redrivePolicy }
                            },
                            cancellationToken
                        )).QueueUrl;
@@ -279,24 +291,10 @@ public sealed class SqsQueueProvider : IQueueProvider
     )
     {
         var response = await client.GetQueueAttributesAsync(
-                           new GetQueueAttributesRequest { QueueUrl = queueUrl, AttributeNames = ["QueueArn"] },
+                           new() { QueueUrl = queueUrl, AttributeNames = ["QueueArn"] },
                            cancellationToken
                        );
 
         return response.Attributes["QueueArn"];
-    }
-
-    /// <inheritdoc />
-    public ValueTask DisposeAsync()
-    {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
-        {
-            return ValueTask.CompletedTask;
-        }
-
-        _client?.Dispose();
-        _topologyLock.Dispose();
-
-        return ValueTask.CompletedTask;
     }
 }

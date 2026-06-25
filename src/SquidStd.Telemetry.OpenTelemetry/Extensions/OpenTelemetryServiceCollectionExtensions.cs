@@ -22,21 +22,25 @@ public static class OpenTelemetryServiceCollectionExtensions
 
         if (options.EnableTracing)
         {
-            builder.WithTracing(tracing =>
-            {
-                TelemetryPipeline.ConfigureTracing(tracing, options, includeAspNetCore: true);
-                TelemetryPipeline.AddTraceExporters(tracing, options);
-            });
+            builder.WithTracing(
+                tracing =>
+                {
+                    TelemetryPipeline.ConfigureTracing(tracing, options, true);
+                    TelemetryPipeline.AddTraceExporters(tracing, options);
+                }
+            );
         }
 
         if (options.EnableMetrics)
         {
             services.AddHostedService<MetricsBridgeActivator>();
-            builder.WithMetrics(metrics =>
-            {
-                TelemetryPipeline.ConfigureMetrics(metrics, options);
-                TelemetryPipeline.AddMetricExporters(metrics, options);
-            });
+            builder.WithMetrics(
+                metrics =>
+                {
+                    TelemetryPipeline.ConfigureMetrics(metrics, options);
+                    TelemetryPipeline.AddMetricExporters(metrics, options);
+                }
+            );
         }
 
         return services;
