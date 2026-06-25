@@ -64,6 +64,10 @@
   href: scheduler.md
 - name: Health Checks
   href: health-checks.md
+- name: SquidStd.Telemetry.Abstractions
+  href: telemetry-abstractions.md
+- name: SquidStd.Telemetry.OpenTelemetry
+  href: telemetry-opentelemetry.md
 - name: SquidStd.Aws.Abstractions
   href: aws-abstractions.md
 - name: Felix Network
