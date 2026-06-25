@@ -6,6 +6,7 @@ using OpenTelemetry.Trace;
 using SquidStd.Telemetry.Abstractions;
 using SquidStd.Telemetry.Abstractions.Data.Config;
 using SquidStd.Telemetry.Abstractions.Types.Telemetry;
+using SquidStd.Telemetry.OpenTelemetry.Services;
 
 namespace SquidStd.Telemetry.OpenTelemetry.Internal;
 
@@ -16,8 +17,6 @@ namespace SquidStd.Telemetry.OpenTelemetry.Internal;
 /// </summary>
 internal static class TelemetryPipeline
 {
-    public const string MeterName = "SquidStd.Metrics";
-
     public static ResourceBuilder BuildResource(TelemetryOptions options)
     {
         var version = options.ServiceVersion
@@ -56,7 +55,7 @@ internal static class TelemetryPipeline
         builder
             .SetResourceBuilder(BuildResource(options))
             .AddRuntimeInstrumentation()
-            .AddMeter(MeterName);
+            .AddMeter(MetricsSnapshotBridge.MeterName);
     }
 
     public static void AddTraceExporters(TracerProviderBuilder builder, TelemetryOptions options)
