@@ -1,3 +1,19 @@
+## [0.6.0](https://github.com/tgiachi/squid-std/compare/v0.5.1...v0.6.0) (2026-06-25)
+
+### Features
+
+* add AddSqsMessaging registration and sqs:// connection string parsing ([f193b33](https://github.com/tgiachi/squid-std/commit/f193b3392e3d02c986b0d9c3bf89cccea34f8f4b))
+* add ASP.NET Core AddSquidStdTelemetry registration ([d4707b4](https://github.com/tgiachi/squid-std/commit/d4707b46b76e9bf9489d7f5104be3292fa056ec0))
+* add SqsQueueProvider with redrive-to-DLQ over LocalStack-tested SQS ([05ab288](https://github.com/tgiachi/squid-std/commit/05ab288d5133733ada4e189bcdedb6f01393ee4e))
+* add SqsTopicProvider with SNS+SQS fan-out ([5278178](https://github.com/tgiachi/squid-std/commit/52781784b4847846870c3f19e529cb6885e1a52f))
+* add SquidStd.Aws.Abstractions with shared AwsConfigEntry ([23fde7d](https://github.com/tgiachi/squid-std/commit/23fde7de4c4d2d410db9f934af134b91d5f2f49f))
+* add SquidStd.Telemetry.Abstractions with TelemetryOptions and ActivitySource convention ([9d18cee](https://github.com/tgiachi/squid-std/commit/9d18ceef5b0acf85a760389bdfbe87efee4339a2))
+* add SquidStd.Telemetry.OpenTelemetry pipeline helper with tracing export ([886b08a](https://github.com/tgiachi/squid-std/commit/886b08afd492830c0b0122e7f2a04073b09faf37))
+* add TelemetryService and worker AddSquidStdTelemetry registration ([5aa4b64](https://github.com/tgiachi/squid-std/commit/5aa4b64cf820b9b8578463c482eb4eb11dc833be))
+* bridge the SquidStd metrics snapshot to OpenTelemetry instruments ([a480b21](https://github.com/tgiachi/squid-std/commit/a480b211074e7776f3ac8797772d1187545891cc))
+* compose AwsConfigEntry in S3StorageOptions ([651820e](https://github.com/tgiachi/squid-std/commit/651820ea7c1722d3cfba775ccae719a627866997))
+* scaffold SquidStd.Messaging.Sqs with SqsOptions, name sanitizer and AWS client factory ([a6dc839](https://github.com/tgiachi/squid-std/commit/a6dc83906cbe0b6cfa5f903da2d5aea4500661ae))
+
 ## [0.5.1](https://github.com/tgiachi/squid-std/compare/v0.5.0...v0.5.1) (2026-06-25)
 
 ### Bug Fixes
