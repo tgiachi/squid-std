@@ -104,7 +104,8 @@ block until cancellation for long-running hosts.
   optionally DEFLATE-compressed messages over ENet (reliable UDP) behind a portable frame, with an
   optional self-forming mesh layer and a pluggable transport (`ITransport`). Published as
   `SquidStd.Felix`, `SquidStd.Felix.MemoryPack`, `SquidStd.Felix.Mesh` and
-  `SquidStd.Felix.Transport.Serial` on NuGet.
+  `SquidStd.Felix.Transport.Serial` on NuGet. See the [Felix Network guide](docs/articles/felix.md)
+  for an overview.
 
 ## Architecture
 
