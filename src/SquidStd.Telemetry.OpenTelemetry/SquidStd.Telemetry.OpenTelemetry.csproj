@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <PublishNuget>true</PublishNuget>
+        <PackageId>SquidStd.Telemetry.OpenTelemetry</PackageId>
+        <Description>OpenTelemetry tracing and metrics export for SquidStd: OTLP + console exporters, standard instrumentation, and a bridge for the SquidStd metrics snapshot. Registers on IContainer (worker) or IServiceCollection (ASP.NET Core).</Description>
+        <PackageTags>telemetry;observability;opentelemetry;tracing;metrics;otlp;squidstd</PackageTags>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\SquidStd.Telemetry.Abstractions\SquidStd.Telemetry.Abstractions.csproj"/>
+        <ProjectReference Include="..\SquidStd.Abstractions\SquidStd.Abstractions.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="DryIoc.dll" Version="5.4.3"/>
+        <PackageReference Include="OpenTelemetry" Version="1.16.0"/>
+        <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.16.0"/>
+        <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.16.0"/>
+        <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.16.0"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.16.0"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.16.0"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.1"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="SquidStd.Tests"/>
+    </ItemGroup>
+
+</Project>

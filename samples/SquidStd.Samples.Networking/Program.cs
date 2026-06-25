@@ -4,14 +4,18 @@ using SquidStd.Network.Client;
 using SquidStd.Network.Server;
 
 #region step-1
+
 var endPoint = new IPEndPoint(IPAddress.Loopback, 9099);
 var server = new SquidTcpServer(endPoint);
 
 server.OnClientConnect += (_, args) =>
-    Console.WriteLine($"Client connected: session {args.Client.SessionId}");
+                              Console.WriteLine($"Client connected: session {args.Client.SessionId}");
 
 server.OnDataReceived += (_, args) =>
-    Console.WriteLine($"Received {args.Data.Length} byte(s): {Encoding.UTF8.GetString(args.Data.Span)}");
+                             Console.WriteLine(
+                                 $"Received {args.Data.Length} byte(s): {Encoding.UTF8.GetString(args.Data.Span)}"
+                             );
+
 #endregion
 
 if (!args.Contains("--run"))
@@ -22,6 +26,7 @@ if (!args.Contains("--run"))
 }
 
 #region step-2
+
 await server.StartAsync(CancellationToken.None);
 
 var client = await SquidStdTcpClient.ConnectAsync(endPoint);
@@ -31,4 +36,5 @@ await Task.Delay(200);
 
 await client.DisposeAsync();
 await server.DisposeAsync();
+
 #endregion

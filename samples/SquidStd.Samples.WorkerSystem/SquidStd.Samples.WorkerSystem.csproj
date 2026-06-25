@@ -9,10 +9,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\SquidStd.Workers\SquidStd.Workers.csproj" />
-        <ProjectReference Include="..\..\src\SquidStd.Workers.Manager\SquidStd.Workers.Manager.csproj" />
-        <ProjectReference Include="..\..\src\SquidStd.Messaging\SquidStd.Messaging.csproj" />
-        <ProjectReference Include="..\..\src\SquidStd.Services.Core\SquidStd.Services.Core.csproj" />
+        <ProjectReference Include="..\..\src\SquidStd.Workers\SquidStd.Workers.csproj"/>
+        <ProjectReference Include="..\..\src\SquidStd.Workers.Manager\SquidStd.Workers.Manager.csproj"/>
+        <ProjectReference Include="..\..\src\SquidStd.Messaging\SquidStd.Messaging.csproj"/>
+        <ProjectReference Include="..\..\src\SquidStd.Services.Core\SquidStd.Services.Core.csproj"/>
     </ItemGroup>
 
 </Project>

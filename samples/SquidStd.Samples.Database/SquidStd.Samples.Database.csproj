@@ -9,8 +9,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\SquidStd.Database\SquidStd.Database.csproj" />
-        <ProjectReference Include="..\..\src\SquidStd.Services.Core\SquidStd.Services.Core.csproj" />
+        <ProjectReference Include="..\..\src\SquidStd.Database\SquidStd.Database.csproj"/>
+        <ProjectReference Include="..\..\src\SquidStd.Services.Core\SquidStd.Services.Core.csproj"/>
     </ItemGroup>
 
 </Project>

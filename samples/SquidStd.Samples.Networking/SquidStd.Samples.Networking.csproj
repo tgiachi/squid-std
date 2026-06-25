@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\SquidStd.Network\SquidStd.Network.csproj" />
+        <ProjectReference Include="..\..\src\SquidStd.Network\SquidStd.Network.csproj"/>
     </ItemGroup>
 
 </Project>

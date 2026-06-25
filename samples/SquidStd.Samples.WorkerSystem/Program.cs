@@ -1,4 +1,3 @@
-using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Messaging.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 using SquidStd.Workers.Abstractions.Data;
@@ -7,24 +6,32 @@ using SquidStd.Workers.Interfaces;
 using SquidStd.Workers.Manager.Extensions;
 using SquidStd.Workers.Manager.Interfaces;
 
-var bootstrap = SquidStdBootstrap.Create(new SquidStdOptions
-{
-    ConfigName = "squidstd",
-    RootDirectory = AppContext.BaseDirectory
-});
+var bootstrap = SquidStdBootstrap.Create(
+    new()
+    {
+        ConfigName = "squidstd",
+        RootDirectory = AppContext.BaseDirectory
+    }
+);
 
 #region step-1
-bootstrap.ConfigureServices(c =>
-{
-    c.AddInMemoryMessaging();
-    c.AddWorkers();
-    c.AddJobHandler<GreetJobHandler>();
-    c.AddWorkerManager();
-    return c;
-});
+
+bootstrap.ConfigureServices(
+    c =>
+    {
+        c.AddInMemoryMessaging();
+        c.AddWorkers();
+        c.AddJobHandler<GreetJobHandler>();
+        c.AddWorkerManager();
+
+        return c;
+    }
+);
+
 #endregion
 
 #region step-3
+
 await bootstrap.StartAsync();
 
 var scheduler = bootstrap.Resolve<IJobScheduler>();
@@ -32,15 +39,14 @@ await scheduler.EnqueueAsync("greet", new Dictionary<string, string> { ["name"] 
 
 await Task.Delay(500);
 await bootstrap.StopAsync();
+
 #endregion
 
 #region step-2
+
 internal sealed class GreetJobHandler : IJobHandler
 {
-    public string JobName
-    {
-        get { return "greet"; }
-    }
+    public string JobName => "greet";
 
     public Task HandleAsync(JobRequest job, CancellationToken cancellationToken)
     {
@@ -50,4 +56,5 @@ internal sealed class GreetJobHandler : IJobHandler
         return Task.CompletedTask;
     }
 }
+
 #endregion

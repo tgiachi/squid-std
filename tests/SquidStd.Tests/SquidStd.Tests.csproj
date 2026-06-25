@@ -11,7 +11,9 @@
         <PackageReference Include="coverlet.collector" Version="10.0.1"/>
         <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="10.0.9"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.7.0"/>
+        <PackageReference Include="OpenTelemetry.Exporter.InMemory" Version="1.16.0"/>
         <PackageReference Include="Testcontainers.Elasticsearch" Version="4.12.0"/>
+        <PackageReference Include="Testcontainers.LocalStack" Version="4.12.0"/>
         <PackageReference Include="Testcontainers.Minio" Version="4.12.0"/>
         <PackageReference Include="Testcontainers.RabbitMq" Version="4.12.0"/>
         <PackageReference Include="Testcontainers.Redis" Version="4.12.0"/>
@@ -34,6 +36,9 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\SquidStd.Core\SquidStd.Core.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Abstractions\SquidStd.Abstractions.csproj"/>
+        <ProjectReference Include="..\..\src\SquidStd.Telemetry.Abstractions\SquidStd.Telemetry.Abstractions.csproj"/>
+        <ProjectReference Include="..\..\src\SquidStd.Telemetry.OpenTelemetry\SquidStd.Telemetry.OpenTelemetry.csproj"/>
+        <ProjectReference Include="..\..\src\SquidStd.Aws.Abstractions\SquidStd.Aws.Abstractions.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.AspNetCore\SquidStd.AspNetCore.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Plugin.Abstractions\SquidStd.Plugin.Abstractions.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Network\SquidStd.Network.csproj"/>
@@ -44,6 +49,7 @@
         <ProjectReference Include="..\..\src\SquidStd.Database.Abstractions\SquidStd.Database.Abstractions.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Database\SquidStd.Database.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Messaging.RabbitMq\SquidStd.Messaging.RabbitMq.csproj"/>
+        <ProjectReference Include="..\..\src\SquidStd.Messaging.Sqs\SquidStd.Messaging.Sqs.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Caching.Abstractions\SquidStd.Caching.Abstractions.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Caching\SquidStd.Caching.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Caching.Redis\SquidStd.Caching.Redis.csproj"/>

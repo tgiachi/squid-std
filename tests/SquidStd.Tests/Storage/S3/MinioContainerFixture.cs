@@ -11,6 +11,8 @@ public sealed class MinioContainerFixture : IAsyncLifetime
 
     public string Endpoint => $"{_container.Hostname}:{_container.GetMappedPublicPort(9000)}";
 
+    public string ServiceUrl => $"http://{Endpoint}";
+
     public string AccessKey => _container.GetAccessKey();
 
     public string SecretKey => _container.GetSecretKey();

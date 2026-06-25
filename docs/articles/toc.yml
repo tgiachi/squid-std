@@ -22,6 +22,8 @@
   href: messaging.md
 - name: SquidStd.Messaging.RabbitMq
   href: messaging-rabbitmq.md
+- name: SquidStd.Messaging.Sqs
+  href: messaging-sqs.md
 - name: SquidStd.Caching.Abstractions
   href: caching-abstractions.md
 - name: SquidStd.Caching
@@ -62,5 +64,11 @@
   href: scheduler.md
 - name: Health Checks
   href: health-checks.md
+- name: SquidStd.Telemetry.Abstractions
+  href: telemetry-abstractions.md
+- name: SquidStd.Telemetry.OpenTelemetry
+  href: telemetry-opentelemetry.md
+- name: SquidStd.Aws.Abstractions
+  href: aws-abstractions.md
 - name: Felix Network
   href: felix.md
