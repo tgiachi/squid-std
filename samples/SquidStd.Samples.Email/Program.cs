@@ -1,7 +1,5 @@
-using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Mail.Abstractions.Data;
-using SquidStd.Mail.Abstractions.Data.Config;
 using SquidStd.Mail.Abstractions.Data.Events;
 using SquidStd.Mail.Abstractions.Interfaces;
 using SquidStd.Mail.Abstractions.Types.Mail;
@@ -11,35 +9,53 @@ using SquidStd.Mail.Queue.Interfaces;
 using SquidStd.Messaging.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 
-var bootstrap = SquidStdBootstrap.Create(new SquidStdOptions
-{
-    ConfigName = "squidstd",
-    RootDirectory = AppContext.BaseDirectory
-});
+var bootstrap = SquidStdBootstrap.Create(
+    new()
+    {
+        ConfigName = "squidstd",
+        RootDirectory = AppContext.BaseDirectory
+    }
+);
 
 #region step-1
-bootstrap.ConfigureServices(container => container.AddMail(new MailOptions
-{
-    Protocol = MailProtocolType.Imap,
-    Host = "imap.example.com",
-    Port = 993,
-    Username = "alice@example.com",
-    Password = "app-password"
-}));
+
+bootstrap.ConfigureServices(
+    container => container.AddMail(
+        new()
+        {
+            Protocol = MailProtocolType.Imap,
+            Host = "imap.example.com",
+            Port = 993,
+            Username = "alice@example.com",
+            Password = "app-password"
+        }
+    )
+);
+
 #endregion
 
 #region step-2
-bootstrap.ConfigureServices(container => container.AddMailSender(new SmtpOptions
-{
-    Host = "smtp.example.com",
-    Port = 587
-}));
+
+bootstrap.ConfigureServices(
+    container => container.AddMailSender(
+        new()
+        {
+            Host = "smtp.example.com",
+            Port = 587
+        }
+    )
+);
+
 #endregion
 
 #region step-3
-bootstrap.ConfigureServices(container => container
-    .AddInMemoryMessaging()
-    .AddMailQueue());
+
+bootstrap.ConfigureServices(
+    container => container
+                 .AddInMemoryMessaging()
+                 .AddMailQueue()
+);
+
 #endregion
 
 await bootstrap.StartAsync();
@@ -50,7 +66,7 @@ eventBus.RegisterAsyncListener(new MailReceivedLogger());
 
 var outgoing = new OutgoingMailMessage
 {
-    To = [new MailAddress("Bob", "bob@example.com")],
+    To = [new("Bob", "bob@example.com")],
     Subject = "Hi",
     HtmlBody = "<p>Hi</p>"
 };

@@ -93,15 +93,15 @@ public sealed class SqsQueueProvider : IQueueProvider
                 try
                 {
                     response = await _client.ReceiveMessageAsync(
-                        new ReceiveMessageRequest
-                        {
-                            QueueUrl = url,
-                            MaxNumberOfMessages = _provider._options.MaxNumberOfMessages,
-                            WaitTimeSeconds = _provider._options.WaitTimeSeconds,
-                            VisibilityTimeout = (int)_provider._options.VisibilityTimeout.TotalSeconds
-                        },
-                        cancellationToken
-                    );
+                                   new ReceiveMessageRequest
+                                   {
+                                       QueueUrl = url,
+                                       MaxNumberOfMessages = _provider._options.MaxNumberOfMessages,
+                                       WaitTimeSeconds = _provider._options.WaitTimeSeconds,
+                                       VisibilityTimeout = (int)_provider._options.VisibilityTimeout.TotalSeconds
+                                   },
+                                   cancellationToken
+                               );
                 }
                 catch (OperationCanceledException)
                 {
@@ -163,7 +163,11 @@ public sealed class SqsQueueProvider : IQueueProvider
     }
 
     /// <inheritdoc />
-    public async Task PublishAsync(string queueName, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
+    public async Task PublishAsync(
+        string queueName,
+        ReadOnlyMemory<byte> payload,
+        CancellationToken cancellationToken = default
+    )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(queueName);
         var client = _client ?? throw new InvalidOperationException("Provider not started.");
@@ -228,12 +232,16 @@ public sealed class SqsQueueProvider : IQueueProvider
 
             if (name.EndsWith(_deadLetterSuffix, StringComparison.Ordinal))
             {
-                url = (await client.CreateQueueAsync(new CreateQueueRequest { QueueName = name }, cancellationToken)).QueueUrl;
+                url = (await client.CreateQueueAsync(new CreateQueueRequest { QueueName = name }, cancellationToken))
+                    .QueueUrl;
             }
             else
             {
                 var dlqName = name + _deadLetterSuffix;
-                var dlqUrl = (await client.CreateQueueAsync(new CreateQueueRequest { QueueName = dlqName }, cancellationToken)).QueueUrl;
+                var dlqUrl = (await client.CreateQueueAsync(
+                                  new CreateQueueRequest { QueueName = dlqName },
+                                  cancellationToken
+                              )).QueueUrl;
                 var dlqArn = await GetQueueArnAsync(client, dlqUrl, cancellationToken);
 
                 var redrivePolicy = JsonSerializer.Serialize(
@@ -245,13 +253,13 @@ public sealed class SqsQueueProvider : IQueueProvider
                 );
 
                 url = (await client.CreateQueueAsync(
-                    new CreateQueueRequest
-                    {
-                        QueueName = name,
-                        Attributes = new Dictionary<string, string> { ["RedrivePolicy"] = redrivePolicy }
-                    },
-                    cancellationToken
-                )).QueueUrl;
+                           new CreateQueueRequest
+                           {
+                               QueueName = name,
+                               Attributes = new Dictionary<string, string> { ["RedrivePolicy"] = redrivePolicy }
+                           },
+                           cancellationToken
+                       )).QueueUrl;
             }
 
             _queueUrls[name] = url;
@@ -264,12 +272,16 @@ public sealed class SqsQueueProvider : IQueueProvider
         }
     }
 
-    private static async Task<string> GetQueueArnAsync(IAmazonSQS client, string queueUrl, CancellationToken cancellationToken)
+    private static async Task<string> GetQueueArnAsync(
+        IAmazonSQS client,
+        string queueUrl,
+        CancellationToken cancellationToken
+    )
     {
         var response = await client.GetQueueAttributesAsync(
-            new GetQueueAttributesRequest { QueueUrl = queueUrl, AttributeNames = ["QueueArn"] },
-            cancellationToken
-        );
+                           new GetQueueAttributesRequest { QueueUrl = queueUrl, AttributeNames = ["QueueArn"] },
+                           cancellationToken
+                       );
 
         return response.Attributes["QueueArn"];
     }

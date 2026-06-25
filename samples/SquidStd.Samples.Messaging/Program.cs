@@ -1,41 +1,53 @@
-using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Messaging.Abstractions.Interfaces;
 using SquidStd.Messaging.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 
-var bootstrap = SquidStdBootstrap.Create(new SquidStdOptions
-{
-    ConfigName = "squidstd",
-    RootDirectory = AppContext.BaseDirectory
-});
+var bootstrap = SquidStdBootstrap.Create(
+    new()
+    {
+        ConfigName = "squidstd",
+        RootDirectory = AppContext.BaseDirectory
+    }
+);
 
 #region step-1
+
 bootstrap.ConfigureServices(container => container.AddInMemoryMessaging());
+
 #endregion
 
 await bootstrap.StartAsync();
 
 #region step-2
+
 var queue = bootstrap.Resolve<IMessageQueue>();
-using (queue.Subscribe<OrderPlaced>("orders", new OrderListener()))
+
+using (queue.Subscribe("orders", new OrderListener()))
 {
     await queue.PublishAsync("orders", new OrderPlaced("order-1"));
     await Task.Delay(200);
 }
+
 #endregion
 
 #region step-3
-var topic = bootstrap.Resolve<IMessageTopic>();
-using (topic.Subscribe<OrderPlaced>("order-events", (order, _) =>
-{
-    Console.WriteLine($"topic saw {order.Id}");
 
-    return Task.CompletedTask;
-}))
+var topic = bootstrap.Resolve<IMessageTopic>();
+
+using (topic.Subscribe<OrderPlaced>(
+           "order-events",
+           (order, _) =>
+           {
+               Console.WriteLine($"topic saw {order.Id}");
+
+               return Task.CompletedTask;
+           }
+       ))
 {
     await topic.PublishAsync("order-events", new OrderPlaced("order-2"));
     await Task.Delay(200);
 }
+
 #endregion
 
 await bootstrap.StopAsync();

@@ -20,7 +20,7 @@ public class WorkerRegistryTests
     [Fact]
     public void Record_AfterOffline_ReturnsReturnTransition()
     {
-        var registry = NewRegistry(30);
+        var registry = NewRegistry();
         registry.Record(Heartbeat("w1", WorkerStatusType.Idle));
         registry.Sweep(DateTime.UtcNow.AddSeconds(31));
 
@@ -65,7 +65,7 @@ public class WorkerRegistryTests
     [Fact]
     public void Sweep_DoesNotReEmitAlreadyOfflineWorker()
     {
-        var registry = NewRegistry(30);
+        var registry = NewRegistry();
         registry.Record(Heartbeat("w1", WorkerStatusType.Idle));
         registry.Sweep(DateTime.UtcNow.AddSeconds(31));
 
@@ -77,7 +77,7 @@ public class WorkerRegistryTests
     [Fact]
     public void Sweep_MarksOverdueWorkerOffline_AndReturnsTransition()
     {
-        var registry = NewRegistry(30);
+        var registry = NewRegistry();
         registry.Record(Heartbeat("w1", WorkerStatusType.Idle));
 
         var changes = registry.Sweep(DateTime.UtcNow.AddSeconds(31));

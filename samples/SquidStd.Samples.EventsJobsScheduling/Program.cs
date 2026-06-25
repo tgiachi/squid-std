@@ -1,15 +1,16 @@
-using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Core.Interfaces.Jobs;
 using SquidStd.Core.Interfaces.Scheduling;
 using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 
-var bootstrap = SquidStdBootstrap.Create(new SquidStdOptions
-{
-    ConfigName = "squidstd",
-    RootDirectory = AppContext.BaseDirectory
-});
+var bootstrap = SquidStdBootstrap.Create(
+    new()
+    {
+        ConfigName = "squidstd",
+        RootDirectory = AppContext.BaseDirectory
+    }
+);
 
 // The cron scheduler and timer wheel are opt-in.
 bootstrap.ConfigureServices(container => container.RegisterSchedulerServices());
@@ -17,24 +18,34 @@ bootstrap.ConfigureServices(container => container.RegisterSchedulerServices());
 await bootstrap.StartAsync();
 
 #region step-1
+
 var eventBus = bootstrap.Resolve<IEventBus>();
 eventBus.RegisterAsyncListener(new PingListener());
 await eventBus.PublishAsync(new PingEvent("hello"), CancellationToken.None);
+
 #endregion
 
 #region step-2
+
 var jobs = bootstrap.Resolve<IJobSystem>();
 await jobs.ScheduleAsync(() => Console.WriteLine("job ran on a worker thread"));
+
 #endregion
 
 #region step-3
-var cron = bootstrap.Resolve<ICronScheduler>();
-cron.Schedule("heartbeat", "*/5 * * * *", _ =>
-{
-    Console.WriteLine("cron tick");
 
-    return Task.CompletedTask;
-});
+var cron = bootstrap.Resolve<ICronScheduler>();
+cron.Schedule(
+    "heartbeat",
+    "*/5 * * * *",
+    _ =>
+    {
+        Console.WriteLine("cron tick");
+
+        return Task.CompletedTask;
+    }
+);
+
 #endregion
 
 await bootstrap.StopAsync();
