@@ -1,3 +1,9 @@
+## [0.5.1](https://github.com/tgiachi/squid-std/compare/v0.5.0...v0.5.1) (2026-06-25)
+
+### Bug Fixes
+
+* bump StackExchange.Redis to 3.0.7 ([1977dac](https://github.com/tgiachi/squid-std/commit/1977dac2bc8fe1b4ef46f4e2f2f88d39ace3b881))
+
 ## [0.5.0](https://github.com/tgiachi/squid-std/compare/v0.4.0...v0.5.0) (2026-06-24)
 
 ### Features
