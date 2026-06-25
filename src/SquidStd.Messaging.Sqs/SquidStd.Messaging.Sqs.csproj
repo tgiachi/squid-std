@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <PublishNuget>true</PublishNuget>
+        <PackageId>SquidStd.Messaging.Sqs</PackageId>
+        <Description>AWS SQS/SNS transport for SquidStd.Messaging: IQueueProvider over SQS (redrive to DLQ) and ITopicProvider via SNS+SQS fan-out.</Description>
+        <PackageTags>networking;messaging;aws;sqs;sns;queue;squidstd</PackageTags>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\SquidStd.Messaging.Abstractions\SquidStd.Messaging.Abstractions.csproj" />
+        <ProjectReference Include="..\SquidStd.Aws.Abstractions\SquidStd.Aws.Abstractions.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AWSSDK.SimpleNotificationService" Version="4.0.3.8" />
+        <PackageReference Include="AWSSDK.SQS" Version="4.0.3.8" />
+        <PackageReference Include="DryIoc.dll" Version="5.4.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="SquidStd.Tests" />
+    </ItemGroup>
+
+</Project>
