@@ -1,6 +1,7 @@
 <Solution>
     <Folder Name="/src/">
         <Project Path="src/SquidStd.Abstractions/SquidStd.Abstractions.csproj"/>
+        <Project Path="src/SquidStd.Aws.Abstractions/SquidStd.Aws.Abstractions.csproj"/>
         <Project Path="src/SquidStd.AspNetCore/SquidStd.AspNetCore.csproj"/>
         <Project Path="src/SquidStd.Caching.Abstractions/SquidStd.Caching.Abstractions.csproj"/>
         <Project Path="src/SquidStd.Caching.Redis/SquidStd.Caching.Redis.csproj"/>
@@ -10,6 +11,7 @@
         <Project Path="src/SquidStd.Database/SquidStd.Database.csproj"/>
         <Project Path="src/SquidStd.Messaging.Abstractions/SquidStd.Messaging.Abstractions.csproj"/>
         <Project Path="src/SquidStd.Messaging.RabbitMq/SquidStd.Messaging.RabbitMq.csproj"/>
+        <Project Path="src/SquidStd.Messaging.Sqs/SquidStd.Messaging.Sqs.csproj"/>
         <Project Path="src/SquidStd.Messaging/SquidStd.Messaging.csproj"/>
         <Project Path="src/SquidStd.Network/SquidStd.Network.csproj"/>
         <Project Path="src/SquidStd.Plugin.Abstractions/SquidStd.Plugin.Abstractions.csproj"/>

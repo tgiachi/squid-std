@@ -14,9 +14,9 @@ public class S3StorageServiceTests
     }
 
     [Fact]
-    public void Ctor_MissingEndpoint_Throws()
-        => Assert.Throws<ArgumentException>(
-            () => new S3StorageService(new() { AccessKey = "a", SecretKey = "b", Bucket = "c" })
+    public void Ctor_MissingServiceUrl_Throws()
+        => Assert.ThrowsAny<ArgumentException>(
+            () => new S3StorageService(new() { Aws = new() { AccessKey = "a", SecretKey = "b" }, Bucket = "c" })
         );
 
     [Fact]
@@ -76,11 +76,13 @@ public class S3StorageServiceTests
         => new(
             new()
             {
-                Endpoint = _fixture.Endpoint,
-                AccessKey = _fixture.AccessKey,
-                SecretKey = _fixture.SecretKey,
-                Bucket = "squidstd-tests",
-                UseSsl = false
+                Aws = new()
+                {
+                    ServiceUrl = _fixture.ServiceUrl,
+                    AccessKey = _fixture.AccessKey,
+                    SecretKey = _fixture.SecretKey
+                },
+                Bucket = "squidstd-tests"
             }
         );
 }

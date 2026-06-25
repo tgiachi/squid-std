@@ -21,9 +21,9 @@ public sealed class S3StorageService : IStorageService, IDisposable
 
     public S3StorageService(S3StorageOptions options)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(options.Endpoint);
-        ArgumentException.ThrowIfNullOrWhiteSpace(options.AccessKey);
-        ArgumentException.ThrowIfNullOrWhiteSpace(options.SecretKey);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.Aws.ServiceUrl);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.Aws.AccessKey);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.Aws.SecretKey);
         ArgumentException.ThrowIfNullOrWhiteSpace(options.Bucket);
 
         _client = CreateClient(options);
@@ -147,14 +147,17 @@ public sealed class S3StorageService : IStorageService, IDisposable
 
     private static IMinioClient CreateClient(S3StorageOptions options)
     {
-        var minio = new MinioClient()
-                    .WithEndpoint(options.Endpoint)
-                    .WithCredentials(options.AccessKey, options.SecretKey)
-                    .WithSSL(options.UseSsl);
+        var uri = new Uri(options.Aws.ServiceUrl!, UriKind.Absolute);
+        var endpoint = uri.IsDefaultPort ? uri.Host : $"{uri.Host}:{uri.Port}";
 
-        if (!string.IsNullOrWhiteSpace(options.Region))
+        var minio = new MinioClient()
+                    .WithEndpoint(endpoint)
+                    .WithCredentials(options.Aws.AccessKey, options.Aws.SecretKey)
+                    .WithSSL(string.Equals(uri.Scheme, "https", StringComparison.OrdinalIgnoreCase));
+
+        if (!string.IsNullOrWhiteSpace(options.Aws.Region))
         {
-            minio = minio.WithRegion(options.Region);
+            minio = minio.WithRegion(options.Aws.Region);
         }
 
         return minio.Build();

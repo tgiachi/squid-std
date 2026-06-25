@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\SquidStd.Storage.Abstractions\SquidStd.Storage.Abstractions.csproj"/>
+        <ProjectReference Include="..\SquidStd.Aws.Abstractions\SquidStd.Aws.Abstractions.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
