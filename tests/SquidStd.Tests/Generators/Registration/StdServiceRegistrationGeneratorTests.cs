@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using SquidStd.Generators.Services;
 using SquidStd.Tests.Generators.Support;
 
@@ -9,15 +11,15 @@ public class StdServiceRegistrationGeneratorTests
     public void Run_GeneratesRegistrationExtension_WhenServiceIsAnnotated()
     {
         const string source = """
-            using SquidStd.Abstractions.Attributes;
+                              using SquidStd.Abstractions.Attributes;
 
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            public interface ISampleService { }
+                              public interface ISampleService { }
 
-            [RegisterStdService(typeof(ISampleService), Priority = 10)]
-            public sealed class SampleService : ISampleService { }
-            """;
+                              [RegisterStdService(typeof(ISampleService), Priority = 10)]
+                              public sealed class SampleService : ISampleService { }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new StdServiceRegistrationGenerator());
         var generatedSource = SingleGeneratedSource(result, "SquidStd.GeneratedStdServiceRegistration.g.cs");
@@ -34,11 +36,11 @@ public class StdServiceRegistrationGeneratorTests
     public void Run_DoesNotRegisterService_WhenAttributeIsMissing()
     {
         const string source = """
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            public interface ISampleService { }
-            public sealed class SampleService : ISampleService { }
-            """;
+                              public interface ISampleService { }
+                              public sealed class SampleService : ISampleService { }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new StdServiceRegistrationGenerator());
         var generatedSource = SingleGeneratedSource(result, "SquidStd.GeneratedStdServiceRegistration.g.cs");
@@ -51,10 +53,10 @@ public class StdServiceRegistrationGeneratorTests
     public void Run_GeneratesNoOpExtension_WhenNoServicesExist()
     {
         const string source = """
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            public sealed class EmptyType { }
-            """;
+                              public sealed class EmptyType { }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new StdServiceRegistrationGenerator());
         var generatedSource = SingleGeneratedSource(result, "SquidStd.GeneratedStdServiceRegistration.g.cs");
@@ -68,13 +70,13 @@ public class StdServiceRegistrationGeneratorTests
     public void Run_ReportsDiagnostic_WhenServiceContractIsMissing()
     {
         const string source = """
-            using SquidStd.Abstractions.Attributes;
+                              using SquidStd.Abstractions.Attributes;
 
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            [RegisterStdService]
-            public sealed class SampleService { }
-            """;
+                              [RegisterStdService]
+                              public sealed class SampleService { }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new StdServiceRegistrationGenerator());
         var diagnostics = result.RunResult.Diagnostics.Concat(result.Diagnostics);
@@ -83,9 +85,9 @@ public class StdServiceRegistrationGeneratorTests
     }
 
     private static string SingleGeneratedSource(
-        (Microsoft.CodeAnalysis.Compilation Compilation,
-         Microsoft.CodeAnalysis.GeneratorDriverRunResult RunResult,
-         System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.Diagnostic> Diagnostics) result,
+        (Compilation Compilation,
+            GeneratorDriverRunResult RunResult,
+            ImmutableArray<Diagnostic> Diagnostics) result,
         string fileName
     )
     {

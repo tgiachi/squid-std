@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using SquidStd.Generators.Scripting.Lua;
 using SquidStd.Tests.Generators.Support;
 
@@ -9,15 +11,15 @@ public class ScriptModuleRegistrationGeneratorTests
     public void Run_GeneratesRegistrationExtension_WhenScriptModuleIsAnnotated()
     {
         const string source = """
-            using SquidStd.Scripting.Lua.Attributes;
-            using SquidStd.Scripting.Lua.Attributes.Scripts;
+                              using SquidStd.Scripting.Lua.Attributes;
+                              using SquidStd.Scripting.Lua.Attributes.Scripts;
 
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            [RegisterScriptModule]
-            [ScriptModule("sample")]
-            public sealed class SampleScriptModule { }
-            """;
+                              [RegisterScriptModule]
+                              [ScriptModule("sample")]
+                              public sealed class SampleScriptModule { }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new ScriptModuleRegistrationGenerator());
         var generatedSource = SingleGeneratedSource(result, "SquidStd.GeneratedScriptModuleRegistration.g.cs");
@@ -34,13 +36,13 @@ public class ScriptModuleRegistrationGeneratorTests
     public void Run_DoesNotRegisterScriptModule_WhenRegisterAttributeIsMissing()
     {
         const string source = """
-            using SquidStd.Scripting.Lua.Attributes.Scripts;
+                              using SquidStd.Scripting.Lua.Attributes.Scripts;
 
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            [ScriptModule("sample")]
-            public sealed class SampleScriptModule { }
-            """;
+                              [ScriptModule("sample")]
+                              public sealed class SampleScriptModule { }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new ScriptModuleRegistrationGenerator());
         var generatedSource = SingleGeneratedSource(result, "SquidStd.GeneratedScriptModuleRegistration.g.cs");
@@ -53,10 +55,10 @@ public class ScriptModuleRegistrationGeneratorTests
     public void Run_GeneratesNoOpExtension_WhenNoScriptModulesExist()
     {
         const string source = """
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            public sealed class EmptyType { }
-            """;
+                              public sealed class EmptyType { }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new ScriptModuleRegistrationGenerator());
         var generatedSource = SingleGeneratedSource(result, "SquidStd.GeneratedScriptModuleRegistration.g.cs");
@@ -70,13 +72,13 @@ public class ScriptModuleRegistrationGeneratorTests
     public void Run_ReportsDiagnostic_WhenScriptModuleMetadataIsMissing()
     {
         const string source = """
-            using SquidStd.Scripting.Lua.Attributes;
+                              using SquidStd.Scripting.Lua.Attributes;
 
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            [RegisterScriptModule]
-            public sealed class SampleScriptModule { }
-            """;
+                              [RegisterScriptModule]
+                              public sealed class SampleScriptModule { }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new ScriptModuleRegistrationGenerator());
         var diagnostics = result.RunResult.Diagnostics.Concat(result.Diagnostics);
@@ -88,15 +90,15 @@ public class ScriptModuleRegistrationGeneratorTests
     public void Run_ReportsDiagnostic_WhenScriptModuleIsAbstract()
     {
         const string source = """
-            using SquidStd.Scripting.Lua.Attributes;
-            using SquidStd.Scripting.Lua.Attributes.Scripts;
+                              using SquidStd.Scripting.Lua.Attributes;
+                              using SquidStd.Scripting.Lua.Attributes.Scripts;
 
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            [RegisterScriptModule]
-            [ScriptModule("sample")]
-            public abstract class SampleScriptModule { }
-            """;
+                              [RegisterScriptModule]
+                              [ScriptModule("sample")]
+                              public abstract class SampleScriptModule { }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new ScriptModuleRegistrationGenerator());
         var diagnostics = result.RunResult.Diagnostics.Concat(result.Diagnostics);
@@ -105,9 +107,9 @@ public class ScriptModuleRegistrationGeneratorTests
     }
 
     private static string SingleGeneratedSource(
-        (Microsoft.CodeAnalysis.Compilation Compilation,
-         Microsoft.CodeAnalysis.GeneratorDriverRunResult RunResult,
-         System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.Diagnostic> Diagnostics) result,
+        (Compilation Compilation,
+            GeneratorDriverRunResult RunResult,
+            ImmutableArray<Diagnostic> Diagnostics) result,
         string fileName
     )
     {

@@ -1,3 +1,4 @@
+using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Generators.Workers;
 using SquidStd.Messaging.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
@@ -9,7 +10,7 @@ using SquidStd.Workers.Manager.Extensions;
 using SquidStd.Workers.Manager.Interfaces;
 
 var bootstrap = SquidStdBootstrap.Create(
-    new()
+    new SquidStdOptions
     {
         ConfigName = "squidstd",
         RootDirectory = AppContext.BaseDirectory
@@ -18,8 +19,7 @@ var bootstrap = SquidStdBootstrap.Create(
 
 #region step-1
 
-bootstrap.ConfigureServices(
-    c =>
+bootstrap.ConfigureServices(c =>
     {
         c.AddInMemoryMessaging();
         c.AddWorkers();

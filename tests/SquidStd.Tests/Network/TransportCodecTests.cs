@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Net;
 using SquidStd.Network.Client;
 using SquidStd.Network.Data;
@@ -16,14 +17,14 @@ public class TransportCodecTests
         var received = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         await using var server = new SquidTcpServer(
-            new(IPAddress.Loopback, 0),
+            new IPEndPoint(IPAddress.Loopback, 0),
             connectionPipelineFactory: () => new ConnectionPipeline(new CountingXorCodec(7))
         );
         server.OnDataReceived += (_, e) => received.TrySetResult(e.Data.ToArray());
         await server.StartAsync(CancellationToken.None);
 
         await using var client = await SquidStdTcpClient.ConnectAsync(
-            new(IPAddress.Loopback, server.Port),
+            new IPEndPoint(IPAddress.Loopback, server.Port),
             codec: new CountingXorCodec(7)
         );
 
@@ -38,11 +39,11 @@ public class TransportCodecTests
     {
         var received = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        await using var server = new SquidTcpServer(new(IPAddress.Loopback, 0));
+        await using var server = new SquidTcpServer(new IPEndPoint(IPAddress.Loopback, 0));
         server.OnDataReceived += (_, e) => received.TrySetResult(e.Data.ToArray());
         await server.StartAsync(CancellationToken.None);
 
-        await using var client = await SquidStdTcpClient.ConnectAsync(new(IPAddress.Loopback, server.Port));
+        await using var client = await SquidStdTcpClient.ConnectAsync(new IPEndPoint(IPAddress.Loopback, server.Port));
 
         var payload = new byte[] { 42, 43, 44 };
         await client.SendAsync(payload, CancellationToken.None);
@@ -57,11 +58,11 @@ public class TransportCodecTests
         const int payloadSize = 16;
         var concurrentTimeout = TimeSpan.FromSeconds(10);
 
-        var frames = new System.Collections.Concurrent.ConcurrentBag<byte[]>();
+        var frames = new ConcurrentBag<byte[]>();
         using var done = new CountdownEvent(messageCount);
 
         await using var server = new SquidTcpServer(
-            new(IPAddress.Loopback, 0),
+            new IPEndPoint(IPAddress.Loopback, 0),
             connectionPipelineFactory: () => new ConnectionPipeline(new CountingXorCodec(5), null, new LengthPrefixFramer())
         );
         server.OnDataReceived += (_, e) =>
@@ -72,7 +73,7 @@ public class TransportCodecTests
         await server.StartAsync(CancellationToken.None);
 
         await using var client = await SquidStdTcpClient.ConnectAsync(
-            new(IPAddress.Loopback, server.Port),
+            new IPEndPoint(IPAddress.Loopback, server.Port),
             codec: new CountingXorCodec(5)
         );
 
@@ -117,17 +118,17 @@ public class TransportCodecTests
     [Fact]
     public async Task Codec_WithFramer_EmitsDecodedFrames()
     {
-        var frames = new System.Collections.Concurrent.BlockingCollection<byte[]>();
+        var frames = new BlockingCollection<byte[]>();
 
         await using var server = new SquidTcpServer(
-            new(IPAddress.Loopback, 0),
+            new IPEndPoint(IPAddress.Loopback, 0),
             connectionPipelineFactory: () => new ConnectionPipeline(new CountingXorCodec(2), null, new LengthPrefixFramer())
         );
         server.OnDataReceived += (_, e) => frames.Add(e.Data.ToArray());
         await server.StartAsync(CancellationToken.None);
 
         await using var client = await SquidStdTcpClient.ConnectAsync(
-            new(IPAddress.Loopback, server.Port),
+            new IPEndPoint(IPAddress.Loopback, server.Port),
             codec: new CountingXorCodec(2)
         );
 
@@ -147,10 +148,10 @@ public class TransportCodecTests
     public async Task Codec_IsolatesStatePerConnection()
     {
         var payload = new byte[] { 9, 8, 7, 6 };
-        var inbox = new System.Collections.Concurrent.BlockingCollection<byte[]>();
+        var inbox = new BlockingCollection<byte[]>();
 
         await using var server = new SquidTcpServer(
-            new(IPAddress.Loopback, 0),
+            new IPEndPoint(IPAddress.Loopback, 0),
             connectionPipelineFactory: () => new ConnectionPipeline(new CountingXorCodec(3))
         );
         server.OnDataReceived += (_, e) => inbox.Add(e.Data.ToArray());
@@ -161,7 +162,7 @@ public class TransportCodecTests
         for (var i = 0; i < 2; i++)
         {
             await using var client = await SquidStdTcpClient.ConnectAsync(
-                new(IPAddress.Loopback, server.Port),
+                new IPEndPoint(IPAddress.Loopback, server.Port),
                 codec: new CountingXorCodec(3)
             );
             await client.SendAsync(payload, CancellationToken.None);
@@ -180,7 +181,7 @@ public class TransportCodecTests
         var second = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         await using var server = new SquidTcpServer(
-            new(IPAddress.Loopback, 0),
+            new IPEndPoint(IPAddress.Loopback, 0),
             connectionPipelineFactory: () => new ConnectionPipeline(new CountingXorCodec(10))
         );
         server.OnDataReceived += (_, e) =>
@@ -198,7 +199,7 @@ public class TransportCodecTests
         await server.StartAsync(CancellationToken.None);
 
         await using var client = await SquidStdTcpClient.ConnectAsync(
-            new(IPAddress.Loopback, server.Port),
+            new IPEndPoint(IPAddress.Loopback, server.Port),
             codec: new CountingXorCodec(10)
         );
 

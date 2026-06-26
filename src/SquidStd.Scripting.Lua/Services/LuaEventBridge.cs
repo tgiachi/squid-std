@@ -6,7 +6,7 @@ using SquidStd.Scripting.Lua.Interfaces.Events;
 namespace SquidStd.Scripting.Lua.Services;
 
 /// <summary>
-/// Default Lua event bridge backed by named MoonSharp closures.
+///     Default Lua event bridge backed by named MoonSharp closures.
 /// </summary>
 public sealed class LuaEventBridge : ILuaEventBridge
 {

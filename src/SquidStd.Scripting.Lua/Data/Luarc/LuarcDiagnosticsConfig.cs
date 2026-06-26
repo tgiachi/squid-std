@@ -3,10 +3,9 @@ using System.Text.Json.Serialization;
 namespace SquidStd.Scripting.Lua.Data.Luarc;
 
 /// <summary>
-/// Diagnostics configuration for Lua Language Server
+///     Diagnostics configuration for Lua Language Server
 /// </summary>
 public class LuarcDiagnosticsConfig
 {
-    [JsonPropertyName("globals")]
-    public string[] Globals { get; set; } = [];
+    [JsonPropertyName("globals")] public string[] Globals { get; set; } = [];
 }

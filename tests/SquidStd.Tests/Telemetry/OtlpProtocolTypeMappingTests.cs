@@ -8,9 +8,13 @@ public class OtlpProtocolTypeMappingTests
 {
     [Fact]
     public void Grpc_MapsToGrpc()
-        => Assert.Equal(OtlpExportProtocol.Grpc, TelemetryPipeline.Map(OtlpProtocolType.Grpc));
+    {
+        Assert.Equal(OtlpExportProtocol.Grpc, TelemetryPipeline.Map(OtlpProtocolType.Grpc));
+    }
 
     [Fact]
     public void HttpProtobuf_MapsToHttpProtobuf()
-        => Assert.Equal(OtlpExportProtocol.HttpProtobuf, TelemetryPipeline.Map(OtlpProtocolType.HttpProtobuf));
+    {
+        Assert.Equal(OtlpExportProtocol.HttpProtobuf, TelemetryPipeline.Map(OtlpProtocolType.HttpProtobuf));
+    }
 }

@@ -4,7 +4,7 @@ using Serilog.Events;
 namespace SquidStd.Tests.Support;
 
 /// <summary>
-/// In-memory Serilog sink that records emitted log events for assertions.
+///     In-memory Serilog sink that records emitted log events for assertions.
 /// </summary>
 public sealed class CapturingLogSink : ILogEventSink
 {

@@ -8,8 +8,8 @@ public class ScriptResultBuilderTests
     public void CreateError_BuildsFailedResult()
     {
         var result = ScriptResultBuilder.CreateError()
-                                        .WithMessage("failed")
-                                        .Build();
+            .WithMessage("failed")
+            .Build();
 
         Assert.False(result.Success);
         Assert.Equal("failed", result.Message);
@@ -20,9 +20,9 @@ public class ScriptResultBuilderTests
     public void CreateSuccess_BuildsSuccessfulResult()
     {
         var result = ScriptResultBuilder.CreateSuccess()
-                                        .WithMessage("ok")
-                                        .WithData(42)
-                                        .Build();
+            .WithMessage("ok")
+            .WithData(42)
+            .Build();
 
         Assert.True(result.Success);
         Assert.Equal("ok", result.Message);

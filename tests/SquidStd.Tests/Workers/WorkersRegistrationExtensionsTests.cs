@@ -12,20 +12,6 @@ namespace SquidStd.Tests.Workers;
 
 public class WorkersRegistrationExtensionsTests
 {
-    private sealed class EchoJobHandler : IJobHandler
-    {
-        public static int Calls;
-
-        public string JobName => "echo";
-
-        public Task HandleAsync(JobRequest job, CancellationToken cancellationToken)
-        {
-            Interlocked.Increment(ref Calls);
-
-            return Task.CompletedTask;
-        }
-    }
-
     [Fact]
     public async Task AddJobHandler_MakesHandlerReachableFromDispatcher()
     {
@@ -35,7 +21,7 @@ public class WorkersRegistrationExtensionsTests
         container.AddJobHandler<EchoJobHandler>();
 
         var dispatcher = container.Resolve<IJobDispatcher>();
-        await dispatcher.DispatchAsync(new("echo", new Dictionary<string, string>()), CancellationToken.None);
+        await dispatcher.DispatchAsync(new JobRequest("echo", new Dictionary<string, string>()), CancellationToken.None);
 
         Assert.Equal(1, EchoJobHandler.Calls);
     }
@@ -63,5 +49,19 @@ public class WorkersRegistrationExtensionsTests
         container.RegisterInstance(new WorkersConfig { WorkerId = "w1", MaxConcurrency = 4 });
 
         return container;
+    }
+
+    private sealed class EchoJobHandler : IJobHandler
+    {
+        public static int Calls;
+
+        public string JobName => "echo";
+
+        public Task HandleAsync(JobRequest job, CancellationToken cancellationToken)
+        {
+            Interlocked.Increment(ref Calls);
+
+            return Task.CompletedTask;
+        }
     }
 }

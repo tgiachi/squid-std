@@ -3,17 +3,17 @@ using System.Diagnostics;
 namespace SquidStd.Tests.Integration.Templates;
 
 /// <summary>
-/// Packs SquidStd.Templates, installs it into an isolated dotnet-new hive, instantiates each template, and
-/// asserts the generated output (name substitution, version-sentinel replacement, messaging branch). No build
-/// of the generated projects: the referenced SquidStd.* packages may not be published yet.
+///     Packs SquidStd.Templates, installs it into an isolated dotnet-new hive, instantiates each template, and
+///     asserts the generated output (name substitution, version-sentinel replacement, messaging branch). No build
+///     of the generated projects: the referenced SquidStd.* packages may not be published yet.
 /// </summary>
 public sealed class TemplatePackTests : IDisposable
 {
-    private readonly string _repoRoot;
-    private readonly string _hive;
-    private readonly string _workDir;
     private readonly bool _dotnetAvailable;
+    private readonly string _hive;
     private readonly bool _installed;
+    private readonly string _repoRoot;
+    private readonly string _workDir;
 
     public TemplatePackTests()
     {
@@ -34,18 +34,26 @@ public sealed class TemplatePackTests : IDisposable
         Assert.True(TryRun("dotnet", $"pack \"{project}\" -c Release", _repoRoot, out _), "pack failed");
 
         var nupkg = Directory
-                    .GetFiles(
-                        Path.Combine(_repoRoot, "src", "SquidStd.Templates", "bin", "Release"),
-                        "SquidStd.Templates.*.nupkg"
-                    )
-                    .OrderByDescending(File.GetLastWriteTimeUtc)
-                    .First();
+            .GetFiles(
+                Path.Combine(_repoRoot, "src", "SquidStd.Templates", "bin", "Release"),
+                "SquidStd.Templates.*.nupkg"
+            )
+            .OrderByDescending(File.GetLastWriteTimeUtc)
+            .First();
 
         _installed = TryRun("dotnet", $"new install \"{nupkg}\" --debug:custom-hive \"{_hive}\"", _repoRoot, out _);
     }
 
     // xUnit 2.9.3 has no dynamic skip; guard with an early return when the CLI/install is unavailable.
     private bool Ready => _dotnetAvailable && _installed;
+
+    public void Dispose()
+    {
+        // The hive is isolated to this test instance, so deleting it fully uninstalls the pack — no
+        // global state to clean up.
+        TryDelete(_workDir);
+        TryDelete(_hive);
+    }
 
     [Fact]
     public void AspNetCore_Instantiates_WithDockerfile()
@@ -60,14 +68,6 @@ public sealed class TemplatePackTests : IDisposable
         Assert.True(File.Exists(Path.Combine(outDir, "Acme.Api.csproj")));
         Assert.True(File.Exists(Path.Combine(outDir, "Dockerfile")));
         Assert.Contains("UseSquidStd", File.ReadAllText(Path.Combine(outDir, "Program.cs")));
-    }
-
-    public void Dispose()
-    {
-        // The hive is isolated to this test instance, so deleting it fully uninstalls the pack — no
-        // global state to clean up.
-        TryDelete(_workDir);
-        TryDelete(_hive);
     }
 
     [Fact]

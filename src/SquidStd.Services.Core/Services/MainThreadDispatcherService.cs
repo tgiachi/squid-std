@@ -6,7 +6,7 @@ using SquidStd.Core.Interfaces.Threading;
 namespace SquidStd.Services.Core.Services;
 
 /// <summary>
-/// Queues callbacks and drains them on the calling thread.
+///     Queues callbacks and drains them on the calling thread.
 /// </summary>
 public sealed class MainThreadDispatcherService : IMainThreadDispatcher
 {

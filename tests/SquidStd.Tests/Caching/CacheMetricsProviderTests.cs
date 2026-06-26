@@ -17,7 +17,9 @@ public class CacheMetricsProviderTests
         var samples = await metrics.CollectAsync();
 
         double Value(string name)
-            => samples.Single(s => s.Name == name).Value;
+        {
+            return samples.Single(s => s.Name == name).Value;
+        }
 
         Assert.Equal(2, Value("hits"));
         Assert.Equal(1, Value("misses"));
@@ -28,5 +30,7 @@ public class CacheMetricsProviderTests
 
     [Fact]
     public void ProviderName_IsCache()
-        => Assert.Equal("cache", new CacheMetricsProvider().ProviderName);
+    {
+        Assert.Equal("cache", new CacheMetricsProvider().ProviderName);
+    }
 }

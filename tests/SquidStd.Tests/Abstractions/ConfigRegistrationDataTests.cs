@@ -8,7 +8,7 @@ public class ConfigRegistrationDataTests
     [Fact]
     public void CreateDefault_IncompatibleFactory_Throws()
     {
-        var entry = new ConfigRegistrationData("test", typeof(TestConfig), () => new());
+        var entry = new ConfigRegistrationData("test", typeof(TestConfig), () => new object());
 
         Assert.Throws<InvalidOperationException>(() => entry.CreateDefault());
     }
@@ -34,11 +34,18 @@ public class ConfigRegistrationDataTests
 
     [Fact]
     public void Ctor_InvalidSectionName_Throws()
-        => Assert.Throws<ArgumentException>(
-            () => new ConfigRegistrationData(string.Empty, typeof(TestConfig), () => new TestConfig())
+    {
+        Assert.Throws<ArgumentException>(() => new ConfigRegistrationData(
+                string.Empty,
+                typeof(TestConfig),
+                () => new TestConfig()
+            )
         );
+    }
 
     [Fact]
     public void Ctor_NullType_Throws()
-        => Assert.Throws<ArgumentNullException>(() => new ConfigRegistrationData("test", null!, () => new TestConfig()));
+    {
+        Assert.Throws<ArgumentNullException>(() => new ConfigRegistrationData("test", null!, () => new TestConfig()));
+    }
 }

@@ -49,8 +49,24 @@ public class SqsQueueProviderTests
         var a = 0;
         var b = 0;
         using var done = new CountdownEvent(total);
-        provider.Subscribe(queue, (_, _) => { Interlocked.Increment(ref a); done.Signal(); return Task.CompletedTask; });
-        provider.Subscribe(queue, (_, _) => { Interlocked.Increment(ref b); done.Signal(); return Task.CompletedTask; });
+        provider.Subscribe(
+            queue,
+            (_, _) =>
+            {
+                Interlocked.Increment(ref a);
+                done.Signal();
+                return Task.CompletedTask;
+            }
+        );
+        provider.Subscribe(
+            queue,
+            (_, _) =>
+            {
+                Interlocked.Increment(ref b);
+                done.Signal();
+                return Task.CompletedTask;
+            }
+        );
 
         for (var i = 0; i < total; i++)
         {
@@ -65,15 +81,22 @@ public class SqsQueueProviderTests
     public async Task AlwaysFailing_IsDeadLettered()
     {
         await using var provider = NewProvider(
-            new() { MaxDeliveryAttempts = 1 },
-            new() { Aws = _fixture.Aws, VisibilityTimeout = TimeSpan.FromSeconds(1), WaitTimeSeconds = 1 }
+            new MessagingOptions { MaxDeliveryAttempts = 1 },
+            new SqsOptions { Aws = _fixture.Aws, VisibilityTimeout = TimeSpan.FromSeconds(1), WaitTimeSeconds = 1 }
         );
         await provider.StartAsync();
         var queue = Queue();
         provider.Subscribe(queue, (_, _) => throw new InvalidOperationException("always"));
 
         var deadLettered = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
-        provider.Subscribe(queue + "-dlq", (payload, _) => { deadLettered.TrySetResult(Text(payload)); return Task.CompletedTask; });
+        provider.Subscribe(
+            queue + "-dlq",
+            (payload, _) =>
+            {
+                deadLettered.TrySetResult(Text(payload));
+                return Task.CompletedTask;
+            }
+        );
 
         await provider.PublishAsync(queue, Bytes("poison"));
 
@@ -81,17 +104,25 @@ public class SqsQueueProviderTests
     }
 
     private SqsQueueProvider NewProvider(MessagingOptions? messaging = null, SqsOptions? sqs = null)
-        => new(
+    {
+        return new SqsQueueProvider(
             sqs ?? new SqsOptions { Aws = _fixture.Aws, WaitTimeSeconds = 1 },
             messaging ?? new MessagingOptions()
         );
+    }
 
     private static ReadOnlyMemory<byte> Bytes(string s)
-        => Encoding.UTF8.GetBytes(s);
+    {
+        return Encoding.UTF8.GetBytes(s);
+    }
 
     private static string Text(ReadOnlyMemory<byte> b)
-        => Encoding.UTF8.GetString(b.Span);
+    {
+        return Encoding.UTF8.GetString(b.Span);
+    }
 
     private static string Queue()
-        => "q-" + Guid.NewGuid().ToString("N");
+    {
+        return "q-" + Guid.NewGuid().ToString("N");
+    }
 }

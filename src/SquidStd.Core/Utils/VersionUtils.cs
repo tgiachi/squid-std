@@ -3,19 +3,21 @@ using System.Reflection;
 namespace SquidStd.Core.Utils;
 
 /// <summary>
-/// Provides utility methods for reading assembly version metadata.
+///     Provides utility methods for reading assembly version metadata.
 /// </summary>
 public static class VersionUtils
 {
     /// <summary>
-    /// Gets the informational version for the LyLy.Core assembly.
+    ///     Gets the informational version for the LyLy.Core assembly.
     /// </summary>
     /// <returns>The package version declared for LyLy.Core.</returns>
     public static string GetVersion()
-        => GetVersion(typeof(VersionUtils).Assembly);
+    {
+        return GetVersion(typeof(VersionUtils).Assembly);
+    }
 
     /// <summary>
-    /// Gets the informational version for the specified assembly.
+    ///     Gets the informational version for the specified assembly.
     /// </summary>
     /// <param name="assembly">The assembly to read version metadata from.</param>
     /// <returns>The assembly informational version, or the assembly version when informational metadata is unavailable.</returns>
@@ -24,7 +26,7 @@ public static class VersionUtils
         ArgumentNullException.ThrowIfNull(assembly);
 
         var informationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                                           ?.InformationalVersion;
+            ?.InformationalVersion;
 
         if (!string.IsNullOrWhiteSpace(informationalVersion))
         {

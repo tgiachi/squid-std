@@ -7,20 +7,6 @@ namespace SquidStd.Tests.Services.Core;
 
 public class EventListenerActivatorTests
 {
-    private sealed record PingEvent(string Message) : IEvent;
-
-    private sealed class PingListener : IEventListener<PingEvent>
-    {
-        public PingEvent? LastEvent { get; private set; }
-
-        public Task HandleAsync(PingEvent eventData, CancellationToken cancellationToken = default)
-        {
-            LastEvent = eventData;
-
-            return Task.CompletedTask;
-        }
-    }
-
     [Fact]
     public async Task StartAsync_SubscribesRegisteredListeners()
     {
@@ -51,5 +37,19 @@ public class EventListenerActivatorTests
         var exception = await Record.ExceptionAsync(() => activator.StartAsync(CancellationToken.None).AsTask());
 
         Assert.Null(exception);
+    }
+
+    private sealed record PingEvent(string Message) : IEvent;
+
+    private sealed class PingListener : IEventListener<PingEvent>
+    {
+        public PingEvent? LastEvent { get; private set; }
+
+        public Task HandleAsync(PingEvent eventData, CancellationToken cancellationToken = default)
+        {
+            LastEvent = eventData;
+
+            return Task.CompletedTask;
+        }
     }
 }

@@ -8,8 +8,8 @@ using SquidStd.Services.Core.Services.Internal;
 namespace SquidStd.Services.Core.Services;
 
 /// <summary>
-/// In-process event bus with parallel per-listener dispatch, catch-all listeners,
-/// fault isolation, and slow-listener telemetry.
+///     In-process event bus with parallel per-listener dispatch, catch-all listeners,
+///     fault isolation, and slow-listener telemetry.
 /// </summary>
 public sealed class EventBusService : IEventBus, IDisposable
 {
@@ -19,7 +19,7 @@ public sealed class EventBusService : IEventBus, IDisposable
     private bool _disposed;
 
     /// <summary>
-    /// Initializes the event bus with default options.
+    ///     Initializes the event bus with default options.
     /// </summary>
     public EventBusService()
         : this(new EventBusOptions())
@@ -27,7 +27,7 @@ public sealed class EventBusService : IEventBus, IDisposable
     }
 
     /// <summary>
-    /// Initializes the event bus with the supplied options.
+    ///     Initializes the event bus with the supplied options.
     /// </summary>
     public EventBusService(EventBusOptions options)
     {
@@ -35,9 +35,23 @@ public sealed class EventBusService : IEventBus, IDisposable
     }
 
     /// <inheritdoc />
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+        _listeners.Clear();
+    }
+
+    /// <inheritdoc />
     public void Publish<TEvent>(TEvent eventData)
         where TEvent : IEvent
-        => PublishAsync(eventData, CancellationToken.None).GetAwaiter().GetResult();
+    {
+        PublishAsync(eventData, CancellationToken.None).GetAwaiter().GetResult();
+    }
 
     /// <inheritdoc />
     public async Task PublishAsync<TEvent>(TEvent eventData, CancellationToken cancellationToken = default)
@@ -179,17 +193,5 @@ public sealed class EventBusService : IEventBus, IDisposable
         {
             throw new ObjectDisposedException(nameof(EventBusService));
         }
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        _disposed = true;
-        _listeners.Clear();
     }
 }

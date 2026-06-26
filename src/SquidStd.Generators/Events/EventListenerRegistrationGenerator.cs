@@ -11,6 +11,7 @@ public sealed class EventListenerRegistrationGenerator : IIncrementalGenerator
     private const string EventListenerMetadataName = "IEventListener`1";
     private const string EventListenerNamespace = "SquidStd.Core.Interfaces.Events";
     private const string GeneratedFileName = "SquidStd.GeneratedEventListenerRegistration.g.cs";
+
     private const string RegisterEventListenerAttributeName =
         "SquidStd.Abstractions.Attributes.RegisterEventListenerAttribute";
 
@@ -61,8 +62,8 @@ public sealed class EventListenerRegistrationGenerator : IIncrementalGenerator
             }
 
             var isSupported = !listenerType.IsGenericType
-                && IsAccessibleFromGeneratedSource(listenerType)
-                && IsAccessibleFromGeneratedSource(eventType);
+                              && IsAccessibleFromGeneratedSource(listenerType)
+                              && IsAccessibleFromGeneratedSource(eventType);
 
             candidates.Add(
                 new EventListenerCandidate(
@@ -83,7 +84,7 @@ public sealed class EventListenerRegistrationGenerator : IIncrementalGenerator
         var originalDefinition = interfaceType.OriginalDefinition;
 
         return originalDefinition.MetadataName == EventListenerMetadataName
-            && originalDefinition.ContainingNamespace.ToDisplayString() == EventListenerNamespace;
+               && originalDefinition.ContainingNamespace.ToDisplayString() == EventListenerNamespace;
     }
 
     private static bool IsAccessibleFromGeneratedSource(INamedTypeSymbol type)
@@ -140,8 +141,7 @@ public sealed class EventListenerRegistrationGenerator : IIncrementalGenerator
             }
         }
 
-        candidates.Sort(
-            static (left, right) => string.Compare(
+        candidates.Sort(static (left, right) => string.Compare(
                 left.ListenerTypeName,
                 right.ListenerTypeName,
                 StringComparison.Ordinal

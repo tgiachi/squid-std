@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 namespace SquidStd.Core.Utils;
 
 /// <summary>
-/// Provides password hashing and verification helpers using PBKDF2-SHA256.
+///     Provides password hashing and verification helpers using PBKDF2-SHA256.
 /// </summary>
 public static class HashUtils
 {
@@ -14,7 +14,7 @@ public static class HashUtils
     private const int DefaultSaltSize = 16;
 
     /// <summary>
-    /// Hashes a password using PBKDF2-SHA256 and returns a serialized payload.
+    ///     Hashes a password using PBKDF2-SHA256 and returns a serialized payload.
     /// </summary>
     /// <param name="password">Plain password.</param>
     /// <returns>Serialized hash payload.</returns>
@@ -41,7 +41,7 @@ public static class HashUtils
     }
 
     /// <summary>
-    /// Verifies a plain password against a serialized PBKDF2-SHA256 payload.
+    ///     Verifies a plain password against a serialized PBKDF2-SHA256 payload.
     /// </summary>
     /// <param name="password">Plain password.</param>
     /// <param name="storedHash">Serialized hash payload.</param>

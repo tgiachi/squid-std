@@ -55,7 +55,7 @@ public class MimeMessageMapperTests
         message.To.Add(new MailboxAddress("Bob", "bob@example.com"));
         message.Cc.Add(new MailboxAddress("Carol", "carol@example.com"));
         message.Subject = "Hello";
-        message.Date = new(2026, 6, 24, 10, 0, 0, TimeSpan.Zero);
+        message.Date = new DateTimeOffset(2026, 6, 24, 10, 0, 0, TimeSpan.Zero);
         message.MessageId = "msg-1@example.com";
 
         var builder = new BodyBuilder

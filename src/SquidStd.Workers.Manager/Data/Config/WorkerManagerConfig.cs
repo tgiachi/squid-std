@@ -3,7 +3,7 @@ using SquidStd.Workers.Abstractions;
 namespace SquidStd.Workers.Manager.Data.Config;
 
 /// <summary>
-/// Configuration for the worker manager (config section "workerManager").
+///     Configuration for the worker manager (config section "workerManager").
 /// </summary>
 public sealed class WorkerManagerConfig
 {

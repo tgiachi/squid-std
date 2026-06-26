@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using SquidStd.Generators.Config;
 using SquidStd.Tests.Generators.Support;
 
@@ -9,13 +11,13 @@ public class ConfigSectionRegistrationGeneratorTests
     public void Run_GeneratesRegistrationExtension_WhenConfigIsAnnotated()
     {
         const string source = """
-            using SquidStd.Abstractions.Attributes;
+                              using SquidStd.Abstractions.Attributes;
 
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            [RegisterConfigSection("workers", Priority = -50)]
-            public sealed class WorkersConfig { }
-            """;
+                              [RegisterConfigSection("workers", Priority = -50)]
+                              public sealed class WorkersConfig { }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new ConfigSectionRegistrationGenerator());
         var generatedSource = SingleGeneratedSource(result, "SquidStd.GeneratedConfigSectionRegistration.g.cs");
@@ -32,10 +34,10 @@ public class ConfigSectionRegistrationGeneratorTests
     public void Run_DoesNotRegisterConfig_WhenAttributeIsMissing()
     {
         const string source = """
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            public sealed class WorkersConfig { }
-            """;
+                              public sealed class WorkersConfig { }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new ConfigSectionRegistrationGenerator());
         var generatedSource = SingleGeneratedSource(result, "SquidStd.GeneratedConfigSectionRegistration.g.cs");
@@ -48,10 +50,10 @@ public class ConfigSectionRegistrationGeneratorTests
     public void Run_GeneratesNoOpExtension_WhenNoConfigsExist()
     {
         const string source = """
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            public sealed class EmptyType { }
-            """;
+                              public sealed class EmptyType { }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new ConfigSectionRegistrationGenerator());
         var generatedSource = SingleGeneratedSource(result, "SquidStd.GeneratedConfigSectionRegistration.g.cs");
@@ -65,13 +67,13 @@ public class ConfigSectionRegistrationGeneratorTests
     public void Run_ReportsDiagnostic_WhenSectionNameIsMissing()
     {
         const string source = """
-            using SquidStd.Abstractions.Attributes;
+                              using SquidStd.Abstractions.Attributes;
 
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            [RegisterConfigSection]
-            public sealed class WorkersConfig { }
-            """;
+                              [RegisterConfigSection]
+                              public sealed class WorkersConfig { }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new ConfigSectionRegistrationGenerator());
         var diagnostics = result.RunResult.Diagnostics.Concat(result.Diagnostics);
@@ -80,9 +82,9 @@ public class ConfigSectionRegistrationGeneratorTests
     }
 
     private static string SingleGeneratedSource(
-        (Microsoft.CodeAnalysis.Compilation Compilation,
-         Microsoft.CodeAnalysis.GeneratorDriverRunResult RunResult,
-         System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.Diagnostic> Diagnostics) result,
+        (Compilation Compilation,
+            GeneratorDriverRunResult RunResult,
+            ImmutableArray<Diagnostic> Diagnostics) result,
         string fileName
     )
     {

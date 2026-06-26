@@ -1,4 +1,5 @@
 using SquidStd.Abstractions.Attributes;
+using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Core.Interfaces.Jobs;
 using SquidStd.Core.Interfaces.Scheduling;
@@ -7,7 +8,7 @@ using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 
 var bootstrap = SquidStdBootstrap.Create(
-    new()
+    new SquidStdOptions
     {
         ConfigName = "squidstd",
         RootDirectory = AppContext.BaseDirectory
@@ -15,10 +16,9 @@ var bootstrap = SquidStdBootstrap.Create(
 );
 
 // The cron scheduler and timer wheel are opt-in.
-bootstrap.ConfigureServices(
-    container => container
-        .RegisterSchedulerServices()
-        .RegisterGeneratedEventListeners()
+bootstrap.ConfigureServices(container => container
+    .RegisterSchedulerServices()
+    .RegisterGeneratedEventListeners()
 );
 
 await bootstrap.StartAsync();

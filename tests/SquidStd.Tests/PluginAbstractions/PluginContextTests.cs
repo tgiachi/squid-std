@@ -6,11 +6,15 @@ public class PluginContextTests
 {
     [Fact]
     public void Data_IsEmptyByDefault()
-        => Assert.Empty(new PluginContext().Data);
+    {
+        Assert.Empty(new PluginContext().Data);
+    }
 
     [Fact]
     public void GetData_MissingKey_Throws()
-        => Assert.Throws<KeyNotFoundException>(() => { _ = new PluginContext().GetData<int>("missing"); });
+    {
+        Assert.Throws<KeyNotFoundException>(() => { _ = new PluginContext().GetData<int>("missing"); });
+    }
 
     [Fact]
     public void GetData_ReferenceType_ReturnsStoredValue()

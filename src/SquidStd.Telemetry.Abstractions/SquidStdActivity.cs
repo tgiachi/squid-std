@@ -3,8 +3,8 @@ using System.Diagnostics;
 namespace SquidStd.Telemetry.Abstractions;
 
 /// <summary>
-/// Well-known SquidStd ActivitySource for app-level custom spans. SquidStd subsystems name their own
-/// sources with the "SquidStd." prefix; the OpenTelemetry provider captures them via "SquidStd.*".
+///     Well-known SquidStd ActivitySource for app-level custom spans. SquidStd subsystems name their own
+///     sources with the "SquidStd." prefix; the OpenTelemetry provider captures them via "SquidStd.*".
 /// </summary>
 public static class SquidStdActivity
 {

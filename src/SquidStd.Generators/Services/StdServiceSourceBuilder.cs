@@ -16,12 +16,16 @@ internal static class StdServiceSourceBuilder
         builder.AppendLine();
         builder.AppendLine("public static class GeneratedStdServiceRegistrationExtensions");
         builder.AppendLine("{");
-        builder.AppendLine("    public static global::DryIoc.IContainer RegisterGeneratedStdServices(this global::DryIoc.IContainer container)");
+        builder.AppendLine(
+            "    public static global::DryIoc.IContainer RegisterGeneratedStdServices(this global::DryIoc.IContainer container)"
+        );
         builder.AppendLine("    {");
 
         for (var i = 0; i < candidates.Count; i++)
         {
-            builder.Append("        global::SquidStd.Abstractions.Extensions.Services.RegisterStdServiceExtension.RegisterStdService<");
+            builder.Append(
+                "        global::SquidStd.Abstractions.Extensions.Services.RegisterStdServiceExtension.RegisterStdService<"
+            );
             builder.Append(candidates[i].ServiceTypeName);
             builder.Append(", ");
             builder.Append(candidates[i].ImplementationTypeName);

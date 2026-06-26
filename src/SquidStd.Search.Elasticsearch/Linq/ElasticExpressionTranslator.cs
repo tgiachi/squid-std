@@ -5,10 +5,10 @@ using System.Text.Json.Nodes;
 namespace SquidStd.Search.Elasticsearch.Linq;
 
 /// <summary>
-/// Translates a constrained LINQ expression chain into an <see cref="ElasticQuery" />. Supported: Where
-/// (==, !=, &lt;, &gt;, &lt;=, &gt;=, &amp;&amp;, ||, !, bool members, string.Contains/StartsWith),
-/// OrderBy/ThenBy(Descending), Skip, Take, and the Match/FullText markers. Anything else throws
-/// <see cref="NotSupportedException" />.
+///     Translates a constrained LINQ expression chain into an <see cref="ElasticQuery" />. Supported: Where
+///     (==, !=, &lt;, &gt;, &lt;=, &gt;=, &amp;&amp;, ||, !, bool members, string.Contains/StartsWith),
+///     OrderBy/ThenBy(Descending), Skip, Take, and the Match/FullText markers. Anything else throws
+///     <see cref="NotSupportedException" />.
 /// </summary>
 public static class ElasticExpressionTranslator
 {
@@ -25,7 +25,7 @@ public static class ElasticExpressionTranslator
 
         if (must.Count > 0)
         {
-            result.Query = new() { ["bool"] = new JsonObject { ["must"] = must } };
+            result.Query = new JsonObject { ["bool"] = new JsonObject { ["must"] = must } };
         }
 
         if (sort.Count > 0)
@@ -37,9 +37,11 @@ public static class ElasticExpressionTranslator
     }
 
     private static object? EvaluateValue(Expression expression)
-        => expression is ConstantExpression constant
-               ? constant.Value
-               : Expression.Lambda(expression).Compile().DynamicInvoke();
+    {
+        return expression is ConstantExpression constant
+            ? constant.Value
+            : Expression.Lambda(expression).Compile().DynamicInvoke();
+    }
 
     private static string FieldName(MemberExpression member)
     {
@@ -56,15 +58,19 @@ public static class ElasticExpressionTranslator
     }
 
     private static object? GetConstant(Expression expression)
-        => EvaluateValue(expression);
+    {
+        return EvaluateValue(expression);
+    }
 
     private static bool IsParameterBound(Expression expression)
-        => expression switch
+    {
+        return expression switch
         {
             ParameterExpression => true,
             MemberExpression m  => m.Expression is not null && IsParameterBound(m.Expression),
             _                   => false
         };
+    }
 
     private static (MemberExpression Member, Expression Value) OrientMemberValue(BinaryExpression binary)
     {
@@ -82,27 +88,33 @@ public static class ElasticExpressionTranslator
     }
 
     private static JsonObject Range(string field, string op, JsonNode? value)
-        => new() { ["range"] = new JsonObject { [field] = new JsonObject { [op] = value } } };
+    {
+        return new JsonObject { ["range"] = new JsonObject { [field] = new JsonObject { [op] = value } } };
+    }
 
     private static JsonObject SortClause(Expression keySelector, string order)
     {
         var member = (MemberExpression)UnquoteLambda(keySelector).Body;
 
-        return new() { [FieldName(member)] = new JsonObject { ["order"] = order } };
+        return new JsonObject { [FieldName(member)] = new JsonObject { ["order"] = order } };
     }
 
     private static Expression StripConvert(Expression expression)
-        => expression is UnaryExpression { NodeType: ExpressionType.Convert } convert ? convert.Operand : expression;
+    {
+        return expression is UnaryExpression { NodeType: ExpressionType.Convert } convert ? convert.Operand : expression;
+    }
 
     private static JsonObject TermOrKeyword(string field, Type memberType, JsonNode? value)
     {
         var termField = memberType == typeof(string) ? $"{field}.keyword" : field;
 
-        return new() { ["term"] = new JsonObject { [termField] = value } };
+        return new JsonObject { ["term"] = new JsonObject { [termField] = value } };
     }
 
     private static JsonNode? ToJsonValue(object? value)
-        => value is null ? null : JsonSerializer.SerializeToNode(value, WebOptions);
+    {
+        return value is null ? null : JsonSerializer.SerializeToNode(value, WebOptions);
+    }
 
     private static JsonObject TranslateComparison(BinaryExpression binary)
     {
@@ -113,7 +125,7 @@ public static class ElasticExpressionTranslator
         return binary.NodeType switch
         {
             ExpressionType.Equal => TermOrKeyword(field, member.Type, value),
-            ExpressionType.NotEqual => new()
+            ExpressionType.NotEqual => new JsonObject
                 { ["bool"] = new JsonObject { ["must_not"] = new JsonArray(TermOrKeyword(field, member.Type, value)) } },
             ExpressionType.GreaterThan        => Range(field, "gt", value),
             ExpressionType.GreaterThanOrEqual => Range(field, "gte", value),
@@ -128,13 +140,13 @@ public static class ElasticExpressionTranslator
         switch (expression)
         {
             case BinaryExpression { NodeType: ExpressionType.AndAlso } and1:
-                return new()
+                return new JsonObject
                 {
                     ["bool"] = new JsonObject
                         { ["must"] = new JsonArray(TranslatePredicate(and1.Left), TranslatePredicate(and1.Right)) }
                 };
             case BinaryExpression { NodeType: ExpressionType.OrElse } or1:
-                return new()
+                return new JsonObject
                 {
                     ["bool"] = new JsonObject
                     {
@@ -143,11 +155,12 @@ public static class ElasticExpressionTranslator
                     }
                 };
             case UnaryExpression { NodeType: ExpressionType.Not } not:
-                return new() { ["bool"] = new JsonObject { ["must_not"] = new JsonArray(TranslatePredicate(not.Operand)) } };
+                return new JsonObject
+                    { ["bool"] = new JsonObject { ["must_not"] = new JsonArray(TranslatePredicate(not.Operand)) } };
             case BinaryExpression binary:
                 return TranslateComparison(binary);
             case MemberExpression member when member.Type == typeof(bool):
-                return new() { ["term"] = new JsonObject { [FieldName(member)] = true } };
+                return new JsonObject { ["term"] = new JsonObject { [FieldName(member)] = true } };
             case MethodCallExpression methodCall:
                 return TranslateStringMethod(methodCall);
             default:
@@ -167,21 +180,25 @@ public static class ElasticExpressionTranslator
 
         return call.Method.Name switch
         {
-            "Contains"   => new() { ["wildcard"] = new JsonObject { [$"{field}.keyword"] = $"*{arg}*" } },
-            "StartsWith" => new() { ["prefix"] = new JsonObject { [$"{field}.keyword"] = arg } },
+            "Contains"   => new JsonObject { ["wildcard"] = new JsonObject { [$"{field}.keyword"] = $"*{arg}*" } },
+            "StartsWith" => new JsonObject { ["prefix"] = new JsonObject { [$"{field}.keyword"] = arg } },
             _            => throw Unsupported(call)
         };
     }
 
     private static LambdaExpression UnquoteLambda(Expression expression)
-        => expression is UnaryExpression { NodeType: ExpressionType.Quote } quote
-               ? (LambdaExpression)quote.Operand
-               : (LambdaExpression)expression;
+    {
+        return expression is UnaryExpression { NodeType: ExpressionType.Quote } quote
+            ? (LambdaExpression)quote.Operand
+            : (LambdaExpression)expression;
+    }
 
     private static NotSupportedException Unsupported(Expression expression)
-        => new(
+    {
+        return new NotSupportedException(
             $"Expression '{expression}' is not supported by the Elasticsearch provider. Use the native ElasticsearchClient for advanced queries."
         );
+    }
 
     private static void Walk(Expression expression, JsonArray must, JsonArray sort, ElasticQuery result)
     {

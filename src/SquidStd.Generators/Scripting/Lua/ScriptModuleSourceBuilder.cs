@@ -15,12 +15,16 @@ internal static class ScriptModuleSourceBuilder
         builder.AppendLine();
         builder.AppendLine("public static class GeneratedScriptModuleRegistrationExtensions");
         builder.AppendLine("{");
-        builder.AppendLine("    public static global::DryIoc.IContainer RegisterGeneratedScriptModules(this global::DryIoc.IContainer container)");
+        builder.AppendLine(
+            "    public static global::DryIoc.IContainer RegisterGeneratedScriptModules(this global::DryIoc.IContainer container)"
+        );
         builder.AppendLine("    {");
 
         for (var i = 0; i < candidates.Count; i++)
         {
-            builder.Append("        global::SquidStd.Scripting.Lua.Extensions.Scripts.AddScriptModuleExtension.RegisterScriptModule<");
+            builder.Append(
+                "        global::SquidStd.Scripting.Lua.Extensions.Scripts.AddScriptModuleExtension.RegisterScriptModule<"
+            );
             builder.Append(candidates[i].ScriptModuleTypeName);
             builder.AppendLine(">(container);");
         }

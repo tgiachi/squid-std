@@ -9,17 +9,17 @@ using SquidStd.Telemetry.OpenTelemetry.Internal;
 namespace SquidStd.Telemetry.OpenTelemetry.Services;
 
 /// <summary>
-/// Owns the OpenTelemetry TracerProvider/MeterProvider for non-web (DryIoc/worker) hosts, building
-/// them on start and disposing (flushing) them on stop. Telemetry failures never crash the host.
+///     Owns the OpenTelemetry TracerProvider/MeterProvider for non-web (DryIoc/worker) hosts, building
+///     them on start and disposing (flushing) them on stop. Telemetry failures never crash the host.
 /// </summary>
 public sealed class TelemetryService : ISquidStdService, IDisposable
 {
+    private readonly MetricsSnapshotBridge _bridge;
     private readonly ILogger _logger = Log.ForContext<TelemetryService>();
     private readonly TelemetryOptions _options;
-    private readonly MetricsSnapshotBridge _bridge;
-    private TracerProvider? _tracerProvider;
-    private MeterProvider? _meterProvider;
     private int _disposed;
+    private MeterProvider? _meterProvider;
+    private TracerProvider? _tracerProvider;
 
     public TelemetryService(TelemetryOptions options, MetricsSnapshotBridge bridge)
     {

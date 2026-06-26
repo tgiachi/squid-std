@@ -20,7 +20,9 @@ public class InMemoryCacheProviderTests
 
     [Fact]
     public async Task Get_Missing_ReturnsNull()
-        => Assert.Null(await NewProvider().GetAsync("absent"));
+    {
+        Assert.Null(await NewProvider().GetAsync("absent"));
+    }
 
     [Fact]
     public async Task SetThenGet_ReturnsValue()
@@ -46,8 +48,12 @@ public class InMemoryCacheProviderTests
     }
 
     private static ReadOnlyMemory<byte> Bytes(string s)
-        => Encoding.UTF8.GetBytes(s);
+    {
+        return Encoding.UTF8.GetBytes(s);
+    }
 
     private static InMemoryCacheProvider NewProvider()
-        => new(new MemoryCache(new MemoryCacheOptions()));
+    {
+        return new InMemoryCacheProvider(new MemoryCache(new MemoryCacheOptions()));
+    }
 }

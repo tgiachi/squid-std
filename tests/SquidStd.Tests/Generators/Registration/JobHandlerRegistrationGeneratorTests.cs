@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using SquidStd.Generators.Workers;
 using SquidStd.Tests.Generators.Support;
 
@@ -9,25 +11,25 @@ public class JobHandlerRegistrationGeneratorTests
     public void Run_GeneratesRegistrationExtension_WhenJobHandlerIsAnnotated()
     {
         const string source = """
-            using System.Threading;
-            using System.Threading.Tasks;
-            using SquidStd.Workers.Abstractions.Data;
-            using SquidStd.Workers.Attributes;
-            using SquidStd.Workers.Interfaces;
+                              using System.Threading;
+                              using System.Threading.Tasks;
+                              using SquidStd.Workers.Abstractions.Data;
+                              using SquidStd.Workers.Attributes;
+                              using SquidStd.Workers.Interfaces;
 
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            [RegisterJobHandler]
-            public sealed class GreetJobHandler : IJobHandler
-            {
-                public string JobName => "greet";
+                              [RegisterJobHandler]
+                              public sealed class GreetJobHandler : IJobHandler
+                              {
+                                  public string JobName => "greet";
 
-                public Task HandleAsync(JobRequest job, CancellationToken cancellationToken)
-                {
-                    return Task.CompletedTask;
-                }
-            }
-            """;
+                                  public Task HandleAsync(JobRequest job, CancellationToken cancellationToken)
+                                  {
+                                      return Task.CompletedTask;
+                                  }
+                              }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new JobHandlerRegistrationGenerator());
         var generatedSource = SingleGeneratedSource(result, "SquidStd.GeneratedJobHandlerRegistration.g.cs");
@@ -44,23 +46,23 @@ public class JobHandlerRegistrationGeneratorTests
     public void Run_DoesNotRegisterJobHandler_WhenAttributeIsMissing()
     {
         const string source = """
-            using System.Threading;
-            using System.Threading.Tasks;
-            using SquidStd.Workers.Abstractions.Data;
-            using SquidStd.Workers.Interfaces;
+                              using System.Threading;
+                              using System.Threading.Tasks;
+                              using SquidStd.Workers.Abstractions.Data;
+                              using SquidStd.Workers.Interfaces;
 
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            public sealed class GreetJobHandler : IJobHandler
-            {
-                public string JobName => "greet";
+                              public sealed class GreetJobHandler : IJobHandler
+                              {
+                                  public string JobName => "greet";
 
-                public Task HandleAsync(JobRequest job, CancellationToken cancellationToken)
-                {
-                    return Task.CompletedTask;
-                }
-            }
-            """;
+                                  public Task HandleAsync(JobRequest job, CancellationToken cancellationToken)
+                                  {
+                                      return Task.CompletedTask;
+                                  }
+                              }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new JobHandlerRegistrationGenerator());
         var generatedSource = SingleGeneratedSource(result, "SquidStd.GeneratedJobHandlerRegistration.g.cs");
@@ -73,10 +75,10 @@ public class JobHandlerRegistrationGeneratorTests
     public void Run_GeneratesNoOpExtension_WhenNoJobHandlersExist()
     {
         const string source = """
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            public sealed class EmptyType { }
-            """;
+                              public sealed class EmptyType { }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new JobHandlerRegistrationGenerator());
         var generatedSource = SingleGeneratedSource(result, "SquidStd.GeneratedJobHandlerRegistration.g.cs");
@@ -90,13 +92,13 @@ public class JobHandlerRegistrationGeneratorTests
     public void Run_ReportsDiagnostic_WhenAnnotatedTypeIsNotAJobHandler()
     {
         const string source = """
-            using SquidStd.Workers.Attributes;
+                              using SquidStd.Workers.Attributes;
 
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            [RegisterJobHandler]
-            public sealed class GreetJobHandler { }
-            """;
+                              [RegisterJobHandler]
+                              public sealed class GreetJobHandler { }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source, new JobHandlerRegistrationGenerator());
         var diagnostics = result.RunResult.Diagnostics.Concat(result.Diagnostics);
@@ -105,9 +107,9 @@ public class JobHandlerRegistrationGeneratorTests
     }
 
     private static string SingleGeneratedSource(
-        (Microsoft.CodeAnalysis.Compilation Compilation,
-         Microsoft.CodeAnalysis.GeneratorDriverRunResult RunResult,
-         System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.Diagnostic> Diagnostics) result,
+        (Compilation Compilation,
+            GeneratorDriverRunResult RunResult,
+            ImmutableArray<Diagnostic> Diagnostics) result,
         string fileName
     )
     {

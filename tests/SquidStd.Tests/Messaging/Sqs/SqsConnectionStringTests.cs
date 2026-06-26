@@ -36,7 +36,9 @@ public class SqsConnectionStringTests
 
     [Fact]
     public void WrongScheme_Throws()
-        => Assert.Throws<ArgumentException>(() => SqsMessagingRegistrationExtensions.ParseOptions("rabbitmq://x"));
+    {
+        Assert.Throws<ArgumentException>(() => SqsMessagingRegistrationExtensions.ParseOptions("rabbitmq://x"));
+    }
 
     [Fact]
     public void AddSqsMessaging_RegistersBothProviders()

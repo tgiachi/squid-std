@@ -7,19 +7,19 @@ using SquidStd.Network.Interfaces.Client;
 namespace SquidStd.Network.Client;
 
 /// <summary>
-/// Connectionless UDP client that binds a local socket and surfaces inbound datagrams through an
-/// async receive loop. Datagrams can be sent to any endpoint with <see cref="SendToAsync" />, or to
-/// an optional default remote endpoint via <see cref="SendAsync" />. Mirrors the lifecycle surface of
-/// <see cref="SquidStdTcpClient" /> (session id, connect/disconnect/data/exception events, and
-/// <see cref="INetworkConnection" />). Supports Start once; recreate the instance to listen again.
+///     Connectionless UDP client that binds a local socket and surfaces inbound datagrams through an
+///     async receive loop. Datagrams can be sent to any endpoint with <see cref="SendToAsync" />, or to
+///     an optional default remote endpoint via <see cref="SendAsync" />. Mirrors the lifecycle surface of
+///     <see cref="SquidStdTcpClient" /> (session id, connect/disconnect/data/exception events, and
+///     <see cref="INetworkConnection" />). Supports Start once; recreate the instance to listen again.
 /// </summary>
 public sealed class SquidStdUdpClient : INetworkConnection, IAsyncDisposable, IDisposable
 {
+    private static long _sessionIdSequence;
     private readonly IPEndPoint? _defaultRemoteEndPoint;
     private readonly CancellationTokenSource _internalCancellationTokenSource = new();
     private readonly ILogger _logger = Log.ForContext<SquidStdUdpClient>();
     private readonly UdpClient _udpClient;
-    private static long _sessionIdSequence;
     private int _closed;
 
     private CancellationTokenRegistration _externalCancellationTokenRegistration;
@@ -27,17 +27,24 @@ public sealed class SquidStdUdpClient : INetworkConnection, IAsyncDisposable, ID
     private int _started;
 
     /// <summary>
-    /// Unique session identifier for this client.
+    ///     Creates a UDP client bound to a local endpoint.
     /// </summary>
-    public long SessionId { get; }
+    /// <param name="localEndPoint">
+    ///     Local endpoint to bind. When <c>null</c>, binds an ephemeral port on <see cref="IPAddress.Any" />.
+    /// </param>
+    /// <param name="defaultRemoteEndPoint">
+    ///     Optional default destination used by <see cref="SendAsync" />. When <c>null</c>, callers must use
+    ///     <see cref="SendToAsync" /> with an explicit endpoint.
+    /// </param>
+    public SquidStdUdpClient(IPEndPoint? localEndPoint = null, IPEndPoint? defaultRemoteEndPoint = null)
+    {
+        _udpClient = new UdpClient(localEndPoint ?? new IPEndPoint(IPAddress.Any, 0));
+        _defaultRemoteEndPoint = defaultRemoteEndPoint;
+        SessionId = Interlocked.Increment(ref _sessionIdSequence);
+    }
 
     /// <summary>
-    /// Default remote endpoint used by <see cref="SendAsync" />, when configured.
-    /// </summary>
-    public EndPoint? RemoteEndPoint => _defaultRemoteEndPoint;
-
-    /// <summary>
-    /// Local endpoint the client is bound to, when available.
+    ///     Local endpoint the client is bound to, when available.
     /// </summary>
     public EndPoint? LocalEndPoint
     {
@@ -53,76 +60,6 @@ public sealed class SquidStdUdpClient : INetworkConnection, IAsyncDisposable, ID
             }
         }
     }
-
-    /// <summary>
-    /// True while the client is open (not closed).
-    /// </summary>
-    public bool IsConnected => Volatile.Read(ref _closed) == 0;
-
-    /// <summary>
-    /// Raised when the client starts and the receive loop begins.
-    /// </summary>
-    public event EventHandler<SquidStdUdpClientEventArgs>? OnConnected;
-
-    /// <summary>
-    /// Raised when the client is closed.
-    /// </summary>
-    public event EventHandler<SquidStdUdpClientEventArgs>? OnDisconnected;
-
-    /// <summary>
-    /// Raised once per received datagram.
-    /// </summary>
-    public event EventHandler<SquidStdUdpDataReceivedEventArgs>? OnDataReceived;
-
-    /// <summary>
-    /// Raised when the receive/send paths throw an unexpected exception.
-    /// </summary>
-    public event EventHandler<SquidStdUdpExceptionEventArgs>? OnException;
-
-    /// <summary>
-    /// Creates a UDP client bound to a local endpoint.
-    /// </summary>
-    /// <param name="localEndPoint">
-    /// Local endpoint to bind. When <c>null</c>, binds an ephemeral port on <see cref="IPAddress.Any" />.
-    /// </param>
-    /// <param name="defaultRemoteEndPoint">
-    /// Optional default destination used by <see cref="SendAsync" />. When <c>null</c>, callers must use
-    /// <see cref="SendToAsync" /> with an explicit endpoint.
-    /// </param>
-    public SquidStdUdpClient(IPEndPoint? localEndPoint = null, IPEndPoint? defaultRemoteEndPoint = null)
-    {
-        _udpClient = new(localEndPoint ?? new IPEndPoint(IPAddress.Any, 0));
-        _defaultRemoteEndPoint = defaultRemoteEndPoint;
-        SessionId = Interlocked.Increment(ref _sessionIdSequence);
-    }
-
-    /// <summary>
-    /// Closes the client and raises <see cref="OnDisconnected" /> once.
-    /// </summary>
-    public async Task CloseAsync(CancellationToken cancellationToken = default)
-    {
-        if (Interlocked.Exchange(ref _closed, 1) != 0)
-        {
-            return;
-        }
-
-        try
-        {
-            await _internalCancellationTokenSource.CancelAsync().WaitAsync(cancellationToken);
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            // Once close has started, still tear down the socket below.
-        }
-
-        _udpClient.Close();
-        _externalCancellationTokenRegistration.Dispose();
-        RaiseDisconnected();
-    }
-
-    /// <inheritdoc />
-    public void Dispose() // Sync-over-async: best effort. Prefer DisposeAsync.
-        => DisposeAsync().AsTask().GetAwaiter().GetResult();
 
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
@@ -146,8 +83,53 @@ public sealed class SquidStdUdpClient : INetworkConnection, IAsyncDisposable, ID
         _udpClient.Dispose();
     }
 
+    /// <inheritdoc />
+    public void Dispose() // Sync-over-async: best effort. Prefer DisposeAsync.
+    {
+    DisposeAsync().AsTask().GetAwaiter().GetResult();
+    }
+
     /// <summary>
-    /// Sends a datagram to the configured default remote endpoint.
+    ///     Unique session identifier for this client.
+    /// </summary>
+    public long SessionId { get; }
+
+    /// <summary>
+    ///     Default remote endpoint used by <see cref="SendAsync" />, when configured.
+    /// </summary>
+    public EndPoint? RemoteEndPoint => _defaultRemoteEndPoint;
+
+    /// <summary>
+    ///     True while the client is open (not closed).
+    /// </summary>
+    public bool IsConnected => Volatile.Read(ref _closed) == 0;
+
+    /// <summary>
+    ///     Closes the client and raises <see cref="OnDisconnected" /> once.
+    /// </summary>
+    public async Task CloseAsync(CancellationToken cancellationToken = default)
+    {
+        if (Interlocked.Exchange(ref _closed, 1) != 0)
+        {
+            return;
+        }
+
+        try
+        {
+            await _internalCancellationTokenSource.CancelAsync().WaitAsync(cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Once close has started, still tear down the socket below.
+        }
+
+        _udpClient.Close();
+        _externalCancellationTokenRegistration.Dispose();
+        RaiseDisconnected();
+    }
+
+    /// <summary>
+    ///     Sends a datagram to the configured default remote endpoint.
     /// </summary>
     /// <exception cref="InvalidOperationException">No default remote endpoint was configured.</exception>
     public Task SendAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
@@ -163,7 +145,27 @@ public sealed class SquidStdUdpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    /// Sends a datagram to an explicit endpoint.
+    ///     Raised when the client starts and the receive loop begins.
+    /// </summary>
+    public event EventHandler<SquidStdUdpClientEventArgs>? OnConnected;
+
+    /// <summary>
+    ///     Raised when the client is closed.
+    /// </summary>
+    public event EventHandler<SquidStdUdpClientEventArgs>? OnDisconnected;
+
+    /// <summary>
+    ///     Raised once per received datagram.
+    /// </summary>
+    public event EventHandler<SquidStdUdpDataReceivedEventArgs>? OnDataReceived;
+
+    /// <summary>
+    ///     Raised when the receive/send paths throw an unexpected exception.
+    /// </summary>
+    public event EventHandler<SquidStdUdpExceptionEventArgs>? OnException;
+
+    /// <summary>
+    ///     Sends a datagram to an explicit endpoint.
     /// </summary>
     public async Task SendToAsync(ReadOnlyMemory<byte> payload, IPEndPoint endPoint, CancellationToken cancellationToken)
     {
@@ -185,7 +187,7 @@ public sealed class SquidStdUdpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    /// Starts the receive loop and raises <see cref="OnConnected" />.
+    ///     Starts the receive loop and raises <see cref="OnConnected" />.
     /// </summary>
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -213,7 +215,7 @@ public sealed class SquidStdUdpClient : INetworkConnection, IAsyncDisposable, ID
             SessionId,
             LocalEndPoint
         );
-        OnConnected?.Invoke(this, new(this));
+        OnConnected?.Invoke(this, new SquidStdUdpClientEventArgs(this));
     }
 
     private void RaiseDisconnected()
@@ -223,13 +225,13 @@ public sealed class SquidStdUdpClient : INetworkConnection, IAsyncDisposable, ID
             SessionId,
             LocalEndPoint
         );
-        OnDisconnected?.Invoke(this, new(this));
+        OnDisconnected?.Invoke(this, new SquidStdUdpClientEventArgs(this));
     }
 
     private void RaiseException(Exception exception)
     {
         _logger.Error(exception, "UDP client exception. SessionId={SessionId}", SessionId);
-        OnException?.Invoke(this, new(exception, this));
+        OnException?.Invoke(this, new SquidStdUdpExceptionEventArgs(exception, this));
     }
 
     private async Task ReceiveLoopAsync()
@@ -241,7 +243,10 @@ public sealed class SquidStdUdpClient : INetworkConnection, IAsyncDisposable, ID
                 var result = await _udpClient.ReceiveAsync(_internalCancellationTokenSource.Token);
 
                 // UdpReceiveResult.Buffer is a fresh array per receive, so it is safe to hand off.
-                OnDataReceived?.Invoke(this, new(this, result.RemoteEndPoint, result.Buffer));
+                OnDataReceived?.Invoke(
+                    this,
+                    new SquidStdUdpDataReceivedEventArgs(this, result.RemoteEndPoint, result.Buffer)
+                );
             }
         }
         catch (OperationCanceledException)

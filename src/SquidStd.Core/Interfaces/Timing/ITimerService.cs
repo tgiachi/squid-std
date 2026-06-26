@@ -1,12 +1,12 @@
 namespace SquidStd.Core.Interfaces.Timing;
 
 /// <summary>
-/// Schedules timer callbacks on a hashed timer wheel.
+///     Schedules timer callbacks on a hashed timer wheel.
 /// </summary>
 public interface ITimerService
 {
     /// <summary>
-    /// Registers a timer.
+    ///     Registers a timer.
     /// </summary>
     /// <param name="name">Logical timer name.</param>
     /// <param name="interval">Timer interval.</param>
@@ -23,26 +23,26 @@ public interface ITimerService
     );
 
     /// <summary>
-    /// Removes all registered timers.
+    ///     Removes all registered timers.
     /// </summary>
     void UnregisterAllTimers();
 
     /// <summary>
-    /// Removes a timer by id.
+    ///     Removes a timer by id.
     /// </summary>
     /// <param name="timerId">Timer id to remove.</param>
     /// <returns><c>true</c> when a timer was removed; otherwise <c>false</c>.</returns>
     bool UnregisterTimer(string timerId);
 
     /// <summary>
-    /// Removes all timers with the specified name.
+    ///     Removes all timers with the specified name.
     /// </summary>
     /// <param name="name">Timer name to remove.</param>
     /// <returns>The number of removed timers.</returns>
     int UnregisterTimersByName(string name);
 
     /// <summary>
-    /// Advances the wheel using an absolute timestamp in milliseconds.
+    ///     Advances the wheel using an absolute timestamp in milliseconds.
     /// </summary>
     /// <param name="timestampMilliseconds">Absolute monotonic timestamp in milliseconds.</param>
     /// <returns>The number of processed wheel ticks.</returns>

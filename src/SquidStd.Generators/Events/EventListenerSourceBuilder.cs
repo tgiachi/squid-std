@@ -15,12 +15,16 @@ internal static class EventListenerSourceBuilder
         builder.AppendLine();
         builder.AppendLine("public static class GeneratedEventListenerRegistrationExtensions");
         builder.AppendLine("{");
-        builder.AppendLine("    public static global::DryIoc.IContainer RegisterGeneratedEventListeners(this global::DryIoc.IContainer container)");
+        builder.AppendLine(
+            "    public static global::DryIoc.IContainer RegisterGeneratedEventListeners(this global::DryIoc.IContainer container)"
+        );
         builder.AppendLine("    {");
 
         for (var i = 0; i < candidates.Count; i++)
         {
-            builder.Append("        global::SquidStd.Abstractions.Extensions.Events.RegisterEventListenerExtension.RegisterEventListener<");
+            builder.Append(
+                "        global::SquidStd.Abstractions.Extensions.Events.RegisterEventListenerExtension.RegisterEventListener<"
+            );
             builder.Append(candidates[i].EventTypeName);
             builder.Append(", ");
             builder.Append(candidates[i].ListenerTypeName);

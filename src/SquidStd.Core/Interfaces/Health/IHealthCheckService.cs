@@ -3,7 +3,7 @@ using SquidStd.Core.Data.Health;
 namespace SquidStd.Core.Interfaces.Health;
 
 /// <summary>
-/// Runs every registered <see cref="IHealthCheck" /> and aggregates the results.
+///     Runs every registered <see cref="IHealthCheck" /> and aggregates the results.
 /// </summary>
 public interface IHealthCheckService
 {

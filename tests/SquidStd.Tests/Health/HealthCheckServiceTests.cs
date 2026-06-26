@@ -57,9 +57,13 @@ public class HealthCheckServiceTests
 
     [Fact]
     public void Ctor_NonPositiveTimeout_Throws()
-        => Assert.Throws<ArgumentOutOfRangeException>(
-            () => new HealthCheckService([], new() { CheckTimeout = TimeSpan.Zero })
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new HealthCheckService(
+                [],
+                new HealthCheckOptions { CheckTimeout = TimeSpan.Zero }
+            )
         );
+    }
 
     [Fact]
     public async Task DuplicateNames_AreMadeUnique()
@@ -109,8 +113,12 @@ public class HealthCheckServiceTests
     }
 
     private static HealthCheckService NewService(HealthCheckOptions options, params IHealthCheck[] checks)
-        => new(checks, options);
+    {
+        return new HealthCheckService(checks, options);
+    }
 
     private static HealthCheckOptions Options(double timeoutSeconds = 5)
-        => new() { CheckTimeout = TimeSpan.FromSeconds(timeoutSeconds) };
+    {
+        return new HealthCheckOptions { CheckTimeout = TimeSpan.FromSeconds(timeoutSeconds) };
+    }
 }

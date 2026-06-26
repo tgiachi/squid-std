@@ -8,7 +8,7 @@ using SquidStd.Services.Core.Services.Internal;
 namespace SquidStd.Services.Core.Services;
 
 /// <summary>
-/// Hashed timer wheel driven by absolute timestamp updates.
+///     Hashed timer wheel driven by absolute timestamp updates.
 /// </summary>
 public sealed class TimerWheelService : ITimerService, ISquidStdService
 {
@@ -24,7 +24,7 @@ public sealed class TimerWheelService : ITimerService, ISquidStdService
     private long _lastTimestampMilliseconds = -1;
 
     /// <summary>
-    /// Initializes the timer wheel service.
+    ///     Initializes the timer wheel service.
     /// </summary>
     /// <param name="config">Timer wheel configuration.</param>
     public TimerWheelService(TimerWheelConfig config)
@@ -53,8 +53,23 @@ public sealed class TimerWheelService : ITimerService, ISquidStdService
 
         for (var i = 0; i < _wheel.Length; i++)
         {
-            _wheel[i] = new();
+            _wheel[i] = new LinkedList<TimerEntry>();
         }
+    }
+
+    /// <inheritdoc />
+    public ValueTask StartAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public ValueTask StopAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        UnregisterAllTimers();
+
+        return ValueTask.CompletedTask;
     }
 
     /// <inheritdoc />
@@ -109,19 +124,6 @@ public sealed class TimerWheelService : ITimerService, ISquidStdService
         }
 
         return entry.Id;
-    }
-
-    /// <inheritdoc />
-    public ValueTask StartAsync(CancellationToken cancellationToken = default)
-        => ValueTask.CompletedTask;
-
-    /// <inheritdoc />
-    public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        UnregisterAllTimers();
-
-        return ValueTask.CompletedTask;
     }
 
     /// <inheritdoc />

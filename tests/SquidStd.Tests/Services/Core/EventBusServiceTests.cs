@@ -9,86 +9,6 @@ namespace SquidStd.Tests.Services.Core;
 
 public class EventBusServiceTests
 {
-    private sealed record TestEvent(string Payload) : IEvent;
-
-    private sealed record OtherEvent(int Value) : IEvent;
-
-    private sealed class RecordingListener : IEventListener<TestEvent>
-    {
-        private readonly List<string> _calls;
-        private readonly string _name;
-
-        public TestEvent? LastEvent { get; private set; }
-
-        public RecordingListener(string name, List<string> calls)
-        {
-            _name = name;
-            _calls = calls;
-        }
-
-        public Task HandleAsync(TestEvent eventData, CancellationToken cancellationToken = default)
-        {
-            LastEvent = eventData;
-            _calls.Add($"{_name}:{eventData.Payload}");
-
-            return Task.CompletedTask;
-        }
-    }
-
-    private sealed class OtherRecordingListener : IEventListener<OtherEvent>
-    {
-        public OtherEvent? LastEvent { get; private set; }
-
-        public Task HandleAsync(OtherEvent eventData, CancellationToken cancellationToken = default)
-        {
-            LastEvent = eventData;
-
-            return Task.CompletedTask;
-        }
-    }
-
-    private sealed class CatchAllListener : IEventListener<IEvent>
-    {
-        public List<IEvent> Received { get; } = [];
-
-        public Task HandleAsync(IEvent eventData, CancellationToken cancellationToken = default)
-        {
-            Received.Add(eventData);
-
-            return Task.CompletedTask;
-        }
-    }
-
-    private sealed class ThrowingListener : IEventListener<TestEvent>
-    {
-        public Task HandleAsync(TestEvent eventData, CancellationToken cancellationToken = default)
-            => throw new InvalidOperationException("listener failure");
-    }
-
-    private sealed class SelfCancellingListener : IEventListener<TestEvent>
-    {
-        private readonly CancellationTokenSource _cts;
-
-        public SelfCancellingListener(CancellationTokenSource cts)
-        {
-            _cts = cts;
-        }
-
-        public Task HandleAsync(TestEvent eventData, CancellationToken cancellationToken = default)
-        {
-            _cts.Cancel();
-            cancellationToken.ThrowIfCancellationRequested();
-
-            return Task.CompletedTask;
-        }
-    }
-
-    private sealed class SlowListener : IEventListener<TestEvent>
-    {
-        public async Task HandleAsync(TestEvent eventData, CancellationToken cancellationToken = default)
-            => await Task.Delay(TimeSpan.FromMilliseconds(40), cancellationToken);
-    }
-
     [Fact]
     public async Task PublishAsync_NoListeners_Completes()
     {
@@ -192,8 +112,7 @@ public class EventBusServiceTests
         using var cts = new CancellationTokenSource();
         await cts.CancelAsync();
 
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(
-            () => bus.PublishAsync(new TestEvent("payload"), cts.Token)
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => bus.PublishAsync(new TestEvent("payload"), cts.Token)
         );
     }
 
@@ -205,8 +124,7 @@ public class EventBusServiceTests
         using var cts = new CancellationTokenSource();
         bus.RegisterListener(new SelfCancellingListener(cts));
 
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(
-            () => bus.PublishAsync(new TestEvent("payload"), cts.Token)
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => bus.PublishAsync(new TestEvent("payload"), cts.Token)
         );
     }
 
@@ -232,11 +150,12 @@ public class EventBusServiceTests
         IEventBus bus = eventBus;
         var received = new List<string>();
         var token = bus.Subscribe<TestEvent>((e, _) =>
-        {
-            received.Add(e.Payload);
+            {
+                received.Add(e.Payload);
 
-            return Task.CompletedTask;
-        });
+                return Task.CompletedTask;
+            }
+        );
 
         await bus.PublishAsync(new TestEvent("first"), CancellationToken.None);
         token.Dispose();
@@ -260,6 +179,90 @@ public class EventBusServiceTests
         Assert.Contains("b:payload", calls);
     }
 
+    private sealed record TestEvent(string Payload) : IEvent;
+
+    private sealed record OtherEvent(int Value) : IEvent;
+
+    private sealed class RecordingListener : IEventListener<TestEvent>
+    {
+        private readonly List<string> _calls;
+        private readonly string _name;
+
+        public RecordingListener(string name, List<string> calls)
+        {
+            _name = name;
+            _calls = calls;
+        }
+
+        public TestEvent? LastEvent { get; private set; }
+
+        public Task HandleAsync(TestEvent eventData, CancellationToken cancellationToken = default)
+        {
+            LastEvent = eventData;
+            _calls.Add($"{_name}:{eventData.Payload}");
+
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class OtherRecordingListener : IEventListener<OtherEvent>
+    {
+        public OtherEvent? LastEvent { get; private set; }
+
+        public Task HandleAsync(OtherEvent eventData, CancellationToken cancellationToken = default)
+        {
+            LastEvent = eventData;
+
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class CatchAllListener : IEventListener<IEvent>
+    {
+        public List<IEvent> Received { get; } = [];
+
+        public Task HandleAsync(IEvent eventData, CancellationToken cancellationToken = default)
+        {
+            Received.Add(eventData);
+
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class ThrowingListener : IEventListener<TestEvent>
+    {
+        public Task HandleAsync(TestEvent eventData, CancellationToken cancellationToken = default)
+        {
+            throw new InvalidOperationException("listener failure");
+        }
+    }
+
+    private sealed class SelfCancellingListener : IEventListener<TestEvent>
+    {
+        private readonly CancellationTokenSource _cts;
+
+        public SelfCancellingListener(CancellationTokenSource cts)
+        {
+            _cts = cts;
+        }
+
+        public Task HandleAsync(TestEvent eventData, CancellationToken cancellationToken = default)
+        {
+            _cts.Cancel();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class SlowListener : IEventListener<TestEvent>
+    {
+        public async Task HandleAsync(TestEvent eventData, CancellationToken cancellationToken = default)
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(40), cancellationToken);
+        }
+    }
+
     [Collection(SerilogEventSinkCollection.Name)]
     public class Telemetry
     {
@@ -269,9 +272,9 @@ public class EventBusServiceTests
             var sink = new CapturingLogSink();
             var original = Log.Logger;
             Log.Logger = new LoggerConfiguration()
-                         .MinimumLevel.Verbose()
-                         .WriteTo.Sink(sink)
-                         .CreateLogger();
+                .MinimumLevel.Verbose()
+                .WriteTo.Sink(sink)
+                .CreateLogger();
 
             try
             {

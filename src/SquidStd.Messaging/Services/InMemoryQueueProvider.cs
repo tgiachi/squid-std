@@ -8,16 +8,16 @@ using SquidStd.Messaging.Internal;
 namespace SquidStd.Messaging.Services;
 
 /// <summary>
-/// In-memory <see cref="IQueueProvider" />: one buffered channel + consumer loop per named queue,
-/// round-robin delivery, retry and dead-lettering.
+///     In-memory <see cref="IQueueProvider" />: one buffered channel + consumer loop per named queue,
+///     round-robin delivery, retry and dead-lettering.
 /// </summary>
 public sealed class InMemoryQueueProvider : IQueueProvider
 {
     private readonly ILogger _logger = Log.ForContext<InMemoryQueueProvider>();
+    private readonly IMessagingMetrics _metrics;
+    private readonly MessagingOptions _options;
     private readonly ConcurrentDictionary<string, InMemoryQueue> _queues = new(StringComparer.Ordinal);
     private readonly CancellationTokenSource _shutdownCts = new();
-    private readonly MessagingOptions _options;
-    private readonly IMessagingMetrics _metrics;
     private readonly TimeProvider _timeProvider;
     private int _disposed;
 
@@ -32,39 +32,6 @@ public sealed class InMemoryQueueProvider : IQueueProvider
         _options = options;
         _metrics = metrics ?? NoOpMessagingMetrics.Instance;
         _timeProvider = timeProvider ?? TimeProvider.System;
-    }
-
-    private sealed class Subscription : IDisposable
-    {
-        private readonly InMemoryQueueProvider _provider;
-        private readonly string _queueName;
-        private readonly InMemoryQueue _queue;
-        private readonly Func<ReadOnlyMemory<byte>, CancellationToken, Task> _handler;
-        private int _disposed;
-
-        public Subscription(
-            InMemoryQueueProvider provider,
-            string queueName,
-            InMemoryQueue queue,
-            Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler
-        )
-        {
-            _provider = provider;
-            _queueName = queueName;
-            _queue = queue;
-            _handler = handler;
-        }
-
-        public void Dispose()
-        {
-            if (Interlocked.Exchange(ref _disposed, 1) != 0)
-            {
-                return;
-            }
-
-            _queue.RemoveHandler(_handler);
-            _provider._metrics.SetSubscriberCount(_queueName, _queue.HandlerCount);
-        }
     }
 
     /// <inheritdoc />
@@ -106,7 +73,7 @@ public sealed class InMemoryQueueProvider : IQueueProvider
         ArgumentException.ThrowIfNullOrWhiteSpace(queueName);
         cancellationToken.ThrowIfCancellationRequested();
 
-        Enqueue(queueName, new(payload, 0));
+        Enqueue(queueName, new QueuedMessage(payload, 0));
         _metrics.OnPublished(queueName);
 
         return Task.CompletedTask;
@@ -114,11 +81,15 @@ public sealed class InMemoryQueueProvider : IQueueProvider
 
     /// <inheritdoc />
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
-        => ValueTask.CompletedTask;
+    {
+        return ValueTask.CompletedTask;
+    }
 
     /// <inheritdoc />
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
-        => DisposeAsync();
+    {
+        return DisposeAsync();
+    }
 
     /// <inheritdoc />
     public IDisposable Subscribe(string queueName, Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler)
@@ -174,10 +145,13 @@ public sealed class InMemoryQueueProvider : IQueueProvider
     }
 
     private void Enqueue(string queueName, QueuedMessage message)
-        => Write(GetOrCreate(queueName), queueName, message);
+    {
+        Write(GetOrCreate(queueName), queueName, message);
+    }
 
     private InMemoryQueue GetOrCreate(string queueName)
-        => _queues.GetOrAdd(
+    {
+        return _queues.GetOrAdd(
             queueName,
             name =>
             {
@@ -190,6 +164,7 @@ public sealed class InMemoryQueueProvider : IQueueProvider
                 return queue;
             }
         );
+    }
 
     private void HandleFailure(string queueName, InMemoryQueue queue, QueuedMessage message, Exception exception)
     {
@@ -211,7 +186,7 @@ public sealed class InMemoryQueueProvider : IQueueProvider
             nextAttempt
         );
         _metrics.OnDeadLettered(queueName);
-        Enqueue(queueName + _options.DeadLetterQueueSuffix, new(message.Payload, 0));
+        Enqueue(queueName + _options.DeadLetterQueueSuffix, new QueuedMessage(message.Payload, 0));
     }
 
     private async Task RequeueAsync(InMemoryQueue queue, string queueName, QueuedMessage message)
@@ -263,5 +238,38 @@ public sealed class InMemoryQueueProvider : IQueueProvider
     {
         queue.Channel.Writer.TryWrite(message);
         _metrics.SetQueueDepth(queueName, queue.IncrementDepth());
+    }
+
+    private sealed class Subscription : IDisposable
+    {
+        private readonly Func<ReadOnlyMemory<byte>, CancellationToken, Task> _handler;
+        private readonly InMemoryQueueProvider _provider;
+        private readonly InMemoryQueue _queue;
+        private readonly string _queueName;
+        private int _disposed;
+
+        public Subscription(
+            InMemoryQueueProvider provider,
+            string queueName,
+            InMemoryQueue queue,
+            Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler
+        )
+        {
+            _provider = provider;
+            _queueName = queueName;
+            _queue = queue;
+            _handler = handler;
+        }
+
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0)
+            {
+                return;
+            }
+
+            _queue.RemoveHandler(_handler);
+            _provider._metrics.SetSubscriberCount(_queueName, _queue.HandlerCount);
+        }
     }
 }

@@ -4,8 +4,8 @@ using Testcontainers.LocalStack;
 namespace SquidStd.Tests.Messaging.Sqs;
 
 /// <summary>
-/// Starts a LocalStack container (SQS + SNS) once for the whole collection and exposes an
-/// <see cref="AwsConfigEntry" /> pointing at its edge endpoint with dummy credentials.
+///     Starts a LocalStack container (SQS + SNS) once for the whole collection and exposes an
+///     <see cref="AwsConfigEntry" /> pointing at its edge endpoint with dummy credentials.
 /// </summary>
 public sealed class LocalStackContainerFixture : IAsyncLifetime
 {
@@ -21,10 +21,14 @@ public sealed class LocalStackContainerFixture : IAsyncLifetime
     };
 
     public Task DisposeAsync()
-        => _container.DisposeAsync().AsTask();
+    {
+        return _container.DisposeAsync().AsTask();
+    }
 
     public Task InitializeAsync()
-        => _container.StartAsync();
+    {
+        return _container.StartAsync();
+    }
 }
 
 [CollectionDefinition(Name)]

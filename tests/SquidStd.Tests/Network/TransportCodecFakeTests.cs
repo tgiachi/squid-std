@@ -20,7 +20,7 @@ public class TransportCodecFakeTests
     [Fact]
     public void Decode_AdvancesIndependentlyFromEncode()
     {
-        var codec = new CountingXorCodec(0);
+        var codec = new CountingXorCodec();
         var encodeProbe = new byte[] { 0, 0, 0 };
         var decodeProbe = new byte[] { 0, 0, 0 };
 

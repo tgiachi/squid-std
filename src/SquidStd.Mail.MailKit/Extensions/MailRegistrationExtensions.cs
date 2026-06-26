@@ -14,8 +14,8 @@ namespace SquidStd.Mail.MailKit.Extensions;
 public static class MailRegistrationExtensions
 {
     /// <summary>
-    /// Registers a single mailbox poller: the options, the protocol-specific <see cref="IMailReader" />, the
-    /// polling service, and the timer-wheel pump (only if not already registered).
+    ///     Registers a single mailbox poller: the options, the protocol-specific <see cref="IMailReader" />, the
+    ///     polling service, and the timer-wheel pump (only if not already registered).
     /// </summary>
     public static IContainer AddMail(this IContainer container, MailOptions options)
     {

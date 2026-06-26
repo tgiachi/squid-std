@@ -11,13 +11,13 @@ public class PluginMetadataTests
         {
             Id = "squidstd.weather",
             Name = "Weather",
-            Version = new(2, 1, 0),
+            Version = new Version(2, 1, 0),
             Author = "squid"
         };
 
         Assert.Equal("squidstd.weather", metadata.Id);
         Assert.Equal("Weather", metadata.Name);
-        Assert.Equal(new(2, 1, 0), metadata.Version);
+        Assert.Equal(new Version(2, 1, 0), metadata.Version);
         Assert.Equal("squid", metadata.Author);
     }
 
@@ -28,7 +28,7 @@ public class PluginMetadataTests
         {
             Id = "id",
             Name = "name",
-            Version = new(1, 0),
+            Version = new Version(1, 0),
             Author = "author",
             Dependencies = ["squidstd.core", "squidstd.net"]
         };
@@ -43,7 +43,7 @@ public class PluginMetadataTests
         {
             Id = "id",
             Name = "name",
-            Version = new(1, 0),
+            Version = new Version(1, 0),
             Author = "author"
         };
 
@@ -57,7 +57,7 @@ public class PluginMetadataTests
         {
             Id = "id",
             Name = "name",
-            Version = new(1, 0),
+            Version = new Version(1, 0),
             Author = "author"
         };
 

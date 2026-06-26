@@ -3,12 +3,12 @@ using SquidStd.Abstractions.Interfaces.Services;
 namespace SquidStd.Tests.Support;
 
 /// <summary>
-/// Minimal <see cref="ISquidStdService" /> implementation tracking start/stop calls.
+///     Minimal <see cref="ISquidStdService" /> implementation tracking start/stop calls.
 /// </summary>
 public class FakeStdService : ISquidStdService
 {
     /// <summary>
-    /// Gets a value indicating whether the service is currently started.
+    ///     Gets a value indicating whether the service is currently started.
     /// </summary>
     public bool Started { get; private set; }
 

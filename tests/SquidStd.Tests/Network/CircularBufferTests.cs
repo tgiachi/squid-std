@@ -18,11 +18,15 @@ public class CircularBufferTests
 
     [Fact]
     public void Constructor_NonPositiveCapacity_Throws()
-        => Assert.Throws<ArgumentException>(() => new CircularBuffer<int>(0));
+    {
+        Assert.Throws<ArgumentException>(() => new CircularBuffer<int>(0));
+    }
 
     [Fact]
     public void Constructor_TooManyItems_Throws()
-        => Assert.Throws<ArgumentException>(() => new CircularBuffer<int>(2, [1, 2, 3]));
+    {
+        Assert.Throws<ArgumentException>(() => new CircularBuffer<int>(2, [1, 2, 3]));
+    }
 
     [Fact]
     public void Constructor_WithItems_PopulatesBuffer()

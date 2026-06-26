@@ -8,17 +8,43 @@ using SquidStd.Network.Server;
 namespace SquidStd.Network.Sessions;
 
 /// <summary>
-/// Observes a <see cref="SquidTcpServer" /> and maintains a registry of <see cref="Session{TState}" />.
-/// The server is not modified; the manager subscribes to its lifecycle events.
+///     Observes a <see cref="SquidTcpServer" /> and maintains a registry of <see cref="Session{TState}" />.
+///     The server is not modified; the manager subscribes to its lifecycle events.
 /// </summary>
 /// <typeparam name="TState">Application-defined per-connection state.</typeparam>
 public sealed class SessionManager<TState> : ISessionManager<TState>, IDisposable
 {
     private readonly ILogger _logger = Log.ForContext<SessionManager<TState>>();
-    private readonly ConcurrentDictionary<long, Session<TState>> _sessions = new();
     private readonly SquidTcpServer _server;
+    private readonly ConcurrentDictionary<long, Session<TState>> _sessions = new();
     private readonly Func<INetworkConnection, TState> _stateFactory;
     private int _disposed;
+
+    public SessionManager(SquidTcpServer server, Func<INetworkConnection, TState> stateFactory)
+    {
+        ArgumentNullException.ThrowIfNull(server);
+        ArgumentNullException.ThrowIfNull(stateFactory);
+
+        _server = server;
+        _stateFactory = stateFactory;
+
+        _server.OnClientConnect += HandleServerClientConnect;
+        _server.OnClientDisconnect += HandleServerClientDisconnect;
+        _server.OnDataReceived += HandleServerDataReceived;
+    }
+
+    public void Dispose()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
+        _server.OnClientConnect -= HandleServerClientConnect;
+        _server.OnClientDisconnect -= HandleServerClientDisconnect;
+        _server.OnDataReceived -= HandleServerDataReceived;
+        _sessions.Clear();
+    }
 
     /// <inheritdoc />
     public int Count => _sessions.Count;
@@ -34,19 +60,6 @@ public sealed class SessionManager<TState> : ISessionManager<TState>, IDisposabl
 
     /// <inheritdoc />
     public event EventHandler<SquidStdSessionDataEventArgs<TState>>? OnSessionData;
-
-    public SessionManager(SquidTcpServer server, Func<INetworkConnection, TState> stateFactory)
-    {
-        ArgumentNullException.ThrowIfNull(server);
-        ArgumentNullException.ThrowIfNull(stateFactory);
-
-        _server = server;
-        _stateFactory = stateFactory;
-
-        _server.OnClientConnect += HandleServerClientConnect;
-        _server.OnClientDisconnect += HandleServerClientDisconnect;
-        _server.OnDataReceived += HandleServerDataReceived;
-    }
 
     /// <inheritdoc />
     public async Task BroadcastAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
@@ -64,32 +77,25 @@ public sealed class SessionManager<TState> : ISessionManager<TState>, IDisposabl
 
     /// <inheritdoc />
     public Task DisconnectAsync(long sessionId, CancellationToken cancellationToken = default)
-        => _sessions.TryGetValue(sessionId, out var session)
-               ? session.CloseAsync(cancellationToken)
-               : Task.CompletedTask;
-
-    public void Dispose()
     {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
-        {
-            return;
-        }
-
-        _server.OnClientConnect -= HandleServerClientConnect;
-        _server.OnClientDisconnect -= HandleServerClientDisconnect;
-        _server.OnDataReceived -= HandleServerDataReceived;
-        _sessions.Clear();
+        return _sessions.TryGetValue(sessionId, out var session)
+            ? session.CloseAsync(cancellationToken)
+            : Task.CompletedTask;
     }
 
     /// <inheritdoc />
     public Task SendAsync(long sessionId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
-        => _sessions.TryGetValue(sessionId, out var session)
-               ? session.SendAsync(payload, cancellationToken)
-               : Task.CompletedTask;
+    {
+        return _sessions.TryGetValue(sessionId, out var session)
+            ? session.SendAsync(payload, cancellationToken)
+            : Task.CompletedTask;
+    }
 
     /// <inheritdoc />
     public bool TryGetSession(long sessionId, out Session<TState>? session)
-        => _sessions.TryGetValue(sessionId, out session);
+    {
+        return _sessions.TryGetValue(sessionId, out session);
+    }
 
     internal void HandleConnected(INetworkConnection connection)
     {
@@ -127,19 +133,25 @@ public sealed class SessionManager<TState> : ISessionManager<TState>, IDisposabl
     }
 
     private void HandleServerClientConnect(object? sender, SquidStdTcpClientEventArgs e)
-        => HandleConnected(e.Client);
+    {
+        HandleConnected(e.Client);
+    }
 
     private void HandleServerClientDisconnect(object? sender, SquidStdTcpClientEventArgs e)
-        => HandleDisconnected(e.Client);
+    {
+        HandleDisconnected(e.Client);
+    }
 
     private void HandleServerDataReceived(object? sender, SquidStdTcpDataReceivedEventArgs e)
-        => HandleData(e.Client, e.Data);
+    {
+        HandleData(e.Client, e.Data);
+    }
 
     private void RaiseSessionCreated(Session<TState> session)
     {
         try
         {
-            OnSessionCreated?.Invoke(this, new(session));
+            OnSessionCreated?.Invoke(this, new SquidStdSessionEventArgs<TState>(session));
         }
         catch (Exception ex)
         {
@@ -151,7 +163,7 @@ public sealed class SessionManager<TState> : ISessionManager<TState>, IDisposabl
     {
         try
         {
-            OnSessionData?.Invoke(this, new(session, data));
+            OnSessionData?.Invoke(this, new SquidStdSessionDataEventArgs<TState>(session, data));
         }
         catch (Exception ex)
         {
@@ -163,7 +175,7 @@ public sealed class SessionManager<TState> : ISessionManager<TState>, IDisposabl
     {
         try
         {
-            OnSessionRemoved?.Invoke(this, new(session));
+            OnSessionRemoved?.Invoke(this, new SquidStdSessionEventArgs<TState>(session));
         }
         catch (Exception ex)
         {

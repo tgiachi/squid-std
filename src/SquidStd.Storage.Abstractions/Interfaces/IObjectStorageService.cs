@@ -1,12 +1,12 @@
 namespace SquidStd.Storage.Abstractions.Interfaces;
 
 /// <summary>
-/// Stores typed objects by logical key.
+///     Stores typed objects by logical key.
 /// </summary>
 public interface IObjectStorageService
 {
     /// <summary>
-    /// Deletes a stored object.
+    ///     Deletes a stored object.
     /// </summary>
     /// <param name="key">The logical storage key.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
@@ -14,7 +14,7 @@ public interface IObjectStorageService
     ValueTask<bool> DeleteAsync(string key, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Checks whether an object exists.
+    ///     Checks whether an object exists.
     /// </summary>
     /// <param name="key">The logical storage key.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
@@ -22,7 +22,7 @@ public interface IObjectStorageService
     ValueTask<bool> ExistsAsync(string key, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Enumerates stored keys, optionally filtered by prefix.
+    ///     Enumerates stored keys, optionally filtered by prefix.
     /// </summary>
     /// <param name="prefix">Optional key prefix; <c>null</c> or empty returns all keys.</param>
     /// <param name="cancellationToken">Token used to cancel the enumeration.</param>
@@ -30,7 +30,7 @@ public interface IObjectStorageService
     IAsyncEnumerable<string> ListKeysAsync(string? prefix = null, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Loads a stored object.
+    ///     Loads a stored object.
     /// </summary>
     /// <param name="key">The logical storage key.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
@@ -39,7 +39,7 @@ public interface IObjectStorageService
     ValueTask<T?> LoadAsync<T>(string key, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Saves an object.
+    ///     Saves an object.
     /// </summary>
     /// <param name="key">The logical storage key.</param>
     /// <param name="value">The object value.</param>

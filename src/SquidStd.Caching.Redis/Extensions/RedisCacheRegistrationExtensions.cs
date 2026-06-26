@@ -11,7 +11,7 @@ using SquidStd.Core.Json;
 namespace SquidStd.Caching.Redis.Extensions;
 
 /// <summary>
-/// DryIoc registration helpers for the Redis cache provider.
+///     DryIoc registration helpers for the Redis cache provider.
 /// </summary>
 public static class RedisCacheRegistrationExtensions
 {

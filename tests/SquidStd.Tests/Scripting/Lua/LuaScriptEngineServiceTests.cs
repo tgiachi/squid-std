@@ -1,5 +1,7 @@
 using DryIoc;
 using MoonSharp.Interpreter;
+using SquidStd.Core.Directories;
+using SquidStd.Scripting.Lua.Data.Config;
 using SquidStd.Scripting.Lua.Data.Internal;
 using SquidStd.Scripting.Lua.Data.Scripts;
 using SquidStd.Scripting.Lua.Interfaces.Events;
@@ -10,31 +12,6 @@ namespace SquidStd.Tests.Scripting.Lua;
 
 public class LuaScriptEngineServiceTests
 {
-    private sealed record LimitConfig(string Name, int Count);
-
-    public sealed class FiveArgumentUserData(int first, int second, int third, int fourth, int fifth)
-    {
-        public int Total { get; } = first + second + third + fourth + fifth;
-    }
-
-    private sealed class CapturingLuaEventBridge : ILuaEventBridge
-    {
-        public Script? AttachedScript { get; private set; }
-
-        public void Attach(Script script)
-            => AttachedScript = script;
-
-        public DynValue Invoke(
-            Closure callback,
-            IReadOnlyDictionary<string, object?> payload
-        )
-            => DynValue.Nil;
-
-        public void Publish(string eventName, IReadOnlyDictionary<string, object?> payload) { }
-
-        public void Register(string eventName, Closure callback) { }
-    }
-
     [Fact]
     public void AddCallback_AndExecuteCallback_NormalizeNameAndPassArguments()
     {
@@ -153,7 +130,7 @@ public class LuaScriptEngineServiceTests
             container,
             loadedUserData:
             [
-                new() { UserType = typeof(FiveArgumentUserData) }
+                new ScriptUserData { UserType = typeof(FiveArgumentUserData) }
             ]
         );
 
@@ -214,12 +191,45 @@ public class LuaScriptEngineServiceTests
         var luarcDirectory = temp.Combine("luarc");
         Directory.CreateDirectory(scriptsDirectory);
 
-        return new(
-            new(temp.Path, []),
+        return new LuaScriptEngineService(
+            new DirectoriesConfig(temp.Path, []),
             container,
-            new(luarcDirectory, scriptsDirectory, "SquidStd", "1.0.0"),
+            new LuaEngineConfig(luarcDirectory, scriptsDirectory, "SquidStd", "1.0.0"),
             scriptModules,
             loadedUserData
         );
+    }
+
+    private sealed record LimitConfig(string Name, int Count);
+
+    public sealed class FiveArgumentUserData(int first, int second, int third, int fourth, int fifth)
+    {
+        public int Total { get; } = first + second + third + fourth + fifth;
+    }
+
+    private sealed class CapturingLuaEventBridge : ILuaEventBridge
+    {
+        public Script? AttachedScript { get; private set; }
+
+        public void Attach(Script script)
+        {
+            AttachedScript = script;
+        }
+
+        public DynValue Invoke(
+            Closure callback,
+            IReadOnlyDictionary<string, object?> payload
+        )
+        {
+            return DynValue.Nil;
+        }
+
+        public void Publish(string eventName, IReadOnlyDictionary<string, object?> payload)
+        {
+        }
+
+        public void Register(string eventName, Closure callback)
+        {
+        }
     }
 }

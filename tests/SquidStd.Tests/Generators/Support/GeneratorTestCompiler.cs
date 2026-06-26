@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using DryIoc;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using SquidStd.Abstractions.Attributes;
@@ -75,7 +76,7 @@ internal static class GeneratorTestCompiler
         AddReference(references, typeof(RegisterJobHandlerAttribute).Assembly.Location);
         AddReference(references, typeof(WorkersRegistrationExtensions).Assembly.Location);
         AddReference(references, typeof(IJobHandler).Assembly.Location);
-        AddReference(references, typeof(DryIoc.IContainer).Assembly.Location);
+        AddReference(references, typeof(IContainer).Assembly.Location);
 
         return references;
     }

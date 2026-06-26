@@ -1,7 +1,7 @@
 namespace SquidStd.Workers.Manager.Interfaces;
 
 /// <summary>
-/// Enqueues jobs for workers to consume.
+///     Enqueues jobs for workers to consume.
 /// </summary>
 public interface IJobScheduler
 {

@@ -11,9 +11,14 @@ public class ReplaceEnvTests
         Assert.Equal("x=$SQUID_MISSING_VAR", "x=$SQUID_MISSING_VAR".ReplaceEnv());
     }
 
-    [Theory, InlineData(null), InlineData(""), InlineData("no tokens here")]
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("no tokens here")]
     public void ReplaceEnv_PassesThroughWhenNothingToReplace(string? input)
-        => Assert.Equal(input, input!.ReplaceEnv());
+    {
+        Assert.Equal(input, input!.ReplaceEnv());
+    }
 
     [Fact]
     public void ReplaceEnv_SubstitutesKnownVariable()

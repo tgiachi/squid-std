@@ -3,12 +3,12 @@ using SquidStd.Core.Extensions.Env;
 namespace SquidStd.Core.Extensions.Directories;
 
 /// <summary>
-/// Provides extension methods for directory path resolution and environment variable expansion
+///     Provides extension methods for directory path resolution and environment variable expansion
 /// </summary>
 public static class DirectoriesExtension
 {
     /// <summary>
-    /// Resolves path by expanding tilde (~) to user home directory and expanding environment variables
+    ///     Resolves path by expanding tilde (~) to user home directory and expanding environment variables
     /// </summary>
     /// <param name="path">The path to resolve</param>
     /// <returns>The fully resolved path with expanded environment variables</returns>

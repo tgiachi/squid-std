@@ -5,16 +5,24 @@ namespace SquidStd.Generators.Common;
 internal static class GeneratorSymbolHelpers
 {
     public static string FullyQualified(ITypeSymbol symbol)
-        => symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+    {
+        return symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+    }
 
     public static string DisplayName(ISymbol symbol)
-        => symbol.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat);
+    {
+        return symbol.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat);
+    }
 
     public static Location? PrimaryLocation(ISymbol symbol)
-        => symbol.Locations.FirstOrDefault();
+    {
+        return symbol.Locations.FirstOrDefault();
+    }
 
     public static bool IsConcreteNonGenericClass(INamedTypeSymbol type)
-        => type.TypeKind == TypeKind.Class && !type.IsAbstract && !type.IsGenericType;
+    {
+        return type.TypeKind == TypeKind.Class && !type.IsAbstract && !type.IsGenericType;
+    }
 
     public static bool IsAccessibleFromGeneratedSource(INamedTypeSymbol type)
     {
@@ -34,15 +42,16 @@ internal static class GeneratorSymbolHelpers
     }
 
     public static bool ImplementsInterface(INamedTypeSymbol type, string metadataName, string namespaceName)
-        => type.AllInterfaces.Any(
-            interfaceType =>
+    {
+        return type.AllInterfaces.Any(interfaceType =>
             {
                 var originalDefinition = interfaceType.OriginalDefinition;
 
                 return originalDefinition.MetadataName == metadataName
-                    && originalDefinition.ContainingNamespace.ToDisplayString() == namespaceName;
+                       && originalDefinition.ContainingNamespace.ToDisplayString() == namespaceName;
             }
         );
+    }
 
     public static bool IsAssignableTo(INamedTypeSymbol implementationType, INamedTypeSymbol serviceType)
     {
@@ -59,13 +68,15 @@ internal static class GeneratorSymbolHelpers
             }
         }
 
-        return implementationType.AllInterfaces.Any(
-            interfaceType => SymbolEqualityComparer.Default.Equals(interfaceType, serviceType)
+        return implementationType.AllInterfaces.Any(interfaceType =>
+            SymbolEqualityComparer.Default.Equals(interfaceType, serviceType)
         );
     }
 
     public static bool HasPublicParameterlessConstructor(INamedTypeSymbol type)
-        => type.InstanceConstructors.Any(
-            constructor => constructor.Parameters.Length == 0 && constructor.DeclaredAccessibility == Accessibility.Public
+    {
+        return type.InstanceConstructors.Any(constructor =>
+            constructor.Parameters.Length == 0 && constructor.DeclaredAccessibility == Accessibility.Public
         );
+    }
 }

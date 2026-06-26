@@ -6,14 +6,38 @@ using SquidStd.Core.Types.Metrics;
 namespace SquidStd.Caching.Abstractions.Services;
 
 /// <summary>
-/// Accumulates aggregate cache metrics and exposes them to the metrics collection system.
+///     Accumulates aggregate cache metrics and exposes them to the metrics collection system.
 /// </summary>
 public sealed class CacheMetricsProvider : ICacheMetrics, IMetricProvider
 {
     private long _hits;
     private long _misses;
-    private long _sets;
     private long _removes;
+    private long _sets;
+
+    /// <inheritdoc />
+    public void OnHit(string key)
+    {
+        Interlocked.Increment(ref _hits);
+    }
+
+    /// <inheritdoc />
+    public void OnMiss(string key)
+    {
+        Interlocked.Increment(ref _misses);
+    }
+
+    /// <inheritdoc />
+    public void OnRemove(string key)
+    {
+        Interlocked.Increment(ref _removes);
+    }
+
+    /// <inheritdoc />
+    public void OnSet(string key)
+    {
+        Interlocked.Increment(ref _sets);
+    }
 
     /// <inheritdoc />
     public string ProviderName => "cache";
@@ -37,20 +61,4 @@ public sealed class CacheMetricsProvider : ICacheMetrics, IMetricProvider
 
         return ValueTask.FromResult<IReadOnlyList<MetricSample>>(samples);
     }
-
-    /// <inheritdoc />
-    public void OnHit(string key)
-        => Interlocked.Increment(ref _hits);
-
-    /// <inheritdoc />
-    public void OnMiss(string key)
-        => Interlocked.Increment(ref _misses);
-
-    /// <inheritdoc />
-    public void OnRemove(string key)
-        => Interlocked.Increment(ref _removes);
-
-    /// <inheritdoc />
-    public void OnSet(string key)
-        => Interlocked.Increment(ref _sets);
 }

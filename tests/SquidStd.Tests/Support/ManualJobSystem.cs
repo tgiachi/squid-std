@@ -3,9 +3,9 @@ using SquidStd.Core.Interfaces.Jobs;
 namespace SquidStd.Tests.Support;
 
 /// <summary>
-/// Single-threaded <see cref="IJobSystem" /> for tests: <see cref="ScheduleAsync(Action, CancellationToken)" />
-/// queues the work; call <see cref="RunAll" /> to execute it. This keeps overlap and
-/// rescheduling tests fully deterministic.
+///     Single-threaded <see cref="IJobSystem" /> for tests: <see cref="ScheduleAsync(Action, CancellationToken)" />
+///     queues the work; call <see cref="RunAll" /> to execute it. This keeps overlap and
+///     rescheduling tests fully deterministic.
 /// </summary>
 public sealed class ManualJobSystem : IJobSystem
 {
@@ -19,21 +19,8 @@ public sealed class ManualJobSystem : IJobSystem
 
     public long CompletedCount { get; private set; }
 
-    public void Dispose() { }
-
-    /// <summary>Runs and clears all queued work; returns how many items ran.</summary>
-    public int RunAll()
+    public void Dispose()
     {
-        var snapshot = _pending.ToArray();
-        _pending.Clear();
-
-        foreach (var action in snapshot)
-        {
-            action();
-            CompletedCount++;
-        }
-
-        return snapshot.Length;
     }
 
     public Task ScheduleAsync(Action work, CancellationToken cancellationToken = default)
@@ -49,5 +36,20 @@ public sealed class ManualJobSystem : IJobSystem
         CompletedCount++;
 
         return Task.FromResult(result);
+    }
+
+    /// <summary>Runs and clears all queued work; returns how many items ran.</summary>
+    public int RunAll()
+    {
+        var snapshot = _pending.ToArray();
+        _pending.Clear();
+
+        foreach (var action in snapshot)
+        {
+            action();
+            CompletedCount++;
+        }
+
+        return snapshot.Length;
     }
 }

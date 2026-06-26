@@ -8,24 +8,24 @@ public class EventListenerRegistrationGeneratorTests
     public void Run_GeneratesRegistrationExtension_WhenListenerExists()
     {
         const string source = """
-            using System.Threading;
-            using System.Threading.Tasks;
-            using SquidStd.Abstractions.Attributes;
-            using SquidStd.Core.Interfaces.Events;
+                              using System.Threading;
+                              using System.Threading.Tasks;
+                              using SquidStd.Abstractions.Attributes;
+                              using SquidStd.Core.Interfaces.Events;
 
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            public sealed record PingEvent(string Message) : IEvent;
+                              public sealed record PingEvent(string Message) : IEvent;
 
-            [RegisterEventListener]
-            public sealed class PingListener : IEventListener<PingEvent>
-            {
-                public Task HandleAsync(PingEvent eventData, CancellationToken cancellationToken = default)
-                {
-                    return Task.CompletedTask;
-                }
-            }
-            """;
+                              [RegisterEventListener]
+                              public sealed class PingListener : IEventListener<PingEvent>
+                              {
+                                  public Task HandleAsync(PingEvent eventData, CancellationToken cancellationToken = default)
+                                  {
+                                      return Task.CompletedTask;
+                                  }
+                              }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source);
         var generatedTree = Assert.Single(
@@ -47,23 +47,23 @@ public class EventListenerRegistrationGeneratorTests
     public void Run_DoesNotRegisterListener_WhenAttributeIsMissing()
     {
         const string source = """
-            using System.Threading;
-            using System.Threading.Tasks;
-            using SquidStd.Abstractions.Attributes;
-            using SquidStd.Core.Interfaces.Events;
+                              using System.Threading;
+                              using System.Threading.Tasks;
+                              using SquidStd.Abstractions.Attributes;
+                              using SquidStd.Core.Interfaces.Events;
 
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            public sealed record PingEvent(string Message) : IEvent;
+                              public sealed record PingEvent(string Message) : IEvent;
 
-            public sealed class PingListener : IEventListener<PingEvent>
-            {
-                public Task HandleAsync(PingEvent eventData, CancellationToken cancellationToken = default)
-                {
-                    return Task.CompletedTask;
-                }
-            }
-            """;
+                              public sealed class PingListener : IEventListener<PingEvent>
+                              {
+                                  public Task HandleAsync(PingEvent eventData, CancellationToken cancellationToken = default)
+                                  {
+                                      return Task.CompletedTask;
+                                  }
+                              }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source);
         var generatedTree = Assert.Single(
@@ -81,12 +81,12 @@ public class EventListenerRegistrationGeneratorTests
     public void Run_GeneratesNoOpExtension_WhenNoListenersExist()
     {
         const string source = """
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            public sealed class EmptyType
-            {
-            }
-            """;
+                              public sealed class EmptyType
+                              {
+                              }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source);
         var generatedTree = Assert.Single(
@@ -105,24 +105,24 @@ public class EventListenerRegistrationGeneratorTests
     public void Run_ReportsDiagnostic_WhenAnnotatedListenerCannotBeGenerated()
     {
         const string source = """
-            using System.Threading;
-            using System.Threading.Tasks;
-            using SquidStd.Abstractions.Attributes;
-            using SquidStd.Core.Interfaces.Events;
+                              using System.Threading;
+                              using System.Threading.Tasks;
+                              using SquidStd.Abstractions.Attributes;
+                              using SquidStd.Core.Interfaces.Events;
 
-            namespace SampleApp;
+                              namespace SampleApp;
 
-            public sealed record PingEvent(string Message) : IEvent;
+                              public sealed record PingEvent(string Message) : IEvent;
 
-            [RegisterEventListener]
-            public sealed class GenericListener<TValue> : IEventListener<PingEvent>
-            {
-                public Task HandleAsync(PingEvent eventData, CancellationToken cancellationToken = default)
-                {
-                    return Task.CompletedTask;
-                }
-            }
-            """;
+                              [RegisterEventListener]
+                              public sealed class GenericListener<TValue> : IEventListener<PingEvent>
+                              {
+                                  public Task HandleAsync(PingEvent eventData, CancellationToken cancellationToken = default)
+                                  {
+                                      return Task.CompletedTask;
+                                  }
+                              }
+                              """;
 
         var result = GeneratorTestCompiler.Run(source);
 

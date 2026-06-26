@@ -36,11 +36,11 @@ public sealed class ConfigSectionRegistrationGenerator : IIncrementalGenerator
         var priority = GetIntNamedArgument(attribute, "Priority");
 
         var isSupported = !string.IsNullOrWhiteSpace(sectionName)
-            && GeneratorSymbolHelpers.IsConcreteNonGenericClass(configType)
-            && GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(configType)
-            && GeneratorSymbolHelpers.HasPublicParameterlessConstructor(configType);
+                          && GeneratorSymbolHelpers.IsConcreteNonGenericClass(configType)
+                          && GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(configType)
+                          && GeneratorSymbolHelpers.HasPublicParameterlessConstructor(configType);
 
-        return new(
+        return new ConfigSectionRegistrationCandidate(
             GeneratorSymbolHelpers.FullyQualified(configType),
             sectionName ?? string.Empty,
             GeneratorSymbolHelpers.DisplayName(configType),
@@ -103,8 +103,7 @@ public sealed class ConfigSectionRegistrationGenerator : IIncrementalGenerator
             }
         }
 
-        supported.Sort(
-            static (left, right) =>
+        supported.Sort(static (left, right) =>
             {
                 var sectionComparison = string.Compare(left.SectionName, right.SectionName, StringComparison.Ordinal);
 

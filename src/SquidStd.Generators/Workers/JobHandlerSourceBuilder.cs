@@ -15,7 +15,9 @@ internal static class JobHandlerSourceBuilder
         builder.AppendLine();
         builder.AppendLine("public static class GeneratedJobHandlerRegistrationExtensions");
         builder.AppendLine("{");
-        builder.AppendLine("    public static global::DryIoc.IContainer RegisterGeneratedJobHandlers(this global::DryIoc.IContainer container)");
+        builder.AppendLine(
+            "    public static global::DryIoc.IContainer RegisterGeneratedJobHandlers(this global::DryIoc.IContainer container)"
+        );
         builder.AppendLine("    {");
 
         for (var i = 0; i < candidates.Count; i++)

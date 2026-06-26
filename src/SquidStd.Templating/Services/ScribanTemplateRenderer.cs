@@ -8,8 +8,8 @@ using SquidStd.Templating.Interfaces;
 namespace SquidStd.Templating.Services;
 
 /// <summary>
-/// Scriban-backed <see cref="ITemplateRenderer" />. Named templates are compiled and cached; ad-hoc
-/// strings are parsed per call. On start it auto-loads <c>templates/**/*.tmpl</c>.
+///     Scriban-backed <see cref="ITemplateRenderer" />. Named templates are compiled and cached; ad-hoc
+///     strings are parsed per call. On start it auto-loads <c>templates/**/*.tmpl</c>.
 /// </summary>
 public sealed class ScribanTemplateRenderer : ITemplateRenderer, ISquidStdService
 {
@@ -21,6 +21,32 @@ public sealed class ScribanTemplateRenderer : ITemplateRenderer, ISquidStdServic
     public ScribanTemplateRenderer(DirectoriesConfig directories)
     {
         _directories = directories;
+    }
+
+    /// <inheritdoc />
+    public async ValueTask StartAsync(CancellationToken cancellationToken = default)
+    {
+        var directory = _directories["templates"];
+
+        if (!Directory.Exists(directory))
+        {
+            return;
+        }
+
+        foreach (var file in Directory.EnumerateFiles(directory, "*" + TemplateExtension, SearchOption.AllDirectories))
+        {
+            var relative = Path.GetRelativePath(directory, file).Replace('\\', '/');
+            var name = relative[..^TemplateExtension.Length];
+            var content = await File.ReadAllTextAsync(file, cancellationToken);
+
+            Register(name, content);
+        }
+    }
+
+    /// <inheritdoc />
+    public ValueTask StopAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.CompletedTask;
     }
 
     /// <inheritdoc />
@@ -56,30 +82,6 @@ public sealed class ScribanTemplateRenderer : ITemplateRenderer, ISquidStdServic
 
         return await RenderCompiledAsync(compiled, model, name);
     }
-
-    /// <inheritdoc />
-    public async ValueTask StartAsync(CancellationToken cancellationToken = default)
-    {
-        var directory = _directories["templates"];
-
-        if (!Directory.Exists(directory))
-        {
-            return;
-        }
-
-        foreach (var file in Directory.EnumerateFiles(directory, "*" + TemplateExtension, SearchOption.AllDirectories))
-        {
-            var relative = Path.GetRelativePath(directory, file).Replace('\\', '/');
-            var name = relative[..^TemplateExtension.Length];
-            var content = await File.ReadAllTextAsync(file, cancellationToken);
-
-            Register(name, content);
-        }
-    }
-
-    /// <inheritdoc />
-    public ValueTask StopAsync(CancellationToken cancellationToken = default)
-        => ValueTask.CompletedTask;
 
     private static Template Parse(string text, string name)
     {

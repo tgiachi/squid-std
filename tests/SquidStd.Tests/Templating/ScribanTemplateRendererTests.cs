@@ -1,3 +1,4 @@
+using SquidStd.Core.Directories;
 using SquidStd.Templating;
 using SquidStd.Templating.Services;
 using SquidStd.Tests.Support;
@@ -82,5 +83,7 @@ public class ScribanTemplateRendererTests
     }
 
     private static ScribanTemplateRenderer NewRenderer(string root)
-        => new(new(root, []));
+    {
+        return new ScribanTemplateRenderer(new DirectoriesConfig(root, []));
+    }
 }

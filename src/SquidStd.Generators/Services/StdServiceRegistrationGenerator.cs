@@ -36,12 +36,12 @@ public sealed class StdServiceRegistrationGenerator : IIncrementalGenerator
         var priority = GetIntNamedArgument(attribute, "Priority");
 
         var isSupported = serviceType is not null
-            && GeneratorSymbolHelpers.IsConcreteNonGenericClass(implementationType)
-            && GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(implementationType)
-            && GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(serviceType)
-            && GeneratorSymbolHelpers.IsAssignableTo(implementationType, serviceType);
+                          && GeneratorSymbolHelpers.IsConcreteNonGenericClass(implementationType)
+                          && GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(implementationType)
+                          && GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(serviceType)
+                          && GeneratorSymbolHelpers.IsAssignableTo(implementationType, serviceType);
 
-        return new(
+        return new StdServiceRegistrationCandidate(
             serviceType is null ? string.Empty : GeneratorSymbolHelpers.FullyQualified(serviceType),
             GeneratorSymbolHelpers.FullyQualified(implementationType),
             GeneratorSymbolHelpers.DisplayName(implementationType),
@@ -101,8 +101,7 @@ public sealed class StdServiceRegistrationGenerator : IIncrementalGenerator
             }
         }
 
-        supported.Sort(
-            static (left, right) => string.Compare(
+        supported.Sort(static (left, right) => string.Compare(
                 left.ImplementationTypeName,
                 right.ImplementationTypeName,
                 StringComparison.Ordinal

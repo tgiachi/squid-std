@@ -3,7 +3,7 @@ using SquidStd.Abstractions.Interfaces.Services;
 namespace SquidStd.Messaging.Abstractions.Interfaces;
 
 /// <summary>
-/// Byte-level queue transport owning buffering, round-robin delivery, retry and dead-lettering.
+///     Byte-level queue transport owning buffering, round-robin delivery, retry and dead-lettering.
 /// </summary>
 public interface IQueueProvider : ISquidStdService, IAsyncDisposable
 {

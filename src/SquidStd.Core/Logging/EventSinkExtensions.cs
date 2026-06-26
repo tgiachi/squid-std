@@ -5,13 +5,13 @@ using Serilog.Events;
 namespace SquidStd.Core.Logging;
 
 /// <summary>
-/// Extension methods for configuring the EventSink.
+///     Extension methods for configuring the EventSink.
 /// </summary>
 public static class EventSinkExtensions
 {
     /// <summary>
-    /// Adds the EventSink to the Serilog pipeline.
-    /// Subscribe to <see cref="EventSink.OnLogReceived" /> to receive log events.
+    ///     Adds the EventSink to the Serilog pipeline.
+    ///     Subscribe to <see cref="EventSink.OnLogReceived" /> to receive log events.
     /// </summary>
     /// <param name="sinkConfiguration">The logger sink configuration.</param>
     /// <param name="restrictedToMinimumLevel">The minimum log level to capture. Defaults to Verbose (all logs).</param>
@@ -20,5 +20,7 @@ public static class EventSinkExtensions
         this LoggerSinkConfiguration sinkConfiguration,
         LogEventLevel restrictedToMinimumLevel = LogEventLevel.Verbose
     )
-        => sinkConfiguration.Sink(new EventSink(), restrictedToMinimumLevel);
+    {
+        return sinkConfiguration.Sink(new EventSink(), restrictedToMinimumLevel);
+    }
 }

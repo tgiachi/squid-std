@@ -16,12 +16,16 @@ internal static class ConfigSectionSourceBuilder
         builder.AppendLine();
         builder.AppendLine("public static class GeneratedConfigSectionRegistrationExtensions");
         builder.AppendLine("{");
-        builder.AppendLine("    public static global::DryIoc.IContainer RegisterGeneratedConfigSections(this global::DryIoc.IContainer container)");
+        builder.AppendLine(
+            "    public static global::DryIoc.IContainer RegisterGeneratedConfigSections(this global::DryIoc.IContainer container)"
+        );
         builder.AppendLine("    {");
 
         for (var i = 0; i < candidates.Count; i++)
         {
-            builder.Append("        global::SquidStd.Abstractions.Extensions.Config.RegisterConfigSectionExtension.RegisterConfigSection<");
+            builder.Append(
+                "        global::SquidStd.Abstractions.Extensions.Config.RegisterConfigSectionExtension.RegisterConfigSection<"
+            );
             builder.Append(candidates[i].ConfigTypeName);
             builder.Append(">(container, ");
             builder.Append(FormatStringLiteral(candidates[i].SectionName));

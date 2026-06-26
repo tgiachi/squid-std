@@ -1,13 +1,13 @@
 namespace SquidStd.Network.Interfaces.Codecs;
 
 /// <summary>
-/// An in-place, length-preserving transport transform applied at the wire — for example a stream cipher.
+///     An in-place, length-preserving transport transform applied at the wire — for example a stream cipher.
 /// </summary>
 /// <remarks>
-/// Implementations MUST preserve the buffer length and transform in place. <see cref="Decode" /> is invoked
-/// only from a connection's receive loop (serial), and <see cref="Encode" /> only from its send path (serial
-/// under the send lock). The two directions may run concurrently (one each), so an implementation MUST NOT
-/// share mutable state between decode and encode (real ciphers keep separate receive/send positions).
+///     Implementations MUST preserve the buffer length and transform in place. <see cref="Decode" /> is invoked
+///     only from a connection's receive loop (serial), and <see cref="Encode" /> only from its send path (serial
+///     under the send lock). The two directions may run concurrently (one each), so an implementation MUST NOT
+///     share mutable state between decode and encode (real ciphers keep separate receive/send positions).
 /// </remarks>
 public interface ITransportCodec
 {

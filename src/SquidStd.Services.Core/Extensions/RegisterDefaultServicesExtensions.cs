@@ -26,7 +26,7 @@ using SquidStd.Storage.Abstractions.Data.Config;
 namespace SquidStd.Services.Core.Extensions;
 
 /// <summary>
-/// Extension methods for registering the default SquidStd core services.
+///     Extension methods for registering the default SquidStd core services.
 /// </summary>
 public static class RegisterDefaultServicesExtensions
 {
@@ -46,14 +46,16 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        /// Registers the default SquidStd core services using the default config file location.
+        ///     Registers the default SquidStd core services using the default config file location.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterCoreServices()
-            => container.RegisterCoreServices("squidstd", Directory.GetCurrentDirectory());
+        {
+            return container.RegisterCoreServices("squidstd", Directory.GetCurrentDirectory());
+        }
 
         /// <summary>
-        /// Registers the default SquidStd core services and config manager.
+        ///     Registers the default SquidStd core services and config manager.
         /// </summary>
         /// <param name="configName">The logical config name or YAML file name.</param>
         /// <param name="configDirectory">The directory where the config file is searched.</param>
@@ -75,14 +77,14 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        /// Registers the default config manager service as a singleton instance.
+        ///     Registers the default config manager service as a singleton instance.
         /// </summary>
         /// <param name="configName">The logical config name or YAML file name.</param>
         /// <param name="configDirectory">The directory where the config file is searched.</param>
         /// <returns>The same container for chaining.</returns>
         /// <summary>
-        /// Registers the default JSON data serializer for <see cref="IDataSerializer" /> and
-        /// <see cref="IDataDeserializer" /> (same singleton instance).
+        ///     Registers the default JSON data serializer for <see cref="IDataSerializer" /> and
+        ///     <see cref="IDataDeserializer" /> (same singleton instance).
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterDataSerializer()
@@ -95,7 +97,7 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        /// Registers the default SquidStd core configuration sections.
+        ///     Registers the default SquidStd core configuration sections.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterDefaultCoreConfigSections()
@@ -111,7 +113,7 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        /// Registers the default event bus service in the container.
+        ///     Registers the default event bus service in the container.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterEventBusService()
@@ -130,7 +132,7 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        /// Registers the default job system service in the container.
+        ///     Registers the default job system service in the container.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterJobSystemService()
@@ -141,14 +143,16 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        /// Registers the default main-thread dispatcher service in the container.
+        ///     Registers the default main-thread dispatcher service in the container.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterMainThreadDispatcherService()
-            => container.RegisterStdService<IMainThreadDispatcher, MainThreadDispatcherService>(-1);
+        {
+            return container.RegisterStdService<IMainThreadDispatcher, MainThreadDispatcherService>(-1);
+        }
 
         /// <summary>
-        /// Registers the default metrics collection service in the container.
+        ///     Registers the default metrics collection service in the container.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterMetricsCollectionService()
@@ -159,7 +163,7 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        /// Registers default encrypted local secret services in the container.
+        ///     Registers default encrypted local secret services in the container.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterSecretServices()
@@ -172,7 +176,7 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        /// Registers the default timer wheel service in the container.
+        ///     Registers the default timer wheel service in the container.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterTimerWheelService()

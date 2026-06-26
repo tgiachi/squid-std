@@ -10,15 +10,21 @@ public sealed class FakeMetricsCollectionService : IMetricsCollectionService
 
     public FakeMetricsCollectionService(IReadOnlyDictionary<string, MetricSample> metrics)
     {
-        _snapshot = new(DateTimeOffset.UnixEpoch, metrics);
+        _snapshot = new MetricsSnapshot(DateTimeOffset.UnixEpoch, metrics);
     }
 
     public IReadOnlyDictionary<string, MetricSample> GetAllMetrics()
-        => _snapshot.Metrics;
+    {
+        return _snapshot.Metrics;
+    }
 
     public MetricsSnapshot GetSnapshot()
-        => _snapshot;
+    {
+        return _snapshot;
+    }
 
     public MetricsSnapshot GetStatus()
-        => _snapshot;
+    {
+        return _snapshot;
+    }
 }

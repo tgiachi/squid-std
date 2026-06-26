@@ -43,7 +43,7 @@ public class MailReaderTests
         var user = "pop-user@example.com";
         await SendAsync(user, "pop-subject", false);
         var reader = new Pop3MailReader(
-            new()
+            new MailOptions
             {
                 Protocol = MailProtocolType.Pop3,
                 Host = _fixture.Host,
@@ -63,7 +63,8 @@ public class MailReaderTests
     }
 
     private MailOptions ImapOptions(string user)
-        => new()
+    {
+        return new MailOptions
         {
             Protocol = MailProtocolType.Imap,
             Host = _fixture.Host,
@@ -74,6 +75,7 @@ public class MailReaderTests
             MarkAsSeen = true,
             IncludeRawEml = true
         };
+    }
 
     private async Task SendAsync(string to, string subject, bool withAttachment)
     {

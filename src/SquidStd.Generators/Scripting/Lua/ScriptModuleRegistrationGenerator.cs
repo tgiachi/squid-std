@@ -34,10 +34,10 @@ public sealed class ScriptModuleRegistrationGenerator : IIncrementalGenerator
 
         var scriptModuleType = (INamedTypeSymbol)context.TargetSymbol;
         var isSupported = GeneratorSymbolHelpers.IsConcreteNonGenericClass(scriptModuleType)
-            && GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(scriptModuleType)
-            && HasScriptModuleAttribute(scriptModuleType);
+                          && GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(scriptModuleType)
+                          && HasScriptModuleAttribute(scriptModuleType);
 
-        return new(
+        return new ScriptModuleRegistrationCandidate(
             GeneratorSymbolHelpers.FullyQualified(scriptModuleType),
             GeneratorSymbolHelpers.DisplayName(scriptModuleType),
             GeneratorSymbolHelpers.PrimaryLocation(scriptModuleType),
@@ -46,16 +46,18 @@ public sealed class ScriptModuleRegistrationGenerator : IIncrementalGenerator
     }
 
     private static bool HasScriptModuleAttribute(INamedTypeSymbol type)
-        => type.GetAttributes().Any(
-            attribute =>
-            {
-                var attributeClass = attribute.AttributeClass;
+    {
+        return type.GetAttributes()
+            .Any(attribute =>
+                {
+                    var attributeClass = attribute.AttributeClass;
 
-                return attributeClass is not null
-                    && attributeClass.MetadataName == ScriptModuleAttributeMetadataName
-                    && attributeClass.ContainingNamespace.ToDisplayString() == ScriptModuleAttributeNamespace;
-            }
-        );
+                    return attributeClass is not null
+                           && attributeClass.MetadataName == ScriptModuleAttributeMetadataName
+                           && attributeClass.ContainingNamespace.ToDisplayString() == ScriptModuleAttributeNamespace;
+                }
+            );
+    }
 
     private static void Execute(
         SourceProductionContext context,
@@ -86,8 +88,7 @@ public sealed class ScriptModuleRegistrationGenerator : IIncrementalGenerator
             }
         }
 
-        supported.Sort(
-            static (left, right) => string.Compare(
+        supported.Sort(static (left, right) => string.Compare(
                 left.ScriptModuleTypeName,
                 right.ScriptModuleTypeName,
                 StringComparison.Ordinal

@@ -6,6 +6,8 @@ using SquidStd.Messaging.Extensions;
 using SquidStd.Services.Core.Services;
 using SquidStd.Workers.Abstractions.Data;
 using SquidStd.Workers.Abstractions.Types;
+using SquidStd.Workers.Manager.Data;
+using SquidStd.Workers.Manager.Data.Config;
 using SquidStd.Workers.Manager.Endpoints;
 using SquidStd.Workers.Manager.Services;
 
@@ -17,10 +19,10 @@ public class WorkerManagerEndpointsTests
     public async Task EnqueueJob_ReturnsAccepted_AndSchedulesJob()
     {
         var result = await WorkerManagerEndpoints.EnqueueJob(
-                         new("resize", new Dictionary<string, string>()),
-                         NewScheduler(),
-                         CancellationToken.None
-                     );
+            new EnqueueJobRequest("resize", new Dictionary<string, string>()),
+            NewScheduler(),
+            CancellationToken.None
+        );
 
         Assert.IsType<Accepted>(result.Result);
     }
@@ -29,10 +31,10 @@ public class WorkerManagerEndpointsTests
     public async Task EnqueueJob_ReturnsBadRequest_WhenJobNameBlank()
     {
         var result = await WorkerManagerEndpoints.EnqueueJob(
-                         new("   ", null),
-                         NewScheduler(),
-                         CancellationToken.None
-                     );
+            new EnqueueJobRequest("   ", null),
+            NewScheduler(),
+            CancellationToken.None
+        );
 
         Assert.IsType<BadRequest<string>>(result.Result);
     }
@@ -67,16 +69,16 @@ public class WorkerManagerEndpointsTests
         container.RegisterInstance<IEventBus>(new EventBusService());
         container.AddInMemoryMessaging();
 
-        return new(container.Resolve<IMessageQueue>(), new());
+        return new JobScheduler(container.Resolve<IMessageQueue>(), new WorkerManagerConfig());
     }
 
     private static WorkerRegistry RegistryWith(params string[] workerIds)
     {
-        var registry = new WorkerRegistry(new());
+        var registry = new WorkerRegistry(new WorkerManagerConfig());
 
         foreach (var id in workerIds)
         {
-            registry.Record(new(id, DateTime.UtcNow, WorkerStatusType.Idle, 0, 8));
+            registry.Record(new WorkerHeartbeat(id, DateTime.UtcNow, WorkerStatusType.Idle, 0, 8));
         }
 
         return registry;

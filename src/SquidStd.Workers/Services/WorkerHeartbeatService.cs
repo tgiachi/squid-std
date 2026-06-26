@@ -9,17 +9,17 @@ using SquidStd.Workers.Interfaces;
 namespace SquidStd.Workers.Services;
 
 /// <summary>
-/// Publishes a <see cref="WorkerHeartbeat" /> on the heartbeat topic immediately on start and then once
-/// per configured interval.
+///     Publishes a <see cref="WorkerHeartbeat" /> on the heartbeat topic immediately on start and then once
+///     per configured interval.
 /// </summary>
 public sealed class WorkerHeartbeatService : ISquidStdService
 {
     private const int DefaultIntervalSeconds = 10;
+    private readonly TimeSpan _interval;
 
     private readonly ILogger _logger = Log.ForContext<WorkerHeartbeatService>();
-    private readonly IMessageTopic _topic;
     private readonly IWorkerState _state;
-    private readonly TimeSpan _interval;
+    private readonly IMessageTopic _topic;
     private readonly string _topicName;
     private CancellationTokenSource? _loopCts;
     private Task? _loopTask;
@@ -42,8 +42,8 @@ public sealed class WorkerHeartbeatService : ISquidStdService
 
         _interval = TimeSpan.FromSeconds(seconds);
         _topicName = string.IsNullOrWhiteSpace(config.HeartbeatTopic)
-                         ? WorkerChannels.HeartbeatTopic
-                         : config.HeartbeatTopic;
+            ? WorkerChannels.HeartbeatTopic
+            : config.HeartbeatTopic;
     }
 
     /// <inheritdoc />

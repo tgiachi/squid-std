@@ -11,14 +11,14 @@ using HttpMethod = Elastic.Transport.HttpMethod;
 namespace SquidStd.Search.Elasticsearch.Services;
 
 /// <summary>
-/// Default <see cref="ISearchService" />: indexes, deletes, and queries documents over the Elasticsearch
-/// low-level transport, with index names resolved from <c>[SearchIndex]</c> + the configured prefix.
+///     Default <see cref="ISearchService" />: indexes, deletes, and queries documents over the Elasticsearch
+///     low-level transport, with index names resolved from <c>[SearchIndex]</c> + the configured prefix.
 /// </summary>
 public sealed class ElasticSearchService : ISearchService
 {
+    private readonly string? _indexPrefix;
     private readonly ILogger _logger = Log.ForContext<ElasticSearchService>();
     private readonly ElasticTransport _transport;
-    private readonly string? _indexPrefix;
 
     public ElasticSearchService(ElasticTransport transport, ElasticsearchOptions options)
     {
@@ -82,11 +82,11 @@ public sealed class ElasticSearchService : ISearchService
         var index = ResolveIndex<T>();
         var path = $"/{index}/_doc/{Uri.EscapeDataString(entity.IndexId)}{RefreshQuery(refresh)}";
         var (status, body) = await _transport.SendAsync(
-                                 HttpMethod.PUT,
-                                 path,
-                                 ElasticTransport.SerializeDocument(entity),
-                                 cancellationToken
-                             );
+            HttpMethod.PUT,
+            path,
+            ElasticTransport.SerializeDocument(entity),
+            cancellationToken
+        );
 
         EnsureSuccess(status, body, $"index document '{entity.IndexId}' into '{index}'");
     }
@@ -130,7 +130,9 @@ public sealed class ElasticSearchService : ISearchService
 
     /// <inheritdoc />
     public IQueryable<T> Query<T>() where T : IIndexableEntity
-        => new ElasticQueryable<T>(new(_transport, ResolveIndex<T>(), typeof(T)));
+    {
+        return new ElasticQueryable<T>(new ElasticQueryProvider(_transport, ResolveIndex<T>(), typeof(T)));
+    }
 
     /// <summary>Resolves the (prefixed, lowercased) index name for a type.</summary>
     public string ResolveIndex<T>()
@@ -154,5 +156,7 @@ public sealed class ElasticSearchService : ISearchService
     }
 
     private static string RefreshQuery(bool refresh)
-        => refresh ? "?refresh=wait_for" : string.Empty;
+    {
+        return refresh ? "?refresh=wait_for" : string.Empty;
+    }
 }

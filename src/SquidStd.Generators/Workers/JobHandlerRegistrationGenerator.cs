@@ -32,14 +32,14 @@ public sealed class JobHandlerRegistrationGenerator : IIncrementalGenerator
 
         var handlerType = (INamedTypeSymbol)context.TargetSymbol;
         var isSupported = GeneratorSymbolHelpers.IsConcreteNonGenericClass(handlerType)
-            && GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(handlerType)
-            && GeneratorSymbolHelpers.ImplementsInterface(
-                handlerType,
-                "IJobHandler",
-                "SquidStd.Workers.Interfaces"
-            );
+                          && GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(handlerType)
+                          && GeneratorSymbolHelpers.ImplementsInterface(
+                              handlerType,
+                              "IJobHandler",
+                              "SquidStd.Workers.Interfaces"
+                          );
 
-        return new(
+        return new JobHandlerRegistrationCandidate(
             GeneratorSymbolHelpers.FullyQualified(handlerType),
             GeneratorSymbolHelpers.DisplayName(handlerType),
             GeneratorSymbolHelpers.PrimaryLocation(handlerType),
@@ -76,8 +76,11 @@ public sealed class JobHandlerRegistrationGenerator : IIncrementalGenerator
             }
         }
 
-        supported.Sort(
-            static (left, right) => string.Compare(left.HandlerTypeName, right.HandlerTypeName, StringComparison.Ordinal)
+        supported.Sort(static (left, right) => string.Compare(
+                left.HandlerTypeName,
+                right.HandlerTypeName,
+                StringComparison.Ordinal
+            )
         );
 
         context.AddSource(GeneratedFileName, JobHandlerSourceBuilder.Build(supported));

@@ -12,16 +12,6 @@ namespace SquidStd.Tests.Security;
 [Collection(SerilogEventSinkCollection.Name)]
 public class SecretsTests
 {
-    private sealed class CapturingSink : ILogEventSink
-    {
-        private readonly List<LogEvent> _events = [];
-
-        public IReadOnlyList<LogEvent> Events => _events;
-
-        public void Emit(LogEvent logEvent)
-            => _events.Add(logEvent);
-    }
-
     [Fact]
     public void AesGcmSecretProtector_Protect_Unprotect_RoundTripsWithoutPlaintext()
     {
@@ -32,7 +22,7 @@ public class SecretsTests
         try
         {
             Environment.SetEnvironmentVariable(variableName, Convert.ToBase64String(key));
-            var protector = new AesGcmSecretProtector(new() { KeyEnvironmentVariable = variableName });
+            var protector = new AesGcmSecretProtector(new SecretsConfig { KeyEnvironmentVariable = variableName });
             var plaintext = Encoding.UTF8.GetBytes("super-secret-value");
 
             var protectedData = protector.Protect(plaintext);
@@ -59,7 +49,7 @@ public class SecretsTests
         {
             Environment.SetEnvironmentVariable(variableName, null);
             Log.Logger = new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Sink(sink).CreateLogger();
-            var protector = new AesGcmSecretProtector(new() { KeyEnvironmentVariable = variableName });
+            var protector = new AesGcmSecretProtector(new SecretsConfig { KeyEnvironmentVariable = variableName });
             var plaintext = Encoding.UTF8.GetBytes("default-key-secret");
 
             var protectedData = protector.Protect(plaintext);
@@ -110,6 +100,18 @@ public class SecretsTests
         finally
         {
             Environment.SetEnvironmentVariable(variableName, previous);
+        }
+    }
+
+    private sealed class CapturingSink : ILogEventSink
+    {
+        private readonly List<LogEvent> _events = [];
+
+        public IReadOnlyList<LogEvent> Events => _events;
+
+        public void Emit(LogEvent logEvent)
+        {
+            _events.Add(logEvent);
         }
     }
 }

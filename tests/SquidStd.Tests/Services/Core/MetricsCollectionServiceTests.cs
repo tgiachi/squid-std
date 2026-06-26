@@ -7,60 +7,10 @@ namespace SquidStd.Tests.Services.Core;
 
 public class MetricsCollectionServiceTests
 {
-    private sealed class CountingMetricProvider : IMetricProvider
-    {
-        private readonly string _metricName;
-        private readonly double _value;
-        private int _collectionCount;
-
-        public CountingMetricProvider(string providerName, string metricName, double value)
-        {
-            ProviderName = providerName;
-            _metricName = metricName;
-            _value = value;
-        }
-
-        public int CollectionCount => Volatile.Read(ref _collectionCount);
-
-        public string ProviderName { get; }
-
-        public ValueTask<IReadOnlyList<MetricSample>> CollectAsync(CancellationToken cancellationToken = default)
-        {
-            Interlocked.Increment(ref _collectionCount);
-
-            return ValueTask.FromResult<IReadOnlyList<MetricSample>>([new(_metricName, _value)]);
-        }
-    }
-
-    private sealed class ThrowingMetricProvider : IMetricProvider
-    {
-        public ThrowingMetricProvider(string providerName)
-        {
-            ProviderName = providerName;
-        }
-
-        public string ProviderName { get; }
-
-        public ValueTask<IReadOnlyList<MetricSample>> CollectAsync(CancellationToken cancellationToken = default)
-            => throw new InvalidOperationException("Synthetic test failure.");
-    }
-
-    private sealed class MetricsCollectedListener : IEventListener<MetricsCollectedEvent>
-    {
-        public MetricsCollectedEvent? LastEvent { get; private set; }
-
-        public Task HandleAsync(MetricsCollectedEvent eventData, CancellationToken cancellationToken = default)
-        {
-            LastEvent = eventData;
-
-            return Task.CompletedTask;
-        }
-    }
-
     [Fact]
     public void GetSnapshot_WhenNotStarted_ReturnsEmptySnapshot()
     {
-        using var service = new MetricsCollectionService([], new());
+        using var service = new MetricsCollectionService([], new MetricsConfig());
 
         var snapshot = service.GetSnapshot();
 
@@ -73,7 +23,7 @@ public class MetricsCollectionServiceTests
     {
         using var service = new MetricsCollectionService(
             [new CountingMetricProvider("jobs", "completed.total", 11)],
-            new()
+            new MetricsConfig
             {
                 IntervalMilliseconds = 10,
                 LogEnabled = false
@@ -95,7 +45,7 @@ public class MetricsCollectionServiceTests
     {
         using var service = new MetricsCollectionService(
             [new CountingMetricProvider("jobs", "pending.total", 7)],
-            new()
+            new MetricsConfig
             {
                 IntervalMilliseconds = 10,
                 LogEnabled = false
@@ -124,7 +74,7 @@ public class MetricsCollectionServiceTests
         bus.RegisterListener(secondListener);
         using var service = new MetricsCollectionService(
             [new CountingMetricProvider("events", "published.total", 5)],
-            new()
+            new MetricsConfig
             {
                 IntervalMilliseconds = 1000,
                 LogEnabled = false
@@ -149,7 +99,7 @@ public class MetricsCollectionServiceTests
         var provider = new CountingMetricProvider("jobs", "pending.total", 7);
         using var service = new MetricsCollectionService(
             [provider],
-            new()
+            new MetricsConfig
             {
                 Enabled = false,
                 IntervalMilliseconds = 10,
@@ -172,7 +122,7 @@ public class MetricsCollectionServiceTests
                 new ThrowingMetricProvider("broken"),
                 new CountingMetricProvider("timer", "callbacks.total", 3)
             ],
-            new()
+            new MetricsConfig
             {
                 IntervalMilliseconds = 10,
                 LogEnabled = false
@@ -194,7 +144,7 @@ public class MetricsCollectionServiceTests
         var provider = new CountingMetricProvider("bus", "dispatch.total", 1);
         using var service = new MetricsCollectionService(
             [provider],
-            new()
+            new MetricsConfig
             {
                 IntervalMilliseconds = 10,
                 LogEnabled = false
@@ -226,5 +176,57 @@ public class MetricsCollectionServiceTests
         }
 
         Assert.Fail("Condition was not met before timeout.");
+    }
+
+    private sealed class CountingMetricProvider : IMetricProvider
+    {
+        private readonly string _metricName;
+        private readonly double _value;
+        private int _collectionCount;
+
+        public CountingMetricProvider(string providerName, string metricName, double value)
+        {
+            ProviderName = providerName;
+            _metricName = metricName;
+            _value = value;
+        }
+
+        public int CollectionCount => Volatile.Read(ref _collectionCount);
+
+        public string ProviderName { get; }
+
+        public ValueTask<IReadOnlyList<MetricSample>> CollectAsync(CancellationToken cancellationToken = default)
+        {
+            Interlocked.Increment(ref _collectionCount);
+
+            return ValueTask.FromResult<IReadOnlyList<MetricSample>>([new MetricSample(_metricName, _value)]);
+        }
+    }
+
+    private sealed class ThrowingMetricProvider : IMetricProvider
+    {
+        public ThrowingMetricProvider(string providerName)
+        {
+            ProviderName = providerName;
+        }
+
+        public string ProviderName { get; }
+
+        public ValueTask<IReadOnlyList<MetricSample>> CollectAsync(CancellationToken cancellationToken = default)
+        {
+            throw new InvalidOperationException("Synthetic test failure.");
+        }
+    }
+
+    private sealed class MetricsCollectedListener : IEventListener<MetricsCollectedEvent>
+    {
+        public MetricsCollectedEvent? LastEvent { get; private set; }
+
+        public Task HandleAsync(MetricsCollectedEvent eventData, CancellationToken cancellationToken = default)
+        {
+            LastEvent = eventData;
+
+            return Task.CompletedTask;
+        }
     }
 }

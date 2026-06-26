@@ -11,8 +11,8 @@ using SquidStd.Scripting.Lua.Data.Internal;
 namespace SquidStd.Scripting.Lua.Utils;
 
 /// <summary>
-/// Utility class for generating Lua meta files with EmmyLua/LuaLS annotations
-/// Automatically creates meta.lua files with function signatures, types, and documentation
+///     Utility class for generating Lua meta files with EmmyLua/LuaLS annotations
+///     Automatically creates meta.lua files with function signatures, types, and documentation
 /// </summary>
 [RequiresUnreferencedCode(
     "This class uses reflection to analyze types for Lua meta generation and requires full type metadata."
@@ -30,12 +30,12 @@ public static class LuaDocumentationGenerator
     private static Func<string, string> _nameResolver = name => name.ToSnakeCase();
 
     /// <summary>
-    /// List of enums found during documentation generation
+    ///     List of enums found during documentation generation
     /// </summary>
     public static List<Type> FoundEnums { get; } = new(16);
 
     /// <summary>
-    /// Adds a class type to be generated in the documentation
+    ///     Adds a class type to be generated in the documentation
     /// </summary>
     public static void AddClassToGenerate(Type type)
     {
@@ -44,7 +44,7 @@ public static class LuaDocumentationGenerator
     }
 
     /// <summary>
-    /// Clears all internal caches and state
+    ///     Clears all internal caches and state
     /// </summary>
     public static void ClearCaches()
     {
@@ -60,13 +60,12 @@ public static class LuaDocumentationGenerator
         }
     }
 
-    [SuppressMessage("Trimming", "IL2075:Reflection", Justification = "Reflection is required for script module analysis"),
-     SuppressMessage(
-         "Trimming",
-         "IL2072:Reflection",
-         Justification = "Reflection is required for parameter and return type analysis"
-     )]
-
+    [SuppressMessage("Trimming", "IL2075:Reflection", Justification = "Reflection is required for script module analysis")]
+    [SuppressMessage(
+        "Trimming",
+        "IL2072:Reflection",
+        Justification = "Reflection is required for parameter and return type analysis"
+    )]
     /// <summary>
     ///     Generates Lua documentation meta file with all module functions, classes, and constants
     /// </summary>
@@ -125,8 +124,8 @@ public static class LuaDocumentationGenerator
             }
 
             var distinctConstants = constants
-                                    .GroupBy(kvp => kvp.Key)
-                                    .ToDictionary(g => g.Key, g => g.First().Value);
+                .GroupBy(kvp => kvp.Key)
+                .ToDictionary(g => g.Key, g => g.First().Value);
 
             ProcessConstants(distinctConstants);
             sb.Append(_constantsBuilder);
@@ -157,9 +156,9 @@ public static class LuaDocumentationGenerator
 
                 // Get all methods with ScriptFunction attribute
                 var methods = module.ModuleType
-                                    .GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                                    .Where(m => m.GetCustomAttribute<ScriptFunctionAttribute>() is not null)
-                                    .ToList();
+                    .GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(m => m.GetCustomAttribute<ScriptFunctionAttribute>() is not null)
+                    .ToList();
 
                 foreach (var method in methods)
                 {
@@ -171,8 +170,8 @@ public static class LuaDocumentationGenerator
                     }
 
                     var functionName = string.IsNullOrWhiteSpace(scriptFunctionAttr.FunctionName)
-                                           ? _nameResolver(method.Name)
-                                           : scriptFunctionAttr.FunctionName;
+                        ? _nameResolver(method.Name)
+                        : scriptFunctionAttr.FunctionName;
 
                     sb.AppendLine(CultureInfo.InvariantCulture, $"{moduleName}.{functionName} = function() end");
                 }
@@ -191,8 +190,8 @@ public static class LuaDocumentationGenerator
                     }
 
                     var functionName = string.IsNullOrWhiteSpace(scriptFunctionAttr.FunctionName)
-                                           ? _nameResolver(method.Name)
-                                           : scriptFunctionAttr.FunctionName;
+                        ? _nameResolver(method.Name)
+                        : scriptFunctionAttr.FunctionName;
                     var description = scriptFunctionAttr.HelpText ?? "No description available";
 
                     sb.AppendLine("---");
@@ -206,8 +205,8 @@ public static class LuaDocumentationGenerator
                     {
                         var isParams = param.IsDefined(typeof(ParamArrayAttribute), false);
                         var paramType = isParams
-                                            ? ConvertToLuaType(param.ParameterType.GetElementType()!)
-                                            : ConvertToLuaType(param.ParameterType);
+                            ? ConvertToLuaType(param.ParameterType.GetElementType()!)
+                            : ConvertToLuaType(param.ParameterType);
                         var paramName = isParams ? "..." : param.Name ?? $"param{Array.IndexOf(parameters, param)}";
                         var paramDescription = GetParameterDescription(param, paramType);
                         sb.AppendLine(
@@ -295,11 +294,13 @@ public static class LuaDocumentationGenerator
     }
 
     private static bool CanProcessType(Type type)
-        => true;
+    {
+        return true;
+    }
 
-    [SuppressMessage("Trimming", "IL2070:Reflection", Justification = "Reflection is required for Lua type conversion"),
-     SuppressMessage("Trimming", "IL2072:Reflection", Justification = "Reflection is required for Lua type conversion"),
-     SuppressMessage("Trimming", "IL2062:Reflection", Justification = "Reflection is required for Lua type conversion")]
+    [SuppressMessage("Trimming", "IL2070:Reflection", Justification = "Reflection is required for Lua type conversion")]
+    [SuppressMessage("Trimming", "IL2072:Reflection", Justification = "Reflection is required for Lua type conversion")]
+    [SuppressMessage("Trimming", "IL2062:Reflection", Justification = "Reflection is required for Lua type conversion")]
     private static string ConvertToLuaType(
         [DynamicallyAccessedMembers(
             DynamicallyAccessedMemberTypes.PublicMethods |
@@ -584,7 +585,7 @@ public static class LuaDocumentationGenerator
     }
 
     /// <summary>
-    /// Generate all classes after collecting them, with robust circular dependency handling
+    ///     Generate all classes after collecting them, with robust circular dependency handling
     /// </summary>
     private static void GenerateAllClasses()
     {
@@ -634,10 +635,10 @@ public static class LuaDocumentationGenerator
     }
 
     /// <summary>
-    /// Generate a single class with properties, constructors, and methods
+    ///     Generate a single class with properties, constructors, and methods
     /// </summary>
-    [SuppressMessage("Trimming", "IL2070:Reflection", Justification = "Reflection is required for class generation"),
-     SuppressMessage("Trimming", "IL2072:Reflection", Justification = "Reflection is required for class generation")]
+    [SuppressMessage("Trimming", "IL2070:Reflection", Justification = "Reflection is required for class generation")]
+    [SuppressMessage("Trimming", "IL2072:Reflection", Justification = "Reflection is required for class generation")]
     private static void GenerateClass(
         [DynamicallyAccessedMembers(
             DynamicallyAccessedMemberTypes.PublicProperties |
@@ -673,8 +674,8 @@ public static class LuaDocumentationGenerator
 
         // Generate properties with documentation (exclude indexers which have parameters)
         var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                             .Where(p => p.CanRead && p.GetIndexParameters().Length == 0)
-                             .ToList();
+            .Where(p => p.CanRead && p.GetIndexParameters().Length == 0)
+            .ToList();
 
         foreach (var property in properties)
         {
@@ -693,8 +694,8 @@ public static class LuaDocumentationGenerator
             // Use original property name for built-in types (XNA), apply resolver for custom types
             var displayName = luaFieldAttr?.Name ??
                               (type.Namespace?.StartsWith("Microsoft.Xna.Framework", StringComparison.Ordinal) == true
-                                   ? propertyName
-                                   : _nameResolver(propertyName));
+                                  ? propertyName
+                                  : _nameResolver(propertyName));
 
             _classesBuilder.AppendLine(
                 CultureInfo.InvariantCulture,
@@ -704,8 +705,8 @@ public static class LuaDocumentationGenerator
 
         // Generate public constructors
         var constructors = type.GetConstructors(BindingFlags.Public)
-                               .Where(c => c.GetParameters().Length > 0)
-                               .ToList();
+            .Where(c => c.GetParameters().Length > 0)
+            .ToList();
 
         if (constructors.Count > 0)
         {
@@ -728,8 +729,8 @@ public static class LuaDocumentationGenerator
 
                     // Use original parameter names for XNA types, apply resolver for custom types
                     var paramName = isXnaType
-                                        ? param.Name ?? $"param{i}"
-                                        : _nameResolver(param.Name ?? $"param{i}");
+                        ? param.Name ?? $"param{i}"
+                        : _nameResolver(param.Name ?? $"param{i}");
                     _classesBuilder.Append(CultureInfo.InvariantCulture, $"{paramName}: {paramType}");
 
                     if (i < parameters.Length - 1)
@@ -769,12 +770,11 @@ public static class LuaDocumentationGenerator
         };
 
         var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                          .Where(
-                              m => !propertyMethods.Contains(m.Name) &&
-                                   !m.IsSpecialName &&
-                                   !excludedMethods.Contains(m.Name)
-                          )
-                          .ToList();
+            .Where(m => !propertyMethods.Contains(m.Name) &&
+                        !m.IsSpecialName &&
+                        !excludedMethods.Contains(m.Name)
+            )
+            .ToList();
 
         if (methods.Count > 0)
         {
@@ -794,8 +794,8 @@ public static class LuaDocumentationGenerator
                 foreach (var method in methodGroup)
                 {
                     var returnType = method.ReturnType == typeof(void)
-                                         ? "nil"
-                                         : ConvertToLuaType(method.ReturnType);
+                        ? "nil"
+                        : ConvertToLuaType(method.ReturnType);
 
                     var parameters = method.GetParameters();
 
@@ -808,8 +808,8 @@ public static class LuaDocumentationGenerator
 
                         // Use original parameter names for XNA types, apply resolver for custom types
                         var paramName = isXnaType
-                                            ? param.Name ?? $"param{i}"
-                                            : _nameResolver(param.Name ?? $"param{i}");
+                            ? param.Name ?? $"param{i}"
+                            : _nameResolver(param.Name ?? $"param{i}");
                         _classesBuilder.Append(CultureInfo.InvariantCulture, $"{paramName}: {paramType}");
 
                         if (i < parameters.Length - 1)
@@ -885,7 +885,7 @@ public static class LuaDocumentationGenerator
     }
 
     /// <summary>
-    /// Gets enhanced parameter description with type information
+    ///     Gets enhanced parameter description with type information
     /// </summary>
     private static string GetParameterDescription(ParameterInfo param, string luaType)
     {
@@ -933,7 +933,7 @@ public static class LuaDocumentationGenerator
     }
 
     /// <summary>
-    /// Gets enhanced return description with type information
+    ///     Gets enhanced return description with type information
     /// </summary>
     private static string GetReturnDescription(Type returnType, string luaType)
     {
@@ -968,7 +968,7 @@ public static class LuaDocumentationGenerator
     }
 
     /// <summary>
-    /// Check if a type is a C# record type
+    ///     Check if a type is a C# record type
     /// </summary>
     [SuppressMessage("Trimming", "IL2070:Reflection", Justification = "Reflection is required for record type detection")]
     private static bool IsRecordType(
@@ -1005,11 +1005,10 @@ public static class LuaDocumentationGenerator
         }
 
         var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-        var hasCompilerGeneratedToString = methods.Any(
-            m =>
-                m.Name == "ToString" &&
-                m.GetParameters().Length == 0 &&
-                m.GetCustomAttributes().Any(attr => attr.GetType().Name.Contains("CompilerGenerated"))
+        var hasCompilerGeneratedToString = methods.Any(m =>
+            m.Name == "ToString" &&
+            m.GetParameters().Length == 0 &&
+            m.GetCustomAttributes().Any(attr => attr.GetType().Name.Contains("CompilerGenerated"))
         );
 
         var result = hasCompilerGeneratedToString;

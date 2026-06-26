@@ -1,7 +1,7 @@
 namespace SquidStd.Core.Data.Scheduling;
 
 /// <summary>
-/// Immutable snapshot describing a registered cron job.
+///     Immutable snapshot describing a registered cron job.
 /// </summary>
 public sealed class CronJobInfo
 {

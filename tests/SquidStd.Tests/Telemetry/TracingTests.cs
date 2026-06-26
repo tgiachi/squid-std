@@ -17,7 +17,7 @@ public class TracingTests
         var exported = new List<Activity>();
         using var source = new ActivitySource(sourceName);
 
-        using (var provider = BuildProvider(new() { ServiceName = "test-svc" }, sourceName, exported))
+        using (var provider = BuildProvider(new TelemetryOptions { ServiceName = "test-svc" }, sourceName, exported))
         {
             using (var activity = source.StartActivity("do-work"))
             {
@@ -38,9 +38,11 @@ public class TracingTests
         var exported = new List<Activity>();
         using var source = new ActivitySource(sourceName);
 
-        using (var provider = BuildProvider(new() { TracingSampleRatio = 0.0 }, sourceName, exported))
+        using (var provider = BuildProvider(new TelemetryOptions { TracingSampleRatio = 0.0 }, sourceName, exported))
         {
-            using (source.StartActivity("dropped")) { }
+            using (source.StartActivity("dropped"))
+            {
+            }
 
             provider.ForceFlush();
         }

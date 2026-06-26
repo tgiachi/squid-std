@@ -5,12 +5,6 @@ namespace SquidStd.Tests.Scripting.Lua;
 
 public class LuaTableReaderTests
 {
-    private enum TestMode
-    {
-        First = 1,
-        Second = 2
-    }
-
     [Fact]
     public void Readers_ReturnDefaultsForMissingOrWrongTypes()
     {
@@ -43,5 +37,11 @@ public class LuaTableReaderTests
         Assert.Equal(1.5f, LuaTableReader.GetFloat(table, "ratio"));
         Assert.True(LuaTableReader.GetBool(table, "enabled"));
         Assert.Equal(TestMode.Second, LuaTableReader.GetEnum(table, "mode", TestMode.First));
+    }
+
+    private enum TestMode
+    {
+        First = 1,
+        Second = 2
     }
 }

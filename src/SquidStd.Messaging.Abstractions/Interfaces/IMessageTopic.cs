@@ -1,7 +1,7 @@
 namespace SquidStd.Messaging.Abstractions.Interfaces;
 
 /// <summary>
-/// Typed facade for publishing to and subscribing to topics (fan-out).
+///     Typed facade for publishing to and subscribing to topics (fan-out).
 /// </summary>
 public interface IMessageTopic
 {

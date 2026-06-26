@@ -1,4 +1,5 @@
 using Cronos;
+using SquidStd.Core.Data.Timing;
 using SquidStd.Services.Core.Services;
 using SquidStd.Services.Core.Services.Scheduling;
 using SquidStd.Tests.Support;
@@ -103,7 +104,7 @@ public class CronSchedulerServiceTests
     public void RealTimerWheel_FiresJob_WhenAdvancedPastAMinute()
     {
         var timer = new TimerWheelService(
-            new()
+            new TimerWheelConfig
             {
                 TickDuration = TimeSpan.FromMilliseconds(8),
                 WheelSize = 512

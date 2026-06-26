@@ -1,7 +1,7 @@
 namespace SquidStd.Services.Core.Services.Internal;
 
 /// <summary>
-/// Unsubscribe token that removes a listener from its bucket when disposed.
+///     Unsubscribe token that removes a listener from its bucket when disposed.
 /// </summary>
 internal sealed class Subscription : IDisposable
 {

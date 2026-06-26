@@ -10,24 +10,6 @@ namespace SquidStd.Tests.Messaging;
 
 public class TopicEventBridgeTests
 {
-    private sealed class Beat
-    {
-        public string Worker { get; set; } = "";
-    }
-
-    private sealed class CapturingListener : IEventListener<TopicMessageEvent>
-    {
-        public TaskCompletionSource<TopicMessageEvent> Received { get; } =
-            new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        public Task HandleAsync(TopicMessageEvent eventData, CancellationToken cancellationToken)
-        {
-            Received.TrySetResult(eventData);
-
-            return Task.CompletedTask;
-        }
-    }
-
     [Fact]
     public async Task Bridge_RepublishesTopicMessageOnEventBus()
     {
@@ -46,5 +28,23 @@ public class TopicEventBridgeTests
         var evt = await listener.Received.Task.WaitAsync(TimeSpan.FromSeconds(5));
         Assert.Equal("workers.heartbeat", evt.Topic);
         Assert.Equal("w1", Assert.IsType<Beat>(evt.Data).Worker);
+    }
+
+    private sealed class Beat
+    {
+        public string Worker { get; set; } = "";
+    }
+
+    private sealed class CapturingListener : IEventListener<TopicMessageEvent>
+    {
+        public TaskCompletionSource<TopicMessageEvent> Received { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public Task HandleAsync(TopicMessageEvent eventData, CancellationToken cancellationToken)
+        {
+            Received.TrySetResult(eventData);
+
+            return Task.CompletedTask;
+        }
     }
 }
