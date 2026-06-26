@@ -1,165 +1,175 @@
-using System.Threading.Channels;
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using Serilog;
+using SquidStd.Core.Data.Events;
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Services.Core.Services.Internal;
 
 namespace SquidStd.Services.Core.Services;
 
 /// <summary>
-/// Dispatches events to registered listeners through an internal channel.
+/// In-process event bus with parallel per-listener dispatch, catch-all listeners,
+/// fault isolation, and slow-listener telemetry.
 /// </summary>
 public sealed class EventBusService : IEventBus, IDisposable
 {
-    private readonly Channel<EventDispatch> _dispatches;
-    private readonly Task _dispatcher;
-    private readonly Lock _listenerSync = new();
-    private readonly Dictionary<Type, List<object>> _asyncListeners = [];
-    private readonly Dictionary<Type, List<object>> _syncListeners = [];
+    private readonly ConcurrentDictionary<Type, List<object>> _listeners = new();
+    private readonly ILogger _logger = Log.ForContext<EventBusService>();
+    private readonly TimeSpan _slowListenerThreshold;
     private bool _disposed;
 
     /// <summary>
-    /// Initializes the event bus service.
+    /// Initializes the event bus with default options.
     /// </summary>
     public EventBusService()
+        : this(new EventBusOptions())
     {
-        _dispatches = Channel.CreateUnbounded<EventDispatch>(
-            new()
-            {
-                SingleReader = true,
-                SingleWriter = false
-            }
-        );
-        _dispatcher = Task.Run(ProcessDispatchesAsync);
     }
 
     /// <summary>
-    /// Stops the internal dispatcher.
+    /// Initializes the event bus with the supplied options.
     /// </summary>
-    public void Dispose()
+    public EventBusService(EventBusOptions options)
     {
-        if (_disposed)
-        {
-            return;
-        }
-
-        _disposed = true;
-        _dispatches.Writer.TryComplete();
-        _dispatcher.GetAwaiter().GetResult();
+        _slowListenerThreshold = options.SlowListenerThreshold;
     }
 
     /// <inheritdoc />
     public void Publish<TEvent>(TEvent eventData)
         where TEvent : IEvent
-    {
-        var listeners = GetListeners<TEvent, ISyncEventListener<TEvent>>(_syncListeners);
-        var dispatch = new EventDispatch(
-            () =>
-            {
-                for (var i = 0; i < listeners.Length; i++)
-                {
-                    listeners[i].Handle(eventData);
-                }
-
-                return Task.CompletedTask;
-            },
-            CancellationToken.None
-        );
-
-        Enqueue(dispatch);
-        dispatch.Completion.GetAwaiter().GetResult();
-    }
+        => PublishAsync(eventData, CancellationToken.None).GetAwaiter().GetResult();
 
     /// <inheritdoc />
-    public async Task PublishAsync<TEvent>(TEvent eventData, CancellationToken cancellationToken)
+    public async Task PublishAsync<TEvent>(TEvent eventData, CancellationToken cancellationToken = default)
         where TEvent : IEvent
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var listeners = GetListeners<TEvent, IAsyncEventListener<TEvent>>(_asyncListeners);
-        var dispatch = new EventDispatch(
-            async () =>
-            {
-                cancellationToken.ThrowIfCancellationRequested();
+        var typed = Snapshot(typeof(TEvent));
+        var global = typeof(TEvent) == typeof(IEvent) ? null : Snapshot(typeof(IEvent));
 
-                for (var i = 0; i < listeners.Length; i++)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    await listeners[i].HandleAsync(eventData, cancellationToken);
-                }
-            },
-            cancellationToken
-        );
+        var total = (typed?.Length ?? 0) + (global?.Length ?? 0);
 
-        Enqueue(dispatch);
-        await dispatch.Completion;
-    }
-
-    /// <inheritdoc />
-    public void RegisterAsyncListener<TEvent>(IAsyncEventListener<TEvent> listener)
-        where TEvent : IEvent
-    {
-        ArgumentNullException.ThrowIfNull(listener);
-        AddListener<TEvent>(_asyncListeners, listener);
-    }
-
-    /// <inheritdoc />
-    public void RegisterListener<TEvent>(ISyncEventListener<TEvent> listener)
-        where TEvent : IEvent
-    {
-        ArgumentNullException.ThrowIfNull(listener);
-        AddListener<TEvent>(_syncListeners, listener);
-    }
-
-    private void AddListener<TEvent>(Dictionary<Type, List<object>> listenersByType, object listener)
-        where TEvent : IEvent
-    {
-        lock (_listenerSync)
+        if (total == 0)
         {
-            ThrowIfDisposed();
-
-            var eventType = typeof(TEvent);
-
-            if (!listenersByType.TryGetValue(eventType, out var listeners))
-            {
-                listeners = [];
-                listenersByType[eventType] = listeners;
-            }
-
-            listeners.Add(listener);
+            return;
         }
+
+        if (total == 1)
+        {
+            var single = typed is { Length: 1 } ? typed[0] : global![0];
+            await DispatchSafeAsync(single, eventData, cancellationToken);
+
+            return;
+        }
+
+        var tasks = new Task[total];
+        var index = 0;
+
+        if (typed is not null)
+        {
+            for (var i = 0; i < typed.Length; i++)
+            {
+                tasks[index++] = DispatchSafeAsync(typed[i], eventData, cancellationToken);
+            }
+        }
+
+        if (global is not null)
+        {
+            for (var i = 0; i < global.Length; i++)
+            {
+                tasks[index++] = DispatchSafeAsync(global[i], eventData, cancellationToken);
+            }
+        }
+
+        await Task.WhenAll(tasks);
     }
 
-    private void Enqueue(EventDispatch dispatch)
+    /// <inheritdoc />
+    public IDisposable RegisterListener<TEvent>(IEventListener<TEvent> listener)
+        where TEvent : IEvent
+    {
+        ArgumentNullException.ThrowIfNull(listener);
+
+        return Add(typeof(TEvent), listener);
+    }
+
+    /// <inheritdoc />
+    public IDisposable Subscribe<TEvent>(Func<TEvent, CancellationToken, Task> handler)
+        where TEvent : IEvent
+    {
+        ArgumentNullException.ThrowIfNull(handler);
+
+        return Add(typeof(TEvent), new DelegateEventListener<TEvent>(handler));
+    }
+
+    private Subscription Add(Type eventType, object listener)
     {
         ThrowIfDisposed();
 
-        if (!_dispatches.Writer.TryWrite(dispatch))
+        var bucket = _listeners.GetOrAdd(eventType, static _ => []);
+
+        lock (bucket)
         {
-            throw new ObjectDisposedException(nameof(EventBusService));
+            bucket.Add(listener);
+        }
+
+        return new Subscription(bucket, listener);
+    }
+
+    private object[]? Snapshot(Type eventType)
+    {
+        if (!_listeners.TryGetValue(eventType, out var bucket))
+        {
+            return null;
+        }
+
+        lock (bucket)
+        {
+            return bucket.Count == 0 ? null : bucket.ToArray();
         }
     }
 
-    private TListener[] GetListeners<TEvent, TListener>(Dictionary<Type, List<object>> listenersByType)
+    private async Task DispatchSafeAsync<TEvent>(object listener, TEvent eventData, CancellationToken cancellationToken)
         where TEvent : IEvent
-        where TListener : class
     {
-        lock (_listenerSync)
-        {
-            ThrowIfDisposed();
+        var start = Stopwatch.GetTimestamp();
 
-            if (!listenersByType.TryGetValue(typeof(TEvent), out var listeners))
+        try
+        {
+            // IEventListener<in TEvent> is contravariant, so a catch-all IEventListener<IEvent>
+            // also matches this cast and handles the concrete event.
+            if (listener is IEventListener<TEvent> typedListener)
             {
-                return [];
+                await typedListener.HandleAsync(eventData, cancellationToken);
             }
-
-            return [.. listeners.Cast<TListener>()];
         }
-    }
-
-    private async Task ProcessDispatchesAsync()
-    {
-        await foreach (var dispatch in _dispatches.Reader.ReadAllAsync())
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            await dispatch.ExecuteAsync();
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(
+                ex,
+                "Event listener {ListenerType} failed for event {EventType}",
+                listener.GetType().FullName,
+                typeof(TEvent).Name
+            );
+        }
+        finally
+        {
+            var elapsed = Stopwatch.GetElapsedTime(start);
+
+            if (elapsed >= _slowListenerThreshold)
+            {
+                _logger.Warning(
+                    "Slow event listener event={EventType} listener={ListenerType} elapsed={ElapsedMs:0.###}ms",
+                    typeof(TEvent).Name,
+                    listener.GetType().FullName,
+                    elapsed.TotalMilliseconds
+                );
+            }
         }
     }
 
@@ -169,5 +179,17 @@ public sealed class EventBusService : IEventBus, IDisposable
         {
             throw new ObjectDisposedException(nameof(EventBusService));
         }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+        _listeners.Clear();
     }
 }

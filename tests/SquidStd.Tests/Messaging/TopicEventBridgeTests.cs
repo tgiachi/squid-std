@@ -15,7 +15,7 @@ public class TopicEventBridgeTests
         public string Worker { get; set; } = "";
     }
 
-    private sealed class CapturingListener : IAsyncEventListener<TopicMessageEvent>
+    private sealed class CapturingListener : IEventListener<TopicMessageEvent>
     {
         public TaskCompletionSource<TopicMessageEvent> Received { get; } =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -38,7 +38,7 @@ public class TopicEventBridgeTests
         ITopicEventBridge bridge = new TopicEventBridge(topic, eventBus);
 
         var listener = new CapturingListener();
-        eventBus.RegisterAsyncListener(listener);
+        eventBus.RegisterListener(listener);
         using var subscription = bridge.Bridge<Beat>("workers.heartbeat");
 
         await topic.PublishAsync("workers.heartbeat", new Beat { Worker = "w1" });

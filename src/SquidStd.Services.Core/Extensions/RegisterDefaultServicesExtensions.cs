@@ -4,6 +4,7 @@ using SquidStd.Abstractions.Extensions.Config;
 using SquidStd.Abstractions.Extensions.Container;
 using SquidStd.Abstractions.Extensions.Services;
 using SquidStd.Core.Data.Bootstrap;
+using SquidStd.Core.Data.Events;
 using SquidStd.Core.Data.Jobs;
 using SquidStd.Core.Data.Metrics;
 using SquidStd.Core.Data.Storage;
@@ -114,7 +115,19 @@ public static class RegisterDefaultServicesExtensions
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterEventBusService()
-            => container.RegisterStdService<IEventBus, EventBusService>(-1);
+        {
+            container.RegisterInstance(new EventBusOptions());
+            container.RegisterDelegate<IEventBus>(
+                resolver => new EventBusService(resolver.Resolve<EventBusOptions>()),
+                Reuse.Singleton
+            );
+            container.AddToRegisterTypedList(
+                new ServiceRegistrationData(typeof(IEventBus), typeof(EventBusService), -1)
+            );
+            container.RegisterStdService<EventListenerActivator, EventListenerActivator>(-900);
+
+            return container;
+        }
 
         /// <summary>
         /// Registers the default job system service in the container.

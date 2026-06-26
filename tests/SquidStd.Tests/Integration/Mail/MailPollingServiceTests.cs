@@ -22,7 +22,7 @@ public class MailPollingServiceTests
         _fixture = fixture;
     }
 
-    private sealed class DelegateListener : IAsyncEventListener<MailReceivedEvent>
+    private sealed class DelegateListener : IEventListener<MailReceivedEvent>
     {
         private readonly Action<MailReceivedEvent> _onEvent;
 
@@ -58,7 +58,7 @@ public class MailPollingServiceTests
 
         var eventBus = new EventBusService();
         var received = new TaskCompletionSource<MailReceivedEvent>(TaskCreationOptions.RunContinuationsAsynchronously);
-        eventBus.RegisterAsyncListener(new DelegateListener(e => received.TrySetResult(e)));
+        eventBus.RegisterListener(new DelegateListener(e => received.TrySetResult(e)));
 
         var reader = new ImapMailReader(
             new()

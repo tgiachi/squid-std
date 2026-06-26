@@ -45,19 +45,11 @@ public class MetricsCollectionServiceTests
             => throw new InvalidOperationException("Synthetic test failure.");
     }
 
-    private sealed class MetricsCollectedSyncListener : ISyncEventListener<MetricsCollectedEvent>
+    private sealed class MetricsCollectedListener : IEventListener<MetricsCollectedEvent>
     {
         public MetricsCollectedEvent? LastEvent { get; private set; }
 
-        public void Handle(MetricsCollectedEvent eventData)
-            => LastEvent = eventData;
-    }
-
-    private sealed class MetricsCollectedAsyncListener : IAsyncEventListener<MetricsCollectedEvent>
-    {
-        public MetricsCollectedEvent? LastEvent { get; private set; }
-
-        public Task HandleAsync(MetricsCollectedEvent eventData, CancellationToken cancellationToken)
+        public Task HandleAsync(MetricsCollectedEvent eventData, CancellationToken cancellationToken = default)
         {
             LastEvent = eventData;
 
@@ -126,10 +118,10 @@ public class MetricsCollectionServiceTests
     {
         using var eventBus = new EventBusService();
         IEventBus bus = eventBus;
-        var syncListener = new MetricsCollectedSyncListener();
-        var asyncListener = new MetricsCollectedAsyncListener();
-        bus.RegisterListener(syncListener);
-        bus.RegisterAsyncListener(asyncListener);
+        var firstListener = new MetricsCollectedListener();
+        var secondListener = new MetricsCollectedListener();
+        bus.RegisterListener(firstListener);
+        bus.RegisterListener(secondListener);
         using var service = new MetricsCollectionService(
             [new CountingMetricProvider("events", "published.total", 5)],
             new()
@@ -141,14 +133,14 @@ public class MetricsCollectionServiceTests
         );
 
         await service.StartAsync(CancellationToken.None);
-        await WaitUntilAsync(() => syncListener.LastEvent is not null && asyncListener.LastEvent is not null);
+        await WaitUntilAsync(() => firstListener.LastEvent is not null && secondListener.LastEvent is not null);
         await service.StopAsync(CancellationToken.None);
 
-        Assert.NotNull(syncListener.LastEvent);
-        Assert.NotNull(asyncListener.LastEvent);
-        Assert.Same(syncListener.LastEvent, asyncListener.LastEvent);
-        Assert.Same(service.GetStatus(), syncListener.LastEvent.Snapshot);
-        Assert.Equal(5, syncListener.LastEvent.Snapshot.Metrics["events.published.total"].Value);
+        Assert.NotNull(firstListener.LastEvent);
+        Assert.NotNull(secondListener.LastEvent);
+        Assert.Same(firstListener.LastEvent, secondListener.LastEvent);
+        Assert.Same(service.GetStatus(), firstListener.LastEvent.Snapshot);
+        Assert.Equal(5, firstListener.LastEvent.Snapshot.Metrics["events.published.total"].Value);
     }
 
     [Fact]

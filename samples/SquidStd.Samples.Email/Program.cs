@@ -62,7 +62,7 @@ await bootstrap.StartAsync();
 
 // Inbound: react to each received email on the event bus.
 var eventBus = bootstrap.Resolve<IEventBus>();
-eventBus.RegisterAsyncListener(new MailReceivedLogger());
+eventBus.RegisterListener(new MailReceivedLogger());
 
 var outgoing = new OutgoingMailMessage
 {
@@ -85,7 +85,7 @@ if (args.Contains("--send"))
 await bootstrap.StopAsync();
 
 /// <summary>Logs every received email as it arrives on the event bus.</summary>
-public sealed class MailReceivedLogger : IAsyncEventListener<MailReceivedEvent>
+public sealed class MailReceivedLogger : IEventListener<MailReceivedEvent>
 {
     /// <summary>Handles a received-mail event.</summary>
     public Task HandleAsync(MailReceivedEvent eventData, CancellationToken cancellationToken)

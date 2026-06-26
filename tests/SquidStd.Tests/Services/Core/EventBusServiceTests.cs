@@ -1,5 +1,9 @@
+using Serilog;
+using Serilog.Events;
+using SquidStd.Core.Data.Events;
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Services.Core.Services;
+using SquidStd.Tests.Support;
 
 namespace SquidStd.Tests.Services.Core;
 
@@ -7,121 +11,86 @@ public class EventBusServiceTests
 {
     private sealed record TestEvent(string Payload) : IEvent;
 
-    private sealed class SyncListener : ISyncEventListener<TestEvent>
+    private sealed record OtherEvent(int Value) : IEvent;
+
+    private sealed class RecordingListener : IEventListener<TestEvent>
     {
         private readonly List<string> _calls;
         private readonly string _name;
 
         public TestEvent? LastEvent { get; private set; }
 
-        public SyncListener(string name, List<string> calls)
+        public RecordingListener(string name, List<string> calls)
         {
             _name = name;
             _calls = calls;
         }
 
-        public void Handle(TestEvent eventData)
+        public Task HandleAsync(TestEvent eventData, CancellationToken cancellationToken = default)
         {
             LastEvent = eventData;
             _calls.Add($"{_name}:{eventData.Payload}");
+
+            return Task.CompletedTask;
         }
     }
 
-    private sealed class ThrowingSyncListener : ISyncEventListener<TestEvent>
+    private sealed class OtherRecordingListener : IEventListener<OtherEvent>
     {
-        private readonly InvalidOperationException _exception;
+        public OtherEvent? LastEvent { get; private set; }
 
-        public ThrowingSyncListener(InvalidOperationException exception)
+        public Task HandleAsync(OtherEvent eventData, CancellationToken cancellationToken = default)
         {
-            _exception = exception;
-        }
-
-        public void Handle(TestEvent eventData)
-            => throw _exception;
-    }
-
-    private sealed class AsyncListener : IAsyncEventListener<TestEvent>
-    {
-        private readonly List<string> _calls;
-        private readonly string _name;
-
-        public CancellationToken CancellationToken { get; private set; }
-        public TestEvent? LastEvent { get; private set; }
-
-        public AsyncListener(string name, List<string> calls)
-        {
-            _name = name;
-            _calls = calls;
-        }
-
-        public async Task HandleAsync(TestEvent eventData, CancellationToken cancellationToken)
-        {
-            await Task.Yield();
-
-            CancellationToken = cancellationToken;
             LastEvent = eventData;
-            _calls.Add($"{_name}:{eventData.Payload}");
+
+            return Task.CompletedTask;
         }
     }
 
-    private sealed class ThrowingAsyncListener : IAsyncEventListener<TestEvent>
+    private sealed class CatchAllListener : IEventListener<IEvent>
     {
-        private readonly InvalidOperationException _exception;
+        public List<IEvent> Received { get; } = [];
 
-        public ThrowingAsyncListener(InvalidOperationException exception)
+        public Task HandleAsync(IEvent eventData, CancellationToken cancellationToken = default)
         {
-            _exception = exception;
+            Received.Add(eventData);
+
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class ThrowingListener : IEventListener<TestEvent>
+    {
+        public Task HandleAsync(TestEvent eventData, CancellationToken cancellationToken = default)
+            => throw new InvalidOperationException("listener failure");
+    }
+
+    private sealed class SelfCancellingListener : IEventListener<TestEvent>
+    {
+        private readonly CancellationTokenSource _cts;
+
+        public SelfCancellingListener(CancellationTokenSource cts)
+        {
+            _cts = cts;
         }
 
-        public Task HandleAsync(TestEvent eventData, CancellationToken cancellationToken)
-            => throw _exception;
+        public Task HandleAsync(TestEvent eventData, CancellationToken cancellationToken = default)
+        {
+            _cts.Cancel();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return Task.CompletedTask;
+        }
     }
 
-    [Fact]
-    public void Publish_NoSyncListeners_DoesNotThrow()
+    private sealed class SlowListener : IEventListener<TestEvent>
     {
-        using var eventBus = new EventBusService();
-        IEventBus bus = eventBus;
-
-        var exception = Record.Exception(() => bus.Publish(new TestEvent("ignored")));
-
-        Assert.Null(exception);
+        public async Task HandleAsync(TestEvent eventData, CancellationToken cancellationToken = default)
+            => await Task.Delay(TimeSpan.FromMilliseconds(40), cancellationToken);
     }
 
     [Fact]
-    public void Publish_RegisteredSyncListeners_InvokesEachInRegistrationOrder()
-    {
-        using var eventBus = new EventBusService();
-        IEventBus bus = eventBus;
-        var calls = new List<string>();
-        var first = new SyncListener("first", calls);
-        var second = new SyncListener("second", calls);
-        bus.RegisterListener(first);
-        bus.RegisterListener(second);
-        var eventData = new TestEvent("payload");
-
-        bus.Publish(eventData);
-
-        Assert.Equal(["first:payload", "second:payload"], calls);
-        Assert.Same(eventData, first.LastEvent);
-        Assert.Same(eventData, second.LastEvent);
-    }
-
-    [Fact]
-    public void Publish_WhenSyncListenerThrows_PropagatesException()
-    {
-        using var eventBus = new EventBusService();
-        IEventBus bus = eventBus;
-        var expected = new InvalidOperationException("sync failure");
-        bus.RegisterListener(new ThrowingSyncListener(expected));
-
-        var actual = Assert.Throws<InvalidOperationException>(() => bus.Publish(new TestEvent("payload")));
-
-        Assert.Same(expected, actual);
-    }
-
-    [Fact]
-    public async Task PublishAsync_NoAsyncListeners_Completes()
+    public async Task PublishAsync_NoListeners_Completes()
     {
         using var eventBus = new EventBusService();
         IEventBus bus = eventBus;
@@ -133,50 +102,197 @@ public class EventBusServiceTests
     }
 
     [Fact]
-    public async Task PublishAsync_PassesCancellationToken()
-    {
-        using var eventBus = new EventBusService();
-        IEventBus bus = eventBus;
-        using var cancellationTokenSource = new CancellationTokenSource();
-        var listener = new AsyncListener("listener", []);
-        bus.RegisterAsyncListener(listener);
-
-        await bus.PublishAsync(new TestEvent("payload"), cancellationTokenSource.Token);
-
-        Assert.Equal(cancellationTokenSource.Token, listener.CancellationToken);
-    }
-
-    [Fact]
-    public async Task PublishAsync_RegisteredAsyncListeners_InvokesEachInRegistrationOrder()
+    public async Task PublishAsync_TypedListener_ReceivesEvent()
     {
         using var eventBus = new EventBusService();
         IEventBus bus = eventBus;
         var calls = new List<string>();
-        var first = new AsyncListener("first", calls);
-        var second = new AsyncListener("second", calls);
-        bus.RegisterAsyncListener(first);
-        bus.RegisterAsyncListener(second);
+        var listener = new RecordingListener("only", calls);
+        bus.RegisterListener(listener);
         var eventData = new TestEvent("payload");
 
         await bus.PublishAsync(eventData, CancellationToken.None);
 
-        Assert.Equal(["first:payload", "second:payload"], calls);
-        Assert.Same(eventData, first.LastEvent);
-        Assert.Same(eventData, second.LastEvent);
+        Assert.Equal(["only:payload"], calls);
+        Assert.Same(eventData, listener.LastEvent);
     }
 
     [Fact]
-    public async Task PublishAsync_WhenAsyncListenerThrows_PropagatesException()
+    public async Task PublishAsync_OnlyMatchingEventType_Receives()
     {
         using var eventBus = new EventBusService();
         IEventBus bus = eventBus;
-        var expected = new InvalidOperationException("async failure");
-        bus.RegisterAsyncListener(new ThrowingAsyncListener(expected));
+        var testListener = new RecordingListener("test", []);
+        var otherListener = new OtherRecordingListener();
+        bus.RegisterListener(testListener);
+        bus.RegisterListener(otherListener);
 
-        var actual = await Assert.ThrowsAsync<InvalidOperationException>(
-                         () => bus.PublishAsync(new TestEvent("payload"), CancellationToken.None)
-                     );
+        await bus.PublishAsync(new TestEvent("payload"), CancellationToken.None);
 
-        Assert.Same(expected, actual);
+        Assert.NotNull(testListener.LastEvent);
+        Assert.Null(otherListener.LastEvent);
+    }
+
+    [Fact]
+    public async Task PublishAsync_CatchAllListener_ReceivesEveryEventType()
+    {
+        using var eventBus = new EventBusService();
+        IEventBus bus = eventBus;
+        var catchAll = new CatchAllListener();
+        bus.RegisterListener(catchAll);
+
+        await bus.PublishAsync(new TestEvent("a"), CancellationToken.None);
+        await bus.PublishAsync(new OtherEvent(7), CancellationToken.None);
+
+        Assert.Equal(2, catchAll.Received.Count);
+        Assert.IsType<TestEvent>(catchAll.Received[0]);
+        Assert.IsType<OtherEvent>(catchAll.Received[1]);
+    }
+
+    [Fact]
+    public async Task PublishAsync_MultipleListeners_AllReceive()
+    {
+        using var eventBus = new EventBusService();
+        IEventBus bus = eventBus;
+        var calls = new List<string>();
+        var first = new RecordingListener("first", calls);
+        var second = new RecordingListener("second", calls);
+        bus.RegisterListener(first);
+        bus.RegisterListener(second);
+
+        await bus.PublishAsync(new TestEvent("payload"), CancellationToken.None);
+
+        Assert.Contains("first:payload", calls);
+        Assert.Contains("second:payload", calls);
+    }
+
+    [Fact]
+    public async Task PublishAsync_WhenListenerThrows_IsolatesAndOthersStillRun()
+    {
+        using var eventBus = new EventBusService();
+        IEventBus bus = eventBus;
+        var calls = new List<string>();
+        var survivor = new RecordingListener("survivor", calls);
+        bus.RegisterListener(new ThrowingListener());
+        bus.RegisterListener(survivor);
+
+        var exception =
+            await Record.ExceptionAsync(() => bus.PublishAsync(new TestEvent("payload"), CancellationToken.None));
+
+        Assert.Null(exception);
+        Assert.Equal(["survivor:payload"], calls);
+    }
+
+    [Fact]
+    public async Task PublishAsync_PreCancelledToken_Throws()
+    {
+        using var eventBus = new EventBusService();
+        IEventBus bus = eventBus;
+        bus.RegisterListener(new RecordingListener("x", []));
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => bus.PublishAsync(new TestEvent("payload"), cts.Token)
+        );
+    }
+
+    [Fact]
+    public async Task PublishAsync_ListenerCancellation_IsNotSwallowed()
+    {
+        using var eventBus = new EventBusService();
+        IEventBus bus = eventBus;
+        using var cts = new CancellationTokenSource();
+        bus.RegisterListener(new SelfCancellingListener(cts));
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => bus.PublishAsync(new TestEvent("payload"), cts.Token)
+        );
+    }
+
+    [Fact]
+    public async Task RegisterListener_DisposeToken_StopsDelivery()
+    {
+        using var eventBus = new EventBusService();
+        IEventBus bus = eventBus;
+        var calls = new List<string>();
+        var token = bus.RegisterListener(new RecordingListener("once", calls));
+
+        await bus.PublishAsync(new TestEvent("first"), CancellationToken.None);
+        token.Dispose();
+        await bus.PublishAsync(new TestEvent("second"), CancellationToken.None);
+
+        Assert.Equal(["once:first"], calls);
+    }
+
+    [Fact]
+    public async Task Subscribe_DelegateHandler_ReceivesAndUnsubscribes()
+    {
+        using var eventBus = new EventBusService();
+        IEventBus bus = eventBus;
+        var received = new List<string>();
+        var token = bus.Subscribe<TestEvent>((e, _) =>
+        {
+            received.Add(e.Payload);
+
+            return Task.CompletedTask;
+        });
+
+        await bus.PublishAsync(new TestEvent("first"), CancellationToken.None);
+        token.Dispose();
+        await bus.PublishAsync(new TestEvent("second"), CancellationToken.None);
+
+        Assert.Equal(["first"], received);
+    }
+
+    [Fact]
+    public void Publish_Sync_DeliversToAllListeners()
+    {
+        using var eventBus = new EventBusService();
+        IEventBus bus = eventBus;
+        var calls = new List<string>();
+        bus.RegisterListener(new RecordingListener("a", calls));
+        bus.RegisterListener(new RecordingListener("b", calls));
+
+        bus.Publish(new TestEvent("payload"));
+
+        Assert.Contains("a:payload", calls);
+        Assert.Contains("b:payload", calls);
+    }
+
+    [Collection(SerilogEventSinkCollection.Name)]
+    public class Telemetry
+    {
+        [Fact]
+        public async Task PublishAsync_SlowListener_LogsWarning()
+        {
+            var sink = new CapturingLogSink();
+            var original = Log.Logger;
+            Log.Logger = new LoggerConfiguration()
+                         .MinimumLevel.Verbose()
+                         .WriteTo.Sink(sink)
+                         .CreateLogger();
+
+            try
+            {
+                using var eventBus = new EventBusService(
+                    new EventBusOptions { SlowListenerThreshold = TimeSpan.FromMilliseconds(5) }
+                );
+                IEventBus bus = eventBus;
+                bus.RegisterListener(new SlowListener());
+
+                await bus.PublishAsync(new TestEvent("payload"), CancellationToken.None);
+
+                Assert.Contains(
+                    sink.Events,
+                    e => e.Level == LogEventLevel.Warning && e.MessageTemplate.Text.Contains("Slow event listener")
+                );
+            }
+            finally
+            {
+                (Log.Logger as IDisposable)?.Dispose();
+                Log.Logger = original;
+            }
+        }
     }
 }
