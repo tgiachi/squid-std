@@ -175,7 +175,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     /// <inheritdoc />
     public void Dispose() // Sync-over-async: best effort. Prefer DisposeAsync.
     {
-    DisposeAsync().AsTask().GetAwaiter().GetResult();
+        DisposeAsync().AsTask().GetAwaiter().GetResult();
     }
 
     /// <summary>
