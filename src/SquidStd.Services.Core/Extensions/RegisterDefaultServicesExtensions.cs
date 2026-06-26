@@ -10,8 +10,10 @@ using SquidStd.Core.Data.Metrics;
 using SquidStd.Core.Data.Storage;
 using SquidStd.Core.Data.Timing;
 using SquidStd.Core.Directories;
+using SquidStd.Core.Files;
 using SquidStd.Core.Interfaces.Config;
 using SquidStd.Core.Interfaces.Events;
+using SquidStd.Core.Interfaces.Files;
 using SquidStd.Core.Interfaces.Jobs;
 using SquidStd.Core.Interfaces.Metrics;
 using SquidStd.Core.Interfaces.Secrets;
@@ -127,6 +129,25 @@ public static class RegisterDefaultServicesExtensions
                 new ServiceRegistrationData(typeof(IEventBus), typeof(EventBusService), -1)
             );
             container.RegisterStdService<EventListenerActivator, EventListenerActivator>(-900);
+
+            return container;
+        }
+
+        /// <summary>
+        ///     Registers the recursive file watcher service as a singleton resolving the event bus.
+        ///     Not part of <see cref="RegisterCoreServices()" />: opt in, then call
+        ///     <see cref="Core.Interfaces.Files.IFileWatcherService.Watch(string)" /> for the directories to watch.
+        /// </summary>
+        /// <param name="debounceDelay">Optional debounce window; defaults to 300ms when null.</param>
+        /// <returns>The same container for chaining.</returns>
+        public IContainer RegisterFileWatcherService(TimeSpan? debounceDelay = null)
+        {
+            container.RegisterDelegate<IFileWatcherService>(
+                resolver => debounceDelay is { } delay
+                    ? new FileWatcherService(resolver.Resolve<IEventBus>(), delay)
+                    : new FileWatcherService(resolver.Resolve<IEventBus>()),
+                Reuse.Singleton
+            );
 
             return container;
         }

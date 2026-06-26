@@ -53,6 +53,7 @@ using SquidStd.Core.Data.Files;
 using SquidStd.Core.Pool;
 
 // Watch several directories (each with its own glob) and react via the event bus.
+// Via DI: container.RegisterFileWatcherService();  then resolve IFileWatcherService.
 var watcher = new FileWatcherService(eventBus);
 watcher.Watch("data/scripts", "*.lua");
 watcher.Watch("data/templates", "*.json");
