@@ -354,6 +354,14 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
+    /// Atomically swaps the transport codec for this connection. The new codec takes effect from the next
+    /// socket read; the caller must trigger the swap at a read boundary (no old-regime bytes still pending).
+    /// </summary>
+    /// <param name="codec">The new codec, or null to remove transport transformation.</param>
+    public void SwapCodec(ITransportCodec? codec)
+        => Volatile.Write(ref _codec, codec);
+
+    /// <summary>
     /// Removes all middleware components of the specified type from this client pipeline.
     /// </summary>
     public bool RemoveMiddleware<TMiddleware>()
