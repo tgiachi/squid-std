@@ -1,3 +1,36 @@
+## [0.7.0](https://github.com/tgiachi/squid-std/compare/v0.6.0...v0.7.0) (2026-06-26)
+
+### Features
+
+* add generated registration attributes ([e6cfee7](https://github.com/tgiachi/squid-std/commit/e6cfee794099641f5586d652cea892b1ac0b6d02))
+* **core:** add FNV-1a ChecksumUtils ([7cdb74f](https://github.com/tgiachi/squid-std/commit/7cdb74fcfead4afab93400698afbc2e980adfd37))
+* **events:** add IEventListener<T> and EventBusOptions contracts ([30b0d57](https://github.com/tgiachi/squid-std/commit/30b0d5768d0d5c30320c36eb5284efaf70091ee4))
+* **events:** DI-native listener auto-subscription ([f1940ef](https://github.com/tgiachi/squid-std/commit/f1940ef3e5bebbc5ca695d246a8912c4fa552ef2))
+* **events:** parallel dispatch, catch-all, fault isolation, delegate subscribe ([fcb84b1](https://github.com/tgiachi/squid-std/commit/fcb84b11c9a29734e9fcd3148829de3e8069bc88))
+* generate config section registrations ([092e52e](https://github.com/tgiachi/squid-std/commit/092e52e4ed31b949f335fe41e1b1ef998ea5f8a1))
+* generate event listener registrations ([f8786d8](https://github.com/tgiachi/squid-std/commit/f8786d8ef1f709ef2bd8f4698c60fa7c20d7c942))
+* generate job handler registrations ([e16ab20](https://github.com/tgiachi/squid-std/commit/e16ab201e5be5b13ca2997ca009a71f277bb0b79))
+* generate lua script module registrations ([d879f42](https://github.com/tgiachi/squid-std/commit/d879f42f1100671e44eaf814ceffa279d040a731))
+* generate standard service registrations ([febf319](https://github.com/tgiachi/squid-std/commit/febf319573fbf85e639de8414d49f330cfadde1d))
+* **network:** add atomic SwapCodec for mid-connection codec upgrade ([eefd529](https://github.com/tgiachi/squid-std/commit/eefd529339edc008cfcb466aed9505a26db65d50))
+* **network:** add ConnectionPipeline per-connection descriptor ([3e76b9f](https://github.com/tgiachi/squid-std/commit/3e76b9fa598e0ca1da39115b2815cda8c63035bd))
+* **network:** add ITransportCodec contract and test codec ([e7e2fd7](https://github.com/tgiachi/squid-std/commit/e7e2fd70a4070706b0dd83724639120172d90086))
+* **network:** apply per-connection transport codec on send and receive ([23ed22b](https://github.com/tgiachi/squid-std/commit/23ed22bcac54435f3af195041c8af51c9c068ccc))
+* **persistence:** atomic per-type binary snapshot service ([f5a6e45](https://github.com/tgiachi/squid-std/commit/f5a6e4531a4b7ff590402760ddec5cd2c671d26c))
+* **persistence:** binary append-only journal service ([6aa4b74](https://github.com/tgiachi/squid-std/commit/6aa4b74bde8cca5aa4db745df96da1c9b4f9e3c9))
+* **persistence:** entity descriptor registry ([b3d822f](https://github.com/tgiachi/squid-std/commit/b3d822f96d6db0f841b4aaca806a8e0a24a93bcd))
+* **persistence:** fixed-binary journal and snapshot codecs ([1711672](https://github.com/tgiachi/squid-std/commit/1711672b55dee3036b453a872851b1ad0fbcd539))
+* **persistence:** in-memory entity store with write-ordered journaling ([c9a242e](https://github.com/tgiachi/squid-std/commit/c9a242ebed2c5d894bf6cdc324b6a5ee4d1092fa))
+* **persistence:** lifecycle service with snapshot+journal replay and autosave ([532ad55](https://github.com/tgiachi/squid-std/commit/532ad559e41b00728d06536dc386ab08c740c345))
+* **persistence:** MessagePack serializer provider and DI entity registration ([bf2a046](https://github.com/tgiachi/squid-std/commit/bf2a046ed40cc94172df228e9d25932eaf073b72))
+* **persistence:** scaffold persistence packages and abstractions ([4f3fce2](https://github.com/tgiachi/squid-std/commit/4f3fce22b43ab59407d025812f6fd3aaca98cdff))
+* **persistence:** state store and serializer-injected entity descriptor ([27b7cfe](https://github.com/tgiachi/squid-std/commit/27b7cfeb600c96e2228799cbd83dad818ee46eb6))
+* require event listener registration attribute ([2b99967](https://github.com/tgiachi/squid-std/commit/2b99967414b6eb54211f48d66369833d0a03aa99))
+
+### Bug Fixes
+
+* **network:** keep receive history in sync with decoded output and clarify per-connection pipeline factory ([8b9d447](https://github.com/tgiachi/squid-std/commit/8b9d44785c4373bb3c475f223173708e8572da6b))
+
 ## [0.6.0](https://github.com/tgiachi/squid-std/compare/v0.5.1...v0.6.0) (2026-06-25)
 
 ### Features
