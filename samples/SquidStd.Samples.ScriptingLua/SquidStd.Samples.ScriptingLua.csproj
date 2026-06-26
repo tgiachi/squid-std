@@ -11,6 +11,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\SquidStd.Scripting.Lua\SquidStd.Scripting.Lua.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Services.Core\SquidStd.Services.Core.csproj"/>
+        <ProjectReference Include="..\..\src\SquidStd.Generators\SquidStd.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
 </Project>

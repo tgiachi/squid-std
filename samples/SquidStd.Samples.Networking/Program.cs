@@ -9,12 +9,12 @@ var endPoint = new IPEndPoint(IPAddress.Loopback, 9099);
 var server = new SquidTcpServer(endPoint);
 
 server.OnClientConnect += (_, args) =>
-                              Console.WriteLine($"Client connected: session {args.Client.SessionId}");
+    Console.WriteLine($"Client connected: session {args.Client.SessionId}");
 
 server.OnDataReceived += (_, args) =>
-                             Console.WriteLine(
-                                 $"Received {args.Data.Length} byte(s): {Encoding.UTF8.GetString(args.Data.Span)}"
-                             );
+    Console.WriteLine(
+        $"Received {args.Data.Length} byte(s): {Encoding.UTF8.GetString(args.Data.Span)}"
+    );
 
 #endregion
 

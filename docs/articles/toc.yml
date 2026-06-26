@@ -4,6 +4,8 @@
   href: core.md
 - name: SquidStd.Abstractions
   href: abstractions.md
+- name: SquidStd.Generators
+  href: source-generators.md
 - name: SquidStd.Services.Core
   href: services-core.md
 - name: SquidStd.AspNetCore

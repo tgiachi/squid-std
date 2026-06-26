@@ -1,7 +1,7 @@
 namespace SquidStd.Storage.Internal;
 
 /// <summary>
-/// Resolves logical storage keys into paths constrained to one root directory.
+///     Resolves logical storage keys into paths constrained to one root directory.
 /// </summary>
 internal static class StoragePathResolver
 {
@@ -40,8 +40,8 @@ internal static class StoragePathResolver
 
         var fullPath = Path.GetFullPath(Path.Combine(normalizedRoot, relativePath));
         var rootPrefix = normalizedRoot.EndsWith(Path.DirectorySeparatorChar)
-                             ? normalizedRoot
-                             : normalizedRoot + Path.DirectorySeparatorChar;
+            ? normalizedRoot
+            : normalizedRoot + Path.DirectorySeparatorChar;
 
         if (!fullPath.StartsWith(rootPrefix, StringComparison.Ordinal))
         {

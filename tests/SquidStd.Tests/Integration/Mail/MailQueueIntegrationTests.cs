@@ -1,6 +1,7 @@
 using DryIoc;
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Mail.Abstractions.Data;
+using SquidStd.Mail.Abstractions.Data.Config;
 using SquidStd.Mail.Abstractions.Types.Mail;
 using SquidStd.Mail.MailKit.Extensions;
 using SquidStd.Mail.MailKit.Services;
@@ -32,25 +33,25 @@ public class MailQueueIntegrationTests
         var container = new Container();
         container.RegisterInstance<IEventBus>(new EventBusService());
         container.AddInMemoryMessaging();
-        container.AddMailSender(new() { Host = _fixture.Host, Port = _fixture.SmtpPort, UseSsl = false });
+        container.AddMailSender(new SmtpOptions { Host = _fixture.Host, Port = _fixture.SmtpPort, UseSsl = false });
         container.AddMailQueue();
 
         var consumer = container.Resolve<MailSendConsumerService>();
         await consumer.StartAsync();
 
         await container.Resolve<IMailQueue>()
-                       .EnqueueAsync(
-                           new()
-                           {
-                               From = new("Sender", "sender@example.com"),
-                               To = [new("Target", recipient)],
-                               Subject = "queued-subject",
-                               TextBody = "hi"
-                           }
-                       );
+            .EnqueueAsync(
+                new OutgoingMailMessage
+                {
+                    From = new MailAddress("Sender", "sender@example.com"),
+                    To = [new MailAddress("Target", recipient)],
+                    Subject = "queued-subject",
+                    TextBody = "hi"
+                }
+            );
 
         var reader = new ImapMailReader(
-            new()
+            new MailOptions
             {
                 Protocol = MailProtocolType.Imap,
                 Host = _fixture.Host,

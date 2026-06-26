@@ -7,18 +7,18 @@ using SquidStd.Core.Interfaces.Timing;
 namespace SquidStd.Services.Core.Services.Scheduling;
 
 /// <summary>
-/// Periodically advances the timer wheel so that wheel-backed timers fire in a normal
-/// (non-game-loop) application. Drives <see cref="ITimerService.UpdateTicksDelta" /> on a
-/// background loop.
+///     Periodically advances the timer wheel so that wheel-backed timers fire in a normal
+///     (non-game-loop) application. Drives <see cref="ITimerService.UpdateTicksDelta" /> on a
+///     background loop.
 /// </summary>
 public sealed class TimerWheelPumpService : ISquidStdService, IDisposable
 {
-    private readonly ILogger _logger = Log.ForContext<TimerWheelPumpService>();
-    private readonly ITimerService _timer;
-    private readonly TimeSpan _pumpInterval;
     private readonly CancellationTokenSource _cts = new();
-    private Task? _loop;
+    private readonly ILogger _logger = Log.ForContext<TimerWheelPumpService>();
+    private readonly TimeSpan _pumpInterval;
+    private readonly ITimerService _timer;
     private int _disposed;
+    private Task? _loop;
 
     public TimerWheelPumpService(ITimerService timer, TimerWheelPumpConfig config)
     {

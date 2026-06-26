@@ -6,6 +6,47 @@ namespace SquidStd.Tests.Search;
 
 public class SearchIndexNameResolverTests
 {
+    [Fact]
+    public void Resolve_ExpandsEnvVariable()
+    {
+        Environment.SetEnvironmentVariable("SQ_ENV", "Prod");
+
+        try
+        {
+            Assert.Equal("orders_prod", SearchIndexNameResolver.Resolve(typeof(EnvDoc)));
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("SQ_ENV", null);
+        }
+    }
+
+    [Fact]
+    public void Resolve_FallsBackToLowercasedTypeName()
+    {
+        Assert.Equal("plaindoc", SearchIndexNameResolver.Resolve(typeof(PlainDoc)));
+    }
+
+    [Fact]
+    public void Resolve_Throws_WhenRequiredVariableMissing()
+    {
+        Environment.SetEnvironmentVariable("SQ_REQUIRED", null);
+        Assert.Throws<InvalidOperationException>(() => SearchIndexNameResolver.Resolve(typeof(EnvRequiredDoc)));
+    }
+
+    [Fact]
+    public void Resolve_UsesAttribute_Lowercased()
+    {
+        Assert.Equal("orders", SearchIndexNameResolver.Resolve(typeof(AttributedDoc)));
+    }
+
+    [Fact]
+    public void Resolve_UsesDefault_WhenVariableMissing()
+    {
+        Environment.SetEnvironmentVariable("SQ_MISSING", null);
+        Assert.Equal("orders_dev", SearchIndexNameResolver.Resolve(typeof(EnvDefaultDoc)));
+    }
+
     private sealed record PlainDoc : IIndexableEntity
     {
         public string IndexId => "1";
@@ -33,42 +74,5 @@ public class SearchIndexNameResolverTests
     private sealed record EnvRequiredDoc : IIndexableEntity
     {
         public string IndexId => "1";
-    }
-
-    [Fact]
-    public void Resolve_ExpandsEnvVariable()
-    {
-        Environment.SetEnvironmentVariable("SQ_ENV", "Prod");
-
-        try
-        {
-            Assert.Equal("orders_prod", SearchIndexNameResolver.Resolve(typeof(EnvDoc)));
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("SQ_ENV", null);
-        }
-    }
-
-    [Fact]
-    public void Resolve_FallsBackToLowercasedTypeName()
-        => Assert.Equal("plaindoc", SearchIndexNameResolver.Resolve(typeof(PlainDoc)));
-
-    [Fact]
-    public void Resolve_Throws_WhenRequiredVariableMissing()
-    {
-        Environment.SetEnvironmentVariable("SQ_REQUIRED", null);
-        Assert.Throws<InvalidOperationException>(() => SearchIndexNameResolver.Resolve(typeof(EnvRequiredDoc)));
-    }
-
-    [Fact]
-    public void Resolve_UsesAttribute_Lowercased()
-        => Assert.Equal("orders", SearchIndexNameResolver.Resolve(typeof(AttributedDoc)));
-
-    [Fact]
-    public void Resolve_UsesDefault_WhenVariableMissing()
-    {
-        Environment.SetEnvironmentVariable("SQ_MISSING", null);
-        Assert.Equal("orders_dev", SearchIndexNameResolver.Resolve(typeof(EnvDefaultDoc)));
     }
 }

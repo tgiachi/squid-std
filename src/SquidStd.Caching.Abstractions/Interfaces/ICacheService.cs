@@ -1,7 +1,7 @@
 namespace SquidStd.Caching.Abstractions.Interfaces;
 
 /// <summary>
-/// Typed cache-aside facade over an <see cref="ICacheProvider" />.
+///     Typed cache-aside facade over an <see cref="ICacheProvider" />.
 /// </summary>
 public interface ICacheService
 {

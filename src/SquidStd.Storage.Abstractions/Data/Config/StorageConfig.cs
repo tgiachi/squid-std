@@ -3,12 +3,12 @@ using SquidStd.Core.Interfaces.Config;
 namespace SquidStd.Storage.Abstractions.Data.Config;
 
 /// <summary>
-/// Configuration for local file storage.
+///     Configuration for local file storage.
 /// </summary>
 public sealed class StorageConfig : IConfigEntry
 {
     /// <summary>
-    /// Gets or sets the root directory used by local storage.
+    ///     Gets or sets the root directory used by local storage.
     /// </summary>
     public string RootDirectory { get; set; } = "storage";
 
@@ -17,5 +17,7 @@ public sealed class StorageConfig : IConfigEntry
     Type IConfigEntry.ConfigType => typeof(StorageConfig);
 
     object IConfigEntry.CreateDefault()
-        => new StorageConfig();
+    {
+        return new StorageConfig();
+    }
 }

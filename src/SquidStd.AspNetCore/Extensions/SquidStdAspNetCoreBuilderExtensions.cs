@@ -9,23 +9,34 @@ using SquidStd.Services.Core.Services.Bootstrap;
 namespace SquidStd.AspNetCore.Extensions;
 
 /// <summary>
-/// Extension methods for connecting SquidStd to ASP.NET Core Minimal API applications.
+///     Extension methods for connecting SquidStd to ASP.NET Core Minimal API applications.
 /// </summary>
 public static class SquidStdAspNetCoreBuilderExtensions
 {
+    internal const string ContainerPropertyKey = "SquidStd:Container";
+
+    private static void ValidateOptions(SquidStdOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.ConfigName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.RootDirectory);
+    }
+
     /// <param name="builder">ASP.NET Core application builder.</param>
     extension(WebApplicationBuilder builder)
     {
         /// <summary>
-        /// Registers SquidStd using DryIoc as the ASP.NET Core service provider.
+        ///     Registers SquidStd using DryIoc as the ASP.NET Core service provider.
         /// </summary>
         /// <param name="configureOptions">Optional SquidStd bootstrap options callback.</param>
         /// <returns>The same builder for chaining.</returns>
         public WebApplicationBuilder UseSquidStd(Action<SquidStdOptions>? configureOptions = null)
-            => builder.UseSquidStd(configureOptions, null);
+        {
+            return builder.UseSquidStd(configureOptions, null);
+        }
 
         /// <summary>
-        /// Registers SquidStd using DryIoc as the ASP.NET Core service provider.
+        ///     Registers SquidStd using DryIoc as the ASP.NET Core service provider.
         /// </summary>
         /// <param name="configureOptions">Optional SquidStd bootstrap options callback.</param>
         /// <param name="configureContainer">Optional DryIoc registration callback.</param>
@@ -60,14 +71,5 @@ public static class SquidStdAspNetCoreBuilderExtensions
 
             return builder;
         }
-    }
-
-    internal const string ContainerPropertyKey = "SquidStd:Container";
-
-    private static void ValidateOptions(SquidStdOptions options)
-    {
-        ArgumentNullException.ThrowIfNull(options);
-        ArgumentException.ThrowIfNullOrWhiteSpace(options.ConfigName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(options.RootDirectory);
     }
 }

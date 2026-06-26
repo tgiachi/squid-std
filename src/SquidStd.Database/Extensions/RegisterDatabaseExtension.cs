@@ -10,12 +10,12 @@ using SquidStd.Database.Services;
 namespace SquidStd.Database.Extensions;
 
 /// <summary>
-/// DI registration for the database subsystem.
+///     DI registration for the database subsystem.
 /// </summary>
 public static class RegisterDatabaseExtension
 {
     /// <summary>
-    /// Registers the database config section, the database service, and the open-generic data access.
+    ///     Registers the database config section, the database service, and the open-generic data access.
     /// </summary>
     /// <param name="container">The DI container.</param>
     /// <returns>The same container for chaining.</returns>

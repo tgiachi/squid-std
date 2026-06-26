@@ -4,12 +4,6 @@ namespace SquidStd.Tests.Core.Json;
 
 public class JsonDataSerializerTests
 {
-    private sealed class Sample
-    {
-        public string Name { get; set; } = string.Empty;
-        public int Count { get; set; }
-    }
-
     [Fact]
     public void Deserialize_NullJson_Throws()
     {
@@ -29,5 +23,11 @@ public class JsonDataSerializerTests
 
         Assert.Equal("abc", result.Name);
         Assert.Equal(7, result.Count);
+    }
+
+    private sealed class Sample
+    {
+        public string Name { get; set; } = string.Empty;
+        public int Count { get; set; }
     }
 }

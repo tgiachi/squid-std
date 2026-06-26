@@ -10,7 +10,7 @@ using SquidStd.Database.Interfaces.Services;
 namespace SquidStd.Database.Data;
 
 /// <summary>
-/// FreeSql-backed <see cref="IDataAccess{TEntity}" />. Writes run inside a unit of work with rollback.
+///     FreeSql-backed <see cref="IDataAccess{TEntity}" />. Writes run inside a unit of work with rollback.
 /// </summary>
 /// <typeparam name="TEntity">The entity type.</typeparam>
 public sealed class FreeSqlDataAccess<TEntity> : IDataAccess<TEntity>
@@ -21,7 +21,7 @@ public sealed class FreeSqlDataAccess<TEntity> : IDataAccess<TEntity>
     private readonly IFreeSql _orm;
 
     /// <summary>
-    /// Initializes the data access over the shared FreeSql instance.
+    ///     Initializes the data access over the shared FreeSql instance.
     /// </summary>
     /// <param name="databaseService">The database service that owns the FreeSql instance.</param>
     public FreeSqlDataAccess(IDatabaseService databaseService)
@@ -34,15 +34,17 @@ public sealed class FreeSqlDataAccess<TEntity> : IDataAccess<TEntity>
         Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken = default
     )
-        => RunInTransactionAsync(
+    {
+        return RunInTransactionAsync(
             transaction => _orm.Delete<TEntity>()
-                               .Where(predicate)
-                               .WithTransaction(transaction)
-                               .ExecuteAffrowsAsync(cancellationToken),
+                .Where(predicate)
+                .WithTransaction(transaction)
+                .ExecuteAffrowsAsync(cancellationToken),
             "BulkDelete",
             null,
             cancellationToken
         );
+    }
 
     /// <inheritdoc />
     public Task<int> BulkInsertAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
@@ -70,9 +72,9 @@ public sealed class FreeSqlDataAccess<TEntity> : IDataAccess<TEntity>
 
         return RunInTransactionAsync(
             transaction => _orm.Update<TEntity>()
-                               .SetSource(list)
-                               .WithTransaction(transaction)
-                               .ExecuteAffrowsAsync(cancellationToken),
+                .SetSource(list)
+                .WithTransaction(transaction)
+                .ExecuteAffrowsAsync(cancellationToken),
             "BulkUpdate",
             list.Count,
             cancellationToken
@@ -99,29 +101,35 @@ public sealed class FreeSqlDataAccess<TEntity> : IDataAccess<TEntity>
     public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var affected = await RunInTransactionAsync(
-                           transaction => _orm.Delete<TEntity>()
-                                              .Where(e => e.Id == id)
-                                              .WithTransaction(transaction)
-                                              .ExecuteAffrowsAsync(cancellationToken),
-                           "Delete",
-                           null,
-                           cancellationToken
-                       );
+            transaction => _orm.Delete<TEntity>()
+                .Where(e => e.Id == id)
+                .WithTransaction(transaction)
+                .ExecuteAffrowsAsync(cancellationToken),
+            "Delete",
+            null,
+            cancellationToken
+        );
 
         return affected > 0;
     }
 
     /// <inheritdoc />
     public Task<bool> DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
-        => DeleteAsync(entity.Id, cancellationToken);
+    {
+        return DeleteAsync(entity.Id, cancellationToken);
+    }
 
     /// <inheritdoc />
     public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
-        => _orm.Select<TEntity>().Where(predicate).AnyAsync(cancellationToken);
+    {
+        return _orm.Select<TEntity>().Where(predicate).AnyAsync(cancellationToken);
+    }
 
     /// <inheritdoc />
     public Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-        => _orm.Select<TEntity>().Where(e => e.Id == id).FirstAsync(cancellationToken)!;
+    {
+        return _orm.Select<TEntity>().Where(e => e.Id == id).FirstAsync(cancellationToken)!;
+    }
 
     /// <inheritdoc />
     public async Task<PagedResultData<TEntity>> GetPagedAsync(
@@ -177,7 +185,9 @@ public sealed class FreeSqlDataAccess<TEntity> : IDataAccess<TEntity>
 
     /// <inheritdoc />
     public ISelect<TEntity> Query()
-        => _orm.Select<TEntity>();
+    {
+        return _orm.Select<TEntity>();
+    }
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<TEntity>> QueryAsync(
@@ -202,9 +212,9 @@ public sealed class FreeSqlDataAccess<TEntity> : IDataAccess<TEntity>
 
         await RunInTransactionAsync(
             transaction => _orm.Update<TEntity>()
-                               .SetSource(entity)
-                               .WithTransaction(transaction)
-                               .ExecuteAffrowsAsync(cancellationToken),
+                .SetSource(entity)
+                .WithTransaction(transaction)
+                .ExecuteAffrowsAsync(cancellationToken),
             "Update",
             1,
             cancellationToken

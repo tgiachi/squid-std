@@ -1,7 +1,7 @@
 namespace SquidStd.Abstractions.Interfaces.Services;
 
 /// <summary>
-/// Defines lifecycle operations for a SquidStd service.
+///     Defines lifecycle operations for a SquidStd service.
 /// </summary>
 public interface ISquidStdService
 {

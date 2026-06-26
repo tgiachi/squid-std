@@ -45,39 +45,57 @@ public ref struct SpanReader : IDisposable
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ReadAscii(int fixedLength)
-        => ReadString(Encoding.ASCII, fixedLength: fixedLength);
+    {
+        return ReadString(Encoding.ASCII, fixedLength: fixedLength);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ReadAscii()
-        => ReadString(Encoding.ASCII);
+    {
+        return ReadString(Encoding.ASCII);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ReadAsciiSafe(int fixedLength)
-        => ReadString(Encoding.ASCII, true, fixedLength);
+    {
+        return ReadString(Encoding.ASCII, true, fixedLength);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ReadAsciiSafe()
-        => ReadString(Encoding.ASCII, true);
+    {
+        return ReadString(Encoding.ASCII, true);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ReadBigUni(int fixedLength)
-        => ReadString(Encoding.BigEndianUnicode, fixedLength: fixedLength);
+    {
+        return ReadString(Encoding.BigEndianUnicode, fixedLength: fixedLength);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ReadBigUni()
-        => ReadString(Encoding.BigEndianUnicode);
+    {
+        return ReadString(Encoding.BigEndianUnicode);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ReadBigUniSafe(int fixedLength)
-        => ReadString(Encoding.BigEndianUnicode, true, fixedLength);
+    {
+        return ReadString(Encoding.BigEndianUnicode, true, fixedLength);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ReadBigUniSafe()
-        => ReadString(Encoding.BigEndianUnicode, true);
+    {
+        return ReadString(Encoding.BigEndianUnicode, true);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool ReadBoolean()
-        => ReadByte() > 0;
+    {
+        return ReadByte() > 0;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public byte ReadByte()
@@ -184,23 +202,33 @@ public ref struct SpanReader : IDisposable
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ReadLittleUni(int fixedLength)
-        => ReadString(Encoding.Unicode, fixedLength: fixedLength);
+    {
+        return ReadString(Encoding.Unicode, fixedLength: fixedLength);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ReadLittleUni()
-        => ReadString(Encoding.Unicode);
+    {
+        return ReadString(Encoding.Unicode);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ReadLittleUniSafe(int fixedLength)
-        => ReadString(Encoding.Unicode, true, fixedLength);
+    {
+        return ReadString(Encoding.Unicode, true, fixedLength);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ReadLittleUniSafe()
-        => ReadString(Encoding.Unicode, true);
+    {
+        return ReadString(Encoding.Unicode, true);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public sbyte ReadSByte()
-        => (sbyte)ReadByte();
+    {
+        return (sbyte)ReadByte();
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ReadString(Encoding encoding, bool safeString = false, int fixedLength = -1)
@@ -324,15 +352,21 @@ public ref struct SpanReader : IDisposable
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ReadUTF8()
-        => ReadString(Encoding.UTF8);
+    {
+        return ReadString(Encoding.UTF8);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ReadUTF8Safe(int fixedLength)
-        => ReadString(Encoding.UTF8, true, fixedLength);
+    {
+        return ReadString(Encoding.UTF8, true, fixedLength);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ReadUTF8Safe()
-        => ReadString(Encoding.UTF8, true);
+    {
+        return ReadString(Encoding.UTF8, true);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int Seek(int offset, SeekOrigin origin)
@@ -358,12 +392,14 @@ public ref struct SpanReader : IDisposable
     }
 
     private static int GetTerminatorWidth(Encoding encoding)
-        => encoding switch
+    {
+        return encoding switch
         {
             UnicodeEncoding => 2,
             UTF32Encoding   => 4,
             _               => 1
         };
+    }
 
     private static int IndexOfTerminator(ReadOnlySpan<byte> span, int terminatorWidth)
     {
@@ -397,5 +433,7 @@ public ref struct SpanReader : IDisposable
 
     [DoesNotReturn]
     private static void ThrowInsufficientData()
-        => throw new InvalidOperationException("Insufficient data in buffer.");
+    {
+        throw new InvalidOperationException("Insufficient data in buffer.");
+    }
 }

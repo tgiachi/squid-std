@@ -16,5 +16,7 @@ public sealed class EventsModule
 
     [ScriptFunction("on", "Registers a callback for a named server event.")]
     public void On(string eventName, Closure callback)
-        => _events.Register(eventName, callback);
+    {
+        _events.Register(eventName, callback);
+    }
 }

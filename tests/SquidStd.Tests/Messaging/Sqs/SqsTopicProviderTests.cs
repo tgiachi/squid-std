@@ -24,8 +24,22 @@ public class SqsTopicProviderTests
         var topic = Topic();
         var a = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
         var b = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
-        provider.Subscribe(topic, (payload, _) => { a.TrySetResult(Text(payload)); return Task.CompletedTask; });
-        provider.Subscribe(topic, (payload, _) => { b.TrySetResult(Text(payload)); return Task.CompletedTask; });
+        provider.Subscribe(
+            topic,
+            (payload, _) =>
+            {
+                a.TrySetResult(Text(payload));
+                return Task.CompletedTask;
+            }
+        );
+        provider.Subscribe(
+            topic,
+            (payload, _) =>
+            {
+                b.TrySetResult(Text(payload));
+                return Task.CompletedTask;
+            }
+        );
 
         // Allow the subscriptions to be wired before publishing.
         await Task.Delay(2000);
@@ -36,14 +50,22 @@ public class SqsTopicProviderTests
     }
 
     private SqsTopicProvider NewProvider()
-        => new(new SqsOptions { Aws = _fixture.Aws, WaitTimeSeconds = 1 });
+    {
+        return new SqsTopicProvider(new SqsOptions { Aws = _fixture.Aws, WaitTimeSeconds = 1 });
+    }
 
     private static ReadOnlyMemory<byte> Bytes(string s)
-        => Encoding.UTF8.GetBytes(s);
+    {
+        return Encoding.UTF8.GetBytes(s);
+    }
 
     private static string Text(ReadOnlyMemory<byte> b)
-        => Encoding.UTF8.GetString(b.Span);
+    {
+        return Encoding.UTF8.GetString(b.Span);
+    }
 
     private static string Topic()
-        => "topic-" + Guid.NewGuid().ToString("N");
+    {
+        return "topic-" + Guid.NewGuid().ToString("N");
+    }
 }

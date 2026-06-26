@@ -23,11 +23,11 @@ public sealed class ConfigRegistrationData : IConfigEntry
         Priority = priority;
     }
 
+    public int Priority { get; }
+
     public string SectionName { get; }
 
     public Type ConfigType { get; }
-
-    public int Priority { get; }
 
     public object CreateDefault()
     {

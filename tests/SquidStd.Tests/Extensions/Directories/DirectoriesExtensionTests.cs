@@ -4,9 +4,14 @@ namespace SquidStd.Tests.Extensions.Directories;
 
 public class DirectoriesExtensionTests
 {
-    [Theory, InlineData(""), InlineData("   "), InlineData(null)]
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
     public void ResolvePathAndEnvs_NullOrWhitespace_ReturnsNull(string? path)
-        => Assert.Null(path!.ResolvePathAndEnvs());
+    {
+        Assert.Null(path!.ResolvePathAndEnvs());
+    }
 
     [Fact]
     public void ResolvePathAndEnvs_TildePrefix_ExpandsToUserProfile()

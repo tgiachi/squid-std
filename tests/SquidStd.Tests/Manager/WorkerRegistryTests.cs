@@ -1,5 +1,6 @@
 using SquidStd.Workers.Abstractions.Data;
 using SquidStd.Workers.Abstractions.Types;
+using SquidStd.Workers.Manager.Data.Config;
 using SquidStd.Workers.Manager.Services;
 
 namespace SquidStd.Tests.Manager;
@@ -89,8 +90,12 @@ public class WorkerRegistryTests
     }
 
     private static WorkerHeartbeat Heartbeat(string id, WorkerStatusType status, int activeJobs = 0)
-        => new(id, DateTime.UtcNow, status, activeJobs, 8);
+    {
+        return new WorkerHeartbeat(id, DateTime.UtcNow, status, activeJobs, 8);
+    }
 
     private static WorkerRegistry NewRegistry(int offlineTimeoutSeconds = 30)
-        => new(new() { OfflineTimeoutSeconds = offlineTimeoutSeconds });
+    {
+        return new WorkerRegistry(new WorkerManagerConfig { OfflineTimeoutSeconds = offlineTimeoutSeconds });
+    }
 }

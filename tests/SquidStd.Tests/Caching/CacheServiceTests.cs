@@ -9,24 +9,26 @@ public class CacheServiceTests
 {
     [Fact]
     public async Task Get_Missing_ReturnsDefault()
-        => Assert.Null(await NewService(new()).GetAsync<string>("absent"));
+    {
+        Assert.Null(await NewService(new FakeCacheProvider()).GetAsync<string>("absent"));
+    }
 
     [Fact]
     public async Task GetOrSet_Hit_DoesNotInvokeFactory()
     {
-        var service = NewService(new());
+        var service = NewService(new FakeCacheProvider());
         await service.SetAsync("k", 7);
         var calls = 0;
 
         var value = await service.GetOrSetAsync(
-                        "k",
-                        _ =>
-                        {
-                            calls++;
+            "k",
+            _ =>
+            {
+                calls++;
 
-                            return Task.FromResult(0);
-                        }
-                    );
+                return Task.FromResult(0);
+            }
+        );
 
         Assert.Equal(7, value);
         Assert.Equal(0, calls);
@@ -40,14 +42,14 @@ public class CacheServiceTests
         var calls = 0;
 
         var value = await service.GetOrSetAsync(
-                        "k",
-                        _ =>
-                        {
-                            calls++;
+            "k",
+            _ =>
+            {
+                calls++;
 
-                            return Task.FromResult(99);
-                        }
-                    );
+                return Task.FromResult(99);
+            }
+        );
 
         Assert.Equal(99, value);
         Assert.Equal(1, calls);
@@ -58,7 +60,7 @@ public class CacheServiceTests
     public async Task KeyPrefix_IsAppliedToProvider()
     {
         var provider = new FakeCacheProvider();
-        var service = NewService(provider, new() { KeyPrefix = "app:" });
+        var service = NewService(provider, new CacheOptions { KeyPrefix = "app:" });
 
         await service.SetAsync("k", "v");
 
@@ -70,7 +72,7 @@ public class CacheServiceTests
     public async Task Metrics_RecordHitAndMiss()
     {
         var metrics = new CacheMetricsProvider();
-        var service = NewService(new(), metrics: metrics);
+        var service = NewService(new FakeCacheProvider(), metrics: metrics);
 
         await service.GetAsync<int>("absent"); // miss
         await service.SetAsync("k", 1);
@@ -85,7 +87,7 @@ public class CacheServiceTests
     public async Task Set_PerEntryTtl_OverridesDefault()
     {
         var provider = new FakeCacheProvider();
-        var service = NewService(provider, new() { DefaultTtl = TimeSpan.FromSeconds(30) });
+        var service = NewService(provider, new CacheOptions { DefaultTtl = TimeSpan.FromSeconds(30) });
 
         await service.SetAsync("k", "v", TimeSpan.FromSeconds(5));
 
@@ -96,7 +98,7 @@ public class CacheServiceTests
     public async Task Set_UsesDefaultTtl_WhenNoneGiven()
     {
         var provider = new FakeCacheProvider();
-        var service = NewService(provider, new() { DefaultTtl = TimeSpan.FromSeconds(30) });
+        var service = NewService(provider, new CacheOptions { DefaultTtl = TimeSpan.FromSeconds(30) });
 
         await service.SetAsync("k", "v");
 
@@ -106,7 +108,7 @@ public class CacheServiceTests
     [Fact]
     public async Task SetThenGet_RoundTrips()
     {
-        var service = NewService(new());
+        var service = NewService(new FakeCacheProvider());
 
         await service.SetAsync("k", 42);
 
@@ -121,6 +123,6 @@ public class CacheServiceTests
     {
         var serializer = new JsonDataSerializer();
 
-        return new(provider, serializer, serializer, options ?? new CacheOptions(), metrics);
+        return new CacheService(provider, serializer, serializer, options ?? new CacheOptions(), metrics);
     }
 }

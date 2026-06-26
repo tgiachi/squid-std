@@ -6,7 +6,7 @@ using SquidStd.Storage.Services;
 namespace SquidStd.Storage.Extensions;
 
 /// <summary>
-/// DryIoc registration helpers for the local file storage provider.
+///     DryIoc registration helpers for the local file storage provider.
 /// </summary>
 public static class StorageRegistrationExtensions
 {

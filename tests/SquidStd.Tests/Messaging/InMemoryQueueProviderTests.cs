@@ -12,7 +12,7 @@ public class InMemoryQueueProviderTests
     [Fact]
     public async Task AlwaysFailing_IsDeadLetteredAfterMaxAttempts()
     {
-        await using var provider = NewProvider(options: new() { MaxDeliveryAttempts = 2 });
+        await using var provider = NewProvider(options: new MessagingOptions { MaxDeliveryAttempts = 2 });
         var attempts = 0;
         provider.Subscribe(
             "q",
@@ -66,7 +66,7 @@ public class InMemoryQueueProviderTests
     [Fact]
     public async Task FailingThenSucceeding_IsRetriedAndDelivered()
     {
-        await using var provider = NewProvider(options: new() { MaxDeliveryAttempts = 3 });
+        await using var provider = NewProvider(options: new MessagingOptions { MaxDeliveryAttempts = 3 });
         var attempts = 0;
         var delivered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         provider.Subscribe(
@@ -169,14 +169,20 @@ public class InMemoryQueueProviderTests
     }
 
     private static ReadOnlyMemory<byte> Bytes(string s)
-        => Encoding.UTF8.GetBytes(s);
+    {
+        return Encoding.UTF8.GetBytes(s);
+    }
 
     private static InMemoryQueueProvider NewProvider(
         MessagingMetricsProvider? metrics = null,
         MessagingOptions? options = null
     )
-        => new(options ?? new MessagingOptions(), metrics ?? new MessagingMetricsProvider());
+    {
+        return new InMemoryQueueProvider(options ?? new MessagingOptions(), metrics ?? new MessagingMetricsProvider());
+    }
 
     private static string Text(ReadOnlyMemory<byte> b)
-        => Encoding.UTF8.GetString(b.Span);
+    {
+        return Encoding.UTF8.GetString(b.Span);
+    }
 }

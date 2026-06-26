@@ -6,10 +6,6 @@ namespace SquidStd.Tests.Scripting.Lua;
 
 public class AddScriptModuleExtensionTests
 {
-    public sealed class TestUserData;
-
-    public sealed class TestModule;
-
     [Fact]
     public void RegisterLuaUserData_AddsUserDataMetadata()
     {
@@ -40,4 +36,8 @@ public class AddScriptModuleExtensionTests
         Assert.Equal(typeof(TestModule), registration.ModuleType);
         Assert.Same(container.Resolve<TestModule>(), container.Resolve<TestModule>());
     }
+
+    public sealed class TestUserData;
+
+    public sealed class TestModule;
 }

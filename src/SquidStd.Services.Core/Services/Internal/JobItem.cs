@@ -1,7 +1,7 @@
 namespace SquidStd.Services.Core.Services.Internal;
 
 /// <summary>
-/// Internal envelope for a scheduled job.
+///     Internal envelope for a scheduled job.
 /// </summary>
 internal sealed class JobItem
 {
@@ -17,8 +17,12 @@ internal sealed class JobItem
     }
 
     public void Cancel()
-        => _cancel();
+    {
+        _cancel();
+    }
 
     public void Run()
-        => _run();
+    {
+        _run();
+    }
 }

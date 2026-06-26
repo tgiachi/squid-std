@@ -13,9 +13,9 @@ namespace SquidStd.Mail.MailKit.Services;
 /// <summary>MailKit <see cref="IMailSender" />: sends via SMTP and publishes send events.</summary>
 public sealed class MailKitMailSender : IMailSender
 {
+    private readonly IEventBus _eventBus;
     private readonly ILogger _logger = Log.ForContext<MailKitMailSender>();
     private readonly SmtpOptions _options;
-    private readonly IEventBus _eventBus;
 
     public MailKitMailSender(SmtpOptions options, IEventBus eventBus)
     {

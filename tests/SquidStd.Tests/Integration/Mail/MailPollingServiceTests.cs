@@ -2,6 +2,7 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
 using SquidStd.Core.Interfaces.Events;
+using SquidStd.Mail.Abstractions.Data.Config;
 using SquidStd.Mail.Abstractions.Data.Events;
 using SquidStd.Mail.Abstractions.Types.Mail;
 using SquidStd.Mail.MailKit.Services;
@@ -20,23 +21,6 @@ public class MailPollingServiceTests
     public MailPollingServiceTests(GreenMailContainerFixture fixture)
     {
         _fixture = fixture;
-    }
-
-    private sealed class DelegateListener : IAsyncEventListener<MailReceivedEvent>
-    {
-        private readonly Action<MailReceivedEvent> _onEvent;
-
-        public DelegateListener(Action<MailReceivedEvent> onEvent)
-        {
-            _onEvent = onEvent;
-        }
-
-        public Task HandleAsync(MailReceivedEvent eventData, CancellationToken cancellationToken)
-        {
-            _onEvent(eventData);
-
-            return Task.CompletedTask;
-        }
     }
 
     [Fact]
@@ -58,10 +42,10 @@ public class MailPollingServiceTests
 
         var eventBus = new EventBusService();
         var received = new TaskCompletionSource<MailReceivedEvent>(TaskCreationOptions.RunContinuationsAsynchronously);
-        eventBus.RegisterAsyncListener(new DelegateListener(e => received.TrySetResult(e)));
+        eventBus.RegisterListener(new DelegateListener(e => received.TrySetResult(e)));
 
         var reader = new ImapMailReader(
-            new()
+            new MailOptions
             {
                 Protocol = MailProtocolType.Imap,
                 Host = _fixture.Host,
@@ -76,11 +60,28 @@ public class MailPollingServiceTests
             reader,
             eventBus,
             new FakeTimerService(),
-            new() { PollIntervalSeconds = 60 }
+            new MailOptions { PollIntervalSeconds = 60 }
         );
         await service.PollOnceAsync();
 
         var evt = await received.Task.WaitAsync(Timeout);
         Assert.Equal("poll-subject", evt.Message.Subject);
+    }
+
+    private sealed class DelegateListener : IEventListener<MailReceivedEvent>
+    {
+        private readonly Action<MailReceivedEvent> _onEvent;
+
+        public DelegateListener(Action<MailReceivedEvent> onEvent)
+        {
+            _onEvent = onEvent;
+        }
+
+        public Task HandleAsync(MailReceivedEvent eventData, CancellationToken cancellationToken)
+        {
+            _onEvent(eventData);
+
+            return Task.CompletedTask;
+        }
     }
 }

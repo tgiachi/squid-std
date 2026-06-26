@@ -3,12 +3,12 @@ using SquidStd.Core.Types;
 namespace SquidStd.Core.Utils;
 
 /// <summary>
-/// Provides utilities for detecting the current platform.
+///     Provides utilities for detecting the current platform.
 /// </summary>
 public static class PlatformUtils
 {
     /// <summary>
-    /// Gets the current platform type.
+    ///     Gets the current platform type.
     /// </summary>
     /// <returns>The detected platform type.</returns>
     public static PlatformType GetCurrentPlatform()
@@ -27,23 +27,29 @@ public static class PlatformUtils
     }
 
     /// <summary>
-    /// Checks if the application is running on Linux.
+    ///     Checks if the application is running on Linux.
     /// </summary>
     /// <returns>True if running on Linux, otherwise false.</returns>
     public static bool IsRunningOnLinux()
-        => OperatingSystem.IsLinux();
+    {
+        return OperatingSystem.IsLinux();
+    }
 
     /// <summary>
-    /// Checks if the application is running on macOS.
+    ///     Checks if the application is running on macOS.
     /// </summary>
     /// <returns>True if running on macOS, otherwise false.</returns>
     public static bool IsRunningOnMacOS()
-        => OperatingSystem.IsMacOS();
+    {
+        return OperatingSystem.IsMacOS();
+    }
 
     /// <summary>
-    /// Checks if the application is running on Windows.
+    ///     Checks if the application is running on Windows.
     /// </summary>
     /// <returns>True if running on Windows, otherwise false.</returns>
     public static bool IsRunningOnWindows()
-        => OperatingSystem.IsWindows();
+    {
+        return OperatingSystem.IsWindows();
+    }
 }

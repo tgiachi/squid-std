@@ -11,17 +11,17 @@ using SquidStd.Services.Core.Services.Internal;
 namespace SquidStd.Services.Core.Services.Scheduling;
 
 /// <summary>
-/// Cron scheduler built on the timer wheel: each job is a one-shot, self-rescheduling
-/// timer. On fire, the handler is dispatched through <see cref="IJobSystem" />; an occurrence
-/// is skipped when the previous run of the same job is still in flight.
+///     Cron scheduler built on the timer wheel: each job is a one-shot, self-rescheduling
+///     timer. On fire, the handler is dispatched through <see cref="IJobSystem" />; an occurrence
+///     is skipped when the previous run of the same job is still in flight.
 /// </summary>
 public sealed class CronSchedulerService : ICronScheduler, ISquidStdService, IDisposable
 {
+    private readonly CancellationTokenSource _cts = new();
+    private readonly ConcurrentDictionary<string, CronJobEntry> _entries = new(StringComparer.Ordinal);
+    private readonly IJobSystem _jobs;
     private readonly ILogger _logger = Log.ForContext<CronSchedulerService>();
     private readonly ITimerService _timer;
-    private readonly IJobSystem _jobs;
-    private readonly ConcurrentDictionary<string, CronJobEntry> _entries = new(StringComparer.Ordinal);
-    private readonly CancellationTokenSource _cts = new();
     private int _disposed;
 
     public CronSchedulerService(ITimerService timer, IJobSystem jobs)
@@ -33,31 +33,18 @@ public sealed class CronSchedulerService : ICronScheduler, ISquidStdService, IDi
     /// <inheritdoc />
     public IReadOnlyCollection<CronJobInfo> Jobs
         => _entries.Values
-                   .Select(
-                       entry => new CronJobInfo
-                       {
-                           JobId = entry.JobId,
-                           Name = entry.Name,
-                           CronExpression = entry.CronText,
-                           NextOccurrenceUtc = entry.NextOccurrenceUtc,
-                           IsRunning = Volatile.Read(ref entry.Running) == 1,
-                           LastRunUtc = entry.LastRunUtc,
-                           RunCount = Interlocked.Read(ref entry.RunCount)
-                       }
-                   )
-                   .ToArray();
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
-        {
-            return;
-        }
-
-        _cts.Cancel();
-        _cts.Dispose();
-    }
+            .Select(entry => new CronJobInfo
+                {
+                    JobId = entry.JobId,
+                    Name = entry.Name,
+                    CronExpression = entry.CronText,
+                    NextOccurrenceUtc = entry.NextOccurrenceUtc,
+                    IsRunning = Volatile.Read(ref entry.Running) == 1,
+                    LastRunUtc = entry.LastRunUtc,
+                    RunCount = Interlocked.Read(ref entry.RunCount)
+                }
+            )
+            .ToArray();
 
     /// <inheritdoc />
     public string Schedule(string name, string cronExpression, Func<CancellationToken, Task> handler)
@@ -81,28 +68,6 @@ public sealed class CronSchedulerService : ICronScheduler, ISquidStdService, IDi
         ScheduleNext(entry);
 
         return entry.JobId;
-    }
-
-    /// <inheritdoc />
-    public ValueTask StartAsync(CancellationToken cancellationToken = default)
-        => ValueTask.CompletedTask;
-
-    /// <inheritdoc />
-    public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        _cts.Cancel();
-
-        foreach (var entry in _entries.Values)
-        {
-            if (entry.TimerId is not null)
-            {
-                _timer.UnregisterTimer(entry.TimerId);
-            }
-        }
-
-        _entries.Clear();
-
-        return ValueTask.CompletedTask;
     }
 
     /// <inheritdoc />
@@ -136,6 +101,42 @@ public sealed class CronSchedulerService : ICronScheduler, ISquidStdService, IDi
         }
 
         return removed;
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+
+    /// <inheritdoc />
+    public ValueTask StartAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public ValueTask StopAsync(CancellationToken cancellationToken = default)
+    {
+        _cts.Cancel();
+
+        foreach (var entry in _entries.Values)
+        {
+            if (entry.TimerId is not null)
+            {
+                _timer.UnregisterTimer(entry.TimerId);
+            }
+        }
+
+        _entries.Clear();
+
+        return ValueTask.CompletedTask;
     }
 
     private void OnTimer(CronJobEntry entry)

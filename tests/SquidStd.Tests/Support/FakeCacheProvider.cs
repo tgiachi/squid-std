@@ -4,7 +4,7 @@ using SquidStd.Caching.Abstractions.Interfaces;
 namespace SquidStd.Tests.Support;
 
 /// <summary>
-/// In-memory <see cref="ICacheProvider" /> for tests. Ignores TTL expiry (records the last TTL seen).
+///     In-memory <see cref="ICacheProvider" /> for tests. Ignores TTL expiry (records the last TTL seen).
 /// </summary>
 public sealed class FakeCacheProvider : ICacheProvider
 {
@@ -13,7 +13,9 @@ public sealed class FakeCacheProvider : ICacheProvider
     public TimeSpan? LastTtl { get; private set; }
 
     public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
-        => Task.FromResult(_store.ContainsKey(key));
+    {
+        return Task.FromResult(_store.ContainsKey(key));
+    }
 
     public Task<ReadOnlyMemory<byte>?> GetAsync(string key, CancellationToken cancellationToken = default)
     {
@@ -26,7 +28,9 @@ public sealed class FakeCacheProvider : ICacheProvider
     }
 
     public Task<bool> RemoveAsync(string key, CancellationToken cancellationToken = default)
-        => Task.FromResult(_store.TryRemove(key, out _));
+    {
+        return Task.FromResult(_store.TryRemove(key, out _));
+    }
 
     public Task SetAsync(
         string key,
@@ -42,8 +46,12 @@ public sealed class FakeCacheProvider : ICacheProvider
     }
 
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
-        => ValueTask.CompletedTask;
+    {
+        return ValueTask.CompletedTask;
+    }
 
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
-        => ValueTask.CompletedTask;
+    {
+        return ValueTask.CompletedTask;
+    }
 }

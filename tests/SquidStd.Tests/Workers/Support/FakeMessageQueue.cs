@@ -5,17 +5,25 @@ namespace SquidStd.Tests.Workers.Support;
 /// <summary>Inert <see cref="IMessageQueue" /> for unit tests that drive the consumer's HandleAsync directly.</summary>
 public sealed class FakeMessageQueue : IMessageQueue
 {
-    private sealed class Subscription : IDisposable
+    public Task PublishAsync<TMessage>(string queueName, TMessage message, CancellationToken cancellationToken = default)
     {
-        public void Dispose() { }
+        return Task.CompletedTask;
     }
 
-    public Task PublishAsync<TMessage>(string queueName, TMessage message, CancellationToken cancellationToken = default)
-        => Task.CompletedTask;
-
     public IDisposable Subscribe<TMessage>(string queueName, IQueueMessageListener<TMessage> listener)
-        => new Subscription();
+    {
+        return new Subscription();
+    }
 
     public IDisposable Subscribe<TMessage>(string queueName, IQueueMessageListenerAsync<TMessage> listener)
-        => new Subscription();
+    {
+        return new Subscription();
+    }
+
+    private sealed class Subscription : IDisposable
+    {
+        public void Dispose()
+        {
+        }
+    }
 }

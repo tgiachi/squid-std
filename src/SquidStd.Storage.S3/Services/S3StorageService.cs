@@ -8,14 +8,14 @@ using SquidStd.Storage.S3.Data.Config;
 namespace SquidStd.Storage.S3.Services;
 
 /// <summary>
-/// S3-compatible <see cref="IStorageService" /> backed by the MinIO client. The bucket is created
-/// lazily on first use.
+///     S3-compatible <see cref="IStorageService" /> backed by the MinIO client. The bucket is created
+///     lazily on first use.
 /// </summary>
 public sealed class S3StorageService : IStorageService, IDisposable
 {
-    private readonly IMinioClient _client;
     private readonly string _bucket;
     private readonly SemaphoreSlim _bucketLock = new(1, 1);
+    private readonly IMinioClient _client;
     private bool _bucketReady;
     private int _disposed;
 
@@ -28,6 +28,18 @@ public sealed class S3StorageService : IStorageService, IDisposable
 
         _client = CreateClient(options);
         _bucket = options.Bucket;
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
+        _client.Dispose();
+        _bucketLock.Dispose();
     }
 
     /// <inheritdoc />
@@ -44,18 +56,6 @@ public sealed class S3StorageService : IStorageService, IDisposable
         );
 
         return true;
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
-        {
-            return;
-        }
-
-        _client.Dispose();
-        _bucketLock.Dispose();
     }
 
     /// <inheritdoc />
@@ -151,9 +151,9 @@ public sealed class S3StorageService : IStorageService, IDisposable
         var endpoint = uri.IsDefaultPort ? uri.Host : $"{uri.Host}:{uri.Port}";
 
         var minio = new MinioClient()
-                    .WithEndpoint(endpoint)
-                    .WithCredentials(options.Aws.AccessKey, options.Aws.SecretKey)
-                    .WithSSL(string.Equals(uri.Scheme, "https", StringComparison.OrdinalIgnoreCase));
+            .WithEndpoint(endpoint)
+            .WithCredentials(options.Aws.AccessKey, options.Aws.SecretKey)
+            .WithSSL(string.Equals(uri.Scheme, "https", StringComparison.OrdinalIgnoreCase));
 
         if (!string.IsNullOrWhiteSpace(options.Aws.Region))
         {

@@ -5,7 +5,7 @@
         {
           "src": "../",
           "files": [ "src/**/*.csproj" ],
-          "exclude": [ "**/bin/**", "**/obj/**" ]
+          "exclude": [ "**/bin/**", "**/obj/**", "src/SquidStd.Generators/**" ]
         }
       ],
       "dest": "api",

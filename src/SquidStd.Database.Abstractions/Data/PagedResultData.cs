@@ -1,7 +1,7 @@
 namespace SquidStd.Database.Abstractions.Data;
 
 /// <summary>
-/// A paginated result set with paging metadata.
+///     A paginated result set with paging metadata.
 /// </summary>
 /// <typeparam name="T">The item type.</typeparam>
 public sealed class PagedResultData<T>
@@ -28,7 +28,7 @@ public sealed class PagedResultData<T>
     public bool HasPrevious => Page > 1 && TotalPages > 0;
 
     /// <summary>
-    /// Creates a paged result.
+    ///     Creates a paged result.
     /// </summary>
     /// <param name="items">The current page items.</param>
     /// <param name="page">The 1-based page number.</param>
@@ -36,11 +36,13 @@ public sealed class PagedResultData<T>
     /// <param name="totalCount">The total matching row count.</param>
     /// <returns>The paged result.</returns>
     public static PagedResultData<T> Create(IReadOnlyList<T> items, int page, int pageSize, long totalCount)
-        => new()
+    {
+        return new PagedResultData<T>
         {
             Items = items,
             Page = page,
             PageSize = pageSize,
             TotalCount = totalCount
         };
+    }
 }

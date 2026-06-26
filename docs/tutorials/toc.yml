@@ -4,6 +4,10 @@
   href: getting-started.md
 - name: Events, jobs and scheduling
   href: events-jobs-scheduling.md
+- name: Generated event listener registration
+  href: source-generators-event-listeners.md
+- name: Generated registrations
+  href: source-generators-registration.md
 - name: Caching
   href: caching.md
 - name: Messaging

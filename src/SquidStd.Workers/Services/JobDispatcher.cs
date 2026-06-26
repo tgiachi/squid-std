@@ -6,12 +6,12 @@ using SquidStd.Workers.Interfaces;
 namespace SquidStd.Workers.Services;
 
 /// <summary>
-/// Default <see cref="IJobDispatcher" />: indexes the registered handlers by job name.
+///     Default <see cref="IJobDispatcher" />: indexes the registered handlers by job name.
 /// </summary>
 public sealed class JobDispatcher : IJobDispatcher
 {
-    private readonly ILogger _logger = Log.ForContext<JobDispatcher>();
     private readonly Dictionary<string, IJobHandler> _handlers = new(StringComparer.Ordinal);
+    private readonly ILogger _logger = Log.ForContext<JobDispatcher>();
 
     public JobDispatcher(IEnumerable<IJobHandler> handlers)
     {

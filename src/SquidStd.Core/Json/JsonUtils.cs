@@ -8,7 +8,7 @@ using System.Text.Json.Serialization.Metadata;
 namespace SquidStd.Core.Json;
 
 /// <summary>
-/// Provides utility methods for JSON serialization and deserialization.
+///     Provides utility methods for JSON serialization and deserialization.
 /// </summary>
 public static class JsonUtils
 {
@@ -27,7 +27,7 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Adds a JSON converter to the global converter list. Thread-safe.
+    ///     Adds a JSON converter to the global converter list. Thread-safe.
     /// </summary>
     /// <param name="converter">The converter to add.</param>
     public static void AddJsonConverter(JsonConverter converter)
@@ -47,18 +47,17 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Deserializes a JSON string to an object using global options.
+    ///     Deserializes a JSON string to an object using global options.
     /// </summary>
     /// <typeparam name="T">The type to deserialize to.</typeparam>
     /// <param name="json">The JSON string to deserialize.</param>
     /// <returns>Deserialized object.</returns>
     [RequiresUnreferencedCode(
-         "JSON deserialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
-     ),
-     RequiresDynamicCode(
-         "JSON deserialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
-     )]
-
+        "JSON deserialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
+    )]
+    [RequiresDynamicCode(
+        "JSON deserialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
+    )]
     /// <summary>
     /// Deserializes a JSON string to an object using global options.
     /// </summary>
@@ -81,7 +80,7 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Deserializes a JSON string to an object using a JsonSerializerContext.
+    ///     Deserializes a JSON string to an object using a JsonSerializerContext.
     /// </summary>
     /// <typeparam name="T">The type to deserialize to.</typeparam>
     /// <param name="json">The JSON string to deserialize.</param>
@@ -106,18 +105,17 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Deserializes an object from a JSON file.
+    ///     Deserializes an object from a JSON file.
     /// </summary>
     /// <typeparam name="T">The type to deserialize to.</typeparam>
     /// <param name="filePath">Path to the JSON file.</param>
     /// <returns>Deserialized object.</returns>
     [RequiresUnreferencedCode(
-         "JSON deserialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
-     ),
-     RequiresDynamicCode(
-         "JSON deserialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
-     )]
-
+        "JSON deserialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
+    )]
+    [RequiresDynamicCode(
+        "JSON deserialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
+    )]
     /// <summary>
     /// Deserializes an object from a JSON file.
     /// </summary>
@@ -148,7 +146,7 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Deserializes an object from a JSON file using a JsonSerializerContext.
+    ///     Deserializes an object from a JSON file using a JsonSerializerContext.
     /// </summary>
     /// <typeparam name="T">The type to deserialize to.</typeparam>
     /// <param name="filePath">Path to the JSON file.</param>
@@ -171,8 +169,8 @@ public static class JsonUtils
             var json = File.ReadAllText(normalizedPath);
 
             return JsonSerializer.Deserialize(json, context.GetTypeInfo(typeof(T))) is T typedResult
-                       ? typedResult
-                       : throw new JsonException($"Deserialization returned null for type {typeof(T).Name}");
+                ? typedResult
+                : throw new JsonException($"Deserialization returned null for type {typeof(T).Name}");
         }
         catch (JsonException ex)
         {
@@ -188,19 +186,18 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Deserializes an object from a JSON file asynchronously.
+    ///     Deserializes an object from a JSON file asynchronously.
     /// </summary>
     /// <typeparam name="T">The type to deserialize to.</typeparam>
     /// <param name="filePath">Path to the JSON file.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Deserialized object.</returns>
     [RequiresUnreferencedCode(
-         "JSON deserialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
-     ),
-     RequiresDynamicCode(
-         "JSON deserialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
-     )]
-
+        "JSON deserialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
+    )]
+    [RequiresDynamicCode(
+        "JSON deserialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
+    )]
     /// <summary>
     /// Deserializes an object from a JSON file asynchronously.
     /// </summary>
@@ -232,19 +229,18 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Deserializes an object from a stream asynchronously.
+    ///     Deserializes an object from a stream asynchronously.
     /// </summary>
     /// <typeparam name="T">The type to deserialize to.</typeparam>
     /// <param name="stream">The stream containing JSON data.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Deserialized object.</returns>
     [RequiresUnreferencedCode(
-         "JSON deserialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
-     ),
-     RequiresDynamicCode(
-         "JSON deserialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
-     )]
-
+        "JSON deserialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
+    )]
+    [RequiresDynamicCode(
+        "JSON deserialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
+    )]
     /// <summary>
     /// Deserializes an object from a stream asynchronously.
     /// </summary>
@@ -259,7 +255,7 @@ public static class JsonUtils
         try
         {
             var result = await JsonSerializer.DeserializeAsync<T>(stream, GetJsonSerializerOptions(), cancellationToken)
-                                             .ConfigureAwait(false);
+                .ConfigureAwait(false);
 
             return result ?? throw new JsonException($"Deserialization returned null for type {typeof(T).Name}");
         }
@@ -270,19 +266,18 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Deserializes a JSON string to an object with fallback value.
+    ///     Deserializes a JSON string to an object with fallback value.
     /// </summary>
     /// <typeparam name="T">The type to deserialize to.</typeparam>
     /// <param name="json">The JSON string to deserialize.</param>
     /// <param name="defaultValue">Default value if deserialization fails.</param>
     /// <returns>Deserialized object or default value.</returns>
     [RequiresUnreferencedCode(
-         "JSON deserialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
-     ),
-     RequiresDynamicCode(
-         "JSON deserialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
-     )]
-
+        "JSON deserialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
+    )]
+    [RequiresDynamicCode(
+        "JSON deserialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
+    )]
     /// <summary>
     /// Deserializes a JSON string to an object with fallback value.
     /// </summary>
@@ -308,7 +303,7 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Gets a read-only view of the current JSON converters.
+    ///     Gets a read-only view of the current JSON converters.
     /// </summary>
     /// <returns>A read-only list of JSON converters.</returns>
     public static IReadOnlyList<JsonConverter> GetJsonConverters()
@@ -321,13 +316,15 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Gets the current JSON serializer options. Thread-safe.
+    ///     Gets the current JSON serializer options. Thread-safe.
     /// </summary>
     public static JsonSerializerOptions GetJsonSerializerOptions()
-        => _jsonSerializerOptions ?? throw new InvalidOperationException("JsonSerializerOptions not initialized");
+    {
+        return _jsonSerializerOptions ?? throw new InvalidOperationException("JsonSerializerOptions not initialized");
+    }
 
     /// <summary>
-    /// Gets cached JSON serializer options combined with a context resolver. Thread-safe.
+    ///     Gets cached JSON serializer options combined with a context resolver. Thread-safe.
     /// </summary>
     public static JsonSerializerOptions GetJsonSerializerOptions(JsonSerializerContext context)
     {
@@ -339,7 +336,7 @@ public static class JsonUtils
             {
                 var baseOptions = GetJsonSerializerOptions();
 
-                return new(baseOptions)
+                return new JsonSerializerOptions(baseOptions)
                 {
                     TypeInfoResolver = JsonTypeInfoResolver.Combine(context, baseOptions.TypeInfoResolver)
                 };
@@ -348,7 +345,7 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Generates a schema file name for the given type using snake_case convention.
+    ///     Generates a schema file name for the given type using snake_case convention.
     /// </summary>
     /// <param name="type">The type to generate a schema name for.</param>
     /// <returns>A schema file name in the format "type_name.schema.json".</returns>
@@ -371,7 +368,7 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Determines if a JSON string represents an array.
+    ///     Determines if a JSON string represents an array.
     /// </summary>
     /// <param name="json">The JSON string to analyze.</param>
     /// <returns>True if the JSON represents an array, false otherwise.</returns>
@@ -395,7 +392,7 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Determines if a JSON file contains an array.
+    ///     Determines if a JSON file contains an array.
     /// </summary>
     /// <param name="filePath">Path to the JSON file to analyze.</param>
     /// <returns>True if the JSON file contains an array, false otherwise.</returns>
@@ -423,7 +420,7 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Validates if a string is valid JSON without deserializing.
+    ///     Validates if a string is valid JSON without deserializing.
     /// </summary>
     /// <param name="json">The JSON string to validate.</param>
     /// <returns>True if valid JSON, false otherwise.</returns>
@@ -447,7 +444,7 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Registers a JSON serializer context for source generation. Thread-safe.
+    ///     Registers a JSON serializer context for source generation. Thread-safe.
     /// </summary>
     /// <param name="context">The context to register.</param>
     public static void RegisterJsonContext(JsonSerializerContext context)
@@ -459,7 +456,7 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Removes all converters of the specified type. Thread-safe.
+    ///     Removes all converters of the specified type. Thread-safe.
     /// </summary>
     /// <typeparam name="T">The converter type to remove.</typeparam>
     /// <returns>True if any converters were removed.</returns>
@@ -497,18 +494,17 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Serializes an object to JSON string using global options.
+    ///     Serializes an object to JSON string using global options.
     /// </summary>
     /// <typeparam name="T">The type to serialize.</typeparam>
     /// <param name="obj">The object to serialize.</param>
     /// <returns>JSON string representation.</returns>
     [RequiresUnreferencedCode(
-         "JSON serialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
-     ),
-     RequiresDynamicCode(
-         "JSON serialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
-     )]
-
+        "JSON serialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
+    )]
+    [RequiresDynamicCode(
+        "JSON serialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
+    )]
     /// <summary>
     /// Serializes an object to JSON string using global options.
     /// </summary>
@@ -530,19 +526,18 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Serializes an object to JSON string using custom options.
+    ///     Serializes an object to JSON string using custom options.
     /// </summary>
     /// <typeparam name="T">The type to serialize.</typeparam>
     /// <param name="obj">The object to serialize.</param>
     /// <param name="options">Custom serialization options.</param>
     /// <returns>JSON string representation.</returns>
     [RequiresUnreferencedCode(
-         "JSON serialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
-     ),
-     RequiresDynamicCode(
-         "JSON serialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
-     )]
-
+        "JSON serialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
+    )]
+    [RequiresDynamicCode(
+        "JSON serialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
+    )]
     /// <summary>
     /// Serializes an object to JSON string using custom options.
     /// </summary>
@@ -566,18 +561,17 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Serializes multiple objects to JSON files in a directory.
+    ///     Serializes multiple objects to JSON files in a directory.
     /// </summary>
     /// <typeparam name="T">The type to serialize.</typeparam>
     /// <param name="objects">Dictionary of filename to object mappings.</param>
     /// <param name="directory">Target directory path.</param>
     [RequiresUnreferencedCode(
-         "JSON serialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
-     ),
-     RequiresDynamicCode(
-         "JSON serialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
-     )]
-
+        "JSON serialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
+    )]
+    [RequiresDynamicCode(
+        "JSON serialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
+    )]
     /// <summary>
     /// Serializes multiple objects to JSON files in a directory.
     /// </summary>
@@ -610,18 +604,17 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Serializes an object to a JSON file with directory creation.
+    ///     Serializes an object to a JSON file with directory creation.
     /// </summary>
     /// <typeparam name="T">The type to serialize.</typeparam>
     /// <param name="obj">The object to serialize.</param>
     /// <param name="filePath">Path to the output JSON file.</param>
     [RequiresUnreferencedCode(
-         "JSON serialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
-     ),
-     RequiresDynamicCode(
-         "JSON serialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
-     )]
-
+        "JSON serialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
+    )]
+    [RequiresDynamicCode(
+        "JSON serialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
+    )]
     /// <summary>
     /// Serializes an object to a JSON file with directory creation.
     /// </summary>
@@ -653,19 +646,18 @@ public static class JsonUtils
     }
 
     /// <summary>
-    /// Serializes an object to a JSON file asynchronously with directory creation.
+    ///     Serializes an object to a JSON file asynchronously with directory creation.
     /// </summary>
     /// <typeparam name="T">The type to serialize.</typeparam>
     /// <param name="obj">The object to serialize.</param>
     /// <param name="filePath">Path to the output JSON file.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     [RequiresUnreferencedCode(
-         "JSON serialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
-     ),
-     RequiresDynamicCode(
-         "JSON serialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
-     )]
-
+        "JSON serialization may require types that cannot be statically analyzed. Use overload with JsonSerializerContext when possible."
+    )]
+    [RequiresDynamicCode(
+        "JSON serialization may require dynamic code generation. Use overload with JsonSerializerContext when possible."
+    )]
     /// <summary>
     /// Serializes an object to a JSON file asynchronously with directory creation.
     /// </summary>

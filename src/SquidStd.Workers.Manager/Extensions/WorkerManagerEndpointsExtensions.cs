@@ -5,12 +5,12 @@ using SquidStd.Workers.Manager.Endpoints;
 namespace SquidStd.Workers.Manager.Extensions;
 
 /// <summary>
-/// Maps the opt-in worker manager HTTP endpoints.
+///     Maps the opt-in worker manager HTTP endpoints.
 /// </summary>
 public static class WorkerManagerEndpointsExtensions
 {
     /// <summary>
-    /// Maps <c>GET /workers</c>, <c>GET /workers/{id}</c>, and <c>POST /jobs</c>.
+    ///     Maps <c>GET /workers</c>, <c>GET /workers/{id}</c>, and <c>POST /jobs</c>.
     /// </summary>
     public static IEndpointRouteBuilder MapWorkerManagerEndpoints(this IEndpointRouteBuilder endpoints)
     {

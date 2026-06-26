@@ -7,46 +7,6 @@ namespace SquidStd.Tests.Search;
 
 public class ElasticExpressionTranslatorTests
 {
-    private sealed record Doc(string Status, int Total, string Name) : IIndexableEntity
-    {
-        public string IndexId => Name;
-    }
-
-    private sealed class TranslateOnlyQueryable<T> : IOrderedQueryable<T>, IQueryProvider
-    {
-        public TranslateOnlyQueryable()
-        {
-            Expression = Expression.Constant(this);
-        }
-
-        private TranslateOnlyQueryable(Expression expression)
-        {
-            Expression = expression;
-        }
-
-        public Type ElementType => typeof(T);
-        public Expression Expression { get; }
-        public IQueryProvider Provider => this;
-
-        public IQueryable CreateQuery(Expression expression)
-            => new TranslateOnlyQueryable<T>(expression);
-
-        public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
-            => new TranslateOnlyQueryable<TElement>(expression);
-
-        public object? Execute(Expression expression)
-            => throw new NotSupportedException();
-
-        public TResult Execute<TResult>(Expression expression)
-            => throw new NotSupportedException();
-
-        public IEnumerator<T> GetEnumerator()
-            => throw new NotSupportedException();
-
-        IEnumerator IEnumerable.GetEnumerator()
-            => throw new NotSupportedException();
-    }
-
     [Fact]
     public void Match_ProducesMatchClause()
     {
@@ -58,7 +18,9 @@ public class ElasticExpressionTranslatorTests
 
     [Fact]
     public void UnsupportedExpression_Throws()
-        => Assert.Throws<NotSupportedException>(() => Translate(s => s.Where(d => d.Name.ToUpperInvariant() == "X")));
+    {
+        Assert.Throws<NotSupportedException>(() => Translate(s => s.Where(d => d.Name.ToUpperInvariant() == "X")));
+    }
 
     [Fact]
     public void Where_Equality_ProducesTermOnKeyword()
@@ -87,5 +49,57 @@ public class ElasticExpressionTranslatorTests
         var query = build(root);
 
         return ElasticExpressionTranslator.Translate(query.Expression, typeof(Doc));
+    }
+
+    private sealed record Doc(string Status, int Total, string Name) : IIndexableEntity
+    {
+        public string IndexId => Name;
+    }
+
+    private sealed class TranslateOnlyQueryable<T> : IOrderedQueryable<T>, IQueryProvider
+    {
+        public TranslateOnlyQueryable()
+        {
+            Expression = Expression.Constant(this);
+        }
+
+        private TranslateOnlyQueryable(Expression expression)
+        {
+            Expression = expression;
+        }
+
+        public Type ElementType => typeof(T);
+        public Expression Expression { get; }
+        public IQueryProvider Provider => this;
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            throw new NotSupportedException();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotSupportedException();
+        }
+
+        public IQueryable CreateQuery(Expression expression)
+        {
+            return new TranslateOnlyQueryable<T>(expression);
+        }
+
+        public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
+        {
+            return new TranslateOnlyQueryable<TElement>(expression);
+        }
+
+        public object? Execute(Expression expression)
+        {
+            throw new NotSupportedException();
+        }
+
+        public TResult Execute<TResult>(Expression expression)
+        {
+            throw new NotSupportedException();
+        }
     }
 }

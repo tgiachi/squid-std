@@ -139,7 +139,7 @@ public class SessionManagerTests
     {
         var timeout = TimeSpan.FromSeconds(5);
 
-        await using var server = new SquidTcpServer(new(IPAddress.Loopback, 0));
+        await using var server = new SquidTcpServer(new IPEndPoint(IPAddress.Loopback, 0));
         using var manager = NewManager(server);
 
         var created = new TaskCompletionSource<Session<string>>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -152,7 +152,7 @@ public class SessionManagerTests
         await server.StartAsync(CancellationToken.None);
         var port = server.Port;
 
-        var client = await SquidStdTcpClient.ConnectAsync(new(IPAddress.Loopback, port));
+        var client = await SquidStdTcpClient.ConnectAsync(new IPEndPoint(IPAddress.Loopback, port));
 
         var session = await created.Task.WaitAsync(timeout);
         Assert.Equal(1, manager.Count);
@@ -216,8 +216,12 @@ public class SessionManagerTests
     }
 
     private static SessionManager<string> NewManager(SquidTcpServer server)
-        => new(server, connection => $"state-{connection.SessionId}");
+    {
+        return new SessionManager<string>(server, connection => $"state-{connection.SessionId}");
+    }
 
     private static SquidTcpServer NewServer()
-        => new(new(IPAddress.Loopback, 0));
+    {
+        return new SquidTcpServer(new IPEndPoint(IPAddress.Loopback, 0));
+    }
 }

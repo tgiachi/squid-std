@@ -1,11 +1,14 @@
+using SquidStd.Abstractions.Attributes;
+using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Core.Interfaces.Jobs;
 using SquidStd.Core.Interfaces.Scheduling;
+using SquidStd.Generators.Events;
 using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 
 var bootstrap = SquidStdBootstrap.Create(
-    new()
+    new SquidStdOptions
     {
         ConfigName = "squidstd",
         RootDirectory = AppContext.BaseDirectory
@@ -13,14 +16,16 @@ var bootstrap = SquidStdBootstrap.Create(
 );
 
 // The cron scheduler and timer wheel are opt-in.
-bootstrap.ConfigureServices(container => container.RegisterSchedulerServices());
+bootstrap.ConfigureServices(container => container
+    .RegisterSchedulerServices()
+    .RegisterGeneratedEventListeners()
+);
 
 await bootstrap.StartAsync();
 
 #region step-1
 
 var eventBus = bootstrap.Resolve<IEventBus>();
-eventBus.RegisterAsyncListener(new PingListener());
 await eventBus.PublishAsync(new PingEvent("hello"), CancellationToken.None);
 
 #endregion
@@ -54,7 +59,8 @@ await bootstrap.StopAsync();
 public sealed record PingEvent(string Message) : IEvent;
 
 /// <summary>Handles <see cref="PingEvent" />.</summary>
-public sealed class PingListener : IAsyncEventListener<PingEvent>
+[RegisterEventListener]
+public sealed class PingListener : IEventListener<PingEvent>
 {
     public Task HandleAsync(PingEvent eventData, CancellationToken cancellationToken)
     {

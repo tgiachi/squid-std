@@ -16,7 +16,9 @@ public class MessagingConnectionStringTests
 
     [Fact]
     public void Parse_NullOrWhitespace_Throws()
-        => Assert.Throws<ArgumentException>(() => MessagingConnectionString.Parse("  "));
+    {
+        Assert.Throws<ArgumentException>(() => MessagingConnectionString.Parse("  "));
+    }
 
     [Fact]
     public void Parse_RabbitMq_ReadsCredentialsHostPortVhost()

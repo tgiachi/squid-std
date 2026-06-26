@@ -11,18 +11,17 @@ using SquidStd.Telemetry.OpenTelemetry.Services;
 namespace SquidStd.Telemetry.OpenTelemetry.Internal;
 
 /// <summary>
-/// Shared OpenTelemetry pipeline configuration, used by both the IContainer and IServiceCollection
-/// registration surfaces. Instrumentation/source configuration is split from exporter configuration so
-/// tests can reuse the production pipeline and append an in-memory exporter.
+///     Shared OpenTelemetry pipeline configuration, used by both the IContainer and IServiceCollection
+///     registration surfaces. Instrumentation/source configuration is split from exporter configuration so
+///     tests can reuse the production pipeline and append an in-memory exporter.
 /// </summary>
 internal static class TelemetryPipeline
 {
     public static void AddMetricExporters(MeterProviderBuilder builder, TelemetryOptions options)
     {
-        builder.AddOtlpExporter(
-            o =>
+        builder.AddOtlpExporter(o =>
             {
-                o.Endpoint = new(options.OtlpEndpoint);
+                o.Endpoint = new Uri(options.OtlpEndpoint);
                 o.Protocol = Map(options.OtlpProtocol);
             }
         );
@@ -35,10 +34,9 @@ internal static class TelemetryPipeline
 
     public static void AddTraceExporters(TracerProviderBuilder builder, TelemetryOptions options)
     {
-        builder.AddOtlpExporter(
-            o =>
+        builder.AddOtlpExporter(o =>
             {
-                o.Endpoint = new(options.OtlpEndpoint);
+                o.Endpoint = new Uri(options.OtlpEndpoint);
                 o.Protocol = Map(options.OtlpProtocol);
             }
         );
@@ -66,10 +64,12 @@ internal static class TelemetryPipeline
     }
 
     public static void ConfigureMetrics(MeterProviderBuilder builder, TelemetryOptions options)
-        => builder
-           .SetResourceBuilder(BuildResource(options))
-           .AddRuntimeInstrumentation()
-           .AddMeter(MetricsSnapshotBridge.MeterName);
+    {
+        builder
+            .SetResourceBuilder(BuildResource(options))
+            .AddRuntimeInstrumentation()
+            .AddMeter(MetricsSnapshotBridge.MeterName);
+    }
 
     public static void ConfigureTracing(TracerProviderBuilder builder, TelemetryOptions options, bool includeAspNetCore)
     {
@@ -87,5 +87,7 @@ internal static class TelemetryPipeline
     }
 
     public static OtlpExportProtocol Map(OtlpProtocolType protocol)
-        => protocol == OtlpProtocolType.HttpProtobuf ? OtlpExportProtocol.HttpProtobuf : OtlpExportProtocol.Grpc;
+    {
+        return protocol == OtlpProtocolType.HttpProtobuf ? OtlpExportProtocol.HttpProtobuf : OtlpExportProtocol.Grpc;
+    }
 }

@@ -10,8 +10,8 @@ namespace SquidStd.Mail.Queue.Extensions;
 public static class MailQueueRegistrationExtensions
 {
     /// <summary>
-    /// Registers the mail queue and its background consumer. Requires <c>IMessageQueue</c> (messaging) and
-    /// <c>IMailSender</c> (the SMTP sender) to be registered already.
+    ///     Registers the mail queue and its background consumer. Requires <c>IMessageQueue</c> (messaging) and
+    ///     <c>IMailSender</c> (the SMTP sender) to be registered already.
     /// </summary>
     public static IContainer AddMailQueue(this IContainer container, MailQueueOptions? options = null)
     {

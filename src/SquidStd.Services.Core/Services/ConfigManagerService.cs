@@ -9,7 +9,7 @@ using SquidStd.Core.Yaml;
 namespace SquidStd.Services.Core.Services;
 
 /// <summary>
-/// Loads YAML configuration sections and registers them into DryIoc.
+///     Loads YAML configuration sections and registers them into DryIoc.
 /// </summary>
 public sealed class ConfigManagerService : IConfigManagerService, ISquidStdService
 {
@@ -17,20 +17,8 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
     private readonly Dictionary<Type, object> _values = [];
     private int _started;
 
-    /// <inheritdoc />
-    public string ConfigName { get; }
-
-    /// <inheritdoc />
-    public string ConfigDirectory { get; }
-
-    /// <inheritdoc />
-    public string ConfigPath { get; }
-
-    /// <inheritdoc />
-    public IReadOnlyCollection<IConfigEntry> Entries => GetEntries();
-
     /// <summary>
-    /// Initializes the config manager service.
+    ///     Initializes the config manager service.
     /// </summary>
     /// <param name="container">Container that receives loaded configuration sections.</param>
     /// <param name="configName">Logical configuration name or YAML file name.</param>
@@ -47,12 +35,28 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
     }
 
     /// <inheritdoc />
+    public string ConfigName { get; }
+
+    /// <inheritdoc />
+    public string ConfigDirectory { get; }
+
+    /// <inheritdoc />
+    public string ConfigPath { get; }
+
+    /// <inheritdoc />
+    public IReadOnlyCollection<IConfigEntry> Entries => GetEntries();
+
+    /// <inheritdoc />
     public string Compose()
-        => YamlUtils.SerializeSections(BuildSectionMap());
+    {
+        return YamlUtils.SerializeSections(BuildSectionMap());
+    }
 
     /// <inheritdoc />
     public TConfig GetConfig<TConfig>() where TConfig : class
-        => _container.Resolve<TConfig>();
+    {
+        return _container.Resolve<TConfig>();
+    }
 
     /// <inheritdoc />
     public void Load()
@@ -66,11 +70,11 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
         {
             var entry = entries[i];
             var value = string.IsNullOrWhiteSpace(yaml)
-                            ? entry.CreateDefault()
-                            : YamlUtils.DeserializeSection(yaml, entry.SectionName, entry.ConfigType) ??
-                              entry.CreateDefault();
+                ? entry.CreateDefault()
+                : YamlUtils.DeserializeSection(yaml, entry.SectionName, entry.ConfigType) ??
+                  entry.CreateDefault();
 
-            ApplyEnvSubstitution(value, new(ReferenceEqualityComparer.Instance));
+            ApplyEnvSubstitution(value, new HashSet<object>(ReferenceEqualityComparer.Instance));
 
             _values[entry.ConfigType] = value;
             _container.RegisterInstance(entry.ConfigType, value, IfAlreadyRegistered.Replace);
@@ -84,7 +88,9 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
 
     /// <inheritdoc />
     public void Save()
-        => YamlUtils.SerializeToFile(BuildSectionMap(), ConfigPath);
+    {
+        YamlUtils.SerializeToFile(BuildSectionMap(), ConfigPath);
+    }
 
     /// <inheritdoc />
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
@@ -170,7 +176,9 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
     }
 
     private IReadOnlyCollection<IConfigEntry> GetEntries()
-        => GetRegistrations().Cast<IConfigEntry>().ToArray();
+    {
+        return GetRegistrations().Cast<IConfigEntry>().ToArray();
+    }
 
     private List<ConfigRegistrationData> GetRegistrations()
     {
@@ -182,8 +190,8 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
         return
         [
             .. _container.Resolve<List<ConfigRegistrationData>>()
-                         .OrderBy(entry => entry.Priority)
-                         .ThenBy(entry => entry.SectionName, StringComparer.Ordinal)
+                .OrderBy(entry => entry.Priority)
+                .ThenBy(entry => entry.SectionName, StringComparer.Ordinal)
         ];
     }
 

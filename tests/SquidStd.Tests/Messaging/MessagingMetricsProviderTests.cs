@@ -21,7 +21,9 @@ public class MessagingMetricsProviderTests
         var samples = await metrics.CollectAsync();
 
         double Value(string name)
-            => samples.Single(s => s.Name == name && s.Tags != null && s.Tags["queue"] == "orders").Value;
+        {
+            return samples.Single(s => s.Name == name && s.Tags != null && s.Tags["queue"] == "orders").Value;
+        }
 
         Assert.Equal(2, Value("published"));
         Assert.Equal(1, Value("delivered"));
@@ -34,5 +36,7 @@ public class MessagingMetricsProviderTests
 
     [Fact]
     public void ProviderName_IsMessaging()
-        => Assert.Equal("messaging", new MessagingMetricsProvider().ProviderName);
+    {
+        Assert.Equal("messaging", new MessagingMetricsProvider().ProviderName);
+    }
 }

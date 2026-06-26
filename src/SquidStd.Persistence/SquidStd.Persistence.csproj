@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PublishNuget>true</PublishNuget>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\SquidStd.Persistence.Abstractions\SquidStd.Persistence.Abstractions.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="DryIoc.dll" Version="5.4.3"/>
+        <PackageReference Include="Serilog" Version="4.3.1"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="SquidStd.Tests"/>
+    </ItemGroup>
+
+</Project>

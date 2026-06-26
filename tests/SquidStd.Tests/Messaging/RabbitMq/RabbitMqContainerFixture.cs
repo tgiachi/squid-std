@@ -3,7 +3,7 @@ using Testcontainers.RabbitMq;
 namespace SquidStd.Tests.Messaging.RabbitMq;
 
 /// <summary>
-/// Starts a RabbitMQ container once for the whole collection and exposes its AMQP URI.
+///     Starts a RabbitMQ container once for the whole collection and exposes its AMQP URI.
 /// </summary>
 public sealed class RabbitMqContainerFixture : IAsyncLifetime
 {
@@ -12,10 +12,14 @@ public sealed class RabbitMqContainerFixture : IAsyncLifetime
     public string AmqpUri => _container.GetConnectionString();
 
     public Task DisposeAsync()
-        => _container.DisposeAsync().AsTask();
+    {
+        return _container.DisposeAsync().AsTask();
+    }
 
     public Task InitializeAsync()
-        => _container.StartAsync();
+    {
+        return _container.StartAsync();
+    }
 }
 
 [CollectionDefinition(Name)]

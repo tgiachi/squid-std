@@ -44,5 +44,7 @@ public static class OutgoingMessageMapper
     }
 
     private static MailboxAddress ToMailbox(MailAddress address)
-        => new(address.Name, address.Address);
+    {
+        return new MailboxAddress(address.Name, address.Address);
+    }
 }

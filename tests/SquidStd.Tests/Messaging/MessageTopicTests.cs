@@ -7,11 +7,6 @@ namespace SquidStd.Tests.Messaging;
 
 public class MessageTopicTests
 {
-    private sealed class Ping
-    {
-        public string Source { get; set; } = "";
-    }
-
     [Fact]
     public async Task PublishSubscribe_RoundTripsTypedMessage()
     {
@@ -33,5 +28,10 @@ public class MessageTopicTests
 
         var got = await received.Task.WaitAsync(TimeSpan.FromSeconds(5));
         Assert.Equal("w1", got.Source);
+    }
+
+    private sealed class Ping
+    {
+        public string Source { get; set; } = "";
     }
 }

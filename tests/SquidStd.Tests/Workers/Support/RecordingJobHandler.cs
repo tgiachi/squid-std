@@ -4,8 +4,8 @@ using SquidStd.Workers.Interfaces;
 namespace SquidStd.Tests.Workers.Support;
 
 /// <summary>
-/// Configurable <see cref="IJobHandler" /> for tests: records the jobs it received and can be told
-/// to throw, or to block until released, so concurrency and error paths can be exercised.
+///     Configurable <see cref="IJobHandler" /> for tests: records the jobs it received and can be told
+///     to throw, or to block until released, so concurrency and error paths can be exercised.
 /// </summary>
 public sealed class RecordingJobHandler : IJobHandler
 {
@@ -16,8 +16,6 @@ public sealed class RecordingJobHandler : IJobHandler
     {
         JobName = jobName;
     }
-
-    public string JobName { get; }
 
     public Exception? ThrowOnHandle { get; set; }
 
@@ -34,6 +32,8 @@ public sealed class RecordingJobHandler : IJobHandler
             }
         }
     }
+
+    public string JobName { get; }
 
     public async Task HandleAsync(JobRequest job, CancellationToken cancellationToken)
     {

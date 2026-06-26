@@ -1,6 +1,7 @@
 using DryIoc;
 using SquidStd.Search.Abstractions.Attributes;
 using SquidStd.Search.Abstractions.Interfaces;
+using SquidStd.Search.Elasticsearch.Data.Config;
 using SquidStd.Search.Elasticsearch.Extensions;
 using SquidStd.Search.Elasticsearch.Linq;
 
@@ -16,18 +17,6 @@ public class ElasticSearchServiceTests
     public ElasticSearchServiceTests(ElasticsearchContainerFixture fixture)
     {
         _fixture = fixture;
-    }
-
-    [SearchIndex("it_orders")]
-    private sealed record Order(string Id, string Status, int Total, string Name) : IIndexableEntity
-    {
-        public string IndexId => Id;
-    }
-
-    [SearchIndex("it_unused_index")]
-    private sealed record UnusedDoc(string Id, string Status) : IIndexableEntity
-    {
-        public string IndexId => Id;
     }
 
     [Fact]
@@ -97,16 +86,16 @@ public class ElasticSearchServiceTests
     {
         var search = NewService();
         await search.IndexManyAsync(
-                        [new("a", "open", 50, "A"), new("b", "open", 200, "B"), new Order("c", "open", 300, "C")],
-                        true
-                    )
-                    .WaitAsync(Timeout);
+                [new Order("a", "open", 50, "A"), new Order("b", "open", 200, "B"), new Order("c", "open", 300, "C")],
+                true
+            )
+            .WaitAsync(Timeout);
 
         var results = await search.Query<Order>()
-                                  .Where(o => o.Total > 100)
-                                  .OrderByDescending(o => o.Total)
-                                  .Take(1)
-                                  .ToListAsync();
+            .Where(o => o.Total > 100)
+            .OrderByDescending(o => o.Total)
+            .Take(1)
+            .ToListAsync();
 
         Assert.Single(results);
         Assert.Equal("c", results[0].Id);
@@ -115,8 +104,20 @@ public class ElasticSearchServiceTests
     private ISearchService NewService()
     {
         var container = new Container();
-        container.AddElasticsearch(new() { Uri = new(_fixture.ConnectionString) });
+        container.AddElasticsearch(new ElasticsearchOptions { Uri = new Uri(_fixture.ConnectionString) });
 
         return container.Resolve<ISearchService>();
+    }
+
+    [SearchIndex("it_orders")]
+    private sealed record Order(string Id, string Status, int Total, string Name) : IIndexableEntity
+    {
+        public string IndexId => Id;
+    }
+
+    [SearchIndex("it_unused_index")]
+    private sealed record UnusedDoc(string Id, string Status) : IIndexableEntity
+    {
+        public string IndexId => Id;
     }
 }

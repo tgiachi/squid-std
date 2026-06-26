@@ -15,9 +15,9 @@ using SquidStd.Workers.Services;
 namespace SquidStd.Tests.Integration.Workers;
 
 /// <summary>
-/// End-to-end test of the workers system over a real RabbitMQ broker (Testcontainers): the manager
-/// enqueues a job that the worker consumes and runs (real queue), and the worker's heartbeat reaches the
-/// manager's registry (real fan-out topic).
+///     End-to-end test of the workers system over a real RabbitMQ broker (Testcontainers): the manager
+///     enqueues a job that the worker consumes and runs (real queue), and the worker's heartbeat reaches the
+///     manager's registry (real fan-out topic).
 /// </summary>
 [Collection(RabbitMqCollection.Name)]
 public class WorkerSystemIntegrationTests
@@ -31,32 +31,12 @@ public class WorkerSystemIntegrationTests
         _fixture = fixture;
     }
 
-    private sealed class CapturingJobHandler : IJobHandler
-    {
-        private readonly TaskCompletionSource<JobRequest> _completion;
-
-        public CapturingJobHandler(string jobName, TaskCompletionSource<JobRequest> completion)
-        {
-            JobName = jobName;
-            _completion = completion;
-        }
-
-        public string JobName { get; }
-
-        public Task HandleAsync(JobRequest job, CancellationToken cancellationToken)
-        {
-            _completion.TrySetResult(job);
-
-            return Task.CompletedTask;
-        }
-    }
-
     [Fact]
     public async Task Manager_EnqueuesJob_WorkerRunsIt_AndHeartbeatReachesRegistry()
     {
         using var container = new Container();
         container.RegisterInstance<IEventBus>(new EventBusService());
-        container.AddRabbitMqMessaging(new RabbitMqOptions { Uri = new(_fixture.AmqpUri) });
+        container.AddRabbitMqMessaging(new RabbitMqOptions { Uri = new Uri(_fixture.AmqpUri) });
 
         // Unique channel names per run so parallel/other tests on the shared broker do not interfere.
         var suffix = Guid.NewGuid().ToString("N");
@@ -149,5 +129,25 @@ public class WorkerSystemIntegrationTests
         }
 
         return null;
+    }
+
+    private sealed class CapturingJobHandler : IJobHandler
+    {
+        private readonly TaskCompletionSource<JobRequest> _completion;
+
+        public CapturingJobHandler(string jobName, TaskCompletionSource<JobRequest> completion)
+        {
+            JobName = jobName;
+            _completion = completion;
+        }
+
+        public string JobName { get; }
+
+        public Task HandleAsync(JobRequest job, CancellationToken cancellationToken)
+        {
+            _completion.TrySetResult(job);
+
+            return Task.CompletedTask;
+        }
     }
 }

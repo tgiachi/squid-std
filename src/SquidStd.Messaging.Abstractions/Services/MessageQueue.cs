@@ -4,14 +4,14 @@ using SquidStd.Messaging.Abstractions.Interfaces;
 namespace SquidStd.Messaging.Abstractions.Services;
 
 /// <summary>
-/// Typed facade over an <see cref="IQueueProvider" />: serializes outgoing messages and
-/// deserializes incoming payloads before handing them to typed listeners.
+///     Typed facade over an <see cref="IQueueProvider" />: serializes outgoing messages and
+///     deserializes incoming payloads before handing them to typed listeners.
 /// </summary>
 public sealed class MessageQueue : IMessageQueue
 {
+    private readonly IDataDeserializer _deserializer;
     private readonly IQueueProvider _provider;
     private readonly IDataSerializer _serializer;
-    private readonly IDataDeserializer _deserializer;
 
     public MessageQueue(IQueueProvider provider, IDataSerializer serializer, IDataDeserializer deserializer)
     {
@@ -22,7 +22,9 @@ public sealed class MessageQueue : IMessageQueue
 
     /// <inheritdoc />
     public Task PublishAsync<TMessage>(string queueName, TMessage message, CancellationToken cancellationToken = default)
-        => _provider.PublishAsync(queueName, _serializer.Serialize(message), cancellationToken);
+    {
+        return _provider.PublishAsync(queueName, _serializer.Serialize(message), cancellationToken);
+    }
 
     /// <inheritdoc />
     public IDisposable Subscribe<TMessage>(string queueName, IQueueMessageListener<TMessage> listener)

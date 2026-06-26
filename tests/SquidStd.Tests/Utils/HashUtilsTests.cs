@@ -4,9 +4,14 @@ namespace SquidStd.Tests.Utils;
 
 public class HashUtilsTests
 {
-    [Theory, InlineData(""), InlineData("   "), InlineData(null)]
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
     public void HashPassword_NullOrWhitespace_Throws(string? password)
-        => Assert.Throws<ArgumentException>(() => HashUtils.HashPassword(password!));
+    {
+        Assert.Throws<ArgumentException>(() => HashUtils.HashPassword(password!));
+    }
 
     [Fact]
     public void HashPassword_SamePasswordTwice_ProducesDifferentHashes()
@@ -39,15 +44,25 @@ public class HashUtilsTests
         Assert.True(HashUtils.VerifyPassword("s3cret", hash));
     }
 
-    [Theory, InlineData("not-a-hash"), InlineData("md5$100000$c2FsdA==$aGFzaA=="),
-     InlineData("pbkdf2-sha256$abc$c2FsdA==$aGFzaA=="), InlineData("pbkdf2-sha256$0$c2FsdA==$aGFzaA=="),
-     InlineData("pbkdf2-sha256$100000$not-base64$aGFzaA==")]
+    [Theory]
+    [InlineData("not-a-hash")]
+    [InlineData("md5$100000$c2FsdA==$aGFzaA==")]
+    [InlineData("pbkdf2-sha256$abc$c2FsdA==$aGFzaA==")]
+    [InlineData("pbkdf2-sha256$0$c2FsdA==$aGFzaA==")]
+    [InlineData("pbkdf2-sha256$100000$not-base64$aGFzaA==")]
     public void VerifyPassword_MalformedStoredHash_ReturnsFalse(string storedHash)
-        => Assert.False(HashUtils.VerifyPassword("s3cret", storedHash));
+    {
+        Assert.False(HashUtils.VerifyPassword("s3cret", storedHash));
+    }
 
-    [Theory, InlineData(""), InlineData("   "), InlineData(null)]
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
     public void VerifyPassword_NullOrWhitespacePassword_ReturnsFalse(string? password)
-        => Assert.False(HashUtils.VerifyPassword(password!, "pbkdf2-sha256$100000$c2FsdA==$aGFzaA=="));
+    {
+        Assert.False(HashUtils.VerifyPassword(password!, "pbkdf2-sha256$100000$c2FsdA==$aGFzaA=="));
+    }
 
     [Fact]
     public void VerifyPassword_WrongPassword_ReturnsFalse()

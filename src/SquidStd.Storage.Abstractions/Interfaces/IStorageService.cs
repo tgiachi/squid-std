@@ -1,12 +1,12 @@
 namespace SquidStd.Storage.Abstractions.Interfaces;
 
 /// <summary>
-/// Stores binary payloads by logical key.
+///     Stores binary payloads by logical key.
 /// </summary>
 public interface IStorageService
 {
     /// <summary>
-    /// Deletes a stored payload.
+    ///     Deletes a stored payload.
     /// </summary>
     /// <param name="key">The logical storage key.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
@@ -14,7 +14,7 @@ public interface IStorageService
     ValueTask<bool> DeleteAsync(string key, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Checks whether a payload exists.
+    ///     Checks whether a payload exists.
     /// </summary>
     /// <param name="key">The logical storage key.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
@@ -22,7 +22,7 @@ public interface IStorageService
     ValueTask<bool> ExistsAsync(string key, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Enumerates stored keys, optionally filtered by prefix.
+    ///     Enumerates stored keys, optionally filtered by prefix.
     /// </summary>
     /// <param name="prefix">Optional key prefix; <c>null</c> or empty returns all keys.</param>
     /// <param name="cancellationToken">Token used to cancel the enumeration.</param>
@@ -30,7 +30,7 @@ public interface IStorageService
     IAsyncEnumerable<string> ListKeysAsync(string? prefix = null, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Loads a binary payload.
+    ///     Loads a binary payload.
     /// </summary>
     /// <param name="key">The logical storage key.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
@@ -38,7 +38,7 @@ public interface IStorageService
     ValueTask<byte[]?> LoadAsync(string key, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Saves a binary payload atomically.
+    ///     Saves a binary payload atomically.
     /// </summary>
     /// <param name="key">The logical storage key.</param>
     /// <param name="data">The payload to store.</param>

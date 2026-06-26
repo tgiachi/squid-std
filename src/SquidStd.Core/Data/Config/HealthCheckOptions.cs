@@ -1,7 +1,7 @@
 namespace SquidStd.Core.Data.Config;
 
 /// <summary>
-/// Options for the health-check aggregator.
+///     Options for the health-check aggregator.
 /// </summary>
 public sealed class HealthCheckOptions
 {

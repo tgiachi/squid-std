@@ -10,22 +10,22 @@ using SquidStd.Messaging.RabbitMq.Data.Config;
 namespace SquidStd.Messaging.RabbitMq.Services;
 
 /// <summary>
-/// RabbitMQ <see cref="IQueueProvider" />: named queues map to quorum queues with a delivery limit
-/// and a dead-letter exchange; round-robin is the broker's native competing-consumers behaviour.
+///     RabbitMQ <see cref="IQueueProvider" />: named queues map to quorum queues with a delivery limit
+///     and a dead-letter exchange; round-robin is the broker's native competing-consumers behaviour.
 /// </summary>
 public sealed class RabbitMqQueueProvider : IQueueProvider
 {
+    private readonly HashSet<string> _declared = new(StringComparer.Ordinal);
     private readonly ILogger _logger = Log.ForContext<RabbitMqQueueProvider>();
-    private readonly RabbitMqOptions _options;
     private readonly MessagingOptions _messagingOptions;
     private readonly IMessagingMetrics _metrics;
+    private readonly RabbitMqOptions _options;
     private readonly SemaphoreSlim _publishLock = new(1, 1);
-    private readonly Lock _topologySync = new();
-    private readonly HashSet<string> _declared = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, int> _subscriberCounts = new(StringComparer.Ordinal);
+    private readonly Lock _topologySync = new();
     private IConnection? _connection;
-    private IChannel? _publishChannel;
     private int _disposed;
+    private IChannel? _publishChannel;
 
     public RabbitMqQueueProvider(
         RabbitMqOptions options,
@@ -36,94 +36,6 @@ public sealed class RabbitMqQueueProvider : IQueueProvider
         _options = options;
         _messagingOptions = messagingOptions;
         _metrics = metrics ?? NoOpMessagingMetrics.Instance;
-    }
-
-    private sealed class Subscription : IDisposable
-    {
-        private readonly RabbitMqQueueProvider _provider;
-        private readonly IConnection _connection;
-        private readonly string _queueName;
-        private readonly Func<ReadOnlyMemory<byte>, CancellationToken, Task> _handler;
-        private IChannel? _channel;
-        private string? _consumerTag;
-        private int _disposed;
-
-        public Subscription(
-            RabbitMqQueueProvider provider,
-            IConnection connection,
-            string queueName,
-            Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler
-        )
-        {
-            _provider = provider;
-            _connection = connection;
-            _queueName = queueName;
-            _handler = handler;
-        }
-
-        public void Dispose()
-        {
-            if (Interlocked.Exchange(ref _disposed, 1) != 0)
-            {
-                return;
-            }
-
-            if (_channel is not null)
-            {
-                try
-                {
-                    if (_consumerTag is not null)
-                    {
-                        _channel.BasicCancelAsync(_consumerTag).GetAwaiter().GetResult();
-                    }
-
-                    _channel.CloseAsync().GetAwaiter().GetResult();
-                    _channel.DisposeAsync().AsTask().GetAwaiter().GetResult();
-                }
-                catch
-                {
-                    // Best-effort teardown.
-                }
-            }
-
-            _provider._metrics.SetSubscriberCount(
-                _queueName,
-                _provider._subscriberCounts.AddOrUpdate(_queueName, 0, static (_, count) => Math.Max(0, count - 1))
-            );
-        }
-
-        public void Start()
-            => StartAsync().GetAwaiter().GetResult();
-
-        private async Task OnReceivedAsync(object sender, BasicDeliverEventArgs args)
-        {
-            var channel = _channel!;
-
-            try
-            {
-                await _handler(args.Body, CancellationToken.None);
-                await channel.BasicAckAsync(args.DeliveryTag, false);
-                _provider._metrics.OnDelivered(_queueName);
-            }
-            catch (Exception ex)
-            {
-                _provider._logger.Warning(ex, "RabbitMq handler failed for {QueueName}", _queueName);
-                _provider._metrics.OnFailed(_queueName);
-                await channel.BasicNackAsync(args.DeliveryTag, false, true);
-            }
-        }
-
-        private async Task StartAsync()
-        {
-            _channel = await _connection.CreateChannelAsync();
-            await _provider.EnsureTopologyAsync(_channel, _queueName, CancellationToken.None);
-            await _channel.BasicQosAsync(0, _provider._options.PrefetchCount, false);
-
-            var consumer = new AsyncEventingBasicConsumer(_channel);
-            consumer.ReceivedAsync += OnReceivedAsync;
-
-            _consumerTag = await _channel.BasicConsumeAsync(_queueName, false, consumer);
-        }
     }
 
     /// <inheritdoc />
@@ -208,7 +120,9 @@ public sealed class RabbitMqQueueProvider : IQueueProvider
 
     /// <inheritdoc />
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
-        => DisposeAsync();
+    {
+        return DisposeAsync();
+    }
 
     /// <inheritdoc />
     public IDisposable Subscribe(string queueName, Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler)
@@ -274,5 +188,95 @@ public sealed class RabbitMqQueueProvider : IQueueProvider
             },
             cancellationToken: cancellationToken
         );
+    }
+
+    private sealed class Subscription : IDisposable
+    {
+        private readonly IConnection _connection;
+        private readonly Func<ReadOnlyMemory<byte>, CancellationToken, Task> _handler;
+        private readonly RabbitMqQueueProvider _provider;
+        private readonly string _queueName;
+        private IChannel? _channel;
+        private string? _consumerTag;
+        private int _disposed;
+
+        public Subscription(
+            RabbitMqQueueProvider provider,
+            IConnection connection,
+            string queueName,
+            Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler
+        )
+        {
+            _provider = provider;
+            _connection = connection;
+            _queueName = queueName;
+            _handler = handler;
+        }
+
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0)
+            {
+                return;
+            }
+
+            if (_channel is not null)
+            {
+                try
+                {
+                    if (_consumerTag is not null)
+                    {
+                        _channel.BasicCancelAsync(_consumerTag).GetAwaiter().GetResult();
+                    }
+
+                    _channel.CloseAsync().GetAwaiter().GetResult();
+                    _channel.DisposeAsync().AsTask().GetAwaiter().GetResult();
+                }
+                catch
+                {
+                    // Best-effort teardown.
+                }
+            }
+
+            _provider._metrics.SetSubscriberCount(
+                _queueName,
+                _provider._subscriberCounts.AddOrUpdate(_queueName, 0, static (_, count) => Math.Max(0, count - 1))
+            );
+        }
+
+        public void Start()
+        {
+            StartAsync().GetAwaiter().GetResult();
+        }
+
+        private async Task OnReceivedAsync(object sender, BasicDeliverEventArgs args)
+        {
+            var channel = _channel!;
+
+            try
+            {
+                await _handler(args.Body, CancellationToken.None);
+                await channel.BasicAckAsync(args.DeliveryTag, false);
+                _provider._metrics.OnDelivered(_queueName);
+            }
+            catch (Exception ex)
+            {
+                _provider._logger.Warning(ex, "RabbitMq handler failed for {QueueName}", _queueName);
+                _provider._metrics.OnFailed(_queueName);
+                await channel.BasicNackAsync(args.DeliveryTag, false, true);
+            }
+        }
+
+        private async Task StartAsync()
+        {
+            _channel = await _connection.CreateChannelAsync();
+            await _provider.EnsureTopologyAsync(_channel, _queueName, CancellationToken.None);
+            await _channel.BasicQosAsync(0, _provider._options.PrefetchCount, false);
+
+            var consumer = new AsyncEventingBasicConsumer(_channel);
+            consumer.ReceivedAsync += OnReceivedAsync;
+
+            _consumerTag = await _channel.BasicConsumeAsync(_queueName, false, consumer);
+        }
     }
 }

@@ -24,7 +24,9 @@ public sealed class RandomModule
 
     [ScriptFunction("float", "Returns a random floating-point number between 0 and 1.")]
     public double Float()
-        => Random.Shared.NextDouble();
+    {
+        return Random.Shared.NextDouble();
+    }
 
     [ScriptFunction("int", "Returns a random integer in the inclusive range.")]
     public int Int(int min, int max)

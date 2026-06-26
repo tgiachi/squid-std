@@ -76,6 +76,6 @@ public class WorkerHeartbeatServiceTests
         container.RegisterInstance<IEventBus>(new EventBusService());
         container.AddInMemoryMessaging();
 
-        return (container.Resolve<IMessageTopic>(), new(config));
+        return (container.Resolve<IMessageTopic>(), new WorkerState(config));
     }
 }

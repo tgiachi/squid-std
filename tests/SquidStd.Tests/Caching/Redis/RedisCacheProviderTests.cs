@@ -1,4 +1,5 @@
 using System.Text;
+using SquidStd.Caching.Redis.Data.Config;
 using SquidStd.Caching.Redis.Services;
 
 namespace SquidStd.Tests.Caching.Redis;
@@ -56,14 +57,22 @@ public class RedisCacheProviderTests
     }
 
     private static ReadOnlyMemory<byte> Bytes(string s)
-        => Encoding.UTF8.GetBytes(s);
+    {
+        return Encoding.UTF8.GetBytes(s);
+    }
 
     private static string Key()
-        => "k-" + Guid.NewGuid().ToString("N");
+    {
+        return "k-" + Guid.NewGuid().ToString("N");
+    }
 
     private RedisCacheProvider NewProvider()
-        => new(new() { Configuration = _fixture.ConnectionString });
+    {
+        return new RedisCacheProvider(new RedisCacheOptions { Configuration = _fixture.ConnectionString });
+    }
 
     private static string Text(ReadOnlyMemory<byte> b)
-        => Encoding.UTF8.GetString(b.Span);
+    {
+        return Encoding.UTF8.GetString(b.Span);
+    }
 }

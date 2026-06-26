@@ -5,8 +5,8 @@ using SquidStd.Messaging.Abstractions.Interfaces;
 namespace SquidStd.Messaging.Services;
 
 /// <summary>
-/// In-memory <see cref="ITopicProvider" />: fan-out delivery to all current subscribers of a topic.
-/// Transient and at-most-once; exceptions in one subscriber are isolated.
+///     In-memory <see cref="ITopicProvider" />: fan-out delivery to all current subscribers of a topic.
+///     Transient and at-most-once; exceptions in one subscriber are isolated.
 /// </summary>
 public sealed class InMemoryTopicProvider : ITopicProvider
 {
@@ -17,32 +17,6 @@ public sealed class InMemoryTopicProvider : ITopicProvider
         _topics = new(StringComparer.Ordinal);
 
     private int _disposed;
-
-    private sealed class Subscription : IDisposable
-    {
-        private readonly ConcurrentDictionary<Guid, Func<ReadOnlyMemory<byte>, CancellationToken, Task>> _handlers;
-        private readonly Guid _id;
-        private int _disposed;
-
-        public Subscription(
-            ConcurrentDictionary<Guid, Func<ReadOnlyMemory<byte>, CancellationToken, Task>> handlers,
-            Guid id
-        )
-        {
-            _handlers = handlers;
-            _id = id;
-        }
-
-        public void Dispose()
-        {
-            if (Interlocked.Exchange(ref _disposed, 1) != 0)
-            {
-                return;
-            }
-
-            _handlers.TryRemove(_id, out _);
-        }
-    }
 
     /// <inheritdoc />
     public ValueTask DisposeAsync()
@@ -82,11 +56,15 @@ public sealed class InMemoryTopicProvider : ITopicProvider
 
     /// <inheritdoc />
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
-        => ValueTask.CompletedTask;
+    {
+        return ValueTask.CompletedTask;
+    }
 
     /// <inheritdoc />
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
-        => DisposeAsync();
+    {
+        return DisposeAsync();
+    }
 
     /// <inheritdoc />
     public IDisposable Subscribe(string topic, Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler)
@@ -94,10 +72,39 @@ public sealed class InMemoryTopicProvider : ITopicProvider
         ArgumentException.ThrowIfNullOrWhiteSpace(topic);
         ArgumentNullException.ThrowIfNull(handler);
 
-        var handlers = _topics.GetOrAdd(topic, static _ => new());
+        var handlers = _topics.GetOrAdd(
+            topic,
+            static _ => new ConcurrentDictionary<Guid, Func<ReadOnlyMemory<byte>, CancellationToken, Task>>()
+        );
         var id = Guid.NewGuid();
         handlers[id] = handler;
 
         return new Subscription(handlers, id);
+    }
+
+    private sealed class Subscription : IDisposable
+    {
+        private readonly ConcurrentDictionary<Guid, Func<ReadOnlyMemory<byte>, CancellationToken, Task>> _handlers;
+        private readonly Guid _id;
+        private int _disposed;
+
+        public Subscription(
+            ConcurrentDictionary<Guid, Func<ReadOnlyMemory<byte>, CancellationToken, Task>> handlers,
+            Guid id
+        )
+        {
+            _handlers = handlers;
+            _id = id;
+        }
+
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0)
+            {
+                return;
+            }
+
+            _handlers.TryRemove(_id, out _);
+        }
     }
 }

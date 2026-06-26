@@ -1,4 +1,5 @@
 using System.Text;
+using SquidStd.Messaging.RabbitMq.Data.Config;
 using SquidStd.Messaging.RabbitMq.Services;
 
 namespace SquidStd.Tests.Messaging.RabbitMq;
@@ -75,11 +76,17 @@ public class RabbitMqTopicProviderTests
     }
 
     private static ReadOnlyMemory<byte> Bytes(string s)
-        => Encoding.UTF8.GetBytes(s);
+    {
+        return Encoding.UTF8.GetBytes(s);
+    }
 
     private RabbitMqTopicProvider NewProvider()
-        => new(new() { Uri = new(_fixture.AmqpUri) });
+    {
+        return new RabbitMqTopicProvider(new RabbitMqOptions { Uri = new Uri(_fixture.AmqpUri) });
+    }
 
     private static string Topic()
-        => "topic-" + Guid.NewGuid().ToString("N");
+    {
+        return "topic-" + Guid.NewGuid().ToString("N");
+    }
 }

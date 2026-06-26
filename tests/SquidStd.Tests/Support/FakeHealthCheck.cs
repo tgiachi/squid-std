@@ -4,14 +4,14 @@ using SquidStd.Core.Interfaces.Health;
 namespace SquidStd.Tests.Support;
 
 /// <summary>
-/// Configurable <see cref="IHealthCheck" /> for tests: returns a fixed result, optionally after a
-/// delay, or throws a configured exception.
+///     Configurable <see cref="IHealthCheck" /> for tests: returns a fixed result, optionally after a
+///     delay, or throws a configured exception.
 /// </summary>
 public sealed class FakeHealthCheck : IHealthCheck
 {
+    private readonly TimeSpan _delay;
     private readonly HealthCheckResult? _result;
     private readonly Exception? _throw;
-    private readonly TimeSpan _delay;
 
     public FakeHealthCheck(
         string name,

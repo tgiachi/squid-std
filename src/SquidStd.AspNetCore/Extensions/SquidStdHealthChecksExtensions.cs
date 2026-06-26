@@ -8,7 +8,7 @@ using SquidHealthCheck = SquidStd.Core.Interfaces.Health.IHealthCheck;
 namespace SquidStd.AspNetCore.Extensions;
 
 /// <summary>
-/// Extension methods that bridge SquidStd health checks into the standard ASP.NET Core health-check system.
+///     Extension methods that bridge SquidStd health checks into the standard ASP.NET Core health-check system.
 /// </summary>
 public static class SquidStdHealthChecksExtensions
 {
@@ -16,9 +16,9 @@ public static class SquidStdHealthChecksExtensions
     extension(WebApplicationBuilder builder)
     {
         /// <summary>
-        /// Registers each SquidStd <c>IHealthCheck</c> as a standard ASP.NET Core health check (one entry
-        /// per check, same name). Call after <c>UseSquidStd</c>; expose them with the standard
-        /// <c>app.MapHealthChecks(...)</c>. Check names must be unique.
+        ///     Registers each SquidStd <c>IHealthCheck</c> as a standard ASP.NET Core health check (one entry
+        ///     per check, same name). Call after <c>UseSquidStd</c>; expose them with the standard
+        ///     <c>app.MapHealthChecks(...)</c>. Check names must be unique.
         /// </summary>
         /// <returns>The same builder for chaining.</returns>
         public WebApplicationBuilder AddSquidStdHealthChecks()
@@ -40,7 +40,7 @@ public static class SquidStdHealthChecksExtensions
             foreach (var check in checks)
             {
                 healthChecks.Add(
-                    new(
+                    new HealthCheckRegistration(
                         check.Name,
                         _ => new SquidStdHealthCheckAdapter(check),
                         HealthStatus.Unhealthy,

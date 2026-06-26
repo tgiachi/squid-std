@@ -5,7 +5,7 @@ using StackExchange.Redis;
 namespace SquidStd.Caching.Redis.Services;
 
 /// <summary>
-/// Redis <see cref="ICacheProvider" /> backed by a StackExchange.Redis connection multiplexer.
+///     Redis <see cref="ICacheProvider" /> backed by a StackExchange.Redis connection multiplexer.
 /// </summary>
 public sealed class RedisCacheProvider : ICacheProvider, IAsyncDisposable
 {
@@ -38,7 +38,9 @@ public sealed class RedisCacheProvider : ICacheProvider, IAsyncDisposable
 
     /// <inheritdoc />
     public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
-        => Database.KeyExistsAsync(key);
+    {
+        return Database.KeyExistsAsync(key);
+    }
 
     /// <inheritdoc />
     public async Task<ReadOnlyMemory<byte>?> GetAsync(string key, CancellationToken cancellationToken = default)
@@ -55,7 +57,9 @@ public sealed class RedisCacheProvider : ICacheProvider, IAsyncDisposable
 
     /// <inheritdoc />
     public Task<bool> RemoveAsync(string key, CancellationToken cancellationToken = default)
-        => Database.KeyDeleteAsync(key);
+    {
+        return Database.KeyDeleteAsync(key);
+    }
 
     /// <inheritdoc />
     public async Task SetAsync(
@@ -65,15 +69,19 @@ public sealed class RedisCacheProvider : ICacheProvider, IAsyncDisposable
         CancellationToken cancellationToken = default
     )
     {
-        var expiry = ttl is null ? Expiration.Default : new(ttl.Value);
+        var expiry = ttl is null ? Expiration.Default : new Expiration(ttl.Value);
         await Database.StringSetAsync(key, value.ToArray(), expiry);
     }
 
     /// <inheritdoc />
     public async ValueTask StartAsync(CancellationToken cancellationToken = default)
-        => _connection = await ConnectionMultiplexer.ConnectAsync(_options.Configuration);
+    {
+        _connection = await ConnectionMultiplexer.ConnectAsync(_options.Configuration);
+    }
 
     /// <inheritdoc />
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
-        => DisposeAsync();
+    {
+        return DisposeAsync();
+    }
 }

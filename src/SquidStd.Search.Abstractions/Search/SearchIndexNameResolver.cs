@@ -4,9 +4,9 @@ using SquidStd.Search.Abstractions.Attributes;
 namespace SquidStd.Search.Abstractions.Search;
 
 /// <summary>
-/// Resolves the Elasticsearch index name for a type from its <see cref="SearchIndexAttribute" /> (or the
-/// lowercased type name), expanding <c>${VAR}</c> / <c>${VAR:-default}</c> from environment variables. The
-/// result is always lowercased (an Elasticsearch requirement).
+///     Resolves the Elasticsearch index name for a type from its <see cref="SearchIndexAttribute" /> (or the
+///     lowercased type name), expanding <c>${VAR}</c> / <c>${VAR:-default}</c> from environment variables. The
+///     result is always lowercased (an Elasticsearch requirement).
 /// </summary>
 public static partial class SearchIndexNameResolver
 {
@@ -17,14 +17,15 @@ public static partial class SearchIndexNameResolver
 
         var template = type.GetCustomAttributes(typeof(SearchIndexAttribute), false) is { Length: > 0 } attributes &&
                        attributes[0] is SearchIndexAttribute attribute
-                           ? attribute.Name
-                           : type.Name;
+            ? attribute.Name
+            : type.Name;
 
         return ExpandEnvironment(template).ToLowerInvariant();
     }
 
     private static string ExpandEnvironment(string template)
-        => PlaceholderRegex()
+    {
+        return PlaceholderRegex()
             .Replace(
                 template,
                 match =>
@@ -48,6 +49,7 @@ public static partial class SearchIndexNameResolver
                     );
                 }
             );
+    }
 
     [GeneratedRegex(@"\$\{(?<name>[A-Za-z_][A-Za-z0-9_]*)(:-(?<default>[^}]*))?\}")]
     private static partial Regex PlaceholderRegex();

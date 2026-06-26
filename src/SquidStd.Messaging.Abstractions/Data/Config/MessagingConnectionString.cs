@@ -4,7 +4,7 @@ using System.Web;
 namespace SquidStd.Messaging.Abstractions.Data.Config;
 
 /// <summary>
-/// Parsed messaging connection string of the form <c>scheme://[user:pass@]host[:port][/vhost][?params]</c>.
+///     Parsed messaging connection string of the form <c>scheme://[user:pass@]host[:port][/vhost][?params]</c>.
 /// </summary>
 public sealed class MessagingConnectionString
 {
@@ -68,14 +68,14 @@ public sealed class MessagingConnectionString
         var virtualHost = uri.AbsolutePath.Trim('/');
         var query = HttpUtility.ParseQueryString(uri.Query);
         var parameters = query.AllKeys
-                              .Where(static key => key is not null)
-                              .ToFrozenDictionary(
-                                  key => key!,
-                                  key => query[key] ?? string.Empty,
-                                  StringComparer.OrdinalIgnoreCase
-                              );
+            .Where(static key => key is not null)
+            .ToFrozenDictionary(
+                key => key!,
+                key => query[key] ?? string.Empty,
+                StringComparer.OrdinalIgnoreCase
+            );
 
-        return new(
+        return new MessagingConnectionString(
             uri.Scheme,
             uri.Host,
             uri.Port > 0 ? uri.Port : null,
@@ -88,15 +88,17 @@ public sealed class MessagingConnectionString
 
     /// <summary>Builds <see cref="MessagingOptions" /> from the query parameters.</summary>
     public MessagingOptions ToMessagingOptions()
-        => new()
+    {
+        return new MessagingOptions
         {
             MaxDeliveryAttempts = Parameters.TryGetValue("maxDeliveryAttempts", out var max) &&
                                   int.TryParse(max, out var parsedMax)
-                                      ? parsedMax
-                                      : 3,
+                ? parsedMax
+                : 3,
             DeadLetterQueueSuffix = Parameters.TryGetValue("deadLetterSuffix", out var suffix) ? suffix : ".dlq",
             RetryDelay = Parameters.TryGetValue("retryDelayMs", out var delay) && int.TryParse(delay, out var parsedDelay)
-                             ? TimeSpan.FromMilliseconds(parsedDelay)
-                             : TimeSpan.Zero
+                ? TimeSpan.FromMilliseconds(parsedDelay)
+                : TimeSpan.Zero
         };
+    }
 }

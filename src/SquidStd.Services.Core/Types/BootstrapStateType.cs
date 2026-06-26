@@ -1,7 +1,7 @@
 namespace SquidStd.Services.Core.Types;
 
 /// <summary>
-/// Lifecycle state of the SquidStd bootstrapper.
+///     Lifecycle state of the SquidStd bootstrapper.
 /// </summary>
 internal enum BootstrapStateType
 {

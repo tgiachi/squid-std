@@ -3,7 +3,7 @@ using SquidStd.Core.Types.Health;
 namespace SquidStd.Core.Data.Health;
 
 /// <summary>
-/// Result of a single health check. <see cref="Duration" /> is stamped by the aggregator.
+///     Result of a single health check. <see cref="Duration" /> is stamped by the aggregator.
 /// </summary>
 public sealed record HealthCheckResult
 {
@@ -21,9 +21,13 @@ public sealed record HealthCheckResult
 
     /// <summary>Creates a healthy result.</summary>
     public static HealthCheckResult Healthy(string? description = null)
-        => new() { Status = HealthStatus.Healthy, Description = description };
+    {
+        return new HealthCheckResult { Status = HealthStatus.Healthy, Description = description };
+    }
 
     /// <summary>Creates an unhealthy result.</summary>
     public static HealthCheckResult Unhealthy(string? description = null, Exception? exception = null)
-        => new() { Status = HealthStatus.Unhealthy, Description = description, Exception = exception };
+    {
+        return new HealthCheckResult { Status = HealthStatus.Unhealthy, Description = description, Exception = exception };
+    }
 }

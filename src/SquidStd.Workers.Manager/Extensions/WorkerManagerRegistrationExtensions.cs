@@ -10,13 +10,13 @@ using SquidStd.Workers.Manager.Services;
 namespace SquidStd.Workers.Manager.Extensions;
 
 /// <summary>
-/// DryIoc registration helpers for the worker manager.
+///     DryIoc registration helpers for the worker manager.
 /// </summary>
 public static class WorkerManagerRegistrationExtensions
 {
     /// <summary>
-    /// Registers the worker manager: config section, registry, job scheduler, the collector and sweep
-    /// lifecycle services, and the timer-wheel pump (only if it is not already registered).
+    ///     Registers the worker manager: config section, registry, job scheduler, the collector and sweep
+    ///     lifecycle services, and the timer-wheel pump (only if it is not already registered).
     /// </summary>
     public static IContainer AddWorkerManager(this IContainer container)
     {

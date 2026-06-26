@@ -3,12 +3,12 @@ using ZLinq;
 namespace SquidStd.Database.Extensions;
 
 /// <summary>
-/// Zero-allocation, in-memory helpers (ZLinq) over already-materialized result lists.
+///     Zero-allocation, in-memory helpers (ZLinq) over already-materialized result lists.
 /// </summary>
 public static class ZLinqResultExtensions
 {
     /// <summary>
-    /// Projects each materialized item to a new form using ZLinq, returning a list.
+    ///     Projects each materialized item to a new form using ZLinq, returning a list.
     /// </summary>
     /// <typeparam name="TSource">The source item type.</typeparam>
     /// <typeparam name="TResult">The projected item type.</typeparam>
@@ -19,10 +19,12 @@ public static class ZLinqResultExtensions
         this IReadOnlyList<TSource> source,
         Func<TSource, TResult> selector
     )
-        => source.AsValueEnumerable().Select(selector).ToList();
+    {
+        return source.AsValueEnumerable().Select(selector).ToList();
+    }
 
     /// <summary>
-    /// Takes an in-memory page of a materialized list using ZLinq (no SQL involved).
+    ///     Takes an in-memory page of a materialized list using ZLinq (no SQL involved).
     /// </summary>
     /// <typeparam name="T">The item type.</typeparam>
     /// <param name="source">The materialized source items.</param>

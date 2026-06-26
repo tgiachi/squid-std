@@ -1,11 +1,13 @@
+using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Search.Abstractions.Attributes;
 using SquidStd.Search.Abstractions.Interfaces;
+using SquidStd.Search.Elasticsearch.Data.Config;
 using SquidStd.Search.Elasticsearch.Extensions;
 using SquidStd.Search.Elasticsearch.Linq;
 using SquidStd.Services.Core.Services.Bootstrap;
 
 var bootstrap = SquidStdBootstrap.Create(
-    new()
+    new SquidStdOptions
     {
         ConfigName = "squidstd",
         RootDirectory = AppContext.BaseDirectory
@@ -14,11 +16,10 @@ var bootstrap = SquidStdBootstrap.Create(
 
 #region step-1
 
-bootstrap.ConfigureServices(
-    container => container.AddElasticsearch(
-        new()
+bootstrap.ConfigureServices(container => container.AddElasticsearch(
+        new ElasticsearchOptions
         {
-            Uri = new("http://localhost:9200")
+            Uri = new Uri("http://localhost:9200")
         }
     )
 );
@@ -34,8 +35,8 @@ var search = bootstrap.Resolve<ISearchService>();
 await search.IndexAsync(new Order("1", "open", 150), true);
 
 var open = await search.Query<Order>()
-                       .Where(o => o.Status == "open")
-                       .ToListAsync();
+    .Where(o => o.Status == "open")
+    .ToListAsync();
 
 Console.WriteLine($"found {open.Count} open order(s)");
 

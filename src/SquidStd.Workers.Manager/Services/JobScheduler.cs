@@ -7,7 +7,7 @@ using SquidStd.Workers.Manager.Interfaces;
 namespace SquidStd.Workers.Manager.Services;
 
 /// <summary>
-/// Default <see cref="IJobScheduler" />: publishes <see cref="JobRequest" />s onto the configured jobs queue.
+///     Default <see cref="IJobScheduler" />: publishes <see cref="JobRequest" />s onto the configured jobs queue.
 /// </summary>
 public sealed class JobScheduler : IJobScheduler
 {
@@ -26,9 +26,13 @@ public sealed class JobScheduler : IJobScheduler
         IReadOnlyDictionary<string, string> parameters,
         CancellationToken cancellationToken = default
     )
-        => _queue.PublishAsync(_queueName, new JobRequest(jobName, parameters), cancellationToken);
+    {
+        return _queue.PublishAsync(_queueName, new JobRequest(jobName, parameters), cancellationToken);
+    }
 
     /// <inheritdoc />
     public Task EnqueueAsync(string jobName, CancellationToken cancellationToken = default)
-        => EnqueueAsync(jobName, new Dictionary<string, string>(), cancellationToken);
+    {
+        return EnqueueAsync(jobName, new Dictionary<string, string>(), cancellationToken);
+    }
 }

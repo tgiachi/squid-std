@@ -25,14 +25,17 @@ dotnet add package SquidStd.Workers
 
 ```csharp
 using DryIoc;
+using SquidStd.Generators.Workers;
+using SquidStd.Workers.Attributes;
 using SquidStd.Workers.Extensions;
 
 container.AddInMemoryMessaging(); // or AddRabbitMqMessaging(...)
 container.AddWorkers();
-container.AddJobHandler<ResizeImageHandler>();
+container.RegisterGeneratedJobHandlers();
 ```
 
 ```csharp
+[RegisterJobHandler]
 public sealed class ResizeImageHandler : IJobHandler
 {
     public string JobName => "resize-image";
@@ -51,6 +54,7 @@ public sealed class ResizeImageHandler : IJobHandler
 |---------------------------------|------------------------------------------------------------------------------|
 | `IJobHandler`                   | Handles jobs of one named kind.                                              |
 | `WorkersConfig`                 | `WorkerId`, `HeartbeatIntervalSeconds`, `MaxConcurrency`, queue/topic names. |
+| `RegisterJobHandlerAttribute`   | Marks handlers for generated registration.                                   |
 | `WorkersRegistrationExtensions` | `AddWorkers()` and `AddJobHandler<T>()`.                                     |
 
 ## License

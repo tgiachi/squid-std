@@ -5,6 +5,7 @@ using Serilog;
 using SquidStd.Network.Buffers;
 using SquidStd.Network.Data.Events;
 using SquidStd.Network.Interfaces.Client;
+using SquidStd.Network.Interfaces.Codecs;
 using SquidStd.Network.Interfaces.Framing;
 using SquidStd.Network.Interfaces.Middleware;
 using SquidStd.Network.Pipeline;
@@ -12,13 +13,14 @@ using SquidStd.Network.Pipeline;
 namespace SquidStd.Network.Client;
 
 /// <summary>
-/// Represents a connected TCP client with async send/receive loops,
-/// middleware processing, lifecycle events, and recent byte history.
+///     Represents a connected TCP client with async send/receive loops,
+///     middleware processing, lifecycle events, and recent byte history.
 /// </summary>
 public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, IDisposable
 {
     private const int DefaultReceiveBufferSize = 8192;
     private const int DefaultHistoryBufferCapacity = 65536;
+    private static long _sessionIdSequence;
 
     private readonly INetFramer? _framer;
     private readonly CancellationTokenSource _internalCancellationTokenSource = new();
@@ -30,8 +32,8 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     private readonly SemaphoreSlim _sendLock = new(1, 1);
     private readonly Socket _socket;
     private readonly Stream _stream;
-    private static long _sessionIdSequence;
     private int _closed;
+    private ITransportCodec? _codec;
 
     private CancellationTokenRegistration _externalCancellationTokenRegistration;
     private byte[]? _pendingBuffer;
@@ -40,35 +42,68 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     private int _started;
 
     /// <summary>
-    /// Unique session identifier for this client connection.
+    ///     Creates a client wrapper for an accepted socket.
     /// </summary>
-    public long SessionId { get; }
+    /// <param name="socket">Connected socket.</param>
+    /// <param name="middlewares">Optional middleware list.</param>
+    /// <param name="framer">
+    ///     Optional framer. When supplied, the receive loop accumulates middleware output and
+    ///     emits <see cref="OnDataReceived" /> once per complete frame instead of once per socket read.
+    /// </param>
+    /// <param name="receiveBufferSize">Receive chunk size in bytes.</param>
+    /// <param name="historyBufferCapacity">Max number of received bytes to keep in history.</param>
+    public SquidStdTcpClient(
+        Socket socket,
+        IEnumerable<INetMiddleware>? middlewares = null,
+        INetFramer? framer = null,
+        ITransportCodec? codec = null,
+        int receiveBufferSize = DefaultReceiveBufferSize,
+        int historyBufferCapacity = DefaultHistoryBufferCapacity
+    ) : this(
+        socket,
+        new NetworkStream(socket, false),
+        middlewares,
+        framer,
+        codec,
+        receiveBufferSize,
+        historyBufferCapacity
+    )
+    {
+    }
 
     /// <summary>
-    /// Receives payload chunk size in bytes.
+    ///     Creates a client wrapper for an accepted socket using the supplied transport stream.
+    /// </summary>
+    public SquidStdTcpClient(
+        Socket socket,
+        Stream stream,
+        IEnumerable<INetMiddleware>? middlewares = null,
+        INetFramer? framer = null,
+        ITransportCodec? codec = null,
+        int receiveBufferSize = DefaultReceiveBufferSize,
+        int historyBufferCapacity = DefaultHistoryBufferCapacity
+    )
+    {
+        ArgumentNullException.ThrowIfNull(socket);
+        ArgumentNullException.ThrowIfNull(stream);
+
+        _socket = socket;
+        _stream = stream;
+        _middlewarePipeline = new NetMiddlewarePipeline(middlewares);
+        _framer = framer;
+        _codec = codec;
+        _receiveBuffer = new CircularBuffer<byte>(historyBufferCapacity);
+        ReceiveBufferSize = receiveBufferSize;
+        SessionId = Interlocked.Increment(ref _sessionIdSequence);
+    }
+
+    /// <summary>
+    ///     Receives payload chunk size in bytes.
     /// </summary>
     public int ReceiveBufferSize { get; }
 
     /// <summary>
-    /// Client remote endpoint, when connected.
-    /// </summary>
-    public EndPoint? RemoteEndPoint
-    {
-        get
-        {
-            try
-            {
-                return _socket.RemoteEndPoint;
-            }
-            catch (ObjectDisposedException)
-            {
-                return null;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Local endpoint used for this connection, when available.
+    ///     Local endpoint used for this connection, when available.
     /// </summary>
     public EndPoint? LocalEndPoint
     {
@@ -86,7 +121,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    /// Gets the number of bytes currently available in the receive circular buffer.
+    ///     Gets the number of bytes currently available in the receive circular buffer.
     /// </summary>
     public int AvailableBytes
     {
@@ -100,7 +135,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    /// Gets whether the receive circular buffer is full.
+    ///     Gets whether the receive circular buffer is full.
     /// </summary>
     public bool IsReceiveBufferFull
     {
@@ -113,93 +148,66 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
         }
     }
 
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+    {
+        await CloseAsync(CancellationToken.None);
+
+        // Drain the receive loop before disposing the resources it relies on.
+        if (_receiveLoopTask is not null)
+        {
+            try
+            {
+                await _receiveLoopTask;
+            }
+            catch
+            {
+                // Loop failures are already surfaced via OnException.
+            }
+        }
+
+        await _stream.DisposeAsync();
+        _sendLock.Dispose();
+        _internalCancellationTokenSource.Dispose();
+        _socket.Dispose();
+    }
+
+    /// <inheritdoc />
+    public void Dispose() // Sync-over-async: best effort. Prefer DisposeAsync.
+    {
+        DisposeAsync().AsTask().GetAwaiter().GetResult();
+    }
+
     /// <summary>
-    /// True when the underlying socket is connected and client not closed.
+    ///     Unique session identifier for this client connection.
+    /// </summary>
+    public long SessionId { get; }
+
+    /// <summary>
+    ///     Client remote endpoint, when connected.
+    /// </summary>
+    public EndPoint? RemoteEndPoint
+    {
+        get
+        {
+            try
+            {
+                return _socket.RemoteEndPoint;
+            }
+            catch (ObjectDisposedException)
+            {
+                return null;
+            }
+        }
+    }
+
+    /// <summary>
+    ///     True when the underlying socket is connected and client not closed.
     /// </summary>
     public bool IsConnected => _socket.Connected && Volatile.Read(ref _closed) == 0;
 
     /// <summary>
-    /// Raised when the client is fully connected and receive loop starts.
-    /// </summary>
-    public event EventHandler<SquidStdTcpClientEventArgs>? OnConnected;
-
-    /// <summary>
-    /// Raised when the client is disconnected.
-    /// </summary>
-    public event EventHandler<SquidStdTcpClientEventArgs>? OnDisconnected;
-
-    /// <summary>
-    /// Raised when data is received (after middleware pipeline).
-    /// </summary>
-    public event EventHandler<SquidStdTcpDataReceivedEventArgs>? OnDataReceived;
-
-    /// <summary>
-    /// Raised when receive/send loops throw an exception.
-    /// </summary>
-    public event EventHandler<SquidStdTcpExceptionEventArgs>? OnException;
-
-    /// <summary>
-    /// Creates a client wrapper for an accepted socket.
-    /// </summary>
-    /// <param name="socket">Connected socket.</param>
-    /// <param name="middlewares">Optional middleware list.</param>
-    /// <param name="framer">
-    /// Optional framer. When supplied, the receive loop accumulates middleware output and
-    /// emits <see cref="OnDataReceived" /> once per complete frame instead of once per socket read.
-    /// </param>
-    /// <param name="receiveBufferSize">Receive chunk size in bytes.</param>
-    /// <param name="historyBufferCapacity">Max number of received bytes to keep in history.</param>
-    public SquidStdTcpClient(
-        Socket socket,
-        IEnumerable<INetMiddleware>? middlewares = null,
-        INetFramer? framer = null,
-        int receiveBufferSize = DefaultReceiveBufferSize,
-        int historyBufferCapacity = DefaultHistoryBufferCapacity
-    ) : this(
-        socket,
-        new NetworkStream(socket, false),
-        middlewares,
-        framer,
-        receiveBufferSize,
-        historyBufferCapacity
-    ) { }
-
-    /// <summary>
-    /// Creates a client wrapper for an accepted socket using the supplied transport stream.
-    /// </summary>
-    public SquidStdTcpClient(
-        Socket socket,
-        Stream stream,
-        IEnumerable<INetMiddleware>? middlewares = null,
-        INetFramer? framer = null,
-        int receiveBufferSize = DefaultReceiveBufferSize,
-        int historyBufferCapacity = DefaultHistoryBufferCapacity
-    )
-    {
-        ArgumentNullException.ThrowIfNull(socket);
-        ArgumentNullException.ThrowIfNull(stream);
-
-        _socket = socket;
-        _stream = stream;
-        _middlewarePipeline = new(middlewares);
-        _framer = framer;
-        _receiveBuffer = new(historyBufferCapacity);
-        ReceiveBufferSize = receiveBufferSize;
-        SessionId = Interlocked.Increment(ref _sessionIdSequence);
-    }
-
-    /// <summary>
-    /// Adds a middleware component to this client pipeline.
-    /// </summary>
-    public SquidStdTcpClient AddMiddleware(INetMiddleware middleware)
-    {
-        _middlewarePipeline.AddMiddleware(middleware);
-
-        return this;
-    }
-
-    /// <summary>
-    /// Closes the client connection and raises disconnect event once.
+    ///     Closes the client connection and raises disconnect event once.
     /// </summary>
     public async Task CloseAsync(CancellationToken cancellationToken = default)
     {
@@ -240,26 +248,113 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    /// Creates an outbound client and connects to the specified endpoint.
+    ///     Sends a payload to the connected socket.
+    /// </summary>
+    public async Task SendAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+    {
+        if (payload.IsEmpty || !IsConnected)
+        {
+            return;
+        }
+
+        var processedPayload = await _middlewarePipeline.ExecuteSendAsync(this, payload, cancellationToken);
+
+        if (processedPayload.IsEmpty)
+        {
+            return;
+        }
+
+        await _sendLock.WaitAsync(cancellationToken);
+
+        try
+        {
+            var codec = Volatile.Read(ref _codec);
+
+            if (codec is null)
+            {
+                await _stream.WriteAsync(processedPayload, cancellationToken);
+            }
+            else
+            {
+                var sendBuffer = ArrayPool<byte>.Shared.Rent(processedPayload.Length);
+
+                try
+                {
+                    processedPayload.Span.CopyTo(sendBuffer);
+                    codec.Encode(sendBuffer.AsSpan(0, processedPayload.Length));
+                    await _stream.WriteAsync(sendBuffer.AsMemory(0, processedPayload.Length), cancellationToken);
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(sendBuffer);
+                }
+            }
+
+            await _stream.FlushAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            RaiseException(ex);
+            await CloseAsync(CancellationToken.None);
+        }
+        finally
+        {
+            _sendLock.Release();
+        }
+    }
+
+    /// <summary>
+    ///     Raised when the client is fully connected and receive loop starts.
+    /// </summary>
+    public event EventHandler<SquidStdTcpClientEventArgs>? OnConnected;
+
+    /// <summary>
+    ///     Raised when the client is disconnected.
+    /// </summary>
+    public event EventHandler<SquidStdTcpClientEventArgs>? OnDisconnected;
+
+    /// <summary>
+    ///     Raised when data is received (after middleware pipeline).
+    /// </summary>
+    public event EventHandler<SquidStdTcpDataReceivedEventArgs>? OnDataReceived;
+
+    /// <summary>
+    ///     Raised when receive/send loops throw an exception.
+    /// </summary>
+    public event EventHandler<SquidStdTcpExceptionEventArgs>? OnException;
+
+    /// <summary>
+    ///     Adds a middleware component to this client pipeline.
+    /// </summary>
+    public SquidStdTcpClient AddMiddleware(INetMiddleware middleware)
+    {
+        _middlewarePipeline.AddMiddleware(middleware);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Creates an outbound client and connects to the specified endpoint.
     /// </summary>
     public static async Task<SquidStdTcpClient> ConnectAsync(
         IPEndPoint endPoint,
         IEnumerable<INetMiddleware>? middlewares = null,
         INetFramer? framer = null,
+        ITransportCodec? codec = null,
         CancellationToken cancellationToken = default
     )
     {
         var socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         await socket.ConnectAsync(endPoint, cancellationToken);
 
-        var client = new SquidStdTcpClient(socket, middlewares, framer);
+        var client = new SquidStdTcpClient(socket, middlewares, framer, codec);
         await client.StartAsync(cancellationToken);
 
         return client;
     }
 
     /// <summary>
-    /// Consumes bytes from the front of the receive circular buffer.
+    ///     Consumes bytes from the front of the receive circular buffer.
     /// </summary>
     public int ConsumeBytes(int count)
     {
@@ -282,48 +377,24 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    /// Checks whether this client pipeline contains at least one middleware instance of the specified type.
+    ///     Checks whether this client pipeline contains at least one middleware instance of the specified type.
     /// </summary>
     public bool ContainsMiddleware<TMiddleware>()
         where TMiddleware : INetMiddleware
-        => _middlewarePipeline.ContainsMiddleware<TMiddleware>();
-
-    /// <inheritdoc />
-    public void Dispose() // Sync-over-async: best effort. Prefer DisposeAsync.
-        => DisposeAsync().AsTask().GetAwaiter().GetResult();
-
-    /// <inheritdoc />
-    public async ValueTask DisposeAsync()
     {
-        await CloseAsync(CancellationToken.None);
-
-        // Drain the receive loop before disposing the resources it relies on.
-        if (_receiveLoopTask is not null)
-        {
-            try
-            {
-                await _receiveLoopTask;
-            }
-            catch
-            {
-                // Loop failures are already surfaced via OnException.
-            }
-        }
-
-        await _stream.DisposeAsync();
-        _sendLock.Dispose();
-        _internalCancellationTokenSource.Dispose();
-        _socket.Dispose();
+        return _middlewarePipeline.ContainsMiddleware<TMiddleware>();
     }
 
     /// <summary>
-    /// Returns a snapshot of recent received bytes from the circular history buffer.
+    ///     Returns a snapshot of recent received bytes from the circular history buffer.
     /// </summary>
     public byte[] GetRecentReceivedBytes()
-        => PeekData();
+    {
+        return PeekData();
+    }
 
     /// <summary>
-    /// Peeks at data in the receive circular buffer without consuming it.
+    ///     Peeks at data in the receive circular buffer without consuming it.
     /// </summary>
     public byte[] PeekData(int count = 0)
     {
@@ -347,49 +418,26 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    /// Removes all middleware components of the specified type from this client pipeline.
+    ///     Atomically swaps the transport codec for this connection. The new codec takes effect from the next
+    ///     socket read; the caller must trigger the swap at a read boundary (no old-regime bytes still pending).
     /// </summary>
-    public bool RemoveMiddleware<TMiddleware>()
-        where TMiddleware : INetMiddleware
-        => _middlewarePipeline.RemoveMiddleware<TMiddleware>();
-
-    /// <summary>
-    /// Sends a payload to the connected socket.
-    /// </summary>
-    public async Task SendAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+    /// <param name="codec">The new codec, or null to remove transport transformation.</param>
+    public void SwapCodec(ITransportCodec? codec)
     {
-        if (payload.IsEmpty || !IsConnected)
-        {
-            return;
-        }
-
-        var processedPayload = await _middlewarePipeline.ExecuteSendAsync(this, payload, cancellationToken);
-
-        if (processedPayload.IsEmpty)
-        {
-            return;
-        }
-
-        await _sendLock.WaitAsync(cancellationToken);
-
-        try
-        {
-            await _stream.WriteAsync(processedPayload, cancellationToken);
-            await _stream.FlushAsync(cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            RaiseException(ex);
-            await CloseAsync(CancellationToken.None);
-        }
-        finally
-        {
-            _sendLock.Release();
-        }
+        Volatile.Write(ref _codec, codec);
     }
 
     /// <summary>
-    /// Starts the receive loop and raises connect event.
+    ///     Removes all middleware components of the specified type from this client pipeline.
+    /// </summary>
+    public bool RemoveMiddleware<TMiddleware>()
+        where TMiddleware : INetMiddleware
+    {
+        return _middlewarePipeline.RemoveMiddleware<TMiddleware>();
+    }
+
+    /// <summary>
+    ///     Starts the receive loop and raises connect event.
     /// </summary>
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -479,7 +527,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
 
             ConsumePending(frameLength);
 
-            OnDataReceived?.Invoke(this, new(this, frame));
+            OnDataReceived?.Invoke(this, new SquidStdTcpDataReceivedEventArgs(this, frame));
         }
     }
 
@@ -490,7 +538,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
             SessionId,
             RemoteEndPoint
         );
-        OnConnected?.Invoke(this, new(this));
+        OnConnected?.Invoke(this, new SquidStdTcpClientEventArgs(this));
     }
 
     private void RaiseDisconnected()
@@ -500,7 +548,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
             SessionId,
             RemoteEndPoint
         );
-        OnDisconnected?.Invoke(this, new(this));
+        OnDisconnected?.Invoke(this, new SquidStdTcpClientEventArgs(this));
     }
 
     private void RaiseException(Exception exception)
@@ -511,7 +559,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
             SessionId,
             RemoteEndPoint
         );
-        OnException?.Invoke(this, new(exception, this));
+        OnException?.Invoke(this, new SquidStdTcpExceptionEventArgs(exception, this));
     }
 
     private async Task ReceiveLoopAsync()
@@ -523,18 +571,13 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
             while (!_internalCancellationTokenSource.IsCancellationRequested && IsConnected)
             {
                 var received = await _stream.ReadAsync(
-                                   buffer.AsMemory(0, ReceiveBufferSize),
-                                   _internalCancellationTokenSource.Token
-                               );
+                    buffer.AsMemory(0, ReceiveBufferSize),
+                    _internalCancellationTokenSource.Token
+                );
 
                 if (received <= 0)
                 {
                     break;
-                }
-
-                lock (_receiveBufferSync)
-                {
-                    _receiveBuffer.PushBackRange(buffer.AsSpan(0, received));
                 }
 
                 var chunk = ArrayPool<byte>.Shared.Rent(received);
@@ -543,12 +586,19 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
                 {
                     buffer.AsSpan(0, received).CopyTo(chunk);
 
+                    Volatile.Read(ref _codec)?.Decode(chunk.AsSpan(0, received));
+
+                    lock (_receiveBufferSync)
+                    {
+                        _receiveBuffer.PushBackRange(chunk.AsSpan(0, received));
+                    }
+
                     var chunkMemory = new ReadOnlyMemory<byte>(chunk, 0, received);
                     var processed = await _middlewarePipeline.ExecuteAsync(
-                                        this,
-                                        chunkMemory,
-                                        _internalCancellationTokenSource.Token
-                                    );
+                        this,
+                        chunkMemory,
+                        _internalCancellationTokenSource.Token
+                    );
 
                     if (processed.IsEmpty)
                     {
@@ -560,7 +610,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
                         // Fresh copy so the event handler can outlive the pooled chunk.
                         var payload = new byte[processed.Length];
                         processed.CopyTo(payload);
-                        OnDataReceived?.Invoke(this, new(this, payload));
+                        OnDataReceived?.Invoke(this, new SquidStdTcpDataReceivedEventArgs(this, payload));
                     }
                     else
                     {

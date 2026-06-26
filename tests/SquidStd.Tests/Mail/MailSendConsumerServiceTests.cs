@@ -16,23 +16,6 @@ public class MailSendConsumerServiceTests
 {
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(10);
 
-    private sealed class CapturingListener : IQueueMessageListenerAsync<OutgoingMailMessage>
-    {
-        private readonly TaskCompletionSource<OutgoingMailMessage> _completion;
-
-        public CapturingListener(TaskCompletionSource<OutgoingMailMessage> completion)
-        {
-            _completion = completion;
-        }
-
-        public Task HandleAsync(OutgoingMailMessage message, CancellationToken cancellationToken)
-        {
-            _completion.TrySetResult(message);
-
-            return Task.CompletedTask;
-        }
-    }
-
     [Fact]
     public async Task Consumer_DeadLetters_AfterRetriesExhausted()
     {
@@ -83,7 +66,9 @@ public class MailSendConsumerServiceTests
     }
 
     private static OutgoingMailMessage NewMessage()
-        => new() { To = [new("Bob", "bob@example.com")], Subject = "queued" };
+    {
+        return new OutgoingMailMessage { To = [new MailAddress("Bob", "bob@example.com")], Subject = "queued" };
+    }
 
     private static async Task WaitUntilAsync(Func<bool> condition, TimeSpan timeout)
     {
@@ -100,5 +85,22 @@ public class MailSendConsumerServiceTests
         }
 
         throw new TimeoutException("Condition not met within timeout.");
+    }
+
+    private sealed class CapturingListener : IQueueMessageListenerAsync<OutgoingMailMessage>
+    {
+        private readonly TaskCompletionSource<OutgoingMailMessage> _completion;
+
+        public CapturingListener(TaskCompletionSource<OutgoingMailMessage> completion)
+        {
+            _completion = completion;
+        }
+
+        public Task HandleAsync(OutgoingMailMessage message, CancellationToken cancellationToken)
+        {
+            _completion.TrySetResult(message);
+
+            return Task.CompletedTask;
+        }
     }
 }

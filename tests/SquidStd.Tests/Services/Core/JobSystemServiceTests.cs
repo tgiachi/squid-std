@@ -1,3 +1,4 @@
+using SquidStd.Core.Data.Jobs;
 using SquidStd.Core.Interfaces.Jobs;
 using SquidStd.Services.Core.Services;
 
@@ -46,8 +47,7 @@ public class JobSystemServiceTests
         {
             var value = i;
             tasks.Add(
-                system.ScheduleAsync(
-                    () =>
+                system.ScheduleAsync(() =>
                     {
                         lock (sync)
                         {
@@ -72,8 +72,8 @@ public class JobSystemServiceTests
         IJobSystem system = jobs;
         await jobs.StartAsync(CancellationToken.None);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => system.ScheduleAsync(() => throw new InvalidOperationException("boom"))
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            system.ScheduleAsync(() => throw new InvalidOperationException("boom"))
         );
     }
 
@@ -102,8 +102,7 @@ public class JobSystemServiceTests
         using var cancellationTokenSource = new CancellationTokenSource();
         await jobs.StartAsync(CancellationToken.None);
 
-        _ = system.ScheduleAsync(
-            () =>
+        _ = system.ScheduleAsync(() =>
             {
                 firstStarted.Set();
                 gate.Wait(TimeSpan.FromSeconds(2));
@@ -128,8 +127,7 @@ public class JobSystemServiceTests
         using var firstStarted = new ManualResetEventSlim(false);
         await jobs.StartAsync(CancellationToken.None);
 
-        _ = system.ScheduleAsync(
-            () =>
+        _ = system.ScheduleAsync(() =>
             {
                 firstStarted.Set();
                 gate.Wait(TimeSpan.FromSeconds(2));
@@ -142,11 +140,7 @@ public class JobSystemServiceTests
         gate.Set();
 
         await Assert.ThrowsAsync<TaskCanceledException>(() => queued);
-        Assert.Throws<ObjectDisposedException>(
-            () =>
-            {
-                _ = system.ScheduleAsync(() => { });
-            }
+        Assert.Throws<ObjectDisposedException>(() => { _ = system.ScheduleAsync(() => { }); }
         );
         jobs.Dispose();
     }
@@ -168,13 +162,15 @@ public class JobSystemServiceTests
     }
 
     private static JobSystemService NewService(int workerCount)
-        => new(
-            new()
+    {
+        return new JobSystemService(
+            new JobsConfig
             {
                 WorkerThreadCount = workerCount,
                 ShutdownTimeoutSeconds = 1.0
             }
         );
+    }
 
     // CompletedCount is incremented by the worker after the scheduled task's completion fires, so
     // awaiting ScheduleAsync does not guarantee the counter is updated yet. Wait for it (bounded).

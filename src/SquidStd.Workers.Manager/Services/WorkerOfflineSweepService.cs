@@ -7,18 +7,18 @@ using SquidStd.Workers.Manager.Data.Config;
 namespace SquidStd.Workers.Manager.Services;
 
 /// <summary>
-/// Periodically marks workers Offline whose heartbeats have stopped, using the timer wheel
-/// (<see cref="ITimerService" />), and publishes the resulting transitions.
+///     Periodically marks workers Offline whose heartbeats have stopped, using the timer wheel
+///     (<see cref="ITimerService" />), and publishes the resulting transitions.
 /// </summary>
 public sealed class WorkerOfflineSweepService : ISquidStdService
 {
     private const int DefaultIntervalSeconds = 10;
-
-    private readonly ILogger _logger = Log.ForContext<WorkerOfflineSweepService>();
-    private readonly ITimerService _timer;
-    private readonly WorkerRegistry _registry;
     private readonly IEventBus _eventBus;
     private readonly TimeSpan _interval;
+
+    private readonly ILogger _logger = Log.ForContext<WorkerOfflineSweepService>();
+    private readonly WorkerRegistry _registry;
+    private readonly ITimerService _timer;
     private string? _timerId;
 
     public WorkerOfflineSweepService(
@@ -46,22 +46,6 @@ public sealed class WorkerOfflineSweepService : ISquidStdService
         _interval = TimeSpan.FromSeconds(seconds);
     }
 
-    /// <summary>Runs one sweep and publishes the transitions. Public so it can be driven directly in tests.</summary>
-    public async Task RunSweepAsync()
-    {
-        try
-        {
-            foreach (var change in _registry.Sweep(DateTime.UtcNow))
-            {
-                await _eventBus.PublishAsync(change, CancellationToken.None);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "Worker offline sweep failed.");
-        }
-    }
-
     /// <inheritdoc />
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
     {
@@ -82,6 +66,24 @@ public sealed class WorkerOfflineSweepService : ISquidStdService
         return ValueTask.CompletedTask;
     }
 
+    /// <summary>Runs one sweep and publishes the transitions. Public so it can be driven directly in tests.</summary>
+    public async Task RunSweepAsync()
+    {
+        try
+        {
+            foreach (var change in _registry.Sweep(DateTime.UtcNow))
+            {
+                await _eventBus.PublishAsync(change, CancellationToken.None);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Worker offline sweep failed.");
+        }
+    }
+
     private void OnTick()
-        => _ = RunSweepAsync();
+    {
+        _ = RunSweepAsync();
+    }
 }

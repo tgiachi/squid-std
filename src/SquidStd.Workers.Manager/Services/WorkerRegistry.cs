@@ -7,14 +7,14 @@ using SquidStd.Workers.Manager.Interfaces;
 namespace SquidStd.Workers.Manager.Services;
 
 /// <summary>
-/// In-memory registry of workers, folded from heartbeats. Pure: it returns status transitions for the
-/// caller to publish, and never touches the event bus or a real clock (the sweep takes the time as a parameter).
+///     In-memory registry of workers, folded from heartbeats. Pure: it returns status transitions for the
+///     caller to publish, and never touches the event bus or a real clock (the sweep takes the time as a parameter).
 /// </summary>
 public sealed class WorkerRegistry : IWorkerRegistry
 {
+    private readonly TimeSpan _offlineTimeout;
     private readonly Lock _sync = new();
     private readonly Dictionary<string, WorkerInfo> _workers = new(StringComparer.Ordinal);
-    private readonly TimeSpan _offlineTimeout;
 
     public WorkerRegistry(WorkerManagerConfig config)
     {
@@ -41,8 +41,8 @@ public sealed class WorkerRegistry : IWorkerRegistry
     }
 
     /// <summary>
-    /// Folds a heartbeat into the registry. Returns a transition only when the worker is newly discovered
-    /// or has returned from <see cref="WorkerStatusType.Offline" />; otherwise <c>null</c>.
+    ///     Folds a heartbeat into the registry. Returns a transition only when the worker is newly discovered
+    ///     or has returned from <see cref="WorkerStatusType.Offline" />; otherwise <c>null</c>.
     /// </summary>
     public WorkerStatusChangedEvent? Record(WorkerHeartbeat heartbeat)
     {
@@ -52,7 +52,7 @@ public sealed class WorkerRegistry : IWorkerRegistry
         {
             if (!_workers.TryGetValue(heartbeat.WorkerId, out var existing))
             {
-                _workers[heartbeat.WorkerId] = new(
+                _workers[heartbeat.WorkerId] = new WorkerInfo(
                     heartbeat.WorkerId,
                     heartbeat.Status,
                     heartbeat.ActiveJobs,
@@ -61,7 +61,7 @@ public sealed class WorkerRegistry : IWorkerRegistry
                     now
                 );
 
-                return new(heartbeat.WorkerId, null, heartbeat.Status);
+                return new WorkerStatusChangedEvent(heartbeat.WorkerId, null, heartbeat.Status);
             }
 
             var old = existing.Status;
@@ -74,14 +74,14 @@ public sealed class WorkerRegistry : IWorkerRegistry
             };
 
             return old == WorkerStatusType.Offline && heartbeat.Status != WorkerStatusType.Offline
-                       ? new WorkerStatusChangedEvent(heartbeat.WorkerId, old, heartbeat.Status)
-                       : null;
+                ? new WorkerStatusChangedEvent(heartbeat.WorkerId, old, heartbeat.Status)
+                : null;
         }
     }
 
     /// <summary>
-    /// Marks workers Offline whose last heartbeat is older than the configured timeout relative to
-    /// <paramref name="nowUtc" />. Returns the resulting transitions.
+    ///     Marks workers Offline whose last heartbeat is older than the configured timeout relative to
+    ///     <paramref name="nowUtc" />. Returns the resulting transitions.
     /// </summary>
     public IReadOnlyList<WorkerStatusChangedEvent> Sweep(DateTime nowUtc)
     {
@@ -97,7 +97,7 @@ public sealed class WorkerRegistry : IWorkerRegistry
                 }
 
                 _workers[id] = info with { Status = WorkerStatusType.Offline };
-                changes.Add(new(id, info.Status, WorkerStatusType.Offline));
+                changes.Add(new WorkerStatusChangedEvent(id, info.Status, WorkerStatusType.Offline));
             }
         }
 

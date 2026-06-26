@@ -5,19 +5,15 @@ using SquidStd.Network.Server;
 namespace SquidStd.Network.Sessions;
 
 /// <summary>
-/// Virtual per-endpoint connection backing a UDP session. Sends route to the server's
-/// <see cref="SquidStdUdpServer.SendToAsync" />; closing removes the session via a callback.
+///     Virtual per-endpoint connection backing a UDP session. Sends route to the server's
+///     <see cref="SquidStdUdpServer.SendToAsync" />; closing removes the session via a callback.
 /// </summary>
 internal sealed class UdpSessionConnection : INetworkConnection
 {
-    private readonly SquidStdUdpServer _server;
-    private readonly IPEndPoint _remoteEndPoint;
     private readonly Action _onClose;
+    private readonly IPEndPoint _remoteEndPoint;
+    private readonly SquidStdUdpServer _server;
     private int _closed;
-
-    public long SessionId { get; }
-    public EndPoint? RemoteEndPoint => _remoteEndPoint;
-    public bool IsConnected => Volatile.Read(ref _closed) == 0;
 
     public UdpSessionConnection(SquidStdUdpServer server, IPEndPoint remoteEndPoint, long sessionId, Action onClose)
     {
@@ -26,6 +22,10 @@ internal sealed class UdpSessionConnection : INetworkConnection
         SessionId = sessionId;
         _onClose = onClose;
     }
+
+    public long SessionId { get; }
+    public EndPoint? RemoteEndPoint => _remoteEndPoint;
+    public bool IsConnected => Volatile.Read(ref _closed) == 0;
 
     public Task CloseAsync(CancellationToken cancellationToken = default)
     {
@@ -38,5 +38,7 @@ internal sealed class UdpSessionConnection : INetworkConnection
     }
 
     public Task SendAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
-        => _server.SendToAsync(_remoteEndPoint, payload, cancellationToken);
+    {
+        return _server.SendToAsync(_remoteEndPoint, payload, cancellationToken);
+    }
 }

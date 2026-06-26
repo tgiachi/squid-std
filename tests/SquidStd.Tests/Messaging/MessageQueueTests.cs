@@ -1,4 +1,5 @@
 using SquidStd.Core.Json;
+using SquidStd.Messaging.Abstractions.Data.Config;
 using SquidStd.Messaging.Abstractions.Interfaces;
 using SquidStd.Messaging.Abstractions.Services;
 using SquidStd.Messaging.Services;
@@ -8,6 +9,22 @@ namespace SquidStd.Tests.Messaging;
 public class MessageQueueTests
 {
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5);
+
+    [Fact]
+    public async Task PublishAsync_DeliversTypedMessageToListener()
+    {
+        await using var provider = new InMemoryQueueProvider(new MessagingOptions(), new MessagingMetricsProvider());
+        var serializer = new JsonDataSerializer();
+        IMessageQueue queue = new MessageQueue(provider, serializer, serializer);
+        var listener = new CapturingListener();
+        queue.Subscribe("orders", listener);
+
+        await queue.PublishAsync("orders", new Order { Id = "A1", Amount = 42 });
+
+        var received = await listener.Received.Task.WaitAsync(Timeout);
+        Assert.Equal("A1", received.Id);
+        Assert.Equal(42, received.Amount);
+    }
 
     private sealed class Order
     {
@@ -25,21 +42,5 @@ public class MessageQueueTests
 
             return Task.CompletedTask;
         }
-    }
-
-    [Fact]
-    public async Task PublishAsync_DeliversTypedMessageToListener()
-    {
-        await using var provider = new InMemoryQueueProvider(new(), new MessagingMetricsProvider());
-        var serializer = new JsonDataSerializer();
-        IMessageQueue queue = new MessageQueue(provider, serializer, serializer);
-        var listener = new CapturingListener();
-        queue.Subscribe("orders", listener);
-
-        await queue.PublishAsync("orders", new Order { Id = "A1", Amount = 42 });
-
-        var received = await listener.Received.Task.WaitAsync(Timeout);
-        Assert.Equal("A1", received.Id);
-        Assert.Equal(42, received.Amount);
     }
 }

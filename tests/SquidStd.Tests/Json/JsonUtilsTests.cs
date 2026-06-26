@@ -14,9 +14,6 @@ public class JsonUtilsTests
         JsonUtils.RegisterJsonContext(TestJsonContext.Default);
     }
 
-    // Local type whose name ends with "Entity" to verify suffix stripping.
-    private sealed class UserEntity { }
-
     [Fact]
     public void AddAndRemoveJsonConverter_MutatesConverterList()
     {
@@ -38,11 +35,17 @@ public class JsonUtilsTests
 
     [Fact]
     public void Deserialize_InvalidJson_ThrowsJsonException()
-        => Assert.Throws<JsonException>(() => JsonUtils.Deserialize<SampleDto>("{ not valid"));
+    {
+        Assert.Throws<JsonException>(() => JsonUtils.Deserialize<SampleDto>("{ not valid"));
+    }
 
-    [Theory, InlineData(""), InlineData("   ")]
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
     public void Deserialize_NullOrWhitespace_Throws(string json)
-        => Assert.Throws<ArgumentException>(() => JsonUtils.Deserialize<SampleDto>(json));
+    {
+        Assert.Throws<ArgumentException>(() => JsonUtils.Deserialize<SampleDto>(json));
+    }
 
     [Fact]
     public void Deserialize_WithExplicitContext_ReturnsObject()
@@ -57,9 +60,11 @@ public class JsonUtilsTests
 
     [Fact]
     public void DeserializeFromFile_MissingFile_Throws()
-        => Assert.Throws<FileNotFoundException>(
-            () => JsonUtils.DeserializeFromFile<SampleDto>(Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".json"))
+    {
+        Assert.Throws<FileNotFoundException>(() =>
+            JsonUtils.DeserializeFromFile<SampleDto>(Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".json"))
         );
+    }
 
     [Fact]
     public void DeserializeOrDefault_EmptyJson_ReturnsDefault()
@@ -82,9 +87,13 @@ public class JsonUtilsTests
 
     [Fact]
     public void GetJsonConverters_ContainsDefaultEnumConverter()
-        => Assert.Contains(JsonUtils.GetJsonConverters(), converter => converter is JsonStringEnumConverter);
+    {
+        Assert.Contains(JsonUtils.GetJsonConverters(), converter => converter is JsonStringEnumConverter);
+    }
 
-    [Theory, InlineData("UserEntity", "user.schema.json"), InlineData("SampleDto", "sample_dto.schema.json")]
+    [Theory]
+    [InlineData("UserEntity", "user.schema.json")]
+    [InlineData("SampleDto", "sample_dto.schema.json")]
     public void GetSchemaFileName_GeneratesSnakeCaseSchemaName(string typeName, string expected)
     {
         // Map the parameterized type name to a real type with the same Name.
@@ -93,18 +102,30 @@ public class JsonUtilsTests
         Assert.Equal(expected, JsonUtils.GetSchemaFileName(type));
     }
 
-    [Theory, InlineData("[1,2,3]", true), InlineData("{\"a\":1}", false), InlineData("invalid", false)]
+    [Theory]
+    [InlineData("[1,2,3]", true)]
+    [InlineData("{\"a\":1}", false)]
+    [InlineData("invalid", false)]
     public void IsArray_VariousInputs_ReturnsExpected(string json, bool expected)
-        => Assert.Equal(expected, JsonUtils.IsArray(json));
+    {
+        Assert.Equal(expected, JsonUtils.IsArray(json));
+    }
 
-    [Theory, InlineData("{\"a\":1}", true), InlineData("[1,2,3]", true), InlineData("not json", false),
-     InlineData("", false)]
+    [Theory]
+    [InlineData("{\"a\":1}", true)]
+    [InlineData("[1,2,3]", true)]
+    [InlineData("not json", false)]
+    [InlineData("", false)]
     public void IsValidJson_VariousInputs_ReturnsExpected(string json, bool expected)
-        => Assert.Equal(expected, JsonUtils.IsValidJson(json));
+    {
+        Assert.Equal(expected, JsonUtils.IsValidJson(json));
+    }
 
     [Fact]
     public void Serialize_NullObject_Throws()
-        => Assert.Throws<ArgumentNullException>(() => JsonUtils.Serialize<SampleDto>(null!));
+    {
+        Assert.Throws<ArgumentNullException>(() => JsonUtils.Serialize<SampleDto>(null!));
+    }
 
     [Fact]
     public void SerializeDeserialize_RoundTrip_PreservesValues()
@@ -131,5 +152,10 @@ public class JsonUtilsTests
         Assert.True(File.Exists(path));
         Assert.Equal("file", restored.Name);
         Assert.Equal(9, restored.Count);
+    }
+
+    // Local type whose name ends with "Entity" to verify suffix stripping.
+    private sealed class UserEntity
+    {
     }
 }

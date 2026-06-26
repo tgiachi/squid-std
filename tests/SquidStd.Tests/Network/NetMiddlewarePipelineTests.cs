@@ -30,8 +30,8 @@ public class NetMiddlewarePipelineTests
         using var cts = new CancellationTokenSource();
         await cts.CancelAsync();
 
-        await Assert.ThrowsAsync<OperationCanceledException>(
-            async () => await pipeline.ExecuteAsync(null, new byte[] { 1 }, cts.Token)
+        await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            await pipeline.ExecuteAsync(null, new byte[] { 1 }, cts.Token)
         );
     }
 

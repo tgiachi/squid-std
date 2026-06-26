@@ -1,7 +1,7 @@
 namespace SquidStd.Services.Core.Services.Internal;
 
 /// <summary>
-/// Internal mutable timer wheel entry.
+///     Internal mutable timer wheel entry.
 /// </summary>
 internal sealed class TimerEntry
 {

@@ -7,8 +7,8 @@ using HttpMethod = Elastic.Transport.HttpMethod;
 namespace SquidStd.Search.Elasticsearch.Services;
 
 /// <summary>
-/// Thin JSON request helper over the Elasticsearch client's low-level transport. Sends raw DSL/document JSON
-/// and returns the parsed response, decoupling the provider from the strongly-typed query DSL.
+///     Thin JSON request helper over the Elasticsearch client's low-level transport. Sends raw DSL/document JSON
+///     and returns the parsed response, decoupling the provider from the strongly-typed query DSL.
 /// </summary>
 public sealed class ElasticTransport
 {
@@ -37,7 +37,9 @@ public sealed class ElasticTransport
 
     /// <summary>Deserializes a document body (an Elasticsearch <c>_source</c>) to <typeparamref name="T" />.</summary>
     public static T DeserializeDocument<T>(JsonNode source)
-        => source.Deserialize<T>(WebOptions)!;
+    {
+        return source.Deserialize<T>(WebOptions)!;
+    }
 
     /// <summary>Sends a request with an optional JSON body and returns (statusCode, bodyJson).</summary>
     public Task<(int Status, JsonNode? Body)> SendAsync(
@@ -46,7 +48,9 @@ public sealed class ElasticTransport
         JsonNode? body,
         CancellationToken cancellationToken
     )
-        => SendCoreAsync(method, path, body?.ToJsonString(), JsonRequest, cancellationToken);
+    {
+        return SendCoreAsync(method, path, body?.ToJsonString(), JsonRequest, cancellationToken);
+    }
 
     /// <summary>Sends a raw (already-serialized) NDJSON body for the bulk API.</summary>
     public Task<(int Status, JsonNode? Body)> SendRawAsync(
@@ -55,11 +59,15 @@ public sealed class ElasticTransport
         string? body,
         CancellationToken cancellationToken
     )
-        => SendCoreAsync(method, path, body, NdjsonRequest, cancellationToken);
+    {
+        return SendCoreAsync(method, path, body, NdjsonRequest, cancellationToken);
+    }
 
     /// <summary>Serializes a value to a <see cref="JsonNode" /> using Web (camelCase) defaults.</summary>
     public static JsonNode SerializeDocument<T>(T value)
-        => JsonSerializer.SerializeToNode(value, WebOptions)!;
+    {
+        return JsonSerializer.SerializeToNode(value, WebOptions)!;
+    }
 
     private async Task<(int Status, JsonNode? Body)> SendCoreAsync(
         HttpMethod method,
@@ -72,14 +80,14 @@ public sealed class ElasticTransport
         var postData = body is null ? null : PostData.String(body);
 
         var response = await _client.Transport
-                                    .RequestAsync<StringResponse>(
-                                        method,
-                                        path,
-                                        postData,
-                                        requestConfiguration,
-                                        cancellationToken
-                                    )
-                                    .ConfigureAwait(false);
+            .RequestAsync<StringResponse>(
+                method,
+                path,
+                postData,
+                requestConfiguration,
+                cancellationToken
+            )
+            .ConfigureAwait(false);
 
         var status = response.ApiCallDetails.HttpStatusCode ?? 0;
         var text = response.Body;
