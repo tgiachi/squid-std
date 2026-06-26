@@ -7,7 +7,6 @@ using SquidStd.Network.Client;
 using SquidStd.Network.Data;
 using SquidStd.Network.Data.Events;
 using SquidStd.Network.Data.Options;
-using SquidStd.Network.Interfaces.Codecs;
 using SquidStd.Network.Interfaces.Framing;
 using SquidStd.Network.Interfaces.Middleware;
 using SquidStd.Network.Interfaces.Server;
