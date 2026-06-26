@@ -209,15 +209,6 @@ public sealed class MetricsCollectionService : IMetricsCollectionService, ISquid
 
         try
         {
-            _eventBus.Publish(eventData);
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "Metrics collected event dispatch failed for synchronous listeners");
-        }
-
-        try
-        {
             await _eventBus.PublishAsync(eventData, cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -226,7 +217,7 @@ public sealed class MetricsCollectionService : IMetricsCollectionService, ISquid
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, "Metrics collected event dispatch failed for asynchronous listeners");
+            _logger.Error(ex, "Metrics collected event dispatch failed");
         }
     }
 

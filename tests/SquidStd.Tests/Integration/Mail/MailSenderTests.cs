@@ -20,7 +20,7 @@ public class MailSenderTests
         _fixture = fixture;
     }
 
-    private sealed class DelegateListener<TEvent> : IAsyncEventListener<TEvent>
+    private sealed class DelegateListener<TEvent> : IEventListener<TEvent>
         where TEvent : IEvent
     {
         private readonly Action<TEvent> _onEvent;
@@ -44,7 +44,7 @@ public class MailSenderTests
         var recipient = "send-target@example.com";
         var eventBus = new EventBusService();
         var sent = new TaskCompletionSource<MailSentEvent>(TaskCreationOptions.RunContinuationsAsynchronously);
-        eventBus.RegisterAsyncListener(new DelegateListener<MailSentEvent>(e => sent.TrySetResult(e)));
+        eventBus.RegisterListener(new DelegateListener<MailSentEvent>(e => sent.TrySetResult(e)));
 
         var sender = new MailKitMailSender(
             new() { Host = _fixture.Host, Port = _fixture.SmtpPort, UseSsl = false },
@@ -87,7 +87,7 @@ public class MailSenderTests
     {
         var eventBus = new EventBusService();
         var failed = new TaskCompletionSource<MailSendFailedEvent>(TaskCreationOptions.RunContinuationsAsynchronously);
-        eventBus.RegisterAsyncListener(new DelegateListener<MailSendFailedEvent>(e => failed.TrySetResult(e)));
+        eventBus.RegisterListener(new DelegateListener<MailSendFailedEvent>(e => failed.TrySetResult(e)));
 
         var sender = new MailKitMailSender(new() { Host = _fixture.Host, Port = 1, UseSsl = false }, eventBus);
 

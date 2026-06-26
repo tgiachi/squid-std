@@ -13,7 +13,7 @@ namespace SquidStd.Tests.Manager;
 
 public class HeartbeatCollectorServiceTests
 {
-    private sealed class DelegateListener : IAsyncEventListener<WorkerStatusChangedEvent>
+    private sealed class DelegateListener : IEventListener<WorkerStatusChangedEvent>
     {
         private readonly Action<WorkerStatusChangedEvent> _onEvent;
 
@@ -42,7 +42,7 @@ public class HeartbeatCollectorServiceTests
         var registry = new WorkerRegistry(new());
 
         var discovered = new TaskCompletionSource<WorkerStatusChangedEvent>();
-        eventBus.RegisterAsyncListener(new DelegateListener(e => discovered.TrySetResult(e)));
+        eventBus.RegisterListener(new DelegateListener(e => discovered.TrySetResult(e)));
 
         var service = new HeartbeatCollectorService(topic, registry, eventBus, new());
         await service.StartAsync();

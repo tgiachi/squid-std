@@ -20,7 +20,7 @@ await bootstrap.StartAsync();
 #region step-1
 
 var eventBus = bootstrap.Resolve<IEventBus>();
-eventBus.RegisterAsyncListener(new PingListener());
+eventBus.RegisterListener(new PingListener());
 await eventBus.PublishAsync(new PingEvent("hello"), CancellationToken.None);
 
 #endregion
@@ -54,7 +54,7 @@ await bootstrap.StopAsync();
 public sealed record PingEvent(string Message) : IEvent;
 
 /// <summary>Handles <see cref="PingEvent" />.</summary>
-public sealed class PingListener : IAsyncEventListener<PingEvent>
+public sealed class PingListener : IEventListener<PingEvent>
 {
     public Task HandleAsync(PingEvent eventData, CancellationToken cancellationToken)
     {

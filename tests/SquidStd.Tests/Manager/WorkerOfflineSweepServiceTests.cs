@@ -9,7 +9,7 @@ namespace SquidStd.Tests.Manager;
 
 public class WorkerOfflineSweepServiceTests
 {
-    private sealed class DelegateListener : IAsyncEventListener<WorkerStatusChangedEvent>
+    private sealed class DelegateListener : IEventListener<WorkerStatusChangedEvent>
     {
         private readonly Action<WorkerStatusChangedEvent> _onEvent;
 
@@ -35,7 +35,7 @@ public class WorkerOfflineSweepServiceTests
 
         var eventBus = new EventBusService();
         var offline = new TaskCompletionSource<WorkerStatusChangedEvent>();
-        eventBus.RegisterAsyncListener(new DelegateListener(e => offline.TrySetResult(e)));
+        eventBus.RegisterListener(new DelegateListener(e => offline.TrySetResult(e)));
 
         var service = new WorkerOfflineSweepService(new FakeTimerService(), registry, eventBus, new());
         await service.RunSweepAsync();
