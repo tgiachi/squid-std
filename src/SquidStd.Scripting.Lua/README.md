@@ -25,6 +25,7 @@ dotnet add package SquidStd.Scripting.Lua
 
 - `IScriptEngineService` — load and run Lua scripts; register modules, constants, callbacks, init scripts.
 - Attribute-based modules: mark a class `[ScriptModule]` and methods `[ScriptFunction]` to expose them.
+- `RegisterScriptModuleAttribute` — opt a `[ScriptModule]` class into generated registration.
 - `container.RegisterScriptModule<TModule>()` / `RegisterLuaUserData<T>()` registration extensions.
 - Event bridging to the SquidStd event bus (`ILuaEventBridge`).
 - Built-in modules (logging, events, random) and `.luarc` documentation generation.
@@ -33,9 +34,12 @@ dotnet add package SquidStd.Scripting.Lua
 
 ```csharp
 using DryIoc;
+using SquidStd.Generators.Scripting.Lua;
+using SquidStd.Scripting.Lua.Attributes;
 using SquidStd.Scripting.Lua.Attributes.Scripts;
 using SquidStd.Scripting.Lua.Extensions.Scripts;
 
+[RegisterScriptModule]
 [ScriptModule("math2")]
 public sealed class MathModule
 {
@@ -44,7 +48,7 @@ public sealed class MathModule
 }
 
 var container = new Container();
-container.RegisterScriptModule<MathModule>();
+container.RegisterGeneratedScriptModules();
 // Resolve IScriptEngineService to load and execute scripts that call math2.add(1, 2).
 ```
 
@@ -55,6 +59,7 @@ container.RegisterScriptModule<MathModule>();
 | `IScriptEngineService`                              | Lua engine: load/run scripts, register modules/constants/callbacks. |
 | `ILuaEventBridge`                                   | Bridges Lua scripts to the event bus.                               |
 | `ScriptModuleAttribute` / `ScriptFunctionAttribute` | Expose .NET classes/methods to Lua.                                 |
+| `RegisterScriptModuleAttribute`                     | Marks script modules for generated registration.                    |
 | `AddScriptModuleExtension`                          | `RegisterScriptModule<T>()` / `RegisterLuaUserData<T>()`.           |
 
 ## License

@@ -15,20 +15,22 @@ and prints a greeting.
 - `dotnet add package SquidStd.Workers.Manager`
 - `dotnet add package SquidStd.Messaging`
 - `dotnet add package SquidStd.Services.Core`
+- `dotnet add package SquidStd.Generators`
 
 ## Steps
 
 ### 1. Register messaging, workers and the manager
 
-`ConfigureServices` runs against the bootstrap's DryIoc container. Add the in-memory queue, the worker runtime, a
-job handler, and the manager (which provides the job scheduler).
+`ConfigureServices` runs against the bootstrap's DryIoc container. Add the in-memory queue, the worker runtime,
+generated job handler registrations, and the manager (which provides the job scheduler).
 
 [!code-csharp[](../../samples/SquidStd.Samples.WorkerSystem/Program.cs#step-1)]
 
 ### 2. Implement the job handler
 
 A handler implements `IJobHandler`: it declares the `JobName` it processes and does the work in `HandleAsync`,
-reading any string parameters off the `JobRequest`.
+reading any string parameters off the `JobRequest`. `[RegisterJobHandler]` opts the handler into generated
+registration.
 
 [!code-csharp[](../../samples/SquidStd.Samples.WorkerSystem/Program.cs#step-2)]
 
@@ -62,4 +64,5 @@ DryIoc container.
 - [SquidStd.Workers reference](../articles/workers.md)
 - [SquidStd.Workers.Manager reference](../articles/workers-manager.md)
 - [SquidStd.Workers.Abstractions reference](../articles/workers-abstractions.md)
+- [Generated registrations](source-generators-registration.md)
 - Previous: [Events, jobs and scheduling](events-jobs-scheduling.md)

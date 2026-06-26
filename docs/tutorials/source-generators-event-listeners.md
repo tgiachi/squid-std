@@ -47,3 +47,7 @@ container.RegisterEventListener<PingEvent, PingListener>();
 ```
 
 The listener is then subscribed during the normal SquidStd service startup.
+
+## See also
+
+- [Generated registrations](source-generators-registration.md)
