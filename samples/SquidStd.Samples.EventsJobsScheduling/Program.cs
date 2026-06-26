@@ -1,6 +1,7 @@
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Core.Interfaces.Jobs;
 using SquidStd.Core.Interfaces.Scheduling;
+using SquidStd.Generators.Events;
 using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 
@@ -13,14 +14,17 @@ var bootstrap = SquidStdBootstrap.Create(
 );
 
 // The cron scheduler and timer wheel are opt-in.
-bootstrap.ConfigureServices(container => container.RegisterSchedulerServices());
+bootstrap.ConfigureServices(
+    container => container
+        .RegisterSchedulerServices()
+        .RegisterGeneratedEventListeners()
+);
 
 await bootstrap.StartAsync();
 
 #region step-1
 
 var eventBus = bootstrap.Resolve<IEventBus>();
-eventBus.RegisterListener(new PingListener());
 await eventBus.PublishAsync(new PingEvent("hello"), CancellationToken.None);
 
 #endregion
