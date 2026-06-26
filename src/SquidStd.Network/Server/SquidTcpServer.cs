@@ -4,8 +4,10 @@ using System.Net.Security;
 using System.Net.Sockets;
 using Serilog;
 using SquidStd.Network.Client;
+using SquidStd.Network.Data;
 using SquidStd.Network.Data.Events;
 using SquidStd.Network.Data.Options;
+using SquidStd.Network.Interfaces.Codecs;
 using SquidStd.Network.Interfaces.Framing;
 using SquidStd.Network.Interfaces.Middleware;
 using SquidStd.Network.Interfaces.Server;
@@ -23,6 +25,7 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
     private readonly ConcurrentDictionary<long, SquidStdTcpClient> _clients = new();
     private readonly IPEndPoint _endPoint;
     private readonly INetFramer? _framer;
+    private readonly Func<ConnectionPipeline>? _connectionFactory;
     private readonly int _historyBufferCapacity;
     private readonly SquidStdTcpServerTlsOptions? _tlsOptions;
 
@@ -86,7 +89,8 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
         INetFramer? framer = null,
         int receiveBufferSize = 8192,
         int historyBufferCapacity = 65536,
-        SquidStdTcpServerTlsOptions? tlsOptions = null
+        SquidStdTcpServerTlsOptions? tlsOptions = null,
+        Func<ConnectionPipeline>? connectionFactory = null
     )
     {
         _endPoint = endPoint;
@@ -94,6 +98,7 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
         _receiveBufferSize = receiveBufferSize;
         _historyBufferCapacity = historyBufferCapacity;
         _tlsOptions = tlsOptions;
+        _connectionFactory = connectionFactory;
     }
 
     /// <summary>
@@ -212,12 +217,16 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
                 var clientSocket = await serverSocket.AcceptAsync(cts.Token);
                 var clientStream = await CreateClientStreamAsync(clientSocket, cts.Token).ConfigureAwait(false);
 
-                var middlewareSnapshot = _middlewares;
+                var pipeline = _connectionFactory?.Invoke();
+                var middlewares = pipeline?.Middlewares ?? _middlewares;
+                var framer = pipeline?.Framer ?? _framer;
+                var codec = pipeline?.Codec;
                 var client = new SquidStdTcpClient(
                     clientSocket,
                     clientStream,
-                    middlewareSnapshot,
-                    _framer,
+                    middlewares,
+                    framer,
+                    codec,
                     _receiveBufferSize,
                     _historyBufferCapacity
                 );

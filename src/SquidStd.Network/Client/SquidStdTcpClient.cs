@@ -5,6 +5,7 @@ using Serilog;
 using SquidStd.Network.Buffers;
 using SquidStd.Network.Data.Events;
 using SquidStd.Network.Interfaces.Client;
+using SquidStd.Network.Interfaces.Codecs;
 using SquidStd.Network.Interfaces.Framing;
 using SquidStd.Network.Interfaces.Middleware;
 using SquidStd.Network.Pipeline;
@@ -32,6 +33,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     private readonly Stream _stream;
     private static long _sessionIdSequence;
     private int _closed;
+    private ITransportCodec? _codec;
 
     private CancellationTokenRegistration _externalCancellationTokenRegistration;
     private byte[]? _pendingBuffer;
@@ -153,6 +155,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
         Socket socket,
         IEnumerable<INetMiddleware>? middlewares = null,
         INetFramer? framer = null,
+        ITransportCodec? codec = null,
         int receiveBufferSize = DefaultReceiveBufferSize,
         int historyBufferCapacity = DefaultHistoryBufferCapacity
     ) : this(
@@ -160,6 +163,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
         new NetworkStream(socket, false),
         middlewares,
         framer,
+        codec,
         receiveBufferSize,
         historyBufferCapacity
     ) { }
@@ -172,6 +176,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
         Stream stream,
         IEnumerable<INetMiddleware>? middlewares = null,
         INetFramer? framer = null,
+        ITransportCodec? codec = null,
         int receiveBufferSize = DefaultReceiveBufferSize,
         int historyBufferCapacity = DefaultHistoryBufferCapacity
     )
@@ -183,6 +188,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
         _stream = stream;
         _middlewarePipeline = new(middlewares);
         _framer = framer;
+        _codec = codec;
         _receiveBuffer = new(historyBufferCapacity);
         ReceiveBufferSize = receiveBufferSize;
         SessionId = Interlocked.Increment(ref _sessionIdSequence);
@@ -246,13 +252,14 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
         IPEndPoint endPoint,
         IEnumerable<INetMiddleware>? middlewares = null,
         INetFramer? framer = null,
+        ITransportCodec? codec = null,
         CancellationToken cancellationToken = default
     )
     {
         var socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         await socket.ConnectAsync(endPoint, cancellationToken);
 
-        var client = new SquidStdTcpClient(socket, middlewares, framer);
+        var client = new SquidStdTcpClient(socket, middlewares, framer, codec);
         await client.StartAsync(cancellationToken);
 
         return client;
@@ -374,7 +381,28 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
 
         try
         {
-            await _stream.WriteAsync(processedPayload, cancellationToken);
+            var codec = Volatile.Read(ref _codec);
+
+            if (codec is null)
+            {
+                await _stream.WriteAsync(processedPayload, cancellationToken);
+            }
+            else
+            {
+                var sendBuffer = ArrayPool<byte>.Shared.Rent(processedPayload.Length);
+
+                try
+                {
+                    processedPayload.Span.CopyTo(sendBuffer);
+                    codec.Encode(sendBuffer.AsSpan(0, processedPayload.Length));
+                    await _stream.WriteAsync(sendBuffer.AsMemory(0, processedPayload.Length), cancellationToken);
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(sendBuffer);
+                }
+            }
+
             await _stream.FlushAsync(cancellationToken);
         }
         catch (Exception ex)
@@ -542,6 +570,8 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
                 try
                 {
                     buffer.AsSpan(0, received).CopyTo(chunk);
+
+                    Volatile.Read(ref _codec)?.Decode(chunk.AsSpan(0, received));
 
                     var chunkMemory = new ReadOnlyMemory<byte>(chunk, 0, received);
                     var processed = await _middlewarePipeline.ExecuteAsync(
