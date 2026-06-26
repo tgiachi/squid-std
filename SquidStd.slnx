@@ -46,6 +46,7 @@
         <Project Path="samples/SquidStd.Samples.Plugins/SquidStd.Samples.Plugins.csproj"/>
         <Project Path="samples/SquidStd.Samples.Networking/SquidStd.Samples.Networking.csproj"/>
         <Project Path="samples/SquidStd.Samples.Persistence/SquidStd.Samples.Persistence.csproj"/>
+        <Project Path="samples/SquidStd.Samples.Commands/SquidStd.Samples.Commands.csproj"/>
         <Project Path="samples/SquidStd.Samples.Email/SquidStd.Samples.Email.csproj"/>
         <Project Path="samples/SquidStd.Samples.Database/SquidStd.Samples.Database.csproj"/>
         <Project Path="samples/SquidStd.Samples.AspNetCore/SquidStd.Samples.AspNetCore.csproj"/>
