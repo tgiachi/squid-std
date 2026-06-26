@@ -72,7 +72,11 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
 
             if (!_registry.IsRegistered(entry.TypeId))
             {
-                _logger.Warning("Journal replay: unregistered type id {TypeId}; skipping entry {SequenceId}", entry.TypeId, entry.SequenceId);
+                _logger.Warning(
+                    "Journal replay: unregistered type id {TypeId}; skipping entry {SequenceId}",
+                    entry.TypeId,
+                    entry.SequenceId
+                );
 
                 continue;
             }
@@ -150,7 +154,10 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
 
         if (_eventBus is not null)
         {
-            await _eventBus.PublishAsync(new SnapshotSaveCompletedEvent(capturedSequenceId, buckets.Count), cancellationToken);
+            await _eventBus.PublishAsync(
+                new SnapshotSaveCompletedEvent(capturedSequenceId, buckets.Count),
+                cancellationToken
+            );
         }
     }
 

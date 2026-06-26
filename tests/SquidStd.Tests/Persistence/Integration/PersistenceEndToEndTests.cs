@@ -38,9 +38,9 @@ public sealed class PersistenceEndToEndTests : IDisposable
         var store = service.GetStore<Item, int>();
         await store.UpsertAsync(new Item { Id = 1, Label = "Sword", Quantity = 1 });
         await store.UpsertAsync(new Item { Id = 2, Label = "Potion", Quantity = 5 });
-        await service.SaveSnapshotAsync();           // snapshot at seq 2
+        await service.SaveSnapshotAsync();                                            // snapshot at seq 2
         await store.UpsertAsync(new Item { Id = 2, Label = "Potion", Quantity = 9 }); // tail update (seq 3)
-        await store.RemoveAsync(1);                   // tail remove (seq 4)
+        await store.RemoveAsync(1);                                                   // tail remove (seq 4)
 
         var reloaded = Create();
         await reloaded.InitializeAsync();

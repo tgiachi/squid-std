@@ -52,7 +52,9 @@ public sealed class BinaryJournalService : IJournalService, IAsyncDisposable
         }
     }
 
-    public async ValueTask AppendBatchAsync(IReadOnlyList<JournalEntry> entries, CancellationToken cancellationToken = default)
+    public async ValueTask AppendBatchAsync(
+        IReadOnlyList<JournalEntry> entries, CancellationToken cancellationToken = default
+    )
     {
         ArgumentNullException.ThrowIfNull(entries);
 
@@ -118,8 +120,8 @@ public sealed class BinaryJournalService : IJournalService, IAsyncDisposable
             }
 
             var kept = ParseAll(await File.ReadAllBytesAsync(_path, cancellationToken))
-                       .Where(entry => entry.SequenceId > inclusiveSequenceId)
-                       .ToArray();
+                .Where(entry => entry.SequenceId > inclusiveSequenceId)
+                .ToArray();
 
             await RewriteAsync(kept, cancellationToken);
         }
@@ -179,7 +181,9 @@ public sealed class BinaryJournalService : IJournalService, IAsyncDisposable
         File.Move(tempPath, _path, true);
     }
 
-    private static async ValueTask WriteRecordAsync(FileStream stream, JournalEntry entry, CancellationToken cancellationToken)
+    private static async ValueTask WriteRecordAsync(
+        FileStream stream, JournalEntry entry, CancellationToken cancellationToken
+    )
     {
         var record = JournalRecordCodec.Encode(entry);
         var header = new byte[FrameHeaderSize];

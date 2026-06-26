@@ -7,5 +7,8 @@ public interface ISnapshotService
 {
     ValueTask DeleteBucketAsync(string typeName, CancellationToken cancellationToken = default);
     ValueTask<PersistedBucket?> LoadBucketAsync(string typeName, CancellationToken cancellationToken = default);
-    ValueTask SaveBucketAsync(EntitySnapshotBucket bucket, long lastSequenceId, CancellationToken cancellationToken = default);
+
+    ValueTask SaveBucketAsync(
+        EntitySnapshotBucket bucket, long lastSequenceId, CancellationToken cancellationToken = default
+    );
 }

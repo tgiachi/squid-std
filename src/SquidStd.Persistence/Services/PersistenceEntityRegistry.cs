@@ -74,7 +74,9 @@ public sealed class PersistenceEntityRegistry : IPersistenceEntityRegistry
             }
         }
 
-        throw new InvalidOperationException($"No persisted entity registered for {typeof(TEntity).Name}/{typeof(TKey).Name}.");
+        throw new InvalidOperationException(
+            $"No persisted entity registered for {typeof(TEntity).Name}/{typeof(TKey).Name}."
+        );
     }
 
     public IReadOnlyCollection<IPersistenceEntityDescriptor> GetRegisteredDescriptors()

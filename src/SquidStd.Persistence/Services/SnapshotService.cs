@@ -96,7 +96,9 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
         }
     }
 
-    public async ValueTask SaveBucketAsync(EntitySnapshotBucket bucket, long lastSequenceId, CancellationToken cancellationToken = default)
+    public async ValueTask SaveBucketAsync(
+        EntitySnapshotBucket bucket, long lastSequenceId, CancellationToken cancellationToken = default
+    )
     {
         ArgumentNullException.ThrowIfNull(bucket);
 
