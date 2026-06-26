@@ -26,6 +26,7 @@ dotnet add package SquidStd.Services.Core
 - One-line bootstrap: `container.RegisterCoreServices()` registers the full default service set.
 - `ConfigManagerService` — loads/saves YAML config sections and substitutes `$ENV_VAR` tokens.
 - `EventBusService` — in-process publish/subscribe over `IEvent`.
+- `CommandDispatcher<TContext>` — typed protocol command dispatch with fan-out, fault isolation, and a `CommandDispatchResult` (`RegisterCommandDispatcher` / `RegisterCommandHandler` / `RegisterCommandContextFactory`).
 - `JobSystemService` — background job execution; `TimerWheelService` + cron scheduling for timed work.
 - `MainThreadDispatcherService` — marshal work back onto a main thread.
 - `MetricsCollectionService` — aggregates `IMetricProvider` samples.
@@ -44,6 +45,22 @@ var container = new Container();
 container.RegisterCoreServices("squidstd", Directory.GetCurrentDirectory());
 ```
 
+## Command dispatch
+
+```csharp
+// Register a dispatcher for your context type, a context factory, and handlers.
+container.RegisterCommandContextFactory<Session, CurrentSessionFactory>();
+container.RegisterCommandDispatcher<Session>();
+container.RegisterCommandHandler<PingCommand, Session, PingHandler>();
+
+// Dispatch (handlers auto-subscribed at bootstrap). Build the context from the factory:
+var result = await dispatcher.DispatchAsync(new PingCommand("hi"));
+if (!result.Matched)
+{
+    // unknown command
+}
+```
+
 ## Key types
 
 | Type                                | Purpose                                                                   |
@@ -51,6 +68,7 @@ container.RegisterCoreServices("squidstd", Directory.GetCurrentDirectory());
 | `RegisterDefaultServicesExtensions` | `RegisterCoreServices()` / `RegisterConfigManagerService()` entry points. |
 | `ConfigManagerService`              | YAML config load/save with env-var substitution.                          |
 | `EventBusService`                   | In-process event bus implementation.                                      |
+| `CommandDispatcher<TContext>`       | Typed protocol command dispatch with context.                             |
 | `JobSystemService`                  | Background job execution.                                                 |
 | `TimerWheelService`                 | Timer-wheel scheduling.                                                   |
 | `MainThreadDispatcherService`       | Main-thread work dispatch.                                                |
