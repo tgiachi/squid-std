@@ -34,6 +34,70 @@ public class TransportCodecTests
     }
 
     [Fact]
+    public async Task Codec_ConcurrentSends_PreserveKeystreamIntegrity()
+    {
+        const int messageCount = 40;
+        const int payloadSize = 16;
+        var concurrentTimeout = TimeSpan.FromSeconds(10);
+
+        var frames = new System.Collections.Concurrent.ConcurrentBag<byte[]>();
+        using var done = new CountdownEvent(messageCount);
+
+        await using var server = new SquidTcpServer(
+            new(IPAddress.Loopback, 0),
+            connectionPipelineFactory: () => new ConnectionPipeline(new CountingXorCodec(5), null, new LengthPrefixFramer())
+        );
+        server.OnDataReceived += (_, e) =>
+        {
+            frames.Add(e.Data.ToArray());
+            done.Signal();
+        };
+        await server.StartAsync(CancellationToken.None);
+
+        await using var client = await SquidStdTcpClient.ConnectAsync(
+            new(IPAddress.Loopback, server.Port),
+            codec: new CountingXorCodec(5)
+        );
+
+        await Parallel.ForEachAsync(
+            Enumerable.Range(0, messageCount),
+            async (id, ct) =>
+            {
+                var frame = new byte[1 + payloadSize];
+                frame[0] = payloadSize;
+
+                for (var i = 1; i < frame.Length; i++)
+                {
+                    frame[i] = (byte)id;
+                }
+
+                await client.SendAsync(frame, ct);
+            }
+        );
+
+        Assert.True(done.Wait(concurrentTimeout));
+        Assert.Equal(messageCount, frames.Count);
+
+        var ids = new HashSet<int>();
+
+        foreach (var frame in frames)
+        {
+            Assert.Equal(1 + payloadSize, frame.Length);
+            Assert.Equal(payloadSize, frame[0]);
+            var id = frame[1];
+
+            for (var i = 1; i < frame.Length; i++)
+            {
+                Assert.Equal(id, frame[i]);
+            }
+
+            ids.Add(id);
+        }
+
+        Assert.Equal(messageCount, ids.Count);
+    }
+
+    [Fact]
     public async Task Codec_WithFramer_EmitsDecodedFrames()
     {
         var frames = new System.Collections.Concurrent.BlockingCollection<byte[]>();
