@@ -25,6 +25,8 @@ dotnet add package SquidStd.Abstractions
 
 - `ISquidStdService` — a `StartAsync`/`StopAsync` lifecycle contract for managed services.
 - `RegisterEventListenerAttribute` — mark `IEventListener<TEvent>` classes for generated registration.
+- `RegisterStdServiceAttribute` — mark service implementations for generated lifecycle registration.
+- `RegisterConfigSectionAttribute` — mark config models for generated config-section registration.
 - `RegisterStdService<TService, TImplementation>()` — register a singleton service and record it in the
   ordered service list (with optional priority).
 - `RegisterConfigSection<TConfig>(sectionName)` — register a YAML config section for the config manager.
@@ -49,11 +51,13 @@ container.RegisterConfigSection<MyConfig>("my");
 | Type                             | Purpose                                          |
 |----------------------------------|--------------------------------------------------|
 | `ISquidStdService`               | Async start/stop lifecycle for managed services. |
-| `RegisterEventListenerAttribute` | Marks event listeners for generated registration. |
-| `RegisterStdServiceExtension`    | `RegisterStdService<,>` container extension.     |
-| `RegisterConfigSectionExtension` | `RegisterConfigSection<>` container extension.   |
-| `ServiceRegistrationData`        | Ordered service registration record.             |
-| `ConfigRegistrationData`         | Config section registration record.              |
+| `RegisterEventListenerAttribute`  | Marks event listeners for generated registration. |
+| `RegisterStdServiceAttribute`     | Marks services for generated registration.        |
+| `RegisterConfigSectionAttribute`  | Marks config sections for generated registration. |
+| `RegisterStdServiceExtension`     | `RegisterStdService<,>` container extension.      |
+| `RegisterConfigSectionExtension`  | `RegisterConfigSection<>` container extension.    |
+| `ServiceRegistrationData`         | Ordered service registration record.              |
+| `ConfigRegistrationData`          | Config section registration record.               |
 
 ## License
 

@@ -12,13 +12,15 @@ bootstrap, runs a small Lua script, and prints values evaluated by the engine.
 - .NET 10 SDK
 - `dotnet add package SquidStd.Scripting.Lua`
 - `dotnet add package SquidStd.Services.Core`
+- `dotnet add package SquidStd.Generators`
 
 ## Steps
 
 ### 1. Register the Lua engine
 
 The engine needs a `LuaEngineConfig` (it watches a scripts directory) and is started by the bootstrap as a
-SquidStd service. The `DirectoriesConfig` it depends on is already registered by the core services.
+SquidStd service. The `DirectoriesConfig` it depends on is already registered by the core services. The generated
+script-module registration call adds any `[RegisterScriptModule]` modules before startup.
 
 [!code-csharp[](../../samples/SquidStd.Samples.ScriptingLua/Program.cs#step-1)]
 
@@ -29,6 +31,13 @@ SquidStd service. The `DirectoriesConfig` it depends on is already registered by
 
 [!code-csharp[](../../samples/SquidStd.Samples.ScriptingLua/Program.cs#step-2)]
 
+### 3. Define a generated module
+
+`[RegisterScriptModule]` opts the type into source generation. `[ScriptModule("sample")]` is still the runtime Lua
+metadata used as the module name.
+
+[!code-csharp[](../../samples/SquidStd.Samples.ScriptingLua/Program.cs#step-3)]
+
 ## Run it
 
 ```bash
@@ -38,6 +47,7 @@ dotnet run --project samples/SquidStd.Samples.ScriptingLua
 Prints:
 
 ```
+lua modules = 1
 3 + 4 = 7
 result = hello from C# and lua
 ```
@@ -52,3 +62,4 @@ configured scripts directory. Globals you register become Lua variables, and `Ex
 ## See also
 
 - [SquidStd.Scripting.Lua reference](../articles/scripting-lua.md)
+- [Generated registrations](source-generators-registration.md)
