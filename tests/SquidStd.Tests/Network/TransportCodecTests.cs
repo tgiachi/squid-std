@@ -34,6 +34,34 @@ public class TransportCodecTests
     }
 
     [Fact]
+    public async Task Codec_IsolatesStatePerConnection()
+    {
+        var payload = new byte[] { 9, 8, 7, 6 };
+        var inbox = new System.Collections.Concurrent.BlockingCollection<byte[]>();
+
+        await using var server = new SquidTcpServer(
+            new(IPAddress.Loopback, 0),
+            connectionPipelineFactory: () => new ConnectionPipeline(new CountingXorCodec(3))
+        );
+        server.OnDataReceived += (_, e) => inbox.Add(e.Data.ToArray());
+        await server.StartAsync(CancellationToken.None);
+
+        // Two sequential connections. Each accepted connection must get a fresh codec (position 0);
+        // a shared codec would leave the second connection's decode position offset and corrupt the bytes.
+        for (var i = 0; i < 2; i++)
+        {
+            await using var client = await SquidStdTcpClient.ConnectAsync(
+                new(IPAddress.Loopback, server.Port),
+                codec: new CountingXorCodec(3)
+            );
+            await client.SendAsync(payload, CancellationToken.None);
+
+            Assert.True(inbox.TryTake(out var got, Timeout));
+            Assert.Equal(payload, got);
+        }
+    }
+
+    [Fact]
     public async Task Codec_SwapsAtomicallyMidConnection()
     {
         var msg1 = new byte[] { 1, 1, 1 };
