@@ -13,40 +13,43 @@ namespace SquidStd.Mail.MailKit.Extensions;
 /// <summary>DryIoc registration helpers for the mail poller.</summary>
 public static class MailRegistrationExtensions
 {
-    /// <summary>
-    ///     Registers a single mailbox poller: the options, the protocol-specific <see cref="IMailReader" />, the
-    ///     polling service, and the timer-wheel pump (only if not already registered).
-    /// </summary>
-    public static IContainer AddMail(this IContainer container, MailOptions options)
+    extension(IContainer container)
     {
-        ArgumentNullException.ThrowIfNull(container);
-        ArgumentNullException.ThrowIfNull(options);
-        ArgumentException.ThrowIfNullOrWhiteSpace(options.Host);
-
-        if (options.Port <= 0)
+        /// <summary>
+        ///     Registers a single mailbox poller: the options, the protocol-specific <see cref="IMailReader" />, the
+        ///     polling service, and the timer-wheel pump (only if not already registered).
+        /// </summary>
+        public IContainer AddMail(MailOptions options)
         {
-            throw new ArgumentException("Port must be positive.", nameof(options));
+            ArgumentNullException.ThrowIfNull(container);
+            ArgumentNullException.ThrowIfNull(options);
+            ArgumentException.ThrowIfNullOrWhiteSpace(options.Host);
+
+            if (options.Port <= 0)
+            {
+                throw new ArgumentException("Port must be positive.", nameof(options));
+            }
+
+            container.RegisterInstance(options);
+
+            if (options.Protocol == MailProtocolType.Pop3)
+            {
+                container.Register<IMailReader, Pop3MailReader>(Reuse.Singleton);
+            }
+            else
+            {
+                container.Register<IMailReader, ImapMailReader>(Reuse.Singleton);
+            }
+
+            container.RegisterStdService<MailPollingService, MailPollingService>(100);
+
+            if (!container.IsRegistered<TimerWheelPumpService>())
+            {
+                container.RegisterConfigSection("timerWheelPump", static () => new TimerWheelPumpConfig(), -90);
+                container.RegisterStdService<TimerWheelPumpService, TimerWheelPumpService>(-1);
+            }
+
+            return container;
         }
-
-        container.RegisterInstance(options);
-
-        if (options.Protocol == MailProtocolType.Pop3)
-        {
-            container.Register<IMailReader, Pop3MailReader>(Reuse.Singleton);
-        }
-        else
-        {
-            container.Register<IMailReader, ImapMailReader>(Reuse.Singleton);
-        }
-
-        container.RegisterStdService<MailPollingService, MailPollingService>(100);
-
-        if (!container.IsRegistered<TimerWheelPumpService>())
-        {
-            container.RegisterConfigSection("timerWheelPump", static () => new TimerWheelPumpConfig(), -90);
-            container.RegisterStdService<TimerWheelPumpService, TimerWheelPumpService>(-1);
-        }
-
-        return container;
     }
 }

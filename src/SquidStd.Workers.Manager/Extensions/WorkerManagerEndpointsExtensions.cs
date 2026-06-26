@@ -9,17 +9,20 @@ namespace SquidStd.Workers.Manager.Extensions;
 /// </summary>
 public static class WorkerManagerEndpointsExtensions
 {
-    /// <summary>
-    ///     Maps <c>GET /workers</c>, <c>GET /workers/{id}</c>, and <c>POST /jobs</c>.
-    /// </summary>
-    public static IEndpointRouteBuilder MapWorkerManagerEndpoints(this IEndpointRouteBuilder endpoints)
+    extension(IEndpointRouteBuilder endpoints)
     {
-        ArgumentNullException.ThrowIfNull(endpoints);
+        /// <summary>
+        ///     Maps <c>GET /workers</c>, <c>GET /workers/{id}</c>, and <c>POST /jobs</c>.
+        /// </summary>
+        public IEndpointRouteBuilder MapWorkerManagerEndpoints()
+        {
+            ArgumentNullException.ThrowIfNull(endpoints);
 
-        endpoints.MapGet("/workers", WorkerManagerEndpoints.GetWorkers);
-        endpoints.MapGet("/workers/{id}", WorkerManagerEndpoints.GetWorker);
-        endpoints.MapPost("/jobs", WorkerManagerEndpoints.EnqueueJob);
+            endpoints.MapGet("/workers", WorkerManagerEndpoints.GetWorkers);
+            endpoints.MapGet("/workers/{id}", WorkerManagerEndpoints.GetWorker);
+            endpoints.MapPost("/jobs", WorkerManagerEndpoints.EnqueueJob);
 
-        return endpoints;
+            return endpoints;
+        }
     }
 }

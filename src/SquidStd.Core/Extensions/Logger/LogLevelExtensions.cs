@@ -8,22 +8,25 @@ namespace SquidStd.Core.Extensions.Logger;
 /// </summary>
 public static class LogLevelExtensions
 {
-    /// <summary>
-    ///     Converts a LogLevelType to a Serilog LogEventLevel.
-    /// </summary>
     /// <param name="logLevel">The log level to convert.</param>
-    /// <returns>The corresponding Serilog log event level.</returns>
-    public static LogEventLevel ToSerilogLogLevel(this LogLevelType logLevel)
+    extension(LogLevelType logLevel)
     {
-        return logLevel switch
+        /// <summary>
+        ///     Converts a LogLevelType to a Serilog LogEventLevel.
+        /// </summary>
+        /// <returns>The corresponding Serilog log event level.</returns>
+        public LogEventLevel ToSerilogLogLevel()
         {
-            LogLevelType.Trace       => LogEventLevel.Verbose,
-            LogLevelType.Debug       => LogEventLevel.Debug,
-            LogLevelType.Information => LogEventLevel.Information,
-            LogLevelType.Warning     => LogEventLevel.Warning,
-            LogLevelType.Error       => LogEventLevel.Error,
-            LogLevelType.Critical    => LogEventLevel.Fatal,
-            _                        => LogEventLevel.Information
-        };
+            return logLevel switch
+            {
+                LogLevelType.Trace       => LogEventLevel.Verbose,
+                LogLevelType.Debug       => LogEventLevel.Debug,
+                LogLevelType.Information => LogEventLevel.Information,
+                LogLevelType.Warning     => LogEventLevel.Warning,
+                LogLevelType.Error       => LogEventLevel.Error,
+                LogLevelType.Critical    => LogEventLevel.Fatal,
+                _                        => LogEventLevel.Information
+            };
+        }
     }
 }

@@ -12,35 +12,38 @@ namespace SquidStd.Workers.Extensions;
 /// </summary>
 public static class WorkersRegistrationExtensions
 {
-    /// <summary>
-    ///     Registers a job handler so the dispatcher can route jobs to it by name.
-    /// </summary>
-    public static IContainer AddJobHandler<THandler>(this IContainer container)
-        where THandler : class, IJobHandler
+    extension(IContainer container)
     {
-        ArgumentNullException.ThrowIfNull(container);
+        /// <summary>
+        ///     Registers a job handler so the dispatcher can route jobs to it by name.
+        /// </summary>
+        public IContainer AddJobHandler<THandler>()
+            where THandler : class, IJobHandler
+        {
+            ArgumentNullException.ThrowIfNull(container);
 
-        container.Register<IJobHandler, THandler>(Reuse.Singleton);
+            container.Register<IJobHandler, THandler>(Reuse.Singleton);
 
-        return container;
-    }
+            return container;
+        }
 
-    /// <summary>
-    ///     Registers the worker runtime: the "workers" config section, shared state, job dispatcher, and the
-    ///     consumer + heartbeat lifecycle services.
-    /// </summary>
-    public static IContainer AddWorkers(this IContainer container)
-    {
-        ArgumentNullException.ThrowIfNull(container);
+        /// <summary>
+        ///     Registers the worker runtime: the "workers" config section, shared state, job dispatcher, and the
+        ///     consumer + heartbeat lifecycle services.
+        /// </summary>
+        public IContainer AddWorkers()
+        {
+            ArgumentNullException.ThrowIfNull(container);
 
-        container.RegisterConfigSection("workers", static () => new WorkersConfig(), -50);
+            container.RegisterConfigSection("workers", static () => new WorkersConfig(), -50);
 
-        container.Register<IWorkerState, WorkerState>(Reuse.Singleton);
-        container.Register<IJobDispatcher, JobDispatcher>(Reuse.Singleton);
+            container.Register<IWorkerState, WorkerState>(Reuse.Singleton);
+            container.Register<IJobDispatcher, JobDispatcher>(Reuse.Singleton);
 
-        container.RegisterStdService<WorkerConsumerService, WorkerConsumerService>(100);
-        container.RegisterStdService<WorkerHeartbeatService, WorkerHeartbeatService>(110);
+            container.RegisterStdService<WorkerConsumerService, WorkerConsumerService>(100);
+            container.RegisterStdService<WorkerHeartbeatService, WorkerHeartbeatService>(110);
 
-        return container;
+            return container;
+        }
     }
 }

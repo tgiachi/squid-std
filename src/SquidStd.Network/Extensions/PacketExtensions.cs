@@ -2,8 +2,11 @@ namespace SquidStd.Network.Extensions;
 
 public static class PacketExtensions
 {
-    public static string ToPacketString(this byte opCode)
+    extension(byte opCode)
     {
-        return "0x" + opCode.ToString("X2");
+        public string ToPacketString()
+        {
+            return "0x" + opCode.ToString("X2");
+        }
     }
 }

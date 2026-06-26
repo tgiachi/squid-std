@@ -17,54 +17,56 @@ namespace SquidStd.Messaging.Sqs.Extensions;
 /// </summary>
 public static class SqsMessagingRegistrationExtensions
 {
-    /// <summary>Registers SQS/SNS messaging from an explicit options object.</summary>
-    public static IContainer AddSqsMessaging(
-        this IContainer container,
-        SqsOptions options,
-        MessagingOptions? messagingOptions = null
-    )
+    extension(IContainer container)
     {
-        ArgumentNullException.ThrowIfNull(container);
-        ArgumentNullException.ThrowIfNull(options);
+        /// <summary>Registers SQS/SNS messaging from an explicit options object.</summary>
+        public IContainer AddSqsMessaging(
+            SqsOptions options,
+            MessagingOptions? messagingOptions = null
+        )
+        {
+            ArgumentNullException.ThrowIfNull(container);
+            ArgumentNullException.ThrowIfNull(options);
 
-        var resolvedMessaging = messagingOptions ?? new MessagingOptions();
+            var resolvedMessaging = messagingOptions ?? new MessagingOptions();
 
-        container.RegisterInstance(resolvedMessaging);
-        container.RegisterInstance(options);
+            container.RegisterInstance(resolvedMessaging);
+            container.RegisterInstance(options);
 
-        var serializer = new JsonDataSerializer();
-        container.RegisterInstance<IDataSerializer>(serializer, IfAlreadyRegistered.Keep);
-        container.RegisterInstance<IDataDeserializer>(serializer, IfAlreadyRegistered.Keep);
+            var serializer = new JsonDataSerializer();
+            container.RegisterInstance<IDataSerializer>(serializer, IfAlreadyRegistered.Keep);
+            container.RegisterInstance<IDataDeserializer>(serializer, IfAlreadyRegistered.Keep);
 
-        var metrics = new MessagingMetricsProvider();
-        container.RegisterInstance<IMessagingMetrics>(metrics);
-        container.RegisterInstance<IMetricProvider>(metrics);
+            var metrics = new MessagingMetricsProvider();
+            container.RegisterInstance<IMessagingMetrics>(metrics);
+            container.RegisterInstance<IMetricProvider>(metrics);
 
-        container.RegisterDelegate<IQueueProvider>(
-            r => new SqsQueueProvider(
-                r.Resolve<SqsOptions>(),
-                r.Resolve<MessagingOptions>(),
-                r.Resolve<IMessagingMetrics>()
-            ),
-            Reuse.Singleton
-        );
-        container.Register<IMessageQueue, MessageQueue>(Reuse.Singleton);
+            container.RegisterDelegate<IQueueProvider>(
+                r => new SqsQueueProvider(
+                    r.Resolve<SqsOptions>(),
+                    r.Resolve<MessagingOptions>(),
+                    r.Resolve<IMessagingMetrics>()
+                ),
+                Reuse.Singleton
+            );
+            container.Register<IMessageQueue, MessageQueue>(Reuse.Singleton);
 
-        container.RegisterDelegate<ITopicProvider>(r => new SqsTopicProvider(r.Resolve<SqsOptions>()), Reuse.Singleton);
-        container.Register<IMessageTopic, MessageTopic>(Reuse.Singleton);
-        container.Register<ITopicEventBridge, TopicEventBridge>(Reuse.Singleton);
+            container.RegisterDelegate<ITopicProvider>(r => new SqsTopicProvider(r.Resolve<SqsOptions>()), Reuse.Singleton);
+            container.Register<IMessageTopic, MessageTopic>(Reuse.Singleton);
+            container.Register<ITopicEventBridge, TopicEventBridge>(Reuse.Singleton);
 
-        return container;
-    }
+            return container;
+        }
 
-    /// <summary>Registers SQS/SNS messaging from a connection string (scheme must be "sqs").</summary>
-    public static IContainer AddSqsMessaging(this IContainer container, string connectionString)
-    {
-        ArgumentNullException.ThrowIfNull(container);
+        /// <summary>Registers SQS/SNS messaging from a connection string (scheme must be "sqs").</summary>
+        public IContainer AddSqsMessaging(string connectionString)
+        {
+            ArgumentNullException.ThrowIfNull(container);
 
-        var cs = MessagingConnectionString.Parse(connectionString);
+            var cs = MessagingConnectionString.Parse(connectionString);
 
-        return container.AddSqsMessaging(ParseOptions(connectionString), cs.ToMessagingOptions());
+            return container.AddSqsMessaging(ParseOptions(connectionString), cs.ToMessagingOptions());
+        }
     }
 
     /// <summary>Parses a "sqs://[ak:sk@]region[?params]" connection string into <see cref="SqsOptions" />.</summary>
