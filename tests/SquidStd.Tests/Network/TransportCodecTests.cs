@@ -34,6 +34,35 @@ public class TransportCodecTests
     }
 
     [Fact]
+    public async Task Codec_WithFramer_EmitsDecodedFrames()
+    {
+        var frames = new System.Collections.Concurrent.BlockingCollection<byte[]>();
+
+        await using var server = new SquidTcpServer(
+            new(IPAddress.Loopback, 0),
+            connectionPipelineFactory: () => new ConnectionPipeline(new CountingXorCodec(2), null, new LengthPrefixFramer())
+        );
+        server.OnDataReceived += (_, e) => frames.Add(e.Data.ToArray());
+        await server.StartAsync(CancellationToken.None);
+
+        await using var client = await SquidStdTcpClient.ConnectAsync(
+            new(IPAddress.Loopback, server.Port),
+            codec: new CountingXorCodec(2)
+        );
+
+        // Three length-prefixed messages in a single send: [len=2][AA BB] [len=1][CC] [len=3][01 02 03].
+        var buffer = new byte[] { 2, 0xAA, 0xBB, 1, 0xCC, 3, 0x01, 0x02, 0x03 };
+        await client.SendAsync(buffer, CancellationToken.None);
+
+        Assert.True(frames.TryTake(out var f1, Timeout));
+        Assert.Equal(new byte[] { 2, 0xAA, 0xBB }, f1);
+        Assert.True(frames.TryTake(out var f2, Timeout));
+        Assert.Equal(new byte[] { 1, 0xCC }, f2);
+        Assert.True(frames.TryTake(out var f3, Timeout));
+        Assert.Equal(new byte[] { 3, 0x01, 0x02, 0x03 }, f3);
+    }
+
+    [Fact]
     public async Task Codec_IsolatesStatePerConnection()
     {
         var payload = new byte[] { 9, 8, 7, 6 };
