@@ -560,11 +560,6 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
                     break;
                 }
 
-                lock (_receiveBufferSync)
-                {
-                    _receiveBuffer.PushBackRange(buffer.AsSpan(0, received));
-                }
-
                 var chunk = ArrayPool<byte>.Shared.Rent(received);
 
                 try
@@ -572,6 +567,11 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
                     buffer.AsSpan(0, received).CopyTo(chunk);
 
                     Volatile.Read(ref _codec)?.Decode(chunk.AsSpan(0, received));
+
+                    lock (_receiveBufferSync)
+                    {
+                        _receiveBuffer.PushBackRange(chunk.AsSpan(0, received));
+                    }
 
                     var chunkMemory = new ReadOnlyMemory<byte>(chunk, 0, received);
                     var processed = await _middlewarePipeline.ExecuteAsync(

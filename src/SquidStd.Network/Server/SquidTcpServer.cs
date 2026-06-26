@@ -25,7 +25,7 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
     private readonly ConcurrentDictionary<long, SquidStdTcpClient> _clients = new();
     private readonly IPEndPoint _endPoint;
     private readonly INetFramer? _framer;
-    private readonly Func<ConnectionPipeline>? _connectionFactory;
+    private readonly Func<ConnectionPipeline>? _connectionPipelineFactory;
     private readonly int _historyBufferCapacity;
     private readonly SquidStdTcpServerTlsOptions? _tlsOptions;
 
@@ -84,13 +84,18 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
     /// </param>
     /// <param name="receiveBufferSize">Per-client receive chunk size.</param>
     /// <param name="historyBufferCapacity">Per-client history buffer capacity.</param>
+    /// <param name="connectionPipelineFactory">
+    /// Optional factory invoked once per accepted connection to produce its transport configuration.
+    /// It MUST return fresh per-connection state — in particular a new <c>ITransportCodec</c> instance per
+    /// call — because codecs are stateful and must not be shared across connections.
+    /// </param>
     public SquidTcpServer(
         IPEndPoint endPoint,
         INetFramer? framer = null,
         int receiveBufferSize = 8192,
         int historyBufferCapacity = 65536,
         SquidStdTcpServerTlsOptions? tlsOptions = null,
-        Func<ConnectionPipeline>? connectionFactory = null
+        Func<ConnectionPipeline>? connectionPipelineFactory = null
     )
     {
         _endPoint = endPoint;
@@ -98,7 +103,7 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
         _receiveBufferSize = receiveBufferSize;
         _historyBufferCapacity = historyBufferCapacity;
         _tlsOptions = tlsOptions;
-        _connectionFactory = connectionFactory;
+        _connectionPipelineFactory = connectionPipelineFactory;
     }
 
     /// <summary>
@@ -217,7 +222,7 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
                 var clientSocket = await serverSocket.AcceptAsync(cts.Token);
                 var clientStream = await CreateClientStreamAsync(clientSocket, cts.Token).ConfigureAwait(false);
 
-                var pipeline = _connectionFactory?.Invoke();
+                var pipeline = _connectionPipelineFactory?.Invoke();
                 var middlewares = pipeline?.Middlewares ?? _middlewares;
                 var framer = pipeline?.Framer ?? _framer;
                 var codec = pipeline?.Codec;

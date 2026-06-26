@@ -17,7 +17,7 @@ public class TransportCodecTests
 
         await using var server = new SquidTcpServer(
             new(IPAddress.Loopback, 0),
-            connectionFactory: () => new ConnectionPipeline(new CountingXorCodec(7))
+            connectionPipelineFactory: () => new ConnectionPipeline(new CountingXorCodec(7))
         );
         server.OnDataReceived += (_, e) => received.TrySetResult(e.Data.ToArray());
         await server.StartAsync(CancellationToken.None);
