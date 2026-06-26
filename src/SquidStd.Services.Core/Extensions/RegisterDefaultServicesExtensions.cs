@@ -124,6 +124,7 @@ public static class RegisterDefaultServicesExtensions
             container.AddToRegisterTypedList(
                 new ServiceRegistrationData(typeof(IEventBus), typeof(EventBusService), -1)
             );
+            container.RegisterStdService<EventListenerActivator, EventListenerActivator>(-900);
 
             return container;
         }
