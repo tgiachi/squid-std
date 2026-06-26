@@ -17,6 +17,9 @@
         <Project Path="src/SquidStd.Messaging.Sqs/SquidStd.Messaging.Sqs.csproj"/>
         <Project Path="src/SquidStd.Messaging/SquidStd.Messaging.csproj"/>
         <Project Path="src/SquidStd.Network/SquidStd.Network.csproj"/>
+        <Project Path="src/SquidStd.Persistence.Abstractions/SquidStd.Persistence.Abstractions.csproj"/>
+        <Project Path="src/SquidStd.Persistence/SquidStd.Persistence.csproj"/>
+        <Project Path="src/SquidStd.Persistence.MessagePack/SquidStd.Persistence.MessagePack.csproj"/>
         <Project Path="src/SquidStd.Plugin.Abstractions/SquidStd.Plugin.Abstractions.csproj"/>
         <Project Path="src/SquidStd.Scripting.Lua/SquidStd.Scripting.Lua.csproj"/>
         <Project Path="src/SquidStd.Services.Core/SquidStd.Services.Core.csproj"/>
