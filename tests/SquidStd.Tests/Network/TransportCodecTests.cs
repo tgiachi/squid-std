@@ -34,6 +34,23 @@ public class TransportCodecTests
     }
 
     [Fact]
+    public async Task NoCodecNoFactory_PassesBytesUnchanged()
+    {
+        var received = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        await using var server = new SquidTcpServer(new(IPAddress.Loopback, 0));
+        server.OnDataReceived += (_, e) => received.TrySetResult(e.Data.ToArray());
+        await server.StartAsync(CancellationToken.None);
+
+        await using var client = await SquidStdTcpClient.ConnectAsync(new(IPAddress.Loopback, server.Port));
+
+        var payload = new byte[] { 42, 43, 44 };
+        await client.SendAsync(payload, CancellationToken.None);
+
+        Assert.Equal(payload, await received.Task.WaitAsync(Timeout));
+    }
+
+    [Fact]
     public async Task Codec_ConcurrentSends_PreserveKeystreamIntegrity()
     {
         const int messageCount = 40;
