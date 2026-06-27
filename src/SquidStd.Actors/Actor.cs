@@ -85,8 +85,7 @@ public abstract class Actor<TMessage> : IAsyncDisposable
         _outstanding[request] = 0;
 
         using var registration = cancellationToken.Register(
-            static state => ((IActorRequestCore)state!).Fail(new OperationCanceledException()),
-            request
+            () => request.Fail(new OperationCanceledException(cancellationToken))
         );
 
         try
@@ -129,7 +128,7 @@ public abstract class Actor<TMessage> : IAsyncDisposable
         {
             if (message is IActorRequestCore cancelledRequest)
             {
-                cancelledRequest.Fail(new OperationCanceledException());
+                cancelledRequest.Fail(new OperationCanceledException(_shutdown.Token));
             }
         }
         catch (Exception ex)
@@ -152,6 +151,11 @@ public abstract class Actor<TMessage> : IAsyncDisposable
 
             if (_options.ErrorPolicy == ActorErrorPolicy.StopOnError)
             {
+                foreach (var pending in _outstanding.Keys)
+                {
+                    pending.Fail(new InvalidOperationException("Actor stopped due to a handler failure.", ex));
+                }
+
                 throw;
             }
         }
