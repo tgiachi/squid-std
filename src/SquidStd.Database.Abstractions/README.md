@@ -21,15 +21,6 @@ operations, paging, and composable queries — without binding to any specific O
 dotnet add package SquidStd.Database.Abstractions
 ```
 
-## Features
-
-- `IDataAccess<TEntity>` — `InsertAsync`, `GetByIdAsync`, `UpdateAsync`, `DeleteAsync`, `CountAsync`,
-  `ExistsAsync`, bulk insert/update/delete, `QueryAsync`, and `GetPagedAsync`.
-- `BaseEntity` — `Guid Id` plus `DateTimeOffset Created` / `Updated` (UTC), set by the data layer.
-- `PagedResultData<T>` — items + `Page`, `PageSize`, `TotalCount`, `TotalPages`, `HasNext`, `HasPrevious`.
-- `DatabaseConfig` — URI connection string + `AutoMigrate` flag.
-- `DatabaseProviderType` — `Sqlite`, `Postgres`, `SqlServer`, `MySql`.
-
 ## Usage
 
 ```csharp
@@ -58,6 +49,10 @@ public async Task ExampleAsync(IDataAccess<User> users)
 | `PagedResultData<T>`   | Paginated result with metadata.                  |
 | `DatabaseConfig`       | Connection string + auto-migrate config section. |
 | `DatabaseProviderType` | Supported provider enum.                         |
+
+## Related
+
+- Tutorial: [Database](https://tgiachi.github.io/squid-std/tutorials/database.html)
 
 ## License
 
