@@ -18,6 +18,12 @@
   href: database-abstractions.md
 - name: SquidStd.Database
   href: database.md
+- name: SquidStd.Persistence.Abstractions
+  href: persistence-abstractions.md
+- name: SquidStd.Persistence
+  href: persistence.md
+- name: SquidStd.Persistence.MessagePack
+  href: persistence-messagepack.md
 - name: SquidStd.Messaging.Abstractions
   href: messaging-abstractions.md
 - name: SquidStd.Messaging
@@ -26,6 +32,8 @@
   href: messaging-rabbitmq.md
 - name: SquidStd.Messaging.Sqs
   href: messaging-sqs.md
+- name: SquidStd.Actors
+  href: actors.md
 - name: SquidStd.Caching.Abstractions
   href: caching-abstractions.md
 - name: SquidStd.Caching
@@ -38,6 +46,10 @@
   href: storage.md
 - name: SquidStd.Storage.S3
   href: storage-s3.md
+- name: SquidStd.Vfs.Abstractions
+  href: vfs-abstractions.md
+- name: SquidStd.Vfs
+  href: vfs.md
 - name: SquidStd.Scripting.Lua
   href: scripting-lua.md
 - name: SquidStd.Templating
@@ -72,5 +84,9 @@
   href: telemetry-opentelemetry.md
 - name: SquidStd.Aws.Abstractions
   href: aws-abstractions.md
+- name: SquidStd.Crypto
+  href: crypto.md
+- name: SquidStd.Secrets.Aws
+  href: secrets-aws.md
 - name: Felix Network
   href: felix.md
