@@ -1,3 +1,15 @@
+- name: Concepts
+  items:
+    - name: Architecture
+      href: concepts/architecture.md
+    - name: Bootstrap lifecycle
+      href: concepts/bootstrap-lifecycle.md
+    - name: Dependency injection
+      href: concepts/dependency-injection.md
+    - name: Abstractions first
+      href: concepts/abstractions-first.md
+    - name: Messaging models
+      href: concepts/messaging-models.md
 - name: Getting Started
   href: getting-started.md
 - name: SquidStd.Core
