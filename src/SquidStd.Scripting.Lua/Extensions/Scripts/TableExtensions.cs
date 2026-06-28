@@ -9,15 +9,18 @@ namespace SquidStd.Scripting.Lua.Extensions.Scripts;
 /// </summary>
 public static class TableExtensions
 {
-    /// <summary>
-    ///     Converts a MoonSharp Table to a proxy implementing the specified interface.
-    /// </summary>
-    public static TInterface ToProxy<TInterface>(this Table table)
-        where TInterface : class
+    extension(Table table)
     {
-        var proxy = DispatchProxy.Create<TInterface, LuaProxy<TInterface>>();
-        ((LuaProxy<TInterface>)(object)proxy).Table = table;
+        /// <summary>
+        ///     Converts a MoonSharp Table to a proxy implementing the specified interface.
+        /// </summary>
+        public TInterface ToProxy<TInterface>()
+            where TInterface : class
+        {
+            var proxy = DispatchProxy.Create<TInterface, LuaProxy<TInterface>>();
+            ((LuaProxy<TInterface>)(object)proxy).Table = table;
 
-        return proxy;
+            return proxy;
+        }
     }
 }

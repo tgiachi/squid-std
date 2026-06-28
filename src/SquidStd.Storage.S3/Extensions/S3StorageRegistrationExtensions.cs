@@ -10,15 +10,18 @@ namespace SquidStd.Storage.S3.Extensions;
 /// </summary>
 public static class S3StorageRegistrationExtensions
 {
-    /// <summary>Registers <see cref="IStorageService" /> backed by S3/MinIO.</summary>
-    public static IContainer AddS3Storage(this IContainer container, S3StorageOptions options)
+    extension(IContainer container)
     {
-        ArgumentNullException.ThrowIfNull(container);
-        ArgumentNullException.ThrowIfNull(options);
+        /// <summary>Registers <see cref="IStorageService" /> backed by S3/MinIO.</summary>
+        public IContainer AddS3Storage(S3StorageOptions options)
+        {
+            ArgumentNullException.ThrowIfNull(container);
+            ArgumentNullException.ThrowIfNull(options);
 
-        container.RegisterInstance(options);
-        container.Register<IStorageService, S3StorageService>(Reuse.Singleton);
+            container.RegisterInstance(options);
+            container.Register<IStorageService, S3StorageService>(Reuse.Singleton);
 
-        return container;
+            return container;
+        }
     }
 }

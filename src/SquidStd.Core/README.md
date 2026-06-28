@@ -26,11 +26,16 @@ dotnet add package SquidStd.Core
 
 - Configuration contracts: `IConfigEntry` (a YAML section) and `IConfigManagerService`.
 - In-process messaging: `IEventBus` with `ISyncEventListener<T>` / `IAsyncEventListener<T>` over `IEvent`.
+- Command dispatch: `ICommandDispatcher<TContext>` with `ICommandHandler<TCommand,TContext>`, fan-out, fault isolation, and a `CommandDispatchResult`; `ICommandContextFactory<TContext,TSeed>` builds the context from a seed for `ISeededCommandDispatcher<TContext,TSeed>`.
 - Background work & timing: `IJobSystem`, `ITimerService`, `IMainThreadDispatcher`.
 - Metrics & secrets: `IMetricProvider` and secret-protection contracts.
 - Serialization: `IDataSerializer` / `IDataDeserializer` (default `JsonDataSerializer`), plus `YamlUtils` / `JsonUtils`.
+- File watching: `IFileWatcherService` / `FileWatcherService` — recursive, debounced watchers that publish `FileChangedEvent` on the event bus.
+- Object pooling: `ObjectPool<T>` — thread-safe, non-blocking, factory-based reuse with optional reset.
+- Cryptography: `CryptoUtils` (AES-GCM authenticated encrypt/decrypt + key generation), `EncryptString`/`DecryptString` string helpers, base64 extensions, and `SslUtils` for loading PEM/PFX TLS certificates.
+- Randomness: `BuiltInRng` (seedable ambient RNG), `RandomUtils` (dice, coin flips), and collection `Shuffle`/`RandomElement`/`RandomSample` extensions.
 - Utilities: a Serilog `EventSink`, and string/env/directory extensions.
-- Shared domain enums under `Types` (e.g. `LogLevelType`, `PlatformType`).
+- Shared domain enums under `Types` (e.g. `LogLevelType`, `PlatformType`, `FileChangeKind`).
 
 ## Usage
 
@@ -45,6 +50,29 @@ var path = "$HOME/squidstd/data".ReplaceEnv();
 var yaml = YamlUtils.Serialize(new { name = "squid", port = 9000 });
 ```
 
+```csharp
+using SquidStd.Core.Files;
+using SquidStd.Core.Data.Files;
+using SquidStd.Core.Pool;
+
+// Watch several directories (each with its own glob) and react via the event bus.
+// Via DI: container.RegisterFileWatcherService();  then resolve IFileWatcherService.
+var watcher = new FileWatcherService(eventBus);
+watcher.Watch("data/scripts", "*.lua");
+watcher.Watch("data/templates", "*.json");
+eventBus.Subscribe<FileChangedEvent>((change, _) =>
+{
+    Console.WriteLine($"{change.Kind}: {change.FullPath}");
+    return Task.CompletedTask;
+});
+
+// Reuse short-lived buffers instead of allocating per call.
+using var pool = new ObjectPool<StringBuilder>(() => new StringBuilder(), onReturn: sb => sb.Clear());
+var builder = pool.Get();
+// ... use builder ...
+pool.Return(builder);
+```
+
 ## Key types
 
 | Type                    | Purpose                                       |
@@ -56,6 +84,9 @@ var yaml = YamlUtils.Serialize(new { name = "squid", port = 9000 });
 | `ITimerService`         | Timer-wheel based scheduling.                 |
 | `IMetricProvider`       | Source of metric samples for collection.      |
 | `IStorageService`       | File/object storage abstraction.              |
+| `IFileWatcherService`   | Recursive, debounced file watcher publishing to the event bus. |
+| `ObjectPool<T>`         | Thread-safe, non-blocking object pool.        |
+| `ICommandDispatcher<TContext>` | Typed protocol command dispatch with context. |
 
 ## License
 

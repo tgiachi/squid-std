@@ -10,15 +10,18 @@ namespace SquidStd.Storage.Extensions;
 /// </summary>
 public static class StorageRegistrationExtensions
 {
-    /// <summary>Registers file-backed <see cref="IStorageService" /> and YAML-backed <see cref="IObjectStorageService" />.</summary>
-    public static IContainer AddFileStorage(this IContainer container, StorageConfig? config = null)
+    extension(IContainer container)
     {
-        ArgumentNullException.ThrowIfNull(container);
+        /// <summary>Registers file-backed <see cref="IStorageService" /> and YAML-backed <see cref="IObjectStorageService" />.</summary>
+        public IContainer AddFileStorage(StorageConfig? config = null)
+        {
+            ArgumentNullException.ThrowIfNull(container);
 
-        container.RegisterInstance(config ?? new StorageConfig());
-        container.Register<IStorageService, FileStorageService>(Reuse.Singleton);
-        container.Register<IObjectStorageService, YamlObjectStorageService>(Reuse.Singleton);
+            container.RegisterInstance(config ?? new StorageConfig());
+            container.Register<IStorageService, FileStorageService>(Reuse.Singleton);
+            container.Register<IObjectStorageService, YamlObjectStorageService>(Reuse.Singleton);
 
-        return container;
+            return container;
+        }
     }
 }

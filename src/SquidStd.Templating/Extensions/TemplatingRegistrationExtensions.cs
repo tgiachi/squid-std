@@ -10,14 +10,17 @@ namespace SquidStd.Templating.Extensions;
 /// </summary>
 public static class TemplatingRegistrationExtensions
 {
-    /// <summary>
-    ///     Registers the Scriban template renderer as a singleton SquidStd service (so its startup
-    ///     auto-load of <c>templates/*.tmpl</c> runs with the host). Requires a registered <c>DirectoriesConfig</c>.
-    /// </summary>
-    public static IContainer AddTemplating(this IContainer container)
+    extension(IContainer container)
     {
-        ArgumentNullException.ThrowIfNull(container);
+        /// <summary>
+        ///     Registers the Scriban template renderer as a singleton SquidStd service (so its startup
+        ///     auto-load of <c>templates/*.tmpl</c> runs with the host). Requires a registered <c>DirectoriesConfig</c>.
+        /// </summary>
+        public IContainer AddTemplating()
+        {
+            ArgumentNullException.ThrowIfNull(container);
 
-        return container.RegisterStdService<ITemplateRenderer, ScribanTemplateRenderer>(-1);
+            return container.RegisterStdService<ITemplateRenderer, ScribanTemplateRenderer>(-1);
+        }
     }
 }

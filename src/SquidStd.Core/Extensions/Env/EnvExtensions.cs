@@ -13,50 +13,52 @@ public static class EnvExtensions
         RegexOptions.Compiled
     );
 
-    /// <summary>
-    ///     Expands environment variables in a string using custom $VARIABLE syntax
-    /// </summary>
-    /// <param name="input">The input string containing environment variable references</param>
-    /// <returns>The string with environment variables expanded to their values</returns>
-    public static string ExpandEnvironmentVariables(this string input)
-    {
-        if (string.IsNullOrEmpty(input))
-        {
-            return input;
-        }
-
-        foreach (DictionaryEntry env in Environment.GetEnvironmentVariables())
-        {
-            var key = $"${env.Key}";
-            var value = env.Value?.ToString() ?? string.Empty;
-            input = input.Replace(key, value);
-        }
-
-        return input;
-    }
-
-    /// <summary>
-    ///     Replaces "$VAR" tokens with the matching environment variable value. Unknown variables are
-    ///     left unchanged.
-    /// </summary>
     /// <param name="input">The input string.</param>
-    /// <returns>The string with known $VAR tokens substituted.</returns>
-    public static string ReplaceEnv(this string input)
+    extension(string input)
     {
-        if (string.IsNullOrEmpty(input))
+        /// <summary>
+        ///     Expands environment variables in a string using custom $VARIABLE syntax
+        /// </summary>
+        /// <returns>The string with environment variables expanded to their values</returns>
+        public string ExpandEnvironmentVariables()
         {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+
+            foreach (DictionaryEntry env in Environment.GetEnvironmentVariables())
+            {
+                var key = $"${env.Key}";
+                var value = env.Value?.ToString() ?? string.Empty;
+                input = input.Replace(key, value);
+            }
+
             return input;
         }
 
-        return EnvTokenRegex.Replace(
-            input,
-            match =>
+        /// <summary>
+        ///     Replaces "$VAR" tokens with the matching environment variable value. Unknown variables are
+        ///     left unchanged.
+        /// </summary>
+        /// <returns>The string with known $VAR tokens substituted.</returns>
+        public string ReplaceEnv()
+        {
+            if (string.IsNullOrEmpty(input))
             {
-                var name = match.Groups[1].Value;
-                var value = Environment.GetEnvironmentVariable(name);
-
-                return value ?? match.Value;
+                return input;
             }
-        );
+
+            return EnvTokenRegex.Replace(
+                input,
+                match =>
+                {
+                    var name = match.Groups[1].Value;
+                    var value = Environment.GetEnvironmentVariable(name);
+
+                    return value ?? match.Value;
+                }
+            );
+        }
     }
 }

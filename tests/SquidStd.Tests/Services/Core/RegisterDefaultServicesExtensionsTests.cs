@@ -8,6 +8,7 @@ using SquidStd.Core.Data.Storage;
 using SquidStd.Core.Data.Timing;
 using SquidStd.Core.Directories;
 using SquidStd.Core.Interfaces.Config;
+using SquidStd.Core.Interfaces.Files;
 using SquidStd.Core.Interfaces.Metrics;
 using SquidStd.Core.Interfaces.Secrets;
 using SquidStd.Services.Core.Extensions;
@@ -173,6 +174,32 @@ public class RegisterDefaultServicesExtensionsTests
         Assert.Contains(entries, entry => entry.SectionName == "secrets" && entry.ConfigType == typeof(SecretsConfig));
         Assert.False(container.IsRegistered<StorageConfig>());
         Assert.False(container.IsRegistered<SecretsConfig>());
+    }
+
+    [Fact]
+    public void RegisterFileWatcherService_RegistersSingletonResolvingEventBus()
+    {
+        using var container = new Container();
+        container.RegisterEventBusService();
+
+        container.RegisterFileWatcherService();
+
+        var first = container.Resolve<IFileWatcherService>();
+        var second = container.Resolve<IFileWatcherService>();
+
+        Assert.NotNull(first);
+        Assert.Same(first, second);
+    }
+
+    [Fact]
+    public void RegisterCoreServices_DoesNotRegisterFileWatcher()
+    {
+        using var temp = new TempDirectory();
+        using var container = new Container();
+
+        container.RegisterCoreServices("app", temp.Path);
+
+        Assert.False(container.IsRegistered<IFileWatcherService>());
     }
 
     [Fact]
