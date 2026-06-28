@@ -13,12 +13,6 @@ public sealed class PgpTestKeys
     public const string AliceIdentity = "alice@squidstd.test";
     public const string BobIdentity = "bob@squidstd.test";
 
-    public PgpTestKeys()
-    {
-        (AlicePublic, AlicePrivate) = Generate(AliceIdentity, AlicePassphrase);
-        (BobPublic, BobPrivate) = Generate(BobIdentity, BobPassphrase);
-    }
-
     public string AlicePublic { get; }
 
     public string AlicePrivate { get; }
@@ -26,6 +20,12 @@ public sealed class PgpTestKeys
     public string BobPublic { get; }
 
     public string BobPrivate { get; }
+
+    public PgpTestKeys()
+    {
+        (AlicePublic, AlicePrivate) = Generate(AliceIdentity, AlicePassphrase);
+        (BobPublic, BobPrivate) = Generate(BobIdentity, BobPassphrase);
+    }
 
     private static (string Public, string Private) Generate(string identity, string passphrase)
     {

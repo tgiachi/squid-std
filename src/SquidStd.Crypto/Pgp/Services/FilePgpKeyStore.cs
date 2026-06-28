@@ -31,14 +31,20 @@ public sealed class FilePgpKeyStore : IPgpKeyStore
         {
             var stem = Stem(key);
             await File.WriteAllTextAsync(
-                Path.Combine(_directory, stem + PublicSuffix), key.PublicArmored, cancellationToken
-            ).ConfigureAwait(false);
+                    Path.Combine(_directory, stem + PublicSuffix),
+                    key.PublicArmored,
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
 
             if (key.PrivateArmored is not null)
             {
                 await File.WriteAllTextAsync(
-                    Path.Combine(_directory, stem + SecretSuffix), key.PrivateArmored, cancellationToken
-                ).ConfigureAwait(false);
+                        Path.Combine(_directory, stem + SecretSuffix),
+                        key.PrivateArmored,
+                        cancellationToken
+                    )
+                    .ConfigureAwait(false);
             }
         }
     }

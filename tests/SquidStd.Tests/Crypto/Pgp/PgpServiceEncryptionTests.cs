@@ -18,8 +18,8 @@ public class PgpServiceEncryptionTests
     public async Task EncryptFor_ThenDecrypt_RoundTripsBytes()
     {
         var keyring = new PgpKeyring();
-        keyring.Import(_keys.AlicePublic);   // recipient public only for encryption
-        keyring.Import(_keys.AlicePrivate);  // secret for decryption (replaces same key id, now HasSecret)
+        keyring.Import(_keys.AlicePublic);  // recipient public only for encryption
+        keyring.Import(_keys.AlicePrivate); // secret for decryption (replaces same key id, now HasSecret)
         var service = new PgpService(keyring);
         var payload = Encoding.UTF8.GetBytes("squid secret message");
 
@@ -35,8 +35,10 @@ public class PgpServiceEncryptionTests
     {
         var service = new PgpService(new PgpKeyring());
 
-        await Assert.ThrowsAsync<KeyNotFoundException>(
-            () => service.EncryptForAsync("nobody@squidstd.test", Encoding.UTF8.GetBytes("x"))
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => service.EncryptForAsync(
+                "nobody@squidstd.test",
+                Encoding.UTF8.GetBytes("x")
+            )
         );
     }
 

@@ -14,7 +14,8 @@ public sealed record PgpKey(
     string? PrivateArmored,
     DateTimeOffset CreatedUtc,
     DateTimeOffset? ExpiresUtc,
-    PgpKeyAlgorithm Algorithm)
+    PgpKeyAlgorithm Algorithm
+)
 {
     /// <summary>Whether this key carries secret material (can decrypt and sign).</summary>
     public bool HasSecret => PrivateArmored is not null;

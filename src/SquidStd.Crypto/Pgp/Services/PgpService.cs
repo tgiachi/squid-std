@@ -50,7 +50,9 @@ public sealed class PgpService : IPgpService
     }
 
     /// <inheritdoc />
-    public async Task<string> EncryptForAsync(string recipientIdentity, byte[] data, CancellationToken cancellationToken = default)
+    public async Task<string> EncryptForAsync(
+        string recipientIdentity, byte[] data, CancellationToken cancellationToken = default
+    )
     {
         ArgumentNullException.ThrowIfNull(data);
 
@@ -65,7 +67,9 @@ public sealed class PgpService : IPgpService
     }
 
     /// <inheritdoc />
-    public async Task EncryptForAsync(string recipientIdentity, Stream input, Stream output, CancellationToken cancellationToken = default)
+    public async Task EncryptForAsync(
+        string recipientIdentity, Stream input, Stream output, CancellationToken cancellationToken = default
+    )
     {
         ArgumentNullException.ThrowIfNull(input);
         ArgumentNullException.ThrowIfNull(output);
@@ -91,7 +95,9 @@ public sealed class PgpService : IPgpService
     }
 
     /// <inheritdoc />
-    public async Task DecryptAsync(Stream input, Stream output, string passphrase, CancellationToken cancellationToken = default)
+    public async Task DecryptAsync(
+        Stream input, Stream output, string passphrase, CancellationToken cancellationToken = default
+    )
     {
         ArgumentNullException.ThrowIfNull(input);
         ArgumentNullException.ThrowIfNull(output);
@@ -109,7 +115,10 @@ public sealed class PgpService : IPgpService
     }
 
     /// <inheritdoc />
-    public async Task<string> EncryptAndSignForAsync(string recipientIdentity, byte[] data, string signerIdentity, string signerPassphrase, CancellationToken cancellationToken = default)
+    public async Task<string> EncryptAndSignForAsync(
+        string recipientIdentity, byte[] data, string signerIdentity, string signerPassphrase,
+        CancellationToken cancellationToken = default
+    )
     {
         ArgumentNullException.ThrowIfNull(data);
 
@@ -123,7 +132,10 @@ public sealed class PgpService : IPgpService
     }
 
     /// <inheritdoc />
-    public async Task EncryptAndSignForAsync(string recipientIdentity, Stream input, Stream output, string signerIdentity, string signerPassphrase, CancellationToken cancellationToken = default)
+    public async Task EncryptAndSignForAsync(
+        string recipientIdentity, Stream input, Stream output, string signerIdentity, string signerPassphrase,
+        CancellationToken cancellationToken = default
+    )
     {
         ArgumentNullException.ThrowIfNull(input);
         ArgumentNullException.ThrowIfNull(output);
@@ -133,7 +145,9 @@ public sealed class PgpService : IPgpService
     }
 
     /// <inheritdoc />
-    public async Task<PgpDecryptionResult> DecryptAndVerifyAsync(string armored, string passphrase, CancellationToken cancellationToken = default)
+    public async Task<PgpDecryptionResult> DecryptAndVerifyAsync(
+        string armored, string passphrase, CancellationToken cancellationToken = default
+    )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(armored);
 
@@ -167,7 +181,9 @@ public sealed class PgpService : IPgpService
     }
 
     /// <inheritdoc />
-    public async Task<string> SignAsync(byte[] data, string signerIdentity, string passphrase, CancellationToken cancellationToken = default)
+    public async Task<string> SignAsync(
+        byte[] data, string signerIdentity, string passphrase, CancellationToken cancellationToken = default
+    )
     {
         ArgumentNullException.ThrowIfNull(data);
 

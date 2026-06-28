@@ -36,7 +36,11 @@ public class PgpServiceSigningTests
         keyring.Import(_keys.AlicePrivate);
         var service = new PgpService(keyring);
 
-        var signed = await service.SignAsync(Encoding.UTF8.GetBytes("original"), PgpTestKeys.AliceIdentity, PgpTestKeys.AlicePassphrase);
+        var signed = await service.SignAsync(
+            Encoding.UTF8.GetBytes("original"),
+            PgpTestKeys.AliceIdentity,
+            PgpTestKeys.AlicePassphrase
+        );
         var tampered = MutateBody(signed);
 
         var result = await service.VerifyAsync(tampered);
@@ -48,13 +52,16 @@ public class PgpServiceSigningTests
     public async Task EncryptAndSign_ThenDecryptAndVerify_RoundTripsAndValidates()
     {
         var keyring = new PgpKeyring();
-        keyring.Import(_keys.AlicePrivate);   // recipient (has secret to decrypt)
-        keyring.Import(_keys.BobPrivate);     // signer
+        keyring.Import(_keys.AlicePrivate); // recipient (has secret to decrypt)
+        keyring.Import(_keys.BobPrivate);   // signer
         var service = new PgpService(keyring);
         var payload = Encoding.UTF8.GetBytes("confidential and signed");
 
         var armored = await service.EncryptAndSignForAsync(
-            PgpTestKeys.AliceIdentity, payload, PgpTestKeys.BobIdentity, PgpTestKeys.BobPassphrase
+            PgpTestKeys.AliceIdentity,
+            payload,
+            PgpTestKeys.BobIdentity,
+            PgpTestKeys.BobPassphrase
         );
         var result = await service.DecryptAndVerifyAsync(armored, PgpTestKeys.AlicePassphrase);
 
@@ -73,7 +80,10 @@ public class PgpServiceSigningTests
         var signingService = new PgpService(signingKeyring);
         var payload = Encoding.UTF8.GetBytes("signed by an unknown party");
         var armored = await signingService.EncryptAndSignForAsync(
-            PgpTestKeys.AliceIdentity, payload, PgpTestKeys.BobIdentity, PgpTestKeys.BobPassphrase
+            PgpTestKeys.AliceIdentity,
+            payload,
+            PgpTestKeys.BobIdentity,
+            PgpTestKeys.BobPassphrase
         );
 
         var recipientOnly = new PgpKeyring();
