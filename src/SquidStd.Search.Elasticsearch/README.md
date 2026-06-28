@@ -1,15 +1,4 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/tgiachi/squid-std/main/assets/icon.png" alt="SquidStd" width="120" height="120" />
-</p>
-
 <h1 align="center">SquidStd.Search.Elasticsearch</h1>
-
-<p align="center">
-  <a href="https://www.nuget.org/packages/SquidStd.Search.Elasticsearch/"><img src="https://img.shields.io/nuget/v/SquidStd.Search.Elasticsearch.svg" alt="NuGet" /></a>
-  <img src="https://img.shields.io/nuget/dt/SquidStd.Search.Elasticsearch.svg" alt="Downloads" />
-  <a href="https://tgiachi.github.io/squid-std/articles/search-elasticsearch.html"><img src="https://img.shields.io/badge/docs-DocFX-1390A3.svg" alt="docs" /></a>
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license" />
-</p>
 
 Elasticsearch provider for SquidStd.Search. Indexes `IIndexableEntity` documents and exposes a constrained
 LINQ `IQueryable<T>` translated to the Elasticsearch query DSL; the native `ElasticsearchClient` is registered
@@ -45,6 +34,19 @@ var open = await search.Query<Order>()
 Supported LINQ: `Where` (`==`, `!=`, `<`, `>`, `<=`, `>=`, `&&`, `||`, `!`, `string.Contains`/`StartsWith`,
 bool members), `OrderBy`/`ThenBy`(`Descending`), `Skip`/`Take`, and `.Match(field, text)` / `.FullText(text)`.
 Anything else throws `NotSupportedException` — drop down to the native `ElasticsearchClient`.
+
+## Key types
+
+| Type | Purpose |
+|------|---------|
+| `SearchRegistrationExtensions` | `AddElasticsearch(...)` registration. |
+| `ElasticSearchService` | `ISearchService` backed by the Elasticsearch client. |
+| `ElasticsearchOptions` | Connection options (URI, credentials). |
+| `ElasticQueryable` | Constrained `IQueryable<T>` translated to the Elasticsearch query DSL. |
+
+## Related
+
+- Tutorial: [Search](https://tgiachi.github.io/squid-std/tutorials/search.html)
 
 ## License
 
