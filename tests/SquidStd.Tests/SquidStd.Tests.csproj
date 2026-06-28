@@ -70,6 +70,7 @@
         <ProjectReference Include="..\..\src\SquidStd.Mail.MailKit\SquidStd.Mail.MailKit.csproj" />
         <ProjectReference Include="..\..\src\SquidStd.Mail.Queue\SquidStd.Mail.Queue.csproj" />
         <ProjectReference Include="..\..\src\SquidStd.Actors\SquidStd.Actors.csproj" />
+        <ProjectReference Include="..\..\src\SquidStd.Crypto\SquidStd.Crypto.csproj" />
     </ItemGroup>
 
 </Project>

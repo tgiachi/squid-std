@@ -37,6 +37,7 @@
         <Project Path="src/SquidStd.Mail.Abstractions/SquidStd.Mail.Abstractions.csproj" />
         <Project Path="src/SquidStd.Mail.MailKit/SquidStd.Mail.MailKit.csproj" />
         <Project Path="src/SquidStd.Mail.Queue/SquidStd.Mail.Queue.csproj" />
+        <Project Path="src/SquidStd.Crypto/SquidStd.Crypto.csproj" />
     </Folder>
     <Folder Name="/samples/">
         <Project Path="samples/SquidStd.Samples.WorkerSystem/SquidStd.Samples.WorkerSystem.csproj" />
