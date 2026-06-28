@@ -20,7 +20,8 @@ public sealed class KmsSecretProtector : ISecretProtector, IDisposable
 
         _keyId = options.KeyId;
         _kms = new AmazonKeyManagementServiceClient(
-            AwsClientFactory.Credentials(options.Aws), AwsClientFactory.KmsConfig(options.Aws)
+            AwsClientFactory.Credentials(options.Aws),
+            AwsClientFactory.KmsConfig(options.Aws)
         );
     }
 
@@ -30,8 +31,10 @@ public sealed class KmsSecretProtector : ISecretProtector, IDisposable
         ArgumentNullException.ThrowIfNull(plaintext);
 
         var generated = _kms.GenerateDataKeyAsync(
-            new GenerateDataKeyRequest { KeyId = _keyId, KeySpec = DataKeySpec.AES_256 }
-        ).GetAwaiter().GetResult();
+                new GenerateDataKeyRequest { KeyId = _keyId, KeySpec = DataKeySpec.AES_256 }
+            )
+            .GetAwaiter()
+            .GetResult();
 
         var dataKey = generated.Plaintext.ToArray();
 
@@ -52,8 +55,10 @@ public sealed class KmsSecretProtector : ISecretProtector, IDisposable
 
         var wrappedKey = KmsEnvelope.ReadWrappedKey(protectedData);
         var decrypted = _kms.DecryptAsync(
-            new DecryptRequest { CiphertextBlob = new MemoryStream(wrappedKey) }
-        ).GetAwaiter().GetResult();
+                new DecryptRequest { CiphertextBlob = new MemoryStream(wrappedKey) }
+            )
+            .GetAwaiter()
+            .GetResult();
 
         var dataKey = decrypted.Plaintext.ToArray();
 

@@ -34,6 +34,7 @@ public class AwsSecretsManagerStoreTests
         {
             names.Add(name);
         }
+
         Assert.Contains("db/main", names);
 
         Assert.True(await store.DeleteAsync("db/main"));

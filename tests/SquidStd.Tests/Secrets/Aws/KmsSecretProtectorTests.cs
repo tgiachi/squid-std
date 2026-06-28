@@ -35,7 +35,8 @@ public class KmsSecretProtectorTests
     {
         using var kms = new AmazonKeyManagementServiceClient(
             new Amazon.Runtime.BasicAWSCredentials("test", "test"),
-            new AmazonKeyManagementServiceConfig { ServiceURL = _localStack.Aws.ServiceUrl, AuthenticationRegion = "us-east-1" }
+            new AmazonKeyManagementServiceConfig
+                { ServiceURL = _localStack.Aws.ServiceUrl, AuthenticationRegion = "us-east-1" }
         );
         var created = await kms.CreateKeyAsync(new CreateKeyRequest());
 

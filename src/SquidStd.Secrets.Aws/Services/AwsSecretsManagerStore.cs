@@ -19,7 +19,8 @@ public sealed class AwsSecretsManagerStore : ISecretStore, IDisposable
 
         _prefix = options.NamePrefix ?? string.Empty;
         _client = new AmazonSecretsManagerClient(
-            AwsClientFactory.Credentials(options.Aws), AwsClientFactory.SecretsManagerConfig(options.Aws)
+            AwsClientFactory.Credentials(options.Aws),
+            AwsClientFactory.SecretsManagerConfig(options.Aws)
         );
     }
 
@@ -36,9 +37,10 @@ public sealed class AwsSecretsManagerStore : ISecretStore, IDisposable
         try
         {
             await _client.DeleteSecretAsync(
-                new DeleteSecretRequest { SecretId = _prefix + name, ForceDeleteWithoutRecovery = true },
-                cancellationToken
-            ).ConfigureAwait(false);
+                    new DeleteSecretRequest { SecretId = _prefix + name, ForceDeleteWithoutRecovery = true },
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
 
             return true;
         }
@@ -56,8 +58,10 @@ public sealed class AwsSecretsManagerStore : ISecretStore, IDisposable
         try
         {
             await _client.DescribeSecretAsync(
-                new DescribeSecretRequest { SecretId = _prefix + name }, cancellationToken
-            ).ConfigureAwait(false);
+                    new DescribeSecretRequest { SecretId = _prefix + name },
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
 
             return true;
         }
@@ -75,8 +79,10 @@ public sealed class AwsSecretsManagerStore : ISecretStore, IDisposable
         try
         {
             var response = await _client.GetSecretValueAsync(
-                new GetSecretValueRequest { SecretId = _prefix + name }, cancellationToken
-            ).ConfigureAwait(false);
+                    new GetSecretValueRequest { SecretId = _prefix + name },
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
 
             return response.SecretString;
         }
@@ -97,19 +103,25 @@ public sealed class AwsSecretsManagerStore : ISecretStore, IDisposable
         try
         {
             await _client.PutSecretValueAsync(
-                new PutSecretValueRequest { SecretId = secretId, SecretString = value }, cancellationToken
-            ).ConfigureAwait(false);
+                    new PutSecretValueRequest { SecretId = secretId, SecretString = value },
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
         }
         catch (ResourceNotFoundException)
         {
             await _client.CreateSecretAsync(
-                new CreateSecretRequest { Name = secretId, SecretString = value }, cancellationToken
-            ).ConfigureAwait(false);
+                    new CreateSecretRequest { Name = secretId, SecretString = value },
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
         }
     }
 
     /// <inheritdoc />
-    public async IAsyncEnumerable<string> ListNamesAsync(string? prefix = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<string> ListNamesAsync(
+        string? prefix = null, [EnumeratorCancellation] CancellationToken cancellationToken = default
+    )
     {
         var fullPrefix = _prefix + (prefix ?? string.Empty);
         string? token = null;
@@ -117,8 +129,10 @@ public sealed class AwsSecretsManagerStore : ISecretStore, IDisposable
         do
         {
             var response = await _client.ListSecretsAsync(
-                new ListSecretsRequest { NextToken = token, MaxResults = 100 }, cancellationToken
-            ).ConfigureAwait(false);
+                    new ListSecretsRequest { NextToken = token, MaxResults = 100 },
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
 
             foreach (var secret in response.SecretList)
             {
@@ -129,8 +143,7 @@ public sealed class AwsSecretsManagerStore : ISecretStore, IDisposable
             }
 
             token = response.NextToken;
-        }
-        while (!string.IsNullOrEmpty(token));
+        } while (!string.IsNullOrEmpty(token));
     }
 
     /// <inheritdoc />
