@@ -38,29 +38,26 @@ Console.WriteLine($"VFS read: {Encoding.UTF8.GetString(bytes!)}");
 
 #region step-3
 
-// Encrypted vault lifecycle: unlock -> write -> lock, then re-open and read.
-// RegisterCryptoVault wires a DI vault over a single on-disk zip file, but that ZipFileSystem
-// backend currently cannot be locked/persisted (its List reads ZipArchiveEntry.Length, which
-// .NET marks unavailable in ZipArchiveMode.Update), so this sample drives CryptoFileSystem over
-// an in-memory backend to demonstrate the full lifecycle without that limitation.
-var backend = new InMemoryFileSystem();
+// Encrypted vault on a single on-disk zip file: unlock -> write -> dispose (flushes to disk),
+// then re-open a brand-new instance over the same file to prove the data round-trips at rest.
+var vaultPath = Path.Combine(Path.GetTempPath(), "squidstd-sample.vault");
 
-using (var vault = new CryptoFileSystem(backend))
+using (var vault = new CryptoFileSystem(new ZipFileSystem(vaultPath)))
 {
     vault.Unlock("vault passphrase");
     await vault.WriteAllBytesAsync("secret.txt", Encoding.UTF8.GetBytes("top secret"));
-    vault.Lock(); // zeroes the key and flushes the encrypted index into the backend
-}
+} // Dispose -> Lock (zeroes the key, flushes the encrypted index) -> flushes the zip to disk
 
-// Re-open the same encrypted backend with the passphrase to prove the data round-trips at rest.
-using (var reopened = new CryptoFileSystem(backend))
+// Re-open the same encrypted file with the passphrase; only the right passphrase decrypts it.
+using (var reopened = new CryptoFileSystem(new ZipFileSystem(vaultPath)))
 {
     reopened.Unlock("vault passphrase");
 
-    // The secret was written above, so it is present.
     var secret = await reopened.ReadAllBytesAsync("secret.txt");
     Console.WriteLine($"Vault read after reopen: {Encoding.UTF8.GetString(secret!)}");
 }
+
+File.Delete(vaultPath);
 
 #endregion
 

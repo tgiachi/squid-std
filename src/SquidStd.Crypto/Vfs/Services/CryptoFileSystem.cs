@@ -232,6 +232,18 @@ public sealed class CryptoFileSystem : ILockableFileSystem, IDisposable
     public void Dispose()
     {
         Lock();
+
+        // The vault owns its inner filesystem; disposing it flushes backends such as ZipFileSystem
+        // (which only writes its archive to disk on dispose) so the vault persists.
+        switch (_inner)
+        {
+            case IDisposable disposable:
+                disposable.Dispose();
+                break;
+            case IAsyncDisposable asyncDisposable:
+                asyncDisposable.DisposeAsync().AsTask().GetAwaiter().GetResult();
+                break;
+        }
     }
 
     private sealed class VaultWriteStream : MemoryStream

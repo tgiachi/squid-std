@@ -11,6 +11,7 @@ public sealed class ZipFileSystem : IVirtualFileSystem, IAsyncDisposable, IDispo
 {
     private readonly ZipArchive _archive;
     private readonly FileStream _file;
+    private readonly Dictionary<string, long> _writtenLengths = new(StringComparer.Ordinal);
 
     public ZipFileSystem(string path)
     {
@@ -50,6 +51,10 @@ public sealed class ZipFileSystem : IVirtualFileSystem, IAsyncDisposable, IDispo
 
         await using var stream = entry.Open();
         await stream.WriteAsync(data, cancellationToken).ConfigureAwait(false);
+
+        // ZipArchiveEntry.Length is unavailable in update mode once an entry has been opened for
+        // writing, so track the uncompressed size ourselves for ListAsync.
+        _writtenLengths[name] = data.Length;
     }
 
     public async Task<Stream> OpenReadAsync(string path, CancellationToken cancellationToken = default)
@@ -67,7 +72,8 @@ public sealed class ZipFileSystem : IVirtualFileSystem, IAsyncDisposable, IDispo
 
     public ValueTask<bool> DeleteAsync(string path, CancellationToken cancellationToken = default)
     {
-        var entry = _archive.GetEntry(VfsPath.Normalize(path));
+        var name = VfsPath.Normalize(path);
+        var entry = _archive.GetEntry(name);
 
         if (entry is null)
         {
@@ -75,6 +81,7 @@ public sealed class ZipFileSystem : IVirtualFileSystem, IAsyncDisposable, IDispo
         }
 
         entry.Delete();
+        _writtenLengths.Remove(name);
 
         return ValueTask.FromResult(true);
     }
@@ -92,9 +99,28 @@ public sealed class ZipFileSystem : IVirtualFileSystem, IAsyncDisposable, IDispo
                 continue;
             }
 
-            yield return new VfsEntry(entry.FullName, entry.Length, entry.LastWriteTime);
+            yield return new VfsEntry(entry.FullName, EntrySize(entry), entry.LastWriteTime);
 
             await Task.CompletedTask;
+        }
+    }
+
+    private long EntrySize(ZipArchiveEntry entry)
+    {
+        if (_writtenLengths.TryGetValue(entry.FullName, out var length))
+        {
+            return length;
+        }
+
+        try
+        {
+            return entry.Length;
+        }
+        catch (InvalidOperationException)
+        {
+            // Unavailable in update mode for an entry opened for writing this session that we did
+            // not track (should not happen, but never let listing throw).
+            return 0;
         }
     }
 

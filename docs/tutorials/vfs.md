@@ -31,14 +31,14 @@ The same `IVirtualFileSystem` API works regardless of the backend. `ReadAllBytes
 ### 3. Encrypted vault round-trip
 
 `CryptoFileSystem` encrypts every entry over a backend filesystem. The lifecycle is
-unlock → write → lock; locking zeroes the key and flushes the encrypted index into the backend,
-so re-opening the same backend with the passphrase decrypts the data at rest.
+unlock → write → dispose; disposing locks the vault (zeroing the key and flushing the encrypted
+index) and disposes the backend, so a `ZipFileSystem` backend flushes its archive to disk.
+Re-opening a fresh instance over the same file with the passphrase decrypts the data at rest.
 
-This sample drives `CryptoFileSystem` over an **in-memory** backend to demonstrate the full
-lifecycle. The DI helper `RegisterCryptoVault` wires a vault over a single on-disk zip file, but
-that `ZipFileSystem` backend currently cannot be locked/persisted (a known limitation — its
-`List` reads `ZipArchiveEntry.Length`, which .NET marks unavailable in `ZipArchiveMode.Update`).
-On-disk vault persistence is therefore not yet supported.
+This sample backs the vault with a single on-disk zip file via `ZipFileSystem`, writes a secret,
+disposes the vault, then re-opens a brand-new instance over the same file to prove on-disk
+persistence. The DI helper `RegisterCryptoVault` wires exactly this — a vault over a single-file
+zip — as a lockable singleton.
 
 [!code-csharp[](../../samples/SquidStd.Samples.Vfs/Program.cs#step-3)]
 
