@@ -22,15 +22,6 @@ on startup.
 dotnet add package SquidStd.Database
 ```
 
-## Features
-
-- One-line registration: `container.RegisterDatabase()` (config section + service + open-generic `IDataAccess<>`).
-- Providers via URI scheme: `sqlite://`, `postgres://`, `sqlserver://`, `mysql://`.
-- `FreeSqlDataAccess<TEntity>` — CRUD, bulk insert/update/delete, `QueryAsync`, `GetPagedAsync`; writes
-  run inside a unit of work and roll back on error. Sets `Id`/`Created`/`Updated` automatically.
-- Optional `AutoMigrate` (FreeSql `AutoSyncStructure`) to create/update tables on startup.
-- ZLinq in-memory helpers for zero-allocation post-processing of materialized results.
-
 ## Usage
 
 ```csharp
@@ -56,6 +47,10 @@ var page = await users.GetPagedAsync(page: 1, pageSize: 20, orderBy: u => u.Name
 | `FreeSqlDataAccess<TEntity>` | FreeSql `IDataAccess<TEntity>` implementation.                      |
 | `ConnectionStringParser`     | URI → provider + native connection string.                          |
 | `ZLinqResultExtensions`      | Zero-alloc in-memory result helpers.                                |
+
+## Related
+
+- Tutorial: [Database](https://tgiachi.github.io/squid-std/tutorials/database.html)
 
 ## License
 

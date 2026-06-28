@@ -23,22 +23,6 @@ dotnet add package SquidStd.Persistence
 dotnet add package SquidStd.Persistence.MessagePack   # recommended binary serializer
 ```
 
-## Features
-
-- **Snapshot + journal**: in-memory state, WAL journal of every upsert/remove, periodic full snapshot + trim.
-- **Crash-safe**: journal records are length+FNV-1a-checksum framed — a torn/corrupt trailing record is
-  detected on read and the tail is discarded. Snapshots are written atomically (temp + rename).
-- **Serializer-agnostic**: per-entity payloads go through `IDataSerializer`/`IDataDeserializer`; the journal
-  and snapshot envelopes use a fixed binary layout. Pair with `SquidStd.Persistence.MessagePack` for a
-  compact binary default, or use the JSON serializer from `SquidStd.Core`.
-- **Detached reads**: `GetByIdAsync`/`GetAllAsync`/`Query()` return deep clones, so callers never mutate
-  stored instances.
-- **Write-ordered journaling**: writes serialize end-to-end (apply + append) so journal order always
-  matches sequence order — replay is deterministic.
-- **Lifecycle service**: `PersistenceService` is an `ISquidStdService` that loads + replays at start,
-  autosaves on a timer, and snapshots on stop. Optional `IEventBus` integration raises
-  `SnapshotSaveStartedEvent`/`SnapshotSaveCompletedEvent`.
-
 ## Usage
 
 ```csharp
