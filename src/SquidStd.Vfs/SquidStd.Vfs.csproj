@@ -8,17 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="PgpCore" Version="7.1.0"/>
+        <ProjectReference Include="..\SquidStd.Vfs.Abstractions\SquidStd.Vfs.Abstractions.csproj"/>
+        <ProjectReference Include="..\SquidStd.Services.Core\SquidStd.Services.Core.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
         <InternalsVisibleTo Include="SquidStd.Tests"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\SquidStd.Core\SquidStd.Core.csproj"/>
-        <ProjectReference Include="..\SquidStd.Services.Core\SquidStd.Services.Core.csproj"/>
-        <ProjectReference Include="..\SquidStd.Vfs.Abstractions\SquidStd.Vfs.Abstractions.csproj"/>
     </ItemGroup>
 
 </Project>
