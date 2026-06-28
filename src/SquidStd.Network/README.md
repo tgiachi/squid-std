@@ -1,15 +1,4 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/tgiachi/squid-std/main/assets/icon.png" alt="SquidStd" width="120" height="120" />
-</p>
-
 <h1 align="center">SquidStd.Network</h1>
-
-<p align="center">
-  <a href="https://www.nuget.org/packages/SquidStd.Network/"><img src="https://img.shields.io/nuget/v/SquidStd.Network.svg" alt="NuGet" /></a>
-  <img src="https://img.shields.io/nuget/dt/SquidStd.Network.svg" alt="Downloads" />
-  <a href="https://tgiachi.github.io/squid-std/articles/network.html"><img src="https://img.shields.io/badge/docs-DocFX-1390A3.svg" alt="docs" /></a>
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license" />
-</p>
 
 Networking primitives for SquidStd: TCP and UDP servers and clients with per-connection sessions, a
 pluggable framing + middleware pipeline, span-based binary readers/writers, and a circular buffer —

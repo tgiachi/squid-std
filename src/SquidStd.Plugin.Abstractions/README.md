@@ -1,15 +1,4 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/tgiachi/squid-std/main/assets/icon.png" alt="SquidStd" width="120" height="120" />
-</p>
-
 <h1 align="center">SquidStd.Plugin.Abstractions</h1>
-
-<p align="center">
-  <a href="https://www.nuget.org/packages/SquidStd.Plugin.Abstractions/"><img src="https://img.shields.io/nuget/v/SquidStd.Plugin.Abstractions.svg" alt="NuGet" /></a>
-  <img src="https://img.shields.io/nuget/dt/SquidStd.Plugin.Abstractions.svg" alt="Downloads" />
-  <a href="https://tgiachi.github.io/squid-std/articles/plugin-abstractions.html"><img src="https://img.shields.io/badge/docs-DocFX-1390A3.svg" alt="docs" /></a>
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license" />
-</p>
 
 Contracts for building SquidStd plugins. A plugin declares its identity through `PluginMetadata` and
 registers its services into the host's DryIoc container via `Configure`, receiving a `PluginContext`

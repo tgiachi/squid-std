@@ -1,14 +1,4 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/tgiachi/squid-std/main/assets/icon.png" alt="SquidStd" width="120" height="120" />
-</p>
-
 <h1 align="center">SquidStd.Persistence.Abstractions</h1>
-
-<p align="center">
-  <a href="https://www.nuget.org/packages/SquidStd.Persistence.Abstractions/"><img src="https://img.shields.io/nuget/v/SquidStd.Persistence.Abstractions.svg" alt="NuGet" /></a>
-  <img src="https://img.shields.io/nuget/dt/SquidStd.Persistence.Abstractions.svg" alt="Downloads" />
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license" />
-</p>
 
 Contracts and DTOs for SquidStd's binary persistence engine. Depend on this package to expose or consume
 persistence types without pulling in the engine implementation.

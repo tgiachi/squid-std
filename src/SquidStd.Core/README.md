@@ -1,15 +1,4 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/tgiachi/squid-std/main/assets/icon.png" alt="SquidStd" width="120" height="120" />
-</p>
-
 <h1 align="center">SquidStd.Core</h1>
-
-<p align="center">
-  <a href="https://www.nuget.org/packages/SquidStd.Core/"><img src="https://img.shields.io/nuget/v/SquidStd.Core.svg" alt="NuGet" /></a>
-  <img src="https://img.shields.io/nuget/dt/SquidStd.Core.svg" alt="Downloads" />
-  <a href="https://tgiachi.github.io/squid-std/articles/core.html"><img src="https://img.shields.io/badge/docs-DocFX-1390A3.svg" alt="docs" /></a>
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license" />
-</p>
 
 Foundational contracts and utilities for the SquidStd stack. It defines the core service interfaces
 (configuration, event bus, jobs, timing, metrics, storage) and ships dependency-free helpers — YAML/JSON
