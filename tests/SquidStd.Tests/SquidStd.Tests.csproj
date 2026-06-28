@@ -73,6 +73,7 @@
         <ProjectReference Include="..\..\src\SquidStd.Crypto\SquidStd.Crypto.csproj" />
         <ProjectReference Include="..\..\src\SquidStd.Vfs.Abstractions\SquidStd.Vfs.Abstractions.csproj" />
         <ProjectReference Include="..\..\src\SquidStd.Vfs\SquidStd.Vfs.csproj" />
+        <ProjectReference Include="..\..\src\SquidStd.Secrets.Aws\SquidStd.Secrets.Aws.csproj" />
     </ItemGroup>
 
 </Project>
