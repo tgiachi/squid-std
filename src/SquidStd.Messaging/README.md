@@ -1,15 +1,4 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/tgiachi/squid-std/main/assets/icon.png" alt="SquidStd" width="120" height="120" />
-</p>
-
 <h1 align="center">SquidStd.Messaging</h1>
-
-<p align="center">
-  <a href="https://www.nuget.org/packages/SquidStd.Messaging/"><img src="https://img.shields.io/nuget/v/SquidStd.Messaging.svg" alt="NuGet" /></a>
-  <img src="https://img.shields.io/nuget/dt/SquidStd.Messaging.svg" alt="Downloads" />
-  <a href="https://tgiachi.github.io/squid-std/articles/messaging.html"><img src="https://img.shields.io/badge/docs-DocFX-1390A3.svg" alt="docs" /></a>
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license" />
-</p>
 
 In-memory transport for SquidStd.Messaging. Provides a channel-backed `IQueueProvider` with per-queue
 buffering, round-robin delivery to subscribers, retry/dead-letter handling, and metrics — registered

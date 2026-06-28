@@ -1,14 +1,4 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/tgiachi/squid-std/main/assets/icon.png" alt="SquidStd" width="120" height="120" />
-</p>
-
 <h1 align="center">SquidStd.Persistence</h1>
-
-<p align="center">
-  <a href="https://www.nuget.org/packages/SquidStd.Persistence/"><img src="https://img.shields.io/nuget/v/SquidStd.Persistence.svg" alt="NuGet" /></a>
-  <img src="https://img.shields.io/nuget/dt/SquidStd.Persistence.svg" alt="Downloads" />
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license" />
-</p>
 
 Embeddable in-memory entity store with durable **binary snapshot + journal (write-ahead log)** persistence.
 Full state lives in memory (synchronous reads), every mutation is appended to a length+checksum-framed
@@ -75,6 +65,10 @@ container.ApplyPersistedEntityRegistrations();   // builds descriptors into IPer
 | `BinaryJournalService`                | Append-only framed binary WAL with tail-corruption recovery.  |
 | `SnapshotService`                     | Atomic per-type binary snapshot files with payload checksum.  |
 | `RegisterPersistedEntity<T,TKey>()`   | DI helper recording an entity for descriptor construction.    |
+
+## Related
+
+- Tutorial: [Persistence](https://tgiachi.github.io/squid-std/tutorials/persistence.html)
 
 ## License
 

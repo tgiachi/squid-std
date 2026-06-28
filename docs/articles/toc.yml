@@ -1,3 +1,33 @@
+- name: Concepts
+  items:
+    - name: Architecture
+      href: concepts/architecture.md
+    - name: Bootstrap lifecycle
+      href: concepts/bootstrap-lifecycle.md
+    - name: Dependency injection
+      href: concepts/dependency-injection.md
+    - name: Abstractions first
+      href: concepts/abstractions-first.md
+    - name: Messaging models
+      href: concepts/messaging-models.md
+- name: Guides
+  items:
+    - name: Configuration
+      href: guides/configuration.md
+    - name: Observability
+      href: guides/observability.md
+    - name: Testing
+      href: guides/testing.md
+    - name: Security
+      href: guides/security.md
+    - name: Choosing a messaging backend
+      href: guides/choosing-messaging.md
+    - name: Choosing a cache
+      href: guides/choosing-caching.md
+    - name: Choosing a storage backend
+      href: guides/choosing-storage.md
+    - name: Choosing search & database
+      href: guides/choosing-search-database.md
 - name: Getting Started
   href: getting-started.md
 - name: SquidStd.Core
@@ -18,6 +48,12 @@
   href: database-abstractions.md
 - name: SquidStd.Database
   href: database.md
+- name: SquidStd.Persistence.Abstractions
+  href: persistence-abstractions.md
+- name: SquidStd.Persistence
+  href: persistence.md
+- name: SquidStd.Persistence.MessagePack
+  href: persistence-messagepack.md
 - name: SquidStd.Messaging.Abstractions
   href: messaging-abstractions.md
 - name: SquidStd.Messaging
@@ -26,6 +62,8 @@
   href: messaging-rabbitmq.md
 - name: SquidStd.Messaging.Sqs
   href: messaging-sqs.md
+- name: SquidStd.Actors
+  href: actors.md
 - name: SquidStd.Caching.Abstractions
   href: caching-abstractions.md
 - name: SquidStd.Caching
@@ -38,6 +76,10 @@
   href: storage.md
 - name: SquidStd.Storage.S3
   href: storage-s3.md
+- name: SquidStd.Vfs.Abstractions
+  href: vfs-abstractions.md
+- name: SquidStd.Vfs
+  href: vfs.md
 - name: SquidStd.Scripting.Lua
   href: scripting-lua.md
 - name: SquidStd.Templating
@@ -72,5 +114,9 @@
   href: telemetry-opentelemetry.md
 - name: SquidStd.Aws.Abstractions
   href: aws-abstractions.md
+- name: SquidStd.Crypto
+  href: crypto.md
+- name: SquidStd.Secrets.Aws
+  href: secrets-aws.md
 - name: Felix Network
   href: felix.md

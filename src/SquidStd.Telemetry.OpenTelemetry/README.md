@@ -35,3 +35,16 @@ builder.Services.AddSquidStdTelemetry(new TelemetryOptions { ServiceName = "orde
   ActivitySource; ParentBased ratio sampler.
 - Metrics: runtime instrumentation + the SquidStd metrics snapshot bridged to OTel instruments.
 - Exporters: OTLP (gRPC/HTTP) plus an optional console exporter for development.
+
+## Key types
+
+| Type | Purpose |
+|------|---------|
+| `OpenTelemetryContainerExtensions` | `AddSquidStdTelemetry(...)` for the DryIoc/worker host. |
+| `OpenTelemetryServiceCollectionExtensions` | `AddSquidStdTelemetry(...)` for the ASP.NET Core host. |
+| `TelemetryService` | Configures tracing/metrics providers and exporters from `TelemetryOptions`. |
+| `MetricsSnapshotBridge` | Exports the existing SquidStd metrics snapshot to OTel instruments. |
+
+## License
+
+MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).

@@ -26,3 +26,13 @@ var aws = new AwsConfigEntry
 When `AccessKey`/`SecretKey` are null, consumers fall back to the AWS default credential chain
 (environment variables, shared profile, IAM role). When `ServiceUrl` is set, consumers point their
 client at that endpoint instead of the regional AWS endpoint.
+
+## Key types
+
+| Type | Purpose |
+|------|---------|
+| `AwsConfigEntry` | Region, optional credentials and an optional endpoint override (e.g. LocalStack). |
+
+## License
+
+MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).

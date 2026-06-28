@@ -34,3 +34,15 @@
   href: plugins.md
 - name: Scaffolding with dotnet new
   href: scaffolding.md
+- name: Actors
+  href: actors.md
+- name: Command dispatcher
+  href: command-dispatcher.md
+- name: Persistence
+  href: persistence.md
+- name: Virtual filesystem
+  href: vfs.md
+- name: Crypto (PGP)
+  href: crypto.md
+- name: Secrets (KMS / Secrets Manager)
+  href: secrets.md

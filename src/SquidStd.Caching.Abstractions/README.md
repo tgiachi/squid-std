@@ -1,15 +1,4 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/tgiachi/squid-std/main/assets/icon.png" alt="SquidStd" width="120" height="120" />
-</p>
-
 <h1 align="center">SquidStd.Caching.Abstractions</h1>
-
-<p align="center">
-  <a href="https://www.nuget.org/packages/SquidStd.Caching.Abstractions/"><img src="https://img.shields.io/nuget/v/SquidStd.Caching.Abstractions.svg" alt="NuGet" /></a>
-  <img src="https://img.shields.io/nuget/dt/SquidStd.Caching.Abstractions.svg" alt="Downloads" />
-  <a href="https://tgiachi.github.io/squid-std/articles/caching-abstractions.html"><img src="https://img.shields.io/badge/docs-DocFX-1390A3.svg" alt="docs" /></a>
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license" />
-</p>
 
 Backend-agnostic caching contracts for SquidStd. It defines the typed cache-aside facade
 (`ICacheService`), the low-level byte provider/metrics contracts, and the shared `CacheService`
