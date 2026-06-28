@@ -71,6 +71,8 @@
         <ProjectReference Include="..\..\src\SquidStd.Mail.Queue\SquidStd.Mail.Queue.csproj" />
         <ProjectReference Include="..\..\src\SquidStd.Actors\SquidStd.Actors.csproj" />
         <ProjectReference Include="..\..\src\SquidStd.Crypto\SquidStd.Crypto.csproj" />
+        <ProjectReference Include="..\..\src\SquidStd.Vfs.Abstractions\SquidStd.Vfs.Abstractions.csproj" />
+        <ProjectReference Include="..\..\src\SquidStd.Vfs\SquidStd.Vfs.csproj" />
     </ItemGroup>
 
 </Project>
