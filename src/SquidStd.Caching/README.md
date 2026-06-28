@@ -21,14 +21,6 @@ single `AddInMemoryCache()` call. Ideal for single-process apps, tests, and loca
 dotnet add package SquidStd.Caching
 ```
 
-## Features
-
-- One-line registration: `container.AddInMemoryCache()` (provider, facade, serializer, metrics).
-- `IMemoryCache`-backed storage with absolute per-entry TTL and built-in eviction.
-- Reuses the shared `CacheService` facade (key prefix, default TTL, cache-aside).
-- Built-in hit/miss metrics via `CacheMetricsProvider`.
-- Configure via `CacheOptions` or a `memory://` connection string (`?defaultTtlSeconds=`, `?keyPrefix=`).
-
 ## Usage
 
 ```csharp
@@ -50,6 +42,10 @@ var user = await cache.GetAsync<object>("user:1");
 |-------------------------------|-----------------------------------------|
 | `CacheRegistrationExtensions` | `AddInMemoryCache(...)` registration.   |
 | `InMemoryCacheProvider`       | `IMemoryCache`-backed `ICacheProvider`. |
+
+## Related
+
+- Tutorial: [Caching](https://tgiachi.github.io/squid-std/tutorials/caching.html)
 
 ## License
 

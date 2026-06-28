@@ -21,14 +21,6 @@ Registered with a single `AddRedisCache(...)` call.
 dotnet add package SquidStd.Caching.Redis
 ```
 
-## Features
-
-- One-line registration: `container.AddRedisCache(connectionString)` or with `RedisCacheOptions`.
-- Redis-backed `ICacheProvider` reusing the shared `ICacheService` facade and serializer.
-- Native TTL via Redis key expiry (`SET ... EX`).
-- Connection via a `redis://` connection string or an explicit StackExchange.Redis configuration string.
-- Built-in hit/miss metrics via `CacheMetricsProvider`.
-
 ## Usage
 
 ```csharp
@@ -51,6 +43,10 @@ var user = await cache.GetAsync<object>("user:1");
 | `RedisCacheRegistrationExtensions` | `AddRedisCache(...)` registration.            |
 | `RedisCacheProvider`               | StackExchange.Redis-backed `ICacheProvider`.  |
 | `RedisCacheOptions`                | StackExchange.Redis connection configuration. |
+
+## Related
+
+- Tutorial: [Caching](https://tgiachi.github.io/squid-std/tutorials/caching.html)
 
 ## License
 

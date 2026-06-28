@@ -22,14 +22,6 @@ backend implementation (in-memory or Redis) from a companion package.
 dotnet add package SquidStd.Caching.Abstractions
 ```
 
-## Features
-
-- `ICacheService` — typed `GetAsync<T>` / `SetAsync<T>` / `RemoveAsync` / `ExistsAsync` / `GetOrSetAsync<T>` facade.
-- `ICacheProvider` — the raw byte-level backend contract implemented per provider.
-- `CacheService` — shared facade that serializes values, applies the key prefix and default TTL, and implements cache-aside.
-- `ICacheMetrics` (+ `CacheMetricsProvider`, `NoOpCacheMetrics`) — hit/miss/set/remove metrics.
-- `CacheOptions` and `CacheConnectionString` — configuration and connection parsing.
-
 ## Usage
 
 ```csharp
@@ -50,6 +42,10 @@ public Task<int> GetOrComputeAsync(ICacheService cache)
 | `ICacheMetrics`         | Hit/miss/set/remove metrics sink.                                   |
 | `CacheOptions`          | Default TTL and key prefix.                                         |
 | `CacheConnectionString` | `scheme://host[?params]` parsing into `CacheOptions`.               |
+
+## Related
+
+- Tutorial: [Caching](https://tgiachi.github.io/squid-std/tutorials/caching.html)
 
 ## License
 
