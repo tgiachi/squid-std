@@ -15,4 +15,11 @@ public sealed class ActorOptions
 
     /// <summary>Behavior when a fire-and-forget handler throws.</summary>
     public ActorErrorPolicy ErrorPolicy { get; init; } = ActorErrorPolicy.Isolate;
+
+    /// <summary>
+    ///     How long <see cref="SquidStd.Actors.Actor{TMessage}.DisposeAsync" /> drains queued messages
+    ///     before cancelling in-flight handlers. Queued work runs to completion within this budget;
+    ///     once it elapses, the actor cancels and faults any still-pending requests.
+    /// </summary>
+    public TimeSpan ShutdownDrainTimeout { get; init; } = TimeSpan.FromSeconds(5);
 }

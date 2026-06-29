@@ -1,15 +1,4 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/tgiachi/squid-std/main/assets/icon.png" alt="SquidStd" width="120" height="120" />
-</p>
-
 <h1 align="center">SquidStd.Database</h1>
-
-<p align="center">
-  <a href="https://www.nuget.org/packages/SquidStd.Database/"><img src="https://img.shields.io/nuget/v/SquidStd.Database.svg" alt="NuGet" /></a>
-  <img src="https://img.shields.io/nuget/dt/SquidStd.Database.svg" alt="Downloads" />
-  <a href="https://tgiachi.github.io/squid-std/articles/database.html"><img src="https://img.shields.io/badge/docs-DocFX-1390A3.svg" alt="docs" /></a>
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license" />
-</p>
 
 FreeSql-backed implementation of the SquidStd.Database.Abstractions contracts. It owns a singleton
 `IFreeSql`, exposes a generic `FreeSqlDataAccess<TEntity>` with transactional writes (rollback on
@@ -21,15 +10,6 @@ on startup.
 ```bash
 dotnet add package SquidStd.Database
 ```
-
-## Features
-
-- One-line registration: `container.RegisterDatabase()` (config section + service + open-generic `IDataAccess<>`).
-- Providers via URI scheme: `sqlite://`, `postgres://`, `sqlserver://`, `mysql://`.
-- `FreeSqlDataAccess<TEntity>` — CRUD, bulk insert/update/delete, `QueryAsync`, `GetPagedAsync`; writes
-  run inside a unit of work and roll back on error. Sets `Id`/`Created`/`Updated` automatically.
-- Optional `AutoMigrate` (FreeSql `AutoSyncStructure`) to create/update tables on startup.
-- ZLinq in-memory helpers for zero-allocation post-processing of materialized results.
 
 ## Usage
 
@@ -56,6 +36,10 @@ var page = await users.GetPagedAsync(page: 1, pageSize: 20, orderBy: u => u.Name
 | `FreeSqlDataAccess<TEntity>` | FreeSql `IDataAccess<TEntity>` implementation.                      |
 | `ConnectionStringParser`     | URI → provider + native connection string.                          |
 | `ZLinqResultExtensions`      | Zero-alloc in-memory result helpers.                                |
+
+## Related
+
+- Tutorial: [Database](https://tgiachi.github.io/squid-std/tutorials/database.html)
 
 ## License
 

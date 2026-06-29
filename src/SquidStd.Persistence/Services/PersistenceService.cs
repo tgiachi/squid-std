@@ -22,6 +22,7 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
     private readonly IPersistenceEntityRegistry _registry;
     private readonly ISnapshotService _snapshotService;
     private readonly PersistenceStateStore _stateStore = new();
+    private readonly SemaphoreSlim _snapshotLock = new(1, 1);
     private CancellationTokenSource? _autosaveCts;
     private Task? _autosaveLoop;
 
@@ -49,10 +50,11 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
         _registry.Freeze();
 
         var maxSequenceId = 0L;
+        var snapshotThresholds = new Dictionary<ushort, long>();
 
         foreach (var descriptor in _registry.GetRegisteredDescriptors())
         {
-            var loaded = await _snapshotService.LoadBucketAsync(descriptor.TypeName, cancellationToken);
+            var loaded = await _snapshotService.LoadBucketAsync(descriptor.TypeName, descriptor.TypeId, cancellationToken);
 
             if (loaded is null)
             {
@@ -60,12 +62,17 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
             }
 
             ((IInternalEntityApplier)descriptor).LoadBucket(_stateStore, loaded.Bucket);
+            snapshotThresholds[descriptor.TypeId] = loaded.LastSequenceId;
             maxSequenceId = Math.Max(maxSequenceId, loaded.LastSequenceId);
         }
 
         foreach (var entry in await _journalService.ReadAllAsync(cancellationToken))
         {
-            if (entry.SequenceId <= maxSequenceId)
+            // Replay each entry against its own type's snapshot watermark, not a global maximum: a
+            // single global threshold would skip journal entries newer than a lagging type's snapshot
+            // (e.g. after a partial snapshot save where one bucket persisted and another did not),
+            // silently dropping that type's recent writes.
+            if (entry.SequenceId <= snapshotThresholds.GetValueOrDefault(entry.TypeId))
             {
                 continue;
             }
@@ -103,61 +110,72 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
 
     public async ValueTask SaveSnapshotAsync(CancellationToken cancellationToken = default)
     {
-        long capturedSequenceId;
-        List<EntitySnapshotBucket> buckets = [];
-        List<string> emptyTypeNames = [];
-
-        await _stateStore.WriteLock.WaitAsync(cancellationToken);
+        // One snapshot at a time: autosave, an explicit call, and StopAsync must not interleave their
+        // capture/save/trim phases, or a lower-sequence snapshot could land after a higher-sequence trim.
+        await _snapshotLock.WaitAsync(cancellationToken);
 
         try
         {
-            capturedSequenceId = _stateStore.LastSequenceId;
+            long capturedSequenceId;
+            List<EntitySnapshotBucket> buckets = [];
+            List<(string TypeName, ushort TypeId)> emptyTypes = [];
 
-            foreach (var descriptor in _registry.GetRegisteredDescriptors())
+            await _stateStore.WriteLock.WaitAsync(cancellationToken);
+
+            try
             {
-                lock (_stateStore.SyncRoot)
-                {
-                    var bucket = ((IInternalEntityApplier)descriptor).CaptureBucket(_stateStore);
+                capturedSequenceId = _stateStore.LastSequenceId;
 
-                    if (bucket is null)
+                foreach (var descriptor in _registry.GetRegisteredDescriptors())
+                {
+                    lock (_stateStore.SyncRoot)
                     {
-                        emptyTypeNames.Add(descriptor.TypeName);
-                    }
-                    else
-                    {
-                        buckets.Add(bucket);
+                        var bucket = ((IInternalEntityApplier)descriptor).CaptureBucket(_stateStore);
+
+                        if (bucket is null)
+                        {
+                            emptyTypes.Add((descriptor.TypeName, descriptor.TypeId));
+                        }
+                        else
+                        {
+                            buckets.Add(bucket);
+                        }
                     }
                 }
+            }
+            finally
+            {
+                _stateStore.WriteLock.Release();
+            }
+
+            if (_eventBus is not null)
+            {
+                await _eventBus.PublishAsync(new SnapshotSaveStartedEvent(capturedSequenceId), cancellationToken);
+            }
+
+            foreach (var bucket in buckets)
+            {
+                await _snapshotService.SaveBucketAsync(bucket, capturedSequenceId, cancellationToken);
+            }
+
+            foreach (var (typeName, typeId) in emptyTypes)
+            {
+                await _snapshotService.DeleteBucketAsync(typeName, typeId, cancellationToken);
+            }
+
+            await _journalService.TrimThroughSequenceAsync(capturedSequenceId, cancellationToken);
+
+            if (_eventBus is not null)
+            {
+                await _eventBus.PublishAsync(
+                    new SnapshotSaveCompletedEvent(capturedSequenceId, buckets.Count),
+                    cancellationToken
+                );
             }
         }
         finally
         {
-            _stateStore.WriteLock.Release();
-        }
-
-        if (_eventBus is not null)
-        {
-            await _eventBus.PublishAsync(new SnapshotSaveStartedEvent(capturedSequenceId), cancellationToken);
-        }
-
-        foreach (var bucket in buckets)
-        {
-            await _snapshotService.SaveBucketAsync(bucket, capturedSequenceId, cancellationToken);
-        }
-
-        foreach (var typeName in emptyTypeNames)
-        {
-            await _snapshotService.DeleteBucketAsync(typeName, cancellationToken);
-        }
-
-        await _journalService.TrimThroughSequenceAsync(capturedSequenceId, cancellationToken);
-
-        if (_eventBus is not null)
-        {
-            await _eventBus.PublishAsync(
-                new SnapshotSaveCompletedEvent(capturedSequenceId, buckets.Count),
-                cancellationToken
-            );
+            _snapshotLock.Release();
         }
     }
 

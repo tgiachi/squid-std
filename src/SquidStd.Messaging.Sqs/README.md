@@ -29,3 +29,20 @@ container.AddSqsMessaging(new SqsOptions { Aws = new AwsConfigEntry { Region = "
 - Topics map to SNS; each subscriber gets a dedicated SQS queue subscribed with raw message delivery.
 - Names are sanitized to the SQS/SNS alphabet (the default `.dlq` suffix becomes `-dlq`).
 - Payloads travel base64-encoded in the message body.
+
+## Key types
+
+| Type                                | Purpose                                  |
+|-------------------------------------|------------------------------------------|
+| `SqsMessagingRegistrationExtensions` | `AddSqsMessaging(...)` registration.    |
+| `SqsQueueProvider`                  | SQS-backed `IQueueProvider`.             |
+| `SqsTopicProvider`                  | SNS+SQS-backed `ITopicProvider`.         |
+| `SqsOptions`                        | AWS connection + queue/topic configuration. |
+
+## Related
+
+- Tutorial: [Messaging](https://tgiachi.github.io/squid-std/tutorials/messaging.html)
+
+## License
+
+MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).

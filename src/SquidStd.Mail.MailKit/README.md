@@ -1,15 +1,4 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/tgiachi/squid-std/main/assets/icon.png" alt="SquidStd" width="120" height="120" />
-</p>
-
 <h1 align="center">SquidStd.Mail.MailKit</h1>
-
-<p align="center">
-  <a href="https://www.nuget.org/packages/SquidStd.Mail.MailKit/"><img src="https://img.shields.io/nuget/v/SquidStd.Mail.MailKit.svg" alt="NuGet" /></a>
-  <img src="https://img.shields.io/nuget/dt/SquidStd.Mail.MailKit.svg" alt="Downloads" />
-  <a href="https://tgiachi.github.io/squid-std/articles/mail-mailkit.html"><img src="https://img.shields.io/badge/docs-DocFX-1390A3.svg" alt="docs" /></a>
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license" />
-</p>
 
 MailKit-backed IMAP/POP3 provider for SquidStd.Mail. Polls a mailbox on the timer wheel and publishes a
 `MailReceivedEvent` on the `IEventBus` for each new message.
@@ -73,6 +62,19 @@ await sender.SendAsync(new OutgoingMailMessage
 ```
 
 `MailSentEvent` / `MailSendFailedEvent` are published on the `IEventBus`; failures throw `MailSendException`.
+
+## Key types
+
+| Type | Purpose |
+|------|---------|
+| `MailRegistrationExtensions` | `AddMail(...)` registration (IMAP/POP3 polling). |
+| `MailSenderRegistrationExtensions` | `AddMailSender(...)` registration (SMTP). |
+| `ImapMailReader` / `Pop3MailReader` | `IMailReader` implementations. |
+| `MailKitMailSender` | `IMailSender` implementation over SMTP. |
+
+## Related
+
+- Tutorial: [Email](https://tgiachi.github.io/squid-std/tutorials/email.html)
 
 ## License
 

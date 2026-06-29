@@ -53,6 +53,15 @@ using SquidStd.Actors.Extensions;
 using var sub = session.SubscribeToEventBus(eventBus, (UserJoinedEvent e) => new SendText($":{e.Nick} JOIN"));
 ```
 
+## Key types
+
+| Type                      | Purpose                                            |
+|---------------------------|----------------------------------------------------|
+| `Actor<TMessage>`         | Mailbox base class (`TellAsync` / `AskAsync`).     |
+| `ActorRequest<TReply>`    | Base record for request/response messages.         |
+| `IActorRequest<TReply>`   | Request contract (implement directly if not using the base). |
+| `ActorOptions`            | Capacity / overflow / error configuration.         |
+
 ## Options
 
 `ActorOptions` controls the mailbox:
@@ -62,22 +71,21 @@ using var sub = session.SubscribeToEventBus(eventBus, (UserJoinedEvent e) => new
 | `Capacity`       | bounded mailbox size                | `1024`   |
 | `OverflowPolicy` | `Wait` / `DropNewest` / `Unbounded` | `Wait`   |
 | `ErrorPolicy`    | `Isolate` / `StopOnError`           | `Isolate`|
+| `ShutdownDrainTimeout` | any `TimeSpan`                | `5s`     |
 
 - **Wait**: `TellAsync` awaits until capacity frees (back-pressure).
 - **DropNewest**: `TellAsync` returns `false` when full.
 - **Isolate**: a throwing handler is logged and skipped; the actor stays alive. `AskAsync` exceptions
   always propagate to the caller regardless of policy.
 
-`DisposeAsync` completes the mailbox, drains in-flight work, and faults any still-pending requests.
+`DisposeAsync` completes the mailbox and drains queued messages — every `Tell` runs and every `Ask`
+replies — within `ShutdownDrainTimeout`. If a handler is still running when that budget elapses, the
+actor cancels its handlers and faults any requests that never completed with `ObjectDisposedException`.
 
-## Key types
+## Related
 
-| Type                      | Purpose                                            |
-|---------------------------|----------------------------------------------------|
-| `Actor<TMessage>`         | Mailbox base class (`TellAsync` / `AskAsync`).     |
-| `ActorRequest<TReply>`    | Base record for request/response messages.         |
-| `IActorRequest<TReply>`   | Request contract (implement directly if not using the base). |
-| `ActorOptions`            | Capacity / overflow / error configuration.         |
+- Tutorial: [Actors](https://tgiachi.github.io/squid-std/tutorials/actors.html)
+- Concept: [Messaging models](https://tgiachi.github.io/squid-std/articles/concepts/messaging-models.html)
 
 ## License
 

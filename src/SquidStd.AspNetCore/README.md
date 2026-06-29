@@ -1,15 +1,4 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/tgiachi/squid-std/main/assets/icon.png" alt="SquidStd" width="120" height="120" />
-</p>
-
 <h1 align="center">SquidStd.AspNetCore</h1>
-
-<p align="center">
-  <a href="https://www.nuget.org/packages/SquidStd.AspNetCore/"><img src="https://img.shields.io/nuget/v/SquidStd.AspNetCore.svg" alt="NuGet" /></a>
-  <img src="https://img.shields.io/nuget/dt/SquidStd.AspNetCore.svg" alt="Downloads" />
-  <a href="https://tgiachi.github.io/squid-std/articles/aspnetcore.html"><img src="https://img.shields.io/badge/docs-DocFX-1390A3.svg" alt="docs" /></a>
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license" />
-</p>
 
 ASP.NET Core integration for SquidStd. A single `builder.UseSquidStd(...)` call wires the SquidStd
 DryIoc container into the web host and registers a hosted service that starts and stops every
@@ -20,15 +9,6 @@ DryIoc container into the web host and registers a hosted service that starts an
 ```bash
 dotnet add package SquidStd.AspNetCore
 ```
-
-## Features
-
-- `WebApplicationBuilder.UseSquidStd(...)` — plug the SquidStd container and services into a web app.
-- Configures DryIoc as the host's service-provider factory.
-- Registers `SquidStdHostedService` to start/stop SquidStd services with the host.
-- Optional `SquidStdOptions` configuration callback.
-- `WebApplicationBuilder.AddSquidStdHealthChecks()` — bridges every SquidStd `IHealthCheck` into the standard ASP.NET Core
-  health-check system (one entry per check), exposed via the standard `app.MapHealthChecks(...)`.
 
 ## Usage
 
@@ -70,6 +50,10 @@ Each registered `IHealthCheck` appears as its own entry in the report. Check nam
 | `SquidStdAspNetCoreBuilderExtensions` | `UseSquidStd(...)` builder extension.                                  |
 | `SquidStdHostedService`               | Hosted service bridging SquidStd service lifecycle to the host.        |
 | `SquidStdHealthChecksExtensions`      | `AddSquidStdHealthChecks(...)` — bridge to ASP.NET Core health checks. |
+
+## Related
+
+- Tutorial: [Build an ASP.NET Core app](https://tgiachi.github.io/squid-std/tutorials/aspnetcore-app.html)
 
 ## License
 

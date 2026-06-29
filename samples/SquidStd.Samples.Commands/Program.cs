@@ -4,6 +4,9 @@ using SquidStd.Abstractions.Extensions.Commands;
 using SquidStd.Core.Interfaces.Commands;
 using SquidStd.Services.Core.Extensions;
 
+#region step-1
+
+// Register the dispatcher and the handlers. EchoCommand has two handlers — both run on dispatch.
 var container = new Container();
 container.RegisterCommandDispatcher<Session>();
 container.RegisterCommandHandler<PingCommand, Session, PingHandler>();
@@ -19,6 +22,10 @@ foreach (var registration in container.Resolve<List<CommandHandlerRegistration<S
     registration.Subscribe(dispatcher, container);
 }
 
+#endregion
+
+#region step-2
+
 // The context (here a Session) is passed explicitly at dispatch time — in a server this is the
 // session the message arrived on. See RegisterSeededCommandDispatcher for building it from a seed.
 var session = new Session();
@@ -26,9 +33,16 @@ var session = new Session();
 await Dispatch(dispatcher, new PingCommand(), session);
 await Dispatch(dispatcher, new EchoCommand("hello world"), session);
 
-// Unknown command path: nothing registered for UnknownCommand.
+#endregion
+
+#region step-3
+
+// The result reports whether any handler matched and how many ran — here nothing is registered
+// for UnknownCommand, so Matched is false and HandlerCount is 0.
 var unknown = await dispatcher.DispatchAsync(new UnknownCommand(), session);
 Console.WriteLine($"UnknownCommand -> matched={unknown.Matched} handlers={unknown.HandlerCount}");
+
+#endregion
 
 return;
 

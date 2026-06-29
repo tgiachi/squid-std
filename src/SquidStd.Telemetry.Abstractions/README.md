@@ -11,7 +11,7 @@ dependency: custom spans use the BCL `System.Diagnostics.ActivitySource`.
 dotnet add package SquidStd.Telemetry.Abstractions
 ```
 
-## Custom spans
+## Usage
 
 ```csharp
 using SquidStd.Telemetry.Abstractions;
@@ -22,3 +22,15 @@ activity?.SetTag("order.id", orderId);
 
 Subsystems create their own `new ActivitySource("SquidStd.Something")`; the OpenTelemetry provider
 captures every `SquidStd.*` source automatically.
+
+## Key types
+
+| Type | Purpose |
+|------|---------|
+| `TelemetryOptions` | Service name, OTLP endpoint/protocol, sampling and exporter configuration. |
+| `OtlpProtocolType` | OTLP transport: gRPC or HTTP. |
+| `SquidStdActivity` | Shared `ActivitySource` and the `SquidStd.*` source naming convention. |
+
+## License
+
+MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).

@@ -1,15 +1,4 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/tgiachi/squid-std/main/assets/icon.png" alt="SquidStd" width="120" height="120" />
-</p>
-
 <h1 align="center">SquidStd.Caching</h1>
-
-<p align="center">
-  <a href="https://www.nuget.org/packages/SquidStd.Caching/"><img src="https://img.shields.io/nuget/v/SquidStd.Caching.svg" alt="NuGet" /></a>
-  <img src="https://img.shields.io/nuget/dt/SquidStd.Caching.svg" alt="Downloads" />
-  <a href="https://tgiachi.github.io/squid-std/articles/caching.html"><img src="https://img.shields.io/badge/docs-DocFX-1390A3.svg" alt="docs" /></a>
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license" />
-</p>
 
 In-memory backend for SquidStd.Caching. Provides an `IMemoryCache`-backed `ICacheProvider` with
 absolute TTL and eviction, wired to the shared typed `ICacheService` facade — registered with a
@@ -20,14 +9,6 @@ single `AddInMemoryCache()` call. Ideal for single-process apps, tests, and loca
 ```bash
 dotnet add package SquidStd.Caching
 ```
-
-## Features
-
-- One-line registration: `container.AddInMemoryCache()` (provider, facade, serializer, metrics).
-- `IMemoryCache`-backed storage with absolute per-entry TTL and built-in eviction.
-- Reuses the shared `CacheService` facade (key prefix, default TTL, cache-aside).
-- Built-in hit/miss metrics via `CacheMetricsProvider`.
-- Configure via `CacheOptions` or a `memory://` connection string (`?defaultTtlSeconds=`, `?keyPrefix=`).
 
 ## Usage
 
@@ -50,6 +31,10 @@ var user = await cache.GetAsync<object>("user:1");
 |-------------------------------|-----------------------------------------|
 | `CacheRegistrationExtensions` | `AddInMemoryCache(...)` registration.   |
 | `InMemoryCacheProvider`       | `IMemoryCache`-backed `ICacheProvider`. |
+
+## Related
+
+- Tutorial: [Caching](https://tgiachi.github.io/squid-std/tutorials/caching.html)
 
 ## License
 

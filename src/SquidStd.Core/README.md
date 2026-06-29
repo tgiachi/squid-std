@@ -1,15 +1,4 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/tgiachi/squid-std/main/assets/icon.png" alt="SquidStd" width="120" height="120" />
-</p>
-
 <h1 align="center">SquidStd.Core</h1>
-
-<p align="center">
-  <a href="https://www.nuget.org/packages/SquidStd.Core/"><img src="https://img.shields.io/nuget/v/SquidStd.Core.svg" alt="NuGet" /></a>
-  <img src="https://img.shields.io/nuget/dt/SquidStd.Core.svg" alt="Downloads" />
-  <a href="https://tgiachi.github.io/squid-std/articles/core.html"><img src="https://img.shields.io/badge/docs-DocFX-1390A3.svg" alt="docs" /></a>
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license" />
-</p>
 
 Foundational contracts and utilities for the SquidStd stack. It defines the core service interfaces
 (configuration, event bus, jobs, timing, metrics, storage) and ships dependency-free helpers — YAML/JSON
@@ -21,21 +10,6 @@ SquidStd packages build on.
 ```bash
 dotnet add package SquidStd.Core
 ```
-
-## Features
-
-- Configuration contracts: `IConfigEntry` (a YAML section) and `IConfigManagerService`.
-- In-process messaging: `IEventBus` with `ISyncEventListener<T>` / `IAsyncEventListener<T>` over `IEvent`.
-- Command dispatch: `ICommandDispatcher<TContext>` with `ICommandHandler<TCommand,TContext>`, fan-out, fault isolation, and a `CommandDispatchResult`; `ICommandContextFactory<TContext,TSeed>` builds the context from a seed for `ISeededCommandDispatcher<TContext,TSeed>`.
-- Background work & timing: `IJobSystem`, `ITimerService`, `IMainThreadDispatcher`.
-- Metrics & secrets: `IMetricProvider` and secret-protection contracts.
-- Serialization: `IDataSerializer` / `IDataDeserializer` (default `JsonDataSerializer`), plus `YamlUtils` / `JsonUtils`.
-- File watching: `IFileWatcherService` / `FileWatcherService` — recursive, debounced watchers that publish `FileChangedEvent` on the event bus.
-- Object pooling: `ObjectPool<T>` — thread-safe, non-blocking, factory-based reuse with optional reset.
-- Cryptography: `CryptoUtils` (AES-GCM authenticated encrypt/decrypt + key generation), `EncryptString`/`DecryptString` string helpers, base64 extensions, and `SslUtils` for loading PEM/PFX TLS certificates.
-- Randomness: `BuiltInRng` (seedable ambient RNG), `RandomUtils` (dice, coin flips), and collection `Shuffle`/`RandomElement`/`RandomSample` extensions.
-- Utilities: a Serilog `EventSink`, and string/env/directory extensions.
-- Shared domain enums under `Types` (e.g. `LogLevelType`, `PlatformType`, `FileChangeKind`).
 
 ## Usage
 
@@ -87,6 +61,10 @@ pool.Return(builder);
 | `IFileWatcherService`   | Recursive, debounced file watcher publishing to the event bus. |
 | `ObjectPool<T>`         | Thread-safe, non-blocking object pool.        |
 | `ICommandDispatcher<TContext>` | Typed protocol command dispatch with context. |
+
+## Related
+
+- Tutorial: [Events, jobs & scheduling](https://tgiachi.github.io/squid-std/tutorials/events-jobs-scheduling.html)
 
 ## License
 

@@ -21,7 +21,7 @@ public abstract class Actor<TMessage> : IAsyncDisposable
     private readonly CancellationTokenSource _shutdown;
     private readonly ConcurrentDictionary<IActorRequestCore, byte> _outstanding;
     private readonly ILogger _logger;
-    private bool _disposed;
+    private int _disposed;
 
     /// <summary>Number of messages waiting in the mailbox.</summary>
     public int PendingCount
@@ -38,14 +38,16 @@ public abstract class Actor<TMessage> : IAsyncDisposable
         _outstanding = new ConcurrentDictionary<IActorRequestCore, byte>();
         _logger = Log.ForContext(GetType());
 
+        // The mailbox is deliberately NOT bound to _shutdown.Token: cancelling that token would abort
+        // the block and discard queued messages. Dispose instead Completes the block to drain the queue,
+        // and only cancels _shutdown (observed by handlers via ReceiveAsync) once the drain budget elapses.
         var blockOptions = new ExecutionDataflowBlockOptions
         {
             MaxDegreeOfParallelism = 1,
             EnsureOrdered = true,
             BoundedCapacity = _options.OverflowPolicy == ActorOverflowPolicy.Unbounded
                 ? DataflowBlockOptions.Unbounded
-                : _options.Capacity,
-            CancellationToken = _shutdown.Token
+                : _options.Capacity
         };
 
         _mailbox = new ActionBlock<TMessage>(ProcessAsync, blockOptions);
@@ -163,32 +165,55 @@ public abstract class Actor<TMessage> : IAsyncDisposable
 
     private void ThrowIfDisposed()
     {
-        if (_disposed)
+        if (Volatile.Read(ref _disposed) != 0)
         {
             throw new ObjectDisposedException(GetType().Name);
         }
     }
 
-    /// <summary>Completes the mailbox, drains in-flight work, and faults any still-pending requests.</summary>
+    private async Task<bool> TryDrainAsync(TimeSpan timeout)
+    {
+        try
+        {
+            await _mailbox.Completion.WaitAsync(timeout);
+
+            return true;
+        }
+        catch (TimeoutException)
+        {
+            return false;
+        }
+        catch (Exception ex)
+        {
+            // The mailbox completed in a faulted/cancelled state; that still counts as drained.
+            _logger.Debug(ex, "Actor {ActorType} mailbox completed with fault during dispose", GetType().Name);
+
+            return true;
+        }
+    }
+
+    /// <summary>
+    ///     Completes the mailbox and drains queued work within <see cref="ActorOptions.ShutdownDrainTimeout" />,
+    ///     then cancels any handlers still running and faults requests that never completed.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
-        if (_disposed)
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
         {
             return;
         }
 
-        _disposed = true;
-        _shutdown.Cancel();
         _mailbox.Complete();
 
-        try
+        if (!await TryDrainAsync(_options.ShutdownDrainTimeout))
         {
-            await _mailbox.Completion;
+            // A handler is still running past the drain budget: cancel cancellation-honoring handlers
+            // and give them one more grace period to unwind before abandoning the drain.
+            _shutdown.Cancel();
+            await TryDrainAsync(_options.ShutdownDrainTimeout);
         }
-        catch (Exception ex)
-        {
-            _logger.Debug(ex, "Actor {ActorType} mailbox completed with fault during dispose", GetType().Name);
-        }
+
+        _shutdown.Cancel(); // idempotent; ensures handler tokens are observed cancelled before teardown
 
         foreach (var request in _outstanding.Keys)
         {
