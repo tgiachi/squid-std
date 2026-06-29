@@ -48,6 +48,26 @@ container.RegisterView<CounterView, CounterViewModel>();
 await container.Resolve<TuiApplicationHost>().RunAsync<CounterViewModel>();
 ```
 
+## Declarative UI (DSL)
+
+Instead of imperative `BuildLayout` + `Bind`, derive from `TuiComposedView<TViewModel>` and return a node
+tree from `Compose()`. One node = widget + binding; direction is inferred (Label one-way, TextField
+two-way, Button command) and bindings are typed lambdas — no magic strings.
+
+```csharp
+public sealed class CounterView : TuiComposedView<CounterViewModel>
+{
+    protected override TuiNode<CounterViewModel> Compose() =>
+        Ui.VStack(
+            Ui.Label(x => x.Title),
+            Ui.Label(x => x.Value),
+            Ui.Button("+1", x => x.IncrementCommand));
+}
+```
+
+`Ui.VStack`/`Ui.HStack` arrange children automatically; `Ui.TextField(x => x.Name)` is two-way by default
+(pass `BindMode.OneWay` to override).
+
 ## Key types
 
 | Type | Purpose |

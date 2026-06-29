@@ -5,6 +5,6 @@ using SquidStd.Tui.Hosting;
 
 var container = new Container();
 container.RegisterTui();
-container.RegisterView<CounterView, CounterViewModel>();
+container.RegisterView<CounterComposedView, CounterViewModel>();
 
 await container.Resolve<TuiApplicationHost>().RunAsync<CounterViewModel>();
