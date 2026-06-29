@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using Serilog;
 using SquidStd.Core.Utils;
 using SquidStd.Persistence.Abstractions.Data;
@@ -70,8 +71,11 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
             var bytes = await File.ReadAllBytesAsync(path, cancellationToken);
             var envelope = SnapshotEnvelopeCodec.Decode(bytes);
 
-            if (ChecksumUtils.Compute(envelope.Bucket.Payload) != envelope.Checksum ||
-                !string.Equals(envelope.Bucket.TypeName, typeName, StringComparison.Ordinal))
+            var checksumValid = envelope.Version >= 2
+                ? SnapshotEnvelopeCodec.ComputeFullChecksum(bytes) == envelope.Checksum
+                : ChecksumUtils.Compute(envelope.Bucket.Payload) == envelope.Checksum;
+
+            if (!checksumValid || !string.Equals(envelope.Bucket.TypeName, typeName, StringComparison.Ordinal))
             {
                 _logger.Error("Snapshot {Path}: checksum or type-name mismatch; treating as absent", path);
 
@@ -104,15 +108,21 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
 
         var envelope = new SnapshotFileEnvelope
         {
-            Version = 1,
+            Version = 2,
             LastSequenceId = lastSequenceId,
-            Checksum = ChecksumUtils.Compute(bucket.Payload),
+            Checksum = 0,
             Bucket = bucket
         };
 
         var path = PathFor(bucket.TypeName);
         var tempPath = path + ".tmp";
         var bytes = SnapshotEnvelopeCodec.Encode(envelope);
+
+        // Checksum covers everything except its own 4 bytes; patch it into the encoded buffer in place.
+        BinaryPrimitives.WriteUInt32LittleEndian(
+            bytes.AsSpan(SnapshotEnvelopeCodec.ChecksumOffset),
+            SnapshotEnvelopeCodec.ComputeFullChecksum(bytes)
+        );
 
         await _ioLock.WaitAsync(cancellationToken);
 
