@@ -3,6 +3,7 @@ using Serilog;
 using SquidStd.Core.Utils;
 using SquidStd.Persistence.Abstractions.Data;
 using SquidStd.Persistence.Abstractions.Interfaces.Persistence;
+using SquidStd.Persistence.Abstractions.Types.Persistence;
 using SquidStd.Persistence.Internal;
 using ILogger = Serilog.ILogger;
 
@@ -22,14 +23,16 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
     private readonly SemaphoreSlim _ioLock = new(1, 1);
     private readonly ILogger _logger = Log.ForContext<SnapshotService>();
     private readonly string _suffix;
+    private readonly DurabilityMode _durability;
 
-    public SnapshotService(string saveDirectory, string fileSuffix)
+    public SnapshotService(string saveDirectory, string fileSuffix, DurabilityMode durability = DurabilityMode.Buffered)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(saveDirectory);
         ArgumentException.ThrowIfNullOrWhiteSpace(fileSuffix);
 
         _directory = Path.GetFullPath(saveDirectory);
         _suffix = fileSuffix;
+        _durability = durability;
 
         Directory.CreateDirectory(_directory);
     }
@@ -131,7 +134,15 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
             await using (var stream = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 await stream.WriteAsync(bytes, cancellationToken);
-                await stream.FlushAsync(cancellationToken);
+
+                if (_durability == DurabilityMode.Durable)
+                {
+                    stream.Flush(flushToDisk: true); // fsync the temp file before the atomic rename
+                }
+                else
+                {
+                    await stream.FlushAsync(cancellationToken);
+                }
             }
 
             File.Move(tempPath, path, true);
