@@ -1,6 +1,7 @@
 using DryIoc;
 using SquidStd.Tui;
 using SquidStd.Tui.Extensions;
+using SquidStd.Tui.Hosting;
 using SquidStd.Tui.Interfaces;
 using SquidStd.Tui.Internal;
 
@@ -33,6 +34,7 @@ public class RegisterTuiExtensionsTests
         Assert.NotNull(container.Resolve<ITuiNavigator>());
         Assert.NotNull(container.Resolve<TuiViewRegistry>());
         Assert.NotNull(container.Resolve<ITuiViewHost>());
+        Assert.Same(container.Resolve<TerminalGuiViewHost>(), container.Resolve<ITuiViewHost>());
     }
 
     [Fact]

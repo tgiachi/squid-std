@@ -64,6 +64,7 @@
         <Project Path="samples/SquidStd.Samples.Vfs/SquidStd.Samples.Vfs.csproj" />
         <Project Path="samples/SquidStd.Samples.Secrets/SquidStd.Samples.Secrets.csproj" />
         <Project Path="samples/SquidStd.Samples.Actors/SquidStd.Samples.Actors.csproj" />
+        <Project Path="samples/SquidStd.Samples.Tui/SquidStd.Samples.Tui.csproj" />
     </Folder>
     <Folder Name="/tests/">
         <Project Path="tests/SquidStd.Tests/SquidStd.Tests.csproj" />
