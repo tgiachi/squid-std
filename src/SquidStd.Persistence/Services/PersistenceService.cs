@@ -54,7 +54,7 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
 
         foreach (var descriptor in _registry.GetRegisteredDescriptors())
         {
-            var loaded = await _snapshotService.LoadBucketAsync(descriptor.TypeName, cancellationToken);
+            var loaded = await _snapshotService.LoadBucketAsync(descriptor.TypeName, descriptor.TypeId, cancellationToken);
 
             if (loaded is null)
             {
@@ -118,7 +118,7 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
         {
             long capturedSequenceId;
             List<EntitySnapshotBucket> buckets = [];
-            List<string> emptyTypeNames = [];
+            List<(string TypeName, ushort TypeId)> emptyTypes = [];
 
             await _stateStore.WriteLock.WaitAsync(cancellationToken);
 
@@ -134,7 +134,7 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
 
                         if (bucket is null)
                         {
-                            emptyTypeNames.Add(descriptor.TypeName);
+                            emptyTypes.Add((descriptor.TypeName, descriptor.TypeId));
                         }
                         else
                         {
@@ -158,9 +158,9 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
                 await _snapshotService.SaveBucketAsync(bucket, capturedSequenceId, cancellationToken);
             }
 
-            foreach (var typeName in emptyTypeNames)
+            foreach (var (typeName, typeId) in emptyTypes)
             {
-                await _snapshotService.DeleteBucketAsync(typeName, cancellationToken);
+                await _snapshotService.DeleteBucketAsync(typeName, typeId, cancellationToken);
             }
 
             await _journalService.TrimThroughSequenceAsync(capturedSequenceId, cancellationToken);

@@ -36,7 +36,7 @@ public sealed class DurableWriteTests : IDisposable
         var bucket = new EntitySnapshotBucket { TypeId = 1, TypeName = "Player", SchemaVersion = 1, Payload = [9, 9] };
 
         await service.SaveBucketAsync(bucket, lastSequenceId: 5);
-        var loaded = await service.LoadBucketAsync("Player");
+        var loaded = await service.LoadBucketAsync("Player", 1);
 
         Assert.NotNull(loaded);
         Assert.Equal(5, loaded.LastSequenceId);

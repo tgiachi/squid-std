@@ -62,10 +62,10 @@ public sealed class PersistenceSnapshotConcurrencyTests : IDisposable
             Interlocked.Decrement(ref _active);
         }
 
-        public ValueTask<PersistedBucket?> LoadBucketAsync(string typeName, CancellationToken cancellationToken = default)
+        public ValueTask<PersistedBucket?> LoadBucketAsync(string typeName, ushort typeId, CancellationToken cancellationToken = default)
             => ValueTask.FromResult<PersistedBucket?>(null);
 
-        public ValueTask DeleteBucketAsync(string typeName, CancellationToken cancellationToken = default)
+        public ValueTask DeleteBucketAsync(string typeName, ushort typeId, CancellationToken cancellationToken = default)
             => ValueTask.CompletedTask;
     }
 }

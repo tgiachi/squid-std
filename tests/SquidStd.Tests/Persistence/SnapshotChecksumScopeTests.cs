@@ -23,7 +23,7 @@ public sealed class SnapshotChecksumScopeTests : IDisposable
         bytes[4] ^= 0xFF; // flip a byte inside the LastSequenceId field (offset 4..11)
         await File.WriteAllBytesAsync(file, bytes);
 
-        Assert.Null(await service.LoadBucketAsync("Player"));
+        Assert.Null(await service.LoadBucketAsync("Player", 1));
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public sealed class SnapshotChecksumScopeTests : IDisposable
         });
         await File.WriteAllBytesAsync(file, legacy);
 
-        var loaded = await service.LoadBucketAsync("Player");
+        var loaded = await service.LoadBucketAsync("Player", 1);
         Assert.NotNull(loaded);
         Assert.Equal(7, loaded.LastSequenceId);
     }

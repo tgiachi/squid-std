@@ -37,11 +37,12 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
         Directory.CreateDirectory(_directory);
     }
 
-    public async ValueTask DeleteBucketAsync(string typeName, CancellationToken cancellationToken = default)
+    public async ValueTask DeleteBucketAsync(string typeName, ushort typeId, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(typeName);
 
-        var path = PathFor(typeName);
+        var path = PathFor(typeName, typeId);
+        var legacyPath = LegacyPathFor(typeName);
 
         await _ioLock.WaitAsync(cancellationToken);
 
@@ -49,6 +50,8 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
         {
             File.Delete(path);
             File.Delete(path + ".tmp");
+            File.Delete(legacyPath);
+            File.Delete(legacyPath + ".tmp");
         }
         finally
         {
@@ -56,16 +59,29 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
         }
     }
 
-    public async ValueTask<PersistedBucket?> LoadBucketAsync(string typeName, CancellationToken cancellationToken = default)
+    public async ValueTask<PersistedBucket?> LoadBucketAsync(
+        string typeName, ushort typeId, CancellationToken cancellationToken = default
+    )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(typeName);
 
-        var path = PathFor(typeName);
+        var path = PathFor(typeName, typeId);
 
         await _ioLock.WaitAsync(cancellationToken);
 
         try
         {
+            // Migrate a legacy (pre-TypeId) snapshot file name to the new scheme on first access.
+            if (!File.Exists(path))
+            {
+                var legacyPath = LegacyPathFor(typeName);
+
+                if (File.Exists(legacyPath))
+                {
+                    File.Move(legacyPath, path);
+                }
+            }
+
             if (!File.Exists(path))
             {
                 return null;
@@ -117,7 +133,7 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
             Bucket = bucket
         };
 
-        var path = PathFor(bucket.TypeName);
+        var path = PathFor(bucket.TypeName, bucket.TypeId);
         var tempPath = path + ".tmp";
         var bytes = SnapshotEnvelopeCodec.Encode(envelope);
 
@@ -153,14 +169,24 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
         }
     }
 
-    private string PathFor(string typeName)
+    private string PathFor(string typeName, ushort typeId)
+    {
+        return Path.Combine(_directory, SnakeName(typeName) + "_" + typeId + _suffix);
+    }
+
+    private string LegacyPathFor(string typeName)
+    {
+        return Path.Combine(_directory, SnakeName(typeName) + _suffix);
+    }
+
+    private string SnakeName(string typeName)
     {
         if (typeName.AsSpan().IndexOfAny(_invalidTypeNameChars) >= 0)
         {
             throw new InvalidOperationException($"Persisted type name '{typeName}' cannot be used as a snapshot file name.");
         }
 
-        return Path.Combine(_directory, StringUtils.ToSnakeCase(typeName) + _suffix);
+        return StringUtils.ToSnakeCase(typeName);
     }
 
     public void Dispose()
