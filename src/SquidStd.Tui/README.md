@@ -1,0 +1,64 @@
+<h1 align="center">SquidStd.Tui</h1>
+
+MVVM for terminal apps, built on **Terminal.Gui v2** and **CommunityToolkit.Mvvm**. Observable
+ViewModels, a View↔ViewModel binder (fluent + opt-in convention), ViewModel-first navigation, and DryIoc
+wiring.
+
+## Install
+
+```bash
+dotnet add package SquidStd.Tui
+```
+
+## Usage
+
+```csharp
+public sealed partial class CounterViewModel : TuiViewModel
+{
+    [ObservableProperty] private string _title = "Counter";
+    [ObservableProperty] private string _value = "0";
+
+    [RelayCommand]
+    private void Increment() => Value = (int.Parse(Value) + 1).ToString();
+}
+
+public sealed class CounterView : TuiView<CounterViewModel>
+{
+    private Label _value = null!;
+    private Button _inc = null!;
+
+    protected override void BuildLayout()
+    {
+        _value = new Label { X = 1, Y = 1 };
+        _inc = new Button { X = 1, Y = 3, Text = "+1" };
+        Add(_value, _inc);
+    }
+
+    protected override void Bind(ViewBinder b)
+    {
+        b.OneWayTitle(ViewModel, x => x.Title, this);
+        b.OneWayText(ViewModel, x => x.Value, _value);
+        b.Command(_inc, ViewModel.IncrementCommand);
+    }
+}
+
+// boot
+var container = new Container().RegisterTui();
+container.RegisterView<CounterView, CounterViewModel>();
+await container.Resolve<TuiApplicationHost>().RunAsync<CounterViewModel>();
+```
+
+## Key types
+
+| Type | Purpose |
+|------|---------|
+| `TuiViewModel` | ViewModel base (ObservableObject + activation hooks + `Navigator`). |
+| `TuiView<TViewModel>` | View base: a Terminal.Gui `Window` with a typed ViewModel and a binder. |
+| `ViewBinder` | One-way / two-way / command binding; fluent typed + `AutoBind` by convention. |
+| `ITuiNavigator` | ViewModel-first stack navigation (`NavigateToAsync`, `BackAsync`). |
+| `TuiApplicationHost` | Boots the Terminal.Gui loop with a root ViewModel. |
+| `RegisterTui()` / `RegisterView<,>()` | DryIoc registration. |
+
+## License
+
+MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
