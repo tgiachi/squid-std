@@ -13,6 +13,7 @@ public sealed class TerminalGuiViewHost : ITuiViewHost
     /// <summary>The shell the navigator's screens are added to. Set by the application host before running.</summary>
     public View? Container { get; set; }
 
+    /// <summary>Adds <paramref name="view"/> as a full-size child of <see cref="Container"/> and gives it focus.</summary>
     public void Show(object view)
     {
         if (Container is not null && view is View concrete)
@@ -24,6 +25,7 @@ public sealed class TerminalGuiViewHost : ITuiViewHost
         }
     }
 
+    /// <summary>Removes <paramref name="view"/> from <see cref="Container"/> and disposes it.</summary>
     public void Remove(object view)
     {
         if (Container is not null && view is View concrete)

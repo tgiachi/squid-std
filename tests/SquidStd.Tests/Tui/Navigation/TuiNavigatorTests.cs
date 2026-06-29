@@ -106,4 +106,71 @@ public class TuiNavigatorTests
 
         Assert.Equal(1, navigator.Depth); // refuses to pop the root
     }
+
+    private sealed class TrackingHomeViewModel : TuiViewModel
+    {
+        public int Activated { get; private set; }
+        public int Deactivated { get; private set; }
+
+        public override ValueTask OnActivatedAsync()
+        {
+            Activated++;
+            return ValueTask.CompletedTask;
+        }
+
+        public override ValueTask OnDeactivatedAsync()
+        {
+            Deactivated++;
+            return ValueTask.CompletedTask;
+        }
+    }
+
+    private sealed class TrackingDetailViewModel : TuiViewModel
+    {
+        public int Activated { get; private set; }
+        public int Deactivated { get; private set; }
+
+        public override ValueTask OnActivatedAsync()
+        {
+            Activated++;
+            return ValueTask.CompletedTask;
+        }
+
+        public override ValueTask OnDeactivatedAsync()
+        {
+            Deactivated++;
+            return ValueTask.CompletedTask;
+        }
+    }
+
+    [Fact]
+    public async Task ForwardThenBack_PairsActivationHooks_NoDoubleActivateWithoutDeactivate()
+    {
+        var container = new Container();
+        container.Register<TrackingHomeViewModel>(Reuse.Singleton);
+        container.Register<TrackingDetailViewModel>(Reuse.Singleton);
+        container.Register<FakeView>(Reuse.Transient);
+
+        var registry = new TuiViewRegistry();
+        registry.Map(typeof(TrackingHomeViewModel), typeof(FakeView));
+        registry.Map(typeof(TrackingDetailViewModel), typeof(FakeView));
+
+        var navigator = new TuiNavigator(container, registry, new FakeViewHost());
+        var home = container.Resolve<TrackingHomeViewModel>();
+        var detail = container.Resolve<TrackingDetailViewModel>();
+
+        await navigator.NavigateToAsync<TrackingHomeViewModel>();   // home: A1 D0
+        Assert.Equal(1, home.Activated);
+        Assert.Equal(0, home.Deactivated);
+
+        await navigator.NavigateToAsync<TrackingDetailViewModel>(); // home deactivated; detail A1
+        Assert.Equal(1, home.Activated);
+        Assert.Equal(1, home.Deactivated);
+        Assert.Equal(1, detail.Activated);
+
+        await navigator.BackAsync();                                 // detail D1; home reactivated
+        Assert.Equal(1, detail.Deactivated);
+        Assert.Equal(2, home.Activated);
+        Assert.Equal(1, home.Deactivated); // still 1 — every activate is now paired with a prior deactivate
+    }
 }

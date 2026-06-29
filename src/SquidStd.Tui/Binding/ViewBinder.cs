@@ -13,6 +13,7 @@ public sealed partial class ViewBinder : IDisposable
     private readonly List<IDisposable> _subscriptions = new();
     private readonly Action<Action> _marshal;
 
+    /// <summary>Initialises the binder with an optional marshal action for UI-thread dispatch.</summary>
     /// <param name="marshal">
     /// Runs an update on the UI thread. Defaults to running inline; the host passes a delegate over
     /// <c>Application.Invoke</c> so updates raised from background threads reach the Terminal.Gui loop.
@@ -119,11 +120,7 @@ public sealed partial class ViewBinder : IDisposable
         });
     }
 
-    private void Track(IDisposable subscription)
-    {
-        _subscriptions.Add(subscription);
-    }
-
+    /// <summary>Disposes all active subscriptions created by this binder.</summary>
     public void Dispose()
     {
         for (var i = 0; i < _subscriptions.Count; i++)

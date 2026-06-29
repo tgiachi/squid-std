@@ -35,6 +35,11 @@ public sealed class TuiNavigator : ITuiNavigator
         view.Bind(viewModel);
         view.Initialize();
 
+        if (_stack.Count > 0)
+        {
+            await _stack.Peek().ViewModel.OnDeactivatedAsync();
+        }
+
         _stack.Push(new Screen(viewModel, view));
         _viewHost.Show(view);
 
