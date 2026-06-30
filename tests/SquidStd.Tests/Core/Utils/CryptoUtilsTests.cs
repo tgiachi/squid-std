@@ -27,10 +27,7 @@ public class CryptoUtilsTests
         Assert.NotEqual(first, second);
     }
 
-    [Theory]
-    [InlineData(16)]
-    [InlineData(24)]
-    [InlineData(32)]
+    [Theory, InlineData(16), InlineData(24), InlineData(32)]
     public void GenerateKey_ReturnsKeyOfRequestedSize(int size)
     {
         var key = Convert.FromBase64String(CryptoUtils.GenerateKey(size));
@@ -40,9 +37,7 @@ public class CryptoUtilsTests
 
     [Fact]
     public void GenerateKey_WhenSizeInvalid_Throws()
-    {
-        Assert.Throws<ArgumentException>(() => CryptoUtils.GenerateKey(20));
-    }
+        => Assert.Throws<ArgumentException>(() => CryptoUtils.GenerateKey(20));
 
     [Fact]
     public void Decrypt_WithWrongKey_Throws()

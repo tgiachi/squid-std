@@ -14,13 +14,9 @@ internal sealed record VaultHeader(
 )
 {
     public byte[] Serialize()
-    {
-        return JsonSerializer.SerializeToUtf8Bytes(this);
-    }
+        => JsonSerializer.SerializeToUtf8Bytes(this);
 
     public static VaultHeader Parse(byte[] data)
-    {
-        return JsonSerializer.Deserialize<VaultHeader>(data)
-               ?? throw new InvalidDataException("Vault header is empty or invalid.");
-    }
+        => JsonSerializer.Deserialize<VaultHeader>(data) ??
+           throw new InvalidDataException("Vault header is empty or invalid.");
 }

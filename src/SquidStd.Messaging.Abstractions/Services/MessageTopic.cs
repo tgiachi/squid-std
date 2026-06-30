@@ -4,8 +4,8 @@ using SquidStd.Messaging.Abstractions.Interfaces;
 namespace SquidStd.Messaging.Abstractions.Services;
 
 /// <summary>
-///     Typed facade over an <see cref="ITopicProvider" />: serializes outgoing messages and deserializes
-///     incoming payloads.
+/// Typed facade over an <see cref="ITopicProvider" />: serializes outgoing messages and deserializes
+/// incoming payloads.
 /// </summary>
 public sealed class MessageTopic : IMessageTopic
 {
@@ -22,9 +22,7 @@ public sealed class MessageTopic : IMessageTopic
 
     /// <inheritdoc />
     public Task PublishAsync<TMessage>(string topic, TMessage message, CancellationToken cancellationToken = default)
-    {
-        return _provider.PublishAsync(topic, _serializer.Serialize(message), cancellationToken);
-    }
+        => _provider.PublishAsync(topic, _serializer.Serialize(message), cancellationToken);
 
     /// <inheritdoc />
     public IDisposable Subscribe<TMessage>(string topic, Func<TMessage, CancellationToken, Task> handler)

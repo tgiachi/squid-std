@@ -8,7 +8,8 @@ namespace SquidStd.Tests.Persistence;
 
 public sealed class PersistenceSnapshotConcurrencyTests : IDisposable
 {
-    private readonly string _dir = Path.Combine(Path.GetTempPath(), "squidstd-snapshot-conc-" + Guid.NewGuid().ToString("N"));
+    private readonly string _dir =
+        Path.Combine(Path.GetTempPath(), "squidstd-snapshot-conc-" + Guid.NewGuid().ToString("N"));
 
     [Fact]
     public async Task SaveSnapshotAsync_ConcurrentCalls_DoNotInterleave()
@@ -19,14 +20,12 @@ public sealed class PersistenceSnapshotConcurrencyTests : IDisposable
         var config = new PersistenceConfig { SaveDirectory = _dir, AutosaveInterval = TimeSpan.FromHours(1) };
         var journal = new BinaryJournalService(Path.Combine(_dir, config.JournalFileName));
         var snapshot = new ConcurrencyProbeSnapshotService();
-        var service = new PersistenceService(registry, journal, snapshot, config, eventBus: null);
+        var service = new PersistenceService(registry, journal, snapshot, config, null);
 
         await service.InitializeAsync();
-        await service.GetStore<Player, int>().UpsertAsync(new Player { Id = 1, Name = "Bob" });
+        await service.GetStore<Player, int>().UpsertAsync(new() { Id = 1, Name = "Bob" });
 
-        await Task.WhenAll(
-            Enumerable.Range(0, 8).Select(async _ => await service.SaveSnapshotAsync())
-        );
+        await Task.WhenAll(Enumerable.Range(0, 8).Select(async _ => await service.SaveSnapshotAsync()));
 
         await journal.DisposeAsync();
         Assert.Equal(1, snapshot.MaxObservedConcurrency); // never two snapshot operations at once
@@ -53,7 +52,9 @@ public sealed class PersistenceSnapshotConcurrencyTests : IDisposable
         public int MaxObservedConcurrency { get; private set; }
 
         public async ValueTask SaveBucketAsync(
-            EntitySnapshotBucket bucket, long lastSequenceId, CancellationToken cancellationToken = default
+            EntitySnapshotBucket bucket,
+            long lastSequenceId,
+            CancellationToken cancellationToken = default
         )
         {
             var now = Interlocked.Increment(ref _active);
@@ -62,7 +63,11 @@ public sealed class PersistenceSnapshotConcurrencyTests : IDisposable
             Interlocked.Decrement(ref _active);
         }
 
-        public ValueTask<PersistedBucket?> LoadBucketAsync(string typeName, ushort typeId, CancellationToken cancellationToken = default)
+        public ValueTask<PersistedBucket?> LoadBucketAsync(
+            string typeName,
+            ushort typeId,
+            CancellationToken cancellationToken = default
+        )
             => ValueTask.FromResult<PersistedBucket?>(null);
 
         public ValueTask DeleteBucketAsync(string typeName, ushort typeId, CancellationToken cancellationToken = default)

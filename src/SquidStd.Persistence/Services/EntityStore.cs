@@ -78,7 +78,7 @@ public sealed class EntityStore<TEntity, TKey> : IEntityStore<TEntity, TKey>
                 clone = _descriptor.Clone(entity);
                 key = _descriptor.GetKey(clone);
                 next = _stateStore.LastSequenceId + 1; // computed, not yet committed
-                entry = new JournalEntry
+                entry = new()
                 {
                     SequenceId = next,
                     TimestampUnixMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
@@ -120,7 +120,7 @@ public sealed class EntityStore<TEntity, TKey> : IEntityStore<TEntity, TKey>
                 }
 
                 next = _stateStore.LastSequenceId + 1;
-                entry = new JournalEntry
+                entry = new()
                 {
                     SequenceId = next,
                     TimestampUnixMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),

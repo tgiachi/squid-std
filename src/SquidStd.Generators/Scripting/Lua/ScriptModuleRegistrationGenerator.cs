@@ -33,11 +33,11 @@ public sealed class ScriptModuleRegistrationGenerator : IIncrementalGenerator
         cancellationToken.ThrowIfCancellationRequested();
 
         var scriptModuleType = (INamedTypeSymbol)context.TargetSymbol;
-        var isSupported = GeneratorSymbolHelpers.IsConcreteNonGenericClass(scriptModuleType)
-                          && GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(scriptModuleType)
-                          && HasScriptModuleAttribute(scriptModuleType);
+        var isSupported = GeneratorSymbolHelpers.IsConcreteNonGenericClass(scriptModuleType) &&
+                          GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(scriptModuleType) &&
+                          HasScriptModuleAttribute(scriptModuleType);
 
-        return new ScriptModuleRegistrationCandidate(
+        return new(
             GeneratorSymbolHelpers.FullyQualified(scriptModuleType),
             GeneratorSymbolHelpers.DisplayName(scriptModuleType),
             GeneratorSymbolHelpers.PrimaryLocation(scriptModuleType),
@@ -46,18 +46,17 @@ public sealed class ScriptModuleRegistrationGenerator : IIncrementalGenerator
     }
 
     private static bool HasScriptModuleAttribute(INamedTypeSymbol type)
-    {
-        return type.GetAttributes()
-            .Any(attribute =>
-                {
-                    var attributeClass = attribute.AttributeClass;
+        => type.GetAttributes()
+               .Any(
+                   attribute =>
+                   {
+                       var attributeClass = attribute.AttributeClass;
 
-                    return attributeClass is not null
-                           && attributeClass.MetadataName == ScriptModuleAttributeMetadataName
-                           && attributeClass.ContainingNamespace.ToDisplayString() == ScriptModuleAttributeNamespace;
-                }
-            );
-    }
+                       return attributeClass is not null &&
+                              attributeClass.MetadataName == ScriptModuleAttributeMetadataName &&
+                              attributeClass.ContainingNamespace.ToDisplayString() == ScriptModuleAttributeNamespace;
+                   }
+               );
 
     private static void Execute(
         SourceProductionContext context,
@@ -88,7 +87,8 @@ public sealed class ScriptModuleRegistrationGenerator : IIncrementalGenerator
             }
         }
 
-        supported.Sort(static (left, right) => string.Compare(
+        supported.Sort(
+            static (left, right) => string.Compare(
                 left.ScriptModuleTypeName,
                 right.ScriptModuleTypeName,
                 StringComparison.Ordinal

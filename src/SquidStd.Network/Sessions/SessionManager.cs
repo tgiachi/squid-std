@@ -8,8 +8,8 @@ using SquidStd.Network.Server;
 namespace SquidStd.Network.Sessions;
 
 /// <summary>
-///     Observes a <see cref="SquidTcpServer" /> and maintains a registry of <see cref="Session{TState}" />.
-///     The server is not modified; the manager subscribes to its lifecycle events.
+/// Observes a <see cref="SquidTcpServer" /> and maintains a registry of <see cref="Session{TState}" />.
+/// The server is not modified; the manager subscribes to its lifecycle events.
 /// </summary>
 /// <typeparam name="TState">Application-defined per-connection state.</typeparam>
 public sealed class SessionManager<TState> : ISessionManager<TState>, IDisposable
@@ -55,25 +55,19 @@ public sealed class SessionManager<TState> : ISessionManager<TState>, IDisposabl
 
     /// <inheritdoc />
     public Task DisconnectAsync(long sessionId, CancellationToken cancellationToken = default)
-    {
-        return _sessions.TryGetValue(sessionId, out var session)
-            ? session.CloseAsync(cancellationToken)
-            : Task.CompletedTask;
-    }
+        => _sessions.TryGetValue(sessionId, out var session)
+               ? session.CloseAsync(cancellationToken)
+               : Task.CompletedTask;
 
     /// <inheritdoc />
     public Task SendAsync(long sessionId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
-    {
-        return _sessions.TryGetValue(sessionId, out var session)
-            ? session.SendAsync(payload, cancellationToken)
-            : Task.CompletedTask;
-    }
+        => _sessions.TryGetValue(sessionId, out var session)
+               ? session.SendAsync(payload, cancellationToken)
+               : Task.CompletedTask;
 
     /// <inheritdoc />
     public bool TryGetSession(long sessionId, out Session<TState>? session)
-    {
-        return _sessions.TryGetValue(sessionId, out session);
-    }
+        => _sessions.TryGetValue(sessionId, out session);
 
     internal void HandleConnected(INetworkConnection connection)
     {
@@ -111,25 +105,19 @@ public sealed class SessionManager<TState> : ISessionManager<TState>, IDisposabl
     }
 
     private void HandleServerClientConnect(object? sender, SquidStdTcpClientEventArgs e)
-    {
-        HandleConnected(e.Client);
-    }
+        => HandleConnected(e.Client);
 
     private void HandleServerClientDisconnect(object? sender, SquidStdTcpClientEventArgs e)
-    {
-        HandleDisconnected(e.Client);
-    }
+        => HandleDisconnected(e.Client);
 
     private void HandleServerDataReceived(object? sender, SquidStdTcpDataReceivedEventArgs e)
-    {
-        HandleData(e.Client, e.Data);
-    }
+        => HandleData(e.Client, e.Data);
 
     private void RaiseSessionCreated(Session<TState> session)
     {
         try
         {
-            OnSessionCreated?.Invoke(this, new SquidStdSessionEventArgs<TState>(session));
+            OnSessionCreated?.Invoke(this, new(session));
         }
         catch (Exception ex)
         {
@@ -141,7 +129,7 @@ public sealed class SessionManager<TState> : ISessionManager<TState>, IDisposabl
     {
         try
         {
-            OnSessionData?.Invoke(this, new SquidStdSessionDataEventArgs<TState>(session, data));
+            OnSessionData?.Invoke(this, new(session, data));
         }
         catch (Exception ex)
         {
@@ -153,7 +141,7 @@ public sealed class SessionManager<TState> : ISessionManager<TState>, IDisposabl
     {
         try
         {
-            OnSessionRemoved?.Invoke(this, new SquidStdSessionEventArgs<TState>(session));
+            OnSessionRemoved?.Invoke(this, new(session));
         }
         catch (Exception ex)
         {

@@ -5,13 +5,9 @@ namespace SquidStd.Tests.Yaml;
 
 public class YamlUtilsTests
 {
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
+    [Theory, InlineData(""), InlineData("   ")]
     public void Deserialize_NullOrWhitespace_Throws(string yaml)
-    {
-        Assert.Throws<ArgumentException>(() => YamlUtils.Deserialize<SampleDto>(yaml));
-    }
+        => Assert.Throws<ArgumentException>(() => YamlUtils.Deserialize<SampleDto>(yaml));
 
     [Fact]
     public void Deserialize_RuntimeType_ReturnsTypedObject()
@@ -31,11 +27,10 @@ public class YamlUtilsTests
 
     [Fact]
     public void DeserializeFromFile_MissingFile_Throws()
-    {
-        Assert.Throws<FileNotFoundException>(() =>
-            YamlUtils.DeserializeFromFile<SampleDto>(Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".yaml"))
+        => Assert.Throws<FileNotFoundException>(
+            () =>
+                YamlUtils.DeserializeFromFile<SampleDto>(Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".yaml"))
         );
-    }
 
     [Fact]
     public void DeserializeSection_ExistingSection_ReturnsTypedObject()
@@ -69,9 +64,7 @@ public class YamlUtilsTests
 
     [Fact]
     public void Serialize_NullObject_Throws()
-    {
-        Assert.Throws<ArgumentNullException>(() => YamlUtils.Serialize<SampleDto>(null!));
-    }
+        => Assert.Throws<ArgumentNullException>(() => YamlUtils.Serialize<SampleDto>(null!));
 
     [Fact]
     public void SerializeDeserialize_RoundTrip_PreservesValues()

@@ -3,7 +3,7 @@ using Testcontainers.Redis;
 namespace SquidStd.Tests.Caching.Redis;
 
 /// <summary>
-///     Starts a Redis container once for the whole collection and exposes its connection string.
+/// Starts a Redis container once for the whole collection and exposes its connection string.
 /// </summary>
 public sealed class RedisContainerFixture : IAsyncLifetime
 {
@@ -12,14 +12,10 @@ public sealed class RedisContainerFixture : IAsyncLifetime
     public string ConnectionString => _container.GetConnectionString();
 
     public Task DisposeAsync()
-    {
-        return _container.DisposeAsync().AsTask();
-    }
+        => _container.DisposeAsync().AsTask();
 
     public Task InitializeAsync()
-    {
-        return _container.StartAsync();
-    }
+        => _container.StartAsync();
 }
 
 [CollectionDefinition(Name)]

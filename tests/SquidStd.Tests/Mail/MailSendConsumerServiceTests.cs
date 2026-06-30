@@ -66,9 +66,7 @@ public class MailSendConsumerServiceTests
     }
 
     private static OutgoingMailMessage NewMessage()
-    {
-        return new OutgoingMailMessage { To = [new MailAddress("Bob", "bob@example.com")], Subject = "queued" };
-    }
+        => new() { To = [new("Bob", "bob@example.com")], Subject = "queued" };
 
     private static async Task WaitUntilAsync(Func<bool> condition, TimeSpan timeout)
     {

@@ -86,7 +86,7 @@ public sealed class PersistenceEntityDescriptor<TEntity, TKey>
             return null;
         }
 
-        return new EntitySnapshotBucket
+        return new()
         {
             TypeId = TypeId,
             TypeName = TypeName,

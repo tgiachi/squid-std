@@ -5,8 +5,8 @@ using SquidStd.Core.Interfaces.Serialization;
 namespace SquidStd.Caching.Abstractions.Services;
 
 /// <summary>
-///     Typed cache-aside facade: serializes values, applies the key prefix and default TTL, and
-///     implements <see cref="GetOrSetAsync{T}" /> once over any <see cref="ICacheProvider" />.
+/// Typed cache-aside facade: serializes values, applies the key prefix and default TTL, and
+/// implements <see cref="GetOrSetAsync{T}" /> once over any <see cref="ICacheProvider" />.
 /// </summary>
 public sealed class CacheService : ICacheService
 {
@@ -35,9 +35,7 @@ public sealed class CacheService : ICacheService
 
     /// <inheritdoc />
     public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
-    {
-        return _provider.ExistsAsync(Prefixed(key), cancellationToken);
-    }
+        => _provider.ExistsAsync(Prefixed(key), cancellationToken);
 
     /// <inheritdoc />
     public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
@@ -104,7 +102,5 @@ public sealed class CacheService : ICacheService
     }
 
     private string Prefixed(string key)
-    {
-        return _keyPrefix.Length == 0 ? key : _keyPrefix + key;
-    }
+        => _keyPrefix.Length == 0 ? key : _keyPrefix + key;
 }

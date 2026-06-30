@@ -14,8 +14,8 @@ internal static class AwsClientFactory
         if (!string.IsNullOrWhiteSpace(aws.AccessKey) && !string.IsNullOrWhiteSpace(aws.SecretKey))
         {
             return string.IsNullOrWhiteSpace(aws.SessionToken)
-                ? new BasicAWSCredentials(aws.AccessKey, aws.SecretKey)
-                : new SessionAWSCredentials(aws.AccessKey, aws.SecretKey, aws.SessionToken);
+                       ? new BasicAWSCredentials(aws.AccessKey, aws.SecretKey)
+                       : new SessionAWSCredentials(aws.AccessKey, aws.SecretKey, aws.SessionToken);
         }
 
         return FallbackCredentialsFactory.GetCredentials();

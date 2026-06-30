@@ -4,12 +4,12 @@ using SquidStd.Database.Abstractions.Types.Data;
 namespace SquidStd.Database.Connection;
 
 /// <summary>
-///     Parses URI-style connection strings ("scheme://...") into a provider and native connection string.
+/// Parses URI-style connection strings ("scheme://...") into a provider and native connection string.
 /// </summary>
 public static class ConnectionStringParser
 {
     /// <summary>
-    ///     Parses the given URI connection string.
+    /// Parses the given URI connection string.
     /// </summary>
     /// <param name="connectionString">The URI connection string.</param>
     /// <returns>The parsed provider and native connection string.</returns>
@@ -29,10 +29,10 @@ public static class ConnectionStringParser
         var provider = ResolveProvider(scheme);
 
         var native = provider == DatabaseProviderType.Sqlite
-            ? BuildSqlite(remainder)
-            : BuildServer(provider, remainder);
+                         ? BuildSqlite(remainder)
+                         : BuildServer(provider, remainder);
 
-        return new ParsedConnection(provider, native);
+        return new(provider, native);
     }
 
     private static string BuildServer(DatabaseProviderType provider, string remainder)
@@ -87,8 +87,7 @@ public static class ConnectionStringParser
     }
 
     private static DatabaseProviderType ResolveProvider(string scheme)
-    {
-        return scheme switch
+        => scheme switch
         {
             "sqlite"                   => DatabaseProviderType.Sqlite,
             "postgres" or "postgresql" => DatabaseProviderType.Postgres,
@@ -96,7 +95,6 @@ public static class ConnectionStringParser
             "mysql"                    => DatabaseProviderType.MySql,
             _                          => throw new NotSupportedException($"Unsupported database scheme '{scheme}'.")
         };
-    }
 
     private static (string User, string Password, string HostPort) SplitAuthority(string authority)
     {

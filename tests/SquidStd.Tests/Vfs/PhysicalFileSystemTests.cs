@@ -19,6 +19,7 @@ public class PhysicalFileSystemTests
             Assert.Equal("hello", Encoding.UTF8.GetString((await fs.ReadAllBytesAsync("docs/cv.pdf"))!));
 
             var entries = new List<string>();
+
             await foreach (var e in fs.ListAsync())
             {
                 entries.Add(e.Path);
@@ -35,7 +36,7 @@ public class PhysicalFileSystemTests
         {
             if (Directory.Exists(root))
             {
-                Directory.Delete(root, recursive: true);
+                Directory.Delete(root, true);
             }
         }
     }

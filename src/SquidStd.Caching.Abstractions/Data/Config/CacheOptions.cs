@@ -1,7 +1,7 @@
 namespace SquidStd.Caching.Abstractions.Data.Config;
 
 /// <summary>
-///     Options shared by all cache providers.
+/// Options shared by all cache providers.
 /// </summary>
 public sealed class CacheOptions
 {

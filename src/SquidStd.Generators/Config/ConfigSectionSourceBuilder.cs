@@ -43,7 +43,5 @@ internal static class ConfigSectionSourceBuilder
     }
 
     private static string FormatStringLiteral(string value)
-    {
-        return "\"" + value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
-    }
+        => "\"" + value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
 }

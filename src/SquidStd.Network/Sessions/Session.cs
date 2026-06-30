@@ -4,7 +4,7 @@ using SquidStd.Network.Interfaces.Client;
 namespace SquidStd.Network.Sessions;
 
 /// <summary>
-///     A tracked network connection with associated application state.
+/// A tracked network connection with associated application state.
 /// </summary>
 /// <typeparam name="TState">Application-defined per-connection state.</typeparam>
 public sealed class Session<TState>
@@ -39,13 +39,9 @@ public sealed class Session<TState>
 
     /// <summary>Closes the underlying connection.</summary>
     public Task CloseAsync(CancellationToken cancellationToken = default)
-    {
-        return Connection.CloseAsync(cancellationToken);
-    }
+        => Connection.CloseAsync(cancellationToken);
 
     /// <summary>Sends a payload over the underlying connection.</summary>
     public Task SendAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
-    {
-        return Connection.SendAsync(payload, cancellationToken);
-    }
+        => Connection.SendAsync(payload, cancellationToken);
 }

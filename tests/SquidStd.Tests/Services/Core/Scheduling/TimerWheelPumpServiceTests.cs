@@ -1,4 +1,3 @@
-using SquidStd.Core.Data.Timing;
 using SquidStd.Services.Core.Services.Scheduling;
 using SquidStd.Tests.Support;
 
@@ -8,13 +7,12 @@ public class TimerWheelPumpServiceTests
 {
     [Fact]
     public void Ctor_NonPositiveInterval_Throws()
-    {
-        Assert.Throws<ArgumentOutOfRangeException>(() => new TimerWheelPumpService(
+        => Assert.Throws<ArgumentOutOfRangeException>(
+            () => new TimerWheelPumpService(
                 new FakeTimerService(),
-                new TimerWheelPumpConfig { PumpInterval = TimeSpan.Zero }
+                new() { PumpInterval = TimeSpan.Zero }
             )
         );
-    }
 
     [Fact]
     public async Task Pump_AdvancesTheWheel()
@@ -22,7 +20,7 @@ public class TimerWheelPumpServiceTests
         var timer = new FakeTimerService();
         var pump = new TimerWheelPumpService(
             timer,
-            new TimerWheelPumpConfig { PumpInterval = TimeSpan.FromMilliseconds(20) }
+            new() { PumpInterval = TimeSpan.FromMilliseconds(20) }
         );
 
         await pump.StartAsync();

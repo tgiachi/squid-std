@@ -30,8 +30,8 @@ using SquidStd.Scripting.Lua.Utils;
 namespace SquidStd.Scripting.Lua.Services;
 
 /// <summary>
-///     Lua engine service that integrates MoonSharp with the SquidCraft game engine
-///     Provides script execution, module loading, and Lua meta file generation
+/// Lua engine service that integrates MoonSharp with the SquidCraft game engine
+/// Provides script execution, module loading, and Lua meta file generation
 /// </summary>
 public class LuaScriptEngineService : IScriptEngineService, IDisposable
 {
@@ -62,17 +62,17 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     private FileSystemWatcher? _watcher;
 
     /// <summary>
-    ///     Gets the MoonSharp script instance.
+    /// Gets the MoonSharp script instance.
     /// </summary>
     public Script LuaScript { get; }
 
     /// <summary>
-    ///     Gets the script engine instance.
+    /// Gets the script engine instance.
     /// </summary>
     public object Engine => LuaScript;
 
     /// <summary>
-    ///     Initializes a new instance of the LuaScriptEngineService class.
+    /// Initializes a new instance of the LuaScriptEngineService class.
     /// </summary>
     /// <param name="directoriesConfig">The directories configuration.</param>
     /// <param name="scriptModules">The list of script modules.</param>
@@ -89,8 +89,8 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     {
         JsonUtils.RegisterJsonContext(SquidStdScriptJsonContext.Default);
 
-        scriptModules ??= new List<ScriptModuleData>();
-        loadedUserData ??= new List<ScriptUserData>();
+        scriptModules ??= new();
+        loadedUserData ??= new();
 
         _scriptModules = scriptModules;
         _directoriesConfig = directoriesConfig;
@@ -107,7 +107,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Adds a callback function that can be called from Lua scripts.
+    /// Adds a callback function that can be called from Lua scripts.
     /// </summary>
     /// <param name="name">The name of the callback.</param>
     /// <param name="callback">The callback action.</param>
@@ -123,7 +123,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Adds a constant value that can be accessed from Lua scripts.
+    /// Adds a constant value that can be accessed from Lua scripts.
     /// </summary>
     /// <param name="name">The name of the constant.</param>
     /// <param name="value">The value of the constant.</param>
@@ -153,7 +153,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Adds an initialization script.
+    /// Adds an initialization script.
     /// </summary>
     /// <param name="script">The script to add.</param>
     public void AddInitScript(string script)
@@ -167,7 +167,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Adds a manual module function that can be called from Lua scripts with a callback.
+    /// Adds a manual module function that can be called from Lua scripts with a callback.
     /// </summary>
     public void AddManualModuleFunction(string moduleName, string functionName, Action<object[]> callback)
     {
@@ -177,7 +177,8 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
 
         var (normalizedModule, normalizedFunction, moduleTable) = PrepareManualModule(moduleName, functionName);
 
-        moduleTable[normalizedFunction] = DynValue.NewCallback((_, args) =>
+        moduleTable[normalizedFunction] = DynValue.NewCallback(
+            (_, args) =>
             {
                 try
                 {
@@ -204,7 +205,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Adds a manual module function with typed input and output that can be called from Lua scripts.
+    /// Adds a manual module function with typed input and output that can be called from Lua scripts.
     /// </summary>
     public void AddManualModuleFunction<TInput, TOutput>(
         string moduleName,
@@ -218,7 +219,8 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
 
         var (normalizedModule, normalizedFunction, moduleTable) = PrepareManualModule(moduleName, functionName);
 
-        moduleTable[normalizedFunction] = DynValue.NewCallback((_, args) =>
+        moduleTable[normalizedFunction] = DynValue.NewCallback(
+            (_, args) =>
             {
                 try
                 {
@@ -245,22 +247,20 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Adds a script module to the engine.
+    /// Adds a script module to the engine.
     /// </summary>
     /// <param name="type">The type of the script module.</param>
     public void AddScriptModule(Type type)
     {
         ArgumentNullException.ThrowIfNull(type);
-        _scriptModules.Add(new ScriptModuleData(type));
+        _scriptModules.Add(new(type));
     }
 
     public void AddSearchDirectory(string path)
-    {
-        _scriptLoader.AddSearchDirectory(path);
-    }
+        => _scriptLoader.AddSearchDirectory(path);
 
     /// <summary>
-    ///     Clears the script cache
+    /// Clears the script cache
     /// </summary>
     public void ClearScriptCache()
     {
@@ -271,7 +271,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Executes a registered callback with the specified arguments.
+    /// Executes a registered callback with the specified arguments.
     /// </summary>
     /// <param name="name">The name of the callback.</param>
     /// <param name="args">The arguments to pass to the callback.</param>
@@ -302,15 +302,13 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Executes the engine ready function from bootstrap scripts.
+    /// Executes the engine ready function from bootstrap scripts.
     /// </summary>
     public void ExecuteEngineReady()
-    {
-        ExecuteFunctionFromBootstrap(OnEngineRunFunctionName);
-    }
+        => ExecuteFunctionFromBootstrap(OnEngineRunFunctionName);
 
     /// <summary>
-    ///     Executes a Lua function and returns the result.
+    /// Executes a Lua function and returns the result.
     /// </summary>
     /// <param name="command">The function command to execute.</param>
     /// <returns>The result of the function execution.</returns>
@@ -336,10 +334,10 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
             );
 
             return ScriptResultBuilder.CreateError()
-                .WithMessage(
-                    $"{errorInfo.ErrorType}: {errorInfo.Message} at line {errorInfo.LineNumber}"
-                )
-                .Build();
+                                      .WithMessage(
+                                          $"{errorInfo.ErrorType}: {errorInfo.Message} at line {errorInfo.LineNumber}"
+                                      )
+                                      .Build();
         }
         catch (InterpreterException luaEx)
         {
@@ -356,10 +354,10 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
             );
 
             return ScriptResultBuilder.CreateError()
-                .WithMessage(
-                    $"{errorInfo.ErrorType}: {errorInfo.Message} at line {errorInfo.LineNumber}"
-                )
-                .Build();
+                                      .WithMessage(
+                                          $"{errorInfo.ErrorType}: {errorInfo.Message} at line {errorInfo.LineNumber}"
+                                      )
+                                      .Build();
         }
         catch (Exception ex)
         {
@@ -370,7 +368,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Executes a Lua function asynchronously and returns the result.
+    /// Executes a Lua function asynchronously and returns the result.
     /// </summary>
     /// <param name="command">The function command to execute.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
@@ -419,16 +417,14 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Executes a script string.
+    /// Executes a script string.
     /// </summary>
     /// <param name="script">The script to execute.</param>
     public void ExecuteScript(string script)
-    {
-        ExecuteScript(script, null);
-    }
+        => ExecuteScript(script, null);
 
     /// <summary>
-    ///     Executes a script from a file.
+    /// Executes a script from a file.
     /// </summary>
     /// <param name="scriptFile">The path to the script file.</param>
     public void ExecuteScriptFile(string scriptFile)
@@ -453,20 +449,18 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Gets execution metrics for performance monitoring
+    /// Gets execution metrics for performance monitoring
     /// </summary>
     public ScriptExecutionMetrics GetExecutionMetrics()
-    {
-        return new ScriptExecutionMetrics
+        => new()
         {
             CacheHits = _cacheHits,
             CacheMisses = _cacheMisses,
             TotalScriptsCached = _scriptCache.Count
         };
-    }
 
     /// <summary>
-    ///     Registers a global variable in the Lua environment.
+    /// Registers a global variable in the Lua environment.
     /// </summary>
     /// <param name="name">The name of the variable.</param>
     /// <param name="value">The value of the variable.</param>
@@ -480,7 +474,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Registers a global function in the Lua environment.
+    /// Registers a global function in the Lua environment.
     /// </summary>
     /// <param name="name">The name of the function.</param>
     /// <param name="func">The delegate representing the function.</param>
@@ -494,7 +488,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Starts the script engine asynchronously.
+    /// Starts the script engine asynchronously.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     public async ValueTask StartAsync(CancellationToken cancellationToken = default)
@@ -531,7 +525,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
 
             if (_watcher == null)
             {
-                _watcher = new FileSystemWatcher(_engineConfig.ScriptsDirectory, "*.lua")
+                _watcher = new(_engineConfig.ScriptsDirectory, "*.lua")
                 {
                     NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
                     IncludeSubdirectories = true,
@@ -550,16 +544,14 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Stops the script engine asynchronously.
+    /// Stops the script engine asynchronously.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        return ValueTask.CompletedTask;
-    }
+        => ValueTask.CompletedTask;
 
     /// <summary>
-    ///     Converts a name to the script engine function name format.
+    /// Converts a name to the script engine function name format.
     /// </summary>
     /// <param name="name">The name to convert.</param>
     /// <returns>The converted function name.</returns>
@@ -571,7 +563,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Unregisters a global variable from the Lua environment.
+    /// Unregisters a global variable from the Lua environment.
     /// </summary>
     /// <param name="name">The name of the variable to unregister.</param>
     /// <returns>True if the variable was unregistered, false otherwise.</returns>
@@ -595,7 +587,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Executes a script file asynchronously.
+    /// Executes a script file asynchronously.
     /// </summary>
     /// <param name="scriptFile">The path to the script file.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
@@ -624,16 +616,14 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Gets the statistics of the script engine.
+    /// Gets the statistics of the script engine.
     /// </summary>
     /// <returns>A tuple containing the module count, callback count, constant count, and initialization status.</returns>
     public (int ModuleCount, int CallbackCount, int ConstantCount, bool IsInitialized) GetStats()
-    {
-        return (_loadedModules.Count, _callbacks.Count, _constants.Count, _isInitialized);
-    }
+        => (_loadedModules.Count, _callbacks.Count, _constants.Count, _isInitialized);
 
     /// <summary>
-    ///     Registers a global type user data.
+    /// Registers a global type user data.
     /// </summary>
     /// <param name="type">The type to register.</param>
     public void RegisterGlobalTypeUserData(Type type)
@@ -646,7 +636,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Registers a global type user data for the specified type.
+    /// Registers a global type user data for the specified type.
     /// </summary>
     /// <typeparam name="T">The type to register.</typeparam>
     public void RegisterGlobalTypeUserData<T>()
@@ -658,7 +648,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Resets the script engine to its initial state.
+    /// Resets the script engine to its initial state.
     /// </summary>
     public void Reset()
     {
@@ -696,8 +686,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     private static object? ConvertFromLua(DynValue dynValue, Type targetType)
-    {
-        return dynValue.Type switch
+        => dynValue.Type switch
         {
             DataType.Nil     => null,
             DataType.Boolean => dynValue.Boolean,
@@ -706,19 +695,15 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
             DataType.Table   => dynValue.ToObject(),
             _                => dynValue.ToObject()
         };
-    }
 
     private DynValue ConvertToLua(object? value)
-    {
-        return value == null ? DynValue.Nil : DynValue.FromObject(LuaScript, value);
-    }
+        => value == null ? DynValue.Nil : DynValue.FromObject(LuaScript, value);
 
     /// <summary>
-    ///     Creates a Lua callback that invokes the constructor matching the number of arguments passed from Lua.
+    /// Creates a Lua callback that invokes the constructor matching the number of arguments passed from Lua.
     /// </summary>
     private DynValue CreateConstructorCallback(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-        Type type
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type
     )
     {
         var constructorsByParamCount = new Dictionary<int, ConstructorInfo>();
@@ -730,7 +715,8 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
             constructorsByParamCount.TryAdd(paramCount, ctor);
         }
 
-        return DynValue.NewCallback((_, args) =>
+        return DynValue.NewCallback(
+            (_, args) =>
             {
                 var argCount = args.Count;
 
@@ -767,7 +753,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Creates detailed error information from a Lua exception
+    /// Creates detailed error information from a Lua exception
     /// </summary>
     private static ScriptErrorInfo CreateErrorInfo(ScriptRuntimeException luaEx, string sourceCode, string? fileName = null)
     {
@@ -786,7 +772,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Creates detailed error information from a Lua interpreter exception (syntax errors, etc.)
+    /// Creates detailed error information from a Lua interpreter exception (syntax errors, etc.)
     /// </summary>
     private static ScriptErrorInfo CreateErrorInfo(InterpreterException luaEx, string sourceCode, string? fileName = null)
     {
@@ -830,8 +816,8 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     private DynValue CreateMethodClosure(object instance, MethodInfo method)
-    {
-        return DynValue.NewCallback((context, args) =>
+        => DynValue.NewCallback(
+            (context, args) =>
             {
                 try
                 {
@@ -890,7 +876,6 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
                 }
             }
         );
-    }
 
     private Table CreateModuleTable(
         object instance,
@@ -901,7 +886,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
         var moduleTable = new Table(LuaScript);
 
         var methods = moduleType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
-            .Where(m => m.GetCustomAttribute<ScriptFunctionAttribute>() is not null);
+                                .Where(m => m.GetCustomAttribute<ScriptFunctionAttribute>() is not null);
 
         foreach (var method in methods)
         {
@@ -913,8 +898,8 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
             }
 
             var functionName = string.IsNullOrWhiteSpace(scriptFunctionAttr.FunctionName)
-                ? _nameResolver(method.Name)
-                : scriptFunctionAttr.FunctionName;
+                                   ? _nameResolver(method.Name)
+                                   : scriptFunctionAttr.FunctionName;
 
             // Create a closure that captures the instance and method
             var closure = CreateMethodClosure(instance, method);
@@ -925,9 +910,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     private void CreateNameResolver()
-    {
-        _nameResolver = name => name.ToSnakeCase();
-    }
+        => _nameResolver = name => name.ToSnakeCase();
 
     // _nameResolver = _scriptEngineConfig.ScriptNameConversion switch
     // {
@@ -938,7 +921,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     // };
     private Script CreateOptimizedEngine()
     {
-        _scriptLoader = new LuaScriptLoader(new[] { _engineConfig.ScriptsDirectory });
+        _scriptLoader = new(new[] { _engineConfig.ScriptsDirectory });
         var script = new Script
         {
             Options =
@@ -955,9 +938,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     private void ExecuteBootFunction()
-    {
-        ExecuteFunctionFromBootstrap(OnReadyFunctionName);
-    }
+        => ExecuteFunctionFromBootstrap(OnReadyFunctionName);
 
     private void ExecuteBootstrap()
     {
@@ -973,7 +954,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Executes a script string with an optional file name for error reporting.
+    /// Executes a script string with an optional file name for error reporting.
     /// </summary>
     /// <param name="script">The script to execute.</param>
     /// <param name="fileName">Optional file name for error reporting.</param>
@@ -1088,7 +1069,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
                 "Moongate",
                 _engineConfig.EngineVersion,
                 _scriptModules,
-                new Dictionary<string, object>(_constants),
+                new(_constants),
                 manualModulesSnapshot,
                 _nameResolver
             );
@@ -1122,7 +1103,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
 
         var luarcConfig = new LuarcConfig
         {
-            Runtime = new LuarcRuntimeConfig
+            Runtime = new()
             {
                 Path =
                 [
@@ -1132,11 +1113,11 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
                     "modules/?/init.lua"
                 ]
             },
-            Workspace = new LuarcWorkspaceConfig
+            Workspace = new()
             {
                 Library = [_engineConfig.ScriptsDirectory]
             },
-            Diagnostics = new LuarcDiagnosticsConfig
+            Diagnostics = new()
             {
                 Globals = [..globalsList]
             }
@@ -1146,7 +1127,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Generates a hash for script caching
+    /// Generates a hash for script caching
     /// </summary>
     private static string GetScriptHash(string script)
     {
@@ -1156,9 +1137,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     private static bool IsSimpleType(Type type)
-    {
-        return type.IsPrimitive || type == typeof(string) || type.IsEnum;
-    }
+        => type.IsPrimitive || type == typeof(string) || type.IsEnum;
 
     private void LoadToUserData()
     {
@@ -1274,7 +1253,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
         }
         else
         {
-            moduleTable = new Table(LuaScript);
+            moduleTable = new(LuaScript);
             LuaScript.Globals[normalizedModuleName] = moduleTable;
         }
 
@@ -1322,7 +1301,8 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
         var metatable = new Table(LuaScript);
 
         // __index: allows case-insensitive access
-        metatable["__index"] = DynValue.NewCallback((ctx, args) =>
+        metatable["__index"] = DynValue.NewCallback(
+            (ctx, args) =>
             {
                 var key = args[1].String;
 
@@ -1356,7 +1336,8 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
         );
 
         // __newindex: prevents modifications (read-only)
-        metatable["__newindex"] = DynValue.NewCallback((ctx, args) =>
+        metatable["__newindex"] = DynValue.NewCallback(
+            (ctx, args) =>
             {
                 var key = args[1].String;
 
@@ -1365,8 +1346,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
         );
 
         // __tostring: pretty print
-        metatable["__tostring"] = DynValue.NewCallback((ctx, args) => { return DynValue.NewString($"enum<{enumName}>"); }
-        );
+        metatable["__tostring"] = DynValue.NewCallback((ctx, args) => { return DynValue.NewString($"enum<{enumName}>"); });
 
         // Set the enum table first
         var enumTableDynValue = DynValue.NewTable(enumTable);
@@ -1407,9 +1387,9 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     private void RegisterGlobalFunctions()
     {
         LuaScript.Globals["delay"] = (Func<int, Task>)(async milliseconds =>
-        {
-            await Task.Delay(Math.Min(milliseconds, 5000));
-        });
+                                                       {
+                                                           await Task.Delay(Math.Min(milliseconds, 5000));
+                                                       });
 
         // NOTE: do NOT define a bare 'log' global here — the LogModule registered above already
         // exposes 'log.info / log.warning / log.error' as a table; overwriting it with a function
@@ -1420,7 +1400,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
 
     private void RegisterManualModuleFunction(string moduleName, string functionName)
     {
-        var functions = _manualModuleFunctions.GetOrAdd(moduleName, _ => new ConcurrentDictionary<string, byte>());
+        var functions = _manualModuleFunctions.GetOrAdd(moduleName, _ => new());
         functions.TryAdd(functionName, 0);
     }
 
@@ -1466,7 +1446,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Disposes of the resources used by the LuaScriptEngineService.
+    /// Disposes of the resources used by the LuaScriptEngineService.
     /// </summary>
     public void Dispose()
     {
@@ -1496,12 +1476,12 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     }
 
     /// <summary>
-    ///     Raised when a watched Lua file changes.
+    /// Raised when a watched Lua file changes.
     /// </summary>
     public event IScriptEngineService.LuaFileChangedHandler? FileChanged;
 
     /// <summary>
-    ///     Event raised when a script error occurs
+    /// Event raised when a script error occurs
     /// </summary>
     public event EventHandler<ScriptErrorInfo>? OnScriptError;
 

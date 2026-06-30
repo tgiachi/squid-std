@@ -42,9 +42,7 @@ public class RandomExtensionsTests
 
     [Fact]
     public void RandomElement_OnEmpty_ReturnsDefault()
-    {
-        Assert.Equal(0, Array.Empty<int>().RandomElement());
-    }
+        => Assert.Equal(0, Array.Empty<int>().RandomElement());
 
     [Fact]
     public void RandomElement_OnList_ReturnsElementFromSource()

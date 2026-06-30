@@ -1,5 +1,4 @@
 using DryIoc;
-using SquidStd.Storage.Abstractions.Data.Config;
 using SquidStd.Storage.Abstractions.Interfaces;
 using SquidStd.Storage.Extensions;
 
@@ -13,7 +12,7 @@ public class StorageRegistrationTests
         var root = Path.Combine(Path.GetTempPath(), "squidstd-storage-" + Guid.NewGuid().ToString("N"));
         using var container = new Container();
 
-        container.AddFileStorage(new StorageConfig { RootDirectory = root });
+        container.AddFileStorage(new() { RootDirectory = root });
 
         var storage = container.Resolve<IStorageService>();
         Assert.NotNull(container.Resolve<IObjectStorageService>());

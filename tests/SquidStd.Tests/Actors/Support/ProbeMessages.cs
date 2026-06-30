@@ -3,9 +3,7 @@ using SquidStd.Actors;
 namespace SquidStd.Tests.Actors.Support;
 
 /// <summary>Marker interface for every message the <see cref="ProbeActor" /> accepts.</summary>
-public interface IProbeMessage
-{
-}
+public interface IProbeMessage { }
 
 /// <summary>Appends a value to the actor's log.</summary>
 public sealed record Append(string Value) : IProbeMessage;

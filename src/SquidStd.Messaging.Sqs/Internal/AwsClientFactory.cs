@@ -7,7 +7,7 @@ using SquidStd.Aws.Abstractions.Data.Config;
 namespace SquidStd.Messaging.Sqs.Internal;
 
 /// <summary>
-///     Builds AWS SDK clients/credentials from a shared <see cref="AwsConfigEntry" />.
+/// Builds AWS SDK clients/credentials from a shared <see cref="AwsConfigEntry" />.
 /// </summary>
 internal static class AwsClientFactory
 {
@@ -16,8 +16,8 @@ internal static class AwsClientFactory
         if (!string.IsNullOrWhiteSpace(aws.AccessKey) && !string.IsNullOrWhiteSpace(aws.SecretKey))
         {
             return string.IsNullOrWhiteSpace(aws.SessionToken)
-                ? new BasicAWSCredentials(aws.AccessKey, aws.SecretKey)
-                : new SessionAWSCredentials(aws.AccessKey, aws.SecretKey, aws.SessionToken);
+                       ? new BasicAWSCredentials(aws.AccessKey, aws.SecretKey)
+                       : new SessionAWSCredentials(aws.AccessKey, aws.SecretKey, aws.SessionToken);
         }
 
         return FallbackCredentialsFactory.GetCredentials();

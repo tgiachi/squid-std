@@ -55,6 +55,7 @@ public class SqsQueueProviderTests
             {
                 Interlocked.Increment(ref a);
                 done.Signal();
+
                 return Task.CompletedTask;
             }
         );
@@ -64,6 +65,7 @@ public class SqsQueueProviderTests
             {
                 Interlocked.Increment(ref b);
                 done.Signal();
+
                 return Task.CompletedTask;
             }
         );
@@ -81,8 +83,8 @@ public class SqsQueueProviderTests
     public async Task AlwaysFailing_IsDeadLettered()
     {
         await using var provider = NewProvider(
-            new MessagingOptions { MaxDeliveryAttempts = 1 },
-            new SqsOptions { Aws = _fixture.Aws, VisibilityTimeout = TimeSpan.FromSeconds(1), WaitTimeSeconds = 1 }
+            new() { MaxDeliveryAttempts = 1 },
+            new() { Aws = _fixture.Aws, VisibilityTimeout = TimeSpan.FromSeconds(1), WaitTimeSeconds = 1 }
         );
         await provider.StartAsync();
         var queue = Queue();
@@ -94,6 +96,7 @@ public class SqsQueueProviderTests
             (payload, _) =>
             {
                 deadLettered.TrySetResult(Text(payload));
+
                 return Task.CompletedTask;
             }
         );
@@ -104,25 +107,17 @@ public class SqsQueueProviderTests
     }
 
     private SqsQueueProvider NewProvider(MessagingOptions? messaging = null, SqsOptions? sqs = null)
-    {
-        return new SqsQueueProvider(
+        => new(
             sqs ?? new SqsOptions { Aws = _fixture.Aws, WaitTimeSeconds = 1 },
             messaging ?? new MessagingOptions()
         );
-    }
 
     private static ReadOnlyMemory<byte> Bytes(string s)
-    {
-        return Encoding.UTF8.GetBytes(s);
-    }
+        => Encoding.UTF8.GetBytes(s);
 
     private static string Text(ReadOnlyMemory<byte> b)
-    {
-        return Encoding.UTF8.GetString(b.Span);
-    }
+        => Encoding.UTF8.GetString(b.Span);
 
     private static string Queue()
-    {
-        return "q-" + Guid.NewGuid().ToString("N");
-    }
+        => "q-" + Guid.NewGuid().ToString("N");
 }

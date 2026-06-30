@@ -5,7 +5,6 @@ using OpenTelemetry.Trace;
 using SquidStd.Abstractions.Interfaces.Services;
 using SquidStd.Core.Data.Metrics;
 using SquidStd.Core.Interfaces.Metrics;
-using SquidStd.Telemetry.Abstractions.Data.Config;
 using SquidStd.Telemetry.OpenTelemetry.Extensions;
 using SquidStd.Telemetry.OpenTelemetry.Services;
 using SquidStd.Tests.Telemetry.Support;
@@ -22,7 +21,7 @@ public class TelemetryRegistrationTests
             new FakeMetricsCollectionService(new Dictionary<string, MetricSample>())
         );
 
-        container.AddSquidStdTelemetry(new TelemetryOptions { EnableConsoleExporter = false });
+        container.AddSquidStdTelemetry(new() { EnableConsoleExporter = false });
 
         var service = container.Resolve<TelemetryService>();
         Assert.IsAssignableFrom<ISquidStdService>(service);
@@ -39,7 +38,7 @@ public class TelemetryRegistrationTests
             new FakeMetricsCollectionService(new Dictionary<string, MetricSample>())
         );
 
-        services.AddSquidStdTelemetry(new TelemetryOptions());
+        services.AddSquidStdTelemetry(new());
 
         using var provider = services.BuildServiceProvider();
 

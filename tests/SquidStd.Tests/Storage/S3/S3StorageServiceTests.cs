@@ -1,6 +1,4 @@
 using System.Text;
-using SquidStd.Aws.Abstractions.Data.Config;
-using SquidStd.Storage.S3.Data.Config;
 using SquidStd.Storage.S3.Services;
 
 namespace SquidStd.Tests.Storage.S3;
@@ -17,13 +15,10 @@ public class S3StorageServiceTests
 
     [Fact]
     public void Ctor_MissingServiceUrl_Throws()
-    {
-        Assert.ThrowsAny<ArgumentException>(() =>
-            new S3StorageService(
-                new S3StorageOptions { Aws = new AwsConfigEntry { AccessKey = "a", SecretKey = "b" }, Bucket = "c" }
-            )
+        => Assert.ThrowsAny<ArgumentException>(
+            () =>
+                new S3StorageService(new() { Aws = new() { AccessKey = "a", SecretKey = "b" }, Bucket = "c" })
         );
-    }
 
     [Fact]
     public async Task Exists_And_Delete()
@@ -60,9 +55,7 @@ public class S3StorageServiceTests
 
     [Fact]
     public async Task Load_MissingKey_ReturnsNull()
-    {
-        Assert.Null(await NewService().LoadAsync(Key()));
-    }
+        => Assert.Null(await NewService().LoadAsync(Key()));
 
     [Fact]
     public async Task SaveThenLoad_RoundTrips_AndCreatesBucket()
@@ -78,16 +71,13 @@ public class S3StorageServiceTests
     }
 
     private static string Key()
-    {
-        return "k-" + Guid.NewGuid().ToString("N");
-    }
+        => "k-" + Guid.NewGuid().ToString("N");
 
     private S3StorageService NewService()
-    {
-        return new S3StorageService(
-            new S3StorageOptions
+        => new(
+            new()
             {
-                Aws = new AwsConfigEntry
+                Aws = new()
                 {
                     ServiceUrl = _fixture.ServiceUrl,
                     AccessKey = _fixture.AccessKey,
@@ -96,5 +86,4 @@ public class S3StorageServiceTests
                 Bucket = "squidstd-tests"
             }
         );
-    }
 }

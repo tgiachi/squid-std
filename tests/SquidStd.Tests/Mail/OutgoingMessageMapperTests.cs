@@ -11,7 +11,7 @@ public class OutgoingMessageMapperTests
     [Fact]
     public void ToMimeMessage_FallsBackToDefaultFrom()
     {
-        var options = new SmtpOptions { DefaultFrom = new MailAddress("Sys", "sys@example.com") };
+        var options = new SmtpOptions { DefaultFrom = new("Sys", "sys@example.com") };
 
         var mime = OutgoingMessageMapper.ToMimeMessage(Message(), options);
 
@@ -21,9 +21,9 @@ public class OutgoingMessageMapperTests
     [Fact]
     public void ToMimeMessage_MapsRecipientsSubjectBodiesAndAttachment()
     {
-        var options = new SmtpOptions { DefaultFrom = new MailAddress("Sys", "sys@example.com") };
+        var options = new SmtpOptions { DefaultFrom = new("Sys", "sys@example.com") };
 
-        var mime = OutgoingMessageMapper.ToMimeMessage(Message(new MailAddress("Alice", "alice@example.com")), options);
+        var mime = OutgoingMessageMapper.ToMimeMessage(Message(new("Alice", "alice@example.com")), options);
 
         Assert.Equal("alice@example.com", mime.From.Mailboxes.Single().Address);
         Assert.Contains(mime.To.Mailboxes, m => m.Address == "bob@example.com");
@@ -37,22 +37,18 @@ public class OutgoingMessageMapperTests
 
     [Fact]
     public void ToMimeMessage_Throws_WhenNoFromAndNoDefault()
-    {
-        Assert.Throws<ArgumentException>(() => OutgoingMessageMapper.ToMimeMessage(Message(), new SmtpOptions()));
-    }
+        => Assert.Throws<ArgumentException>(() => OutgoingMessageMapper.ToMimeMessage(Message(), new()));
 
     private static OutgoingMailMessage Message(MailAddress? from = null)
-    {
-        return new OutgoingMailMessage
+        => new()
         {
             From = from,
-            To = [new MailAddress("Bob", "bob@example.com")],
-            Cc = [new MailAddress("Carol", "carol@example.com")],
-            Bcc = [new MailAddress("Dave", "dave@example.com")],
+            To = [new("Bob", "bob@example.com")],
+            Cc = [new("Carol", "carol@example.com")],
+            Bcc = [new("Dave", "dave@example.com")],
             Subject = "Hello",
             TextBody = "plain",
             HtmlBody = "<p>html</p>",
-            Attachments = [new OutgoingAttachment("a.txt", "text/plain", Encoding.UTF8.GetBytes("xyz"))]
+            Attachments = [new("a.txt", "text/plain", Encoding.UTF8.GetBytes("xyz"))]
         };
-    }
 }

@@ -1,6 +1,5 @@
 using System.Text;
 using SquidStd.Messaging.Abstractions.Data.Config;
-using SquidStd.Messaging.RabbitMq.Data.Config;
 using SquidStd.Messaging.RabbitMq.Services;
 
 namespace SquidStd.Tests.Messaging.RabbitMq;
@@ -20,7 +19,7 @@ public class RabbitMqQueueProviderTests
     [Fact]
     public async Task AlwaysFailing_IsDeadLettered()
     {
-        await using var provider = NewProvider(new MessagingOptions { MaxDeliveryAttempts = 2 });
+        await using var provider = NewProvider(new() { MaxDeliveryAttempts = 2 });
         await provider.StartAsync();
         var queue = Queue();
         provider.Subscribe(queue, (_, _) => throw new InvalidOperationException("always"));
@@ -106,25 +105,17 @@ public class RabbitMqQueueProviderTests
     }
 
     private static ReadOnlyMemory<byte> Bytes(string s)
-    {
-        return Encoding.UTF8.GetBytes(s);
-    }
+        => Encoding.UTF8.GetBytes(s);
 
     private RabbitMqQueueProvider NewProvider(MessagingOptions? options = null)
-    {
-        return new RabbitMqQueueProvider(
-            new RabbitMqOptions { Uri = new Uri(_fixture.AmqpUri) },
+        => new(
+            new() { Uri = new(_fixture.AmqpUri) },
             options ?? new MessagingOptions()
         );
-    }
 
     private static string Queue()
-    {
-        return "q-" + Guid.NewGuid().ToString("N");
-    }
+        => "q-" + Guid.NewGuid().ToString("N");
 
     private static string Text(ReadOnlyMemory<byte> b)
-    {
-        return Encoding.UTF8.GetString(b.Span);
-    }
+        => Encoding.UTF8.GetString(b.Span);
 }

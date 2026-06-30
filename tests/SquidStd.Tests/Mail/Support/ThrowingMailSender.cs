@@ -7,7 +7,5 @@ namespace SquidStd.Tests.Mail.Support;
 public sealed class ThrowingMailSender : IMailSender
 {
     public Task SendAsync(OutgoingMailMessage message, CancellationToken cancellationToken = default)
-    {
-        throw new InvalidOperationException("send failed");
-    }
+        => throw new InvalidOperationException("send failed");
 }

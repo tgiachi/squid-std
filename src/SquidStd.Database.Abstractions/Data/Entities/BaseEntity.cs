@@ -1,7 +1,7 @@
 namespace SquidStd.Database.Abstractions.Data.Entities;
 
 /// <summary>
-///     Base class for all persisted entities: a Guid identity plus UTC create/update timestamps.
+/// Base class for all persisted entities: a Guid identity plus UTC create/update timestamps.
 /// </summary>
 public abstract class BaseEntity
 {

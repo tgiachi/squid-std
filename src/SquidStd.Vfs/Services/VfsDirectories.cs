@@ -1,5 +1,5 @@
-using SquidStd.Vfs.Abstractions.Interfaces;
 using SquidStd.Vfs.Abstractions;
+using SquidStd.Vfs.Abstractions.Interfaces;
 
 namespace SquidStd.Vfs.Services;
 
@@ -37,7 +37,5 @@ public sealed class VfsDirectories
 
     /// <summary>Combines a named directory with a relative sub-path into a normalized logical path.</summary>
     public string Combine(string directoryName, string relativePath)
-    {
-        return VfsPath.Normalize(GetPath(directoryName) + "/" + relativePath);
-    }
+        => VfsPath.Normalize(GetPath(directoryName) + "/" + relativePath);
 }

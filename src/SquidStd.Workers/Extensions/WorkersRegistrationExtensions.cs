@@ -8,14 +8,14 @@ using SquidStd.Workers.Services;
 namespace SquidStd.Workers.Extensions;
 
 /// <summary>
-///     DryIoc registration helpers for the worker runtime.
+/// DryIoc registration helpers for the worker runtime.
 /// </summary>
 public static class WorkersRegistrationExtensions
 {
     extension(IContainer container)
     {
         /// <summary>
-        ///     Registers a job handler so the dispatcher can route jobs to it by name.
+        /// Registers a job handler so the dispatcher can route jobs to it by name.
         /// </summary>
         public IContainer AddJobHandler<THandler>()
             where THandler : class, IJobHandler
@@ -28,8 +28,8 @@ public static class WorkersRegistrationExtensions
         }
 
         /// <summary>
-        ///     Registers the worker runtime: the "workers" config section, shared state, job dispatcher, and the
-        ///     consumer + heartbeat lifecycle services.
+        /// Registers the worker runtime: the "workers" config section, shared state, job dispatcher, and the
+        /// consumer + heartbeat lifecycle services.
         /// </summary>
         public IContainer AddWorkers()
         {

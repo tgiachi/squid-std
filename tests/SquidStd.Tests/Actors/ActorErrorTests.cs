@@ -1,4 +1,3 @@
-using SquidStd.Actors.Data;
 using SquidStd.Actors.Types;
 using SquidStd.Tests.Actors.Support;
 
@@ -15,7 +14,7 @@ public class ActorErrorTests
         await actor.TellAsync(new Boom());
         await actor.TellAsync(new Append("b"));
 
-        var log = await actor.AskAsync<GetLog, string>(new GetLog());
+        var log = await actor.AskAsync<GetLog, string>(new());
 
         Assert.Equal("a,b", log);
         Assert.Contains("boom", actor.Errors);
@@ -26,9 +25,10 @@ public class ActorErrorTests
     {
         await using var actor = new ProbeActor();
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            actor.AskAsync<FailingRequest, string>(new FailingRequest())
-        );
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                     () =>
+                         actor.AskAsync<FailingRequest, string>(new())
+                 );
 
         Assert.Equal("ask-boom", ex.Message);
     }
@@ -36,14 +36,11 @@ public class ActorErrorTests
     [Fact]
     public async Task StopOnError_StopsProcessingAfterThrow()
     {
-        await using var actor = new ProbeActor(
-            new ActorOptions { ErrorPolicy = ActorErrorPolicy.StopOnError }
-        );
+        await using var actor = new ProbeActor(new() { ErrorPolicy = ActorErrorPolicy.StopOnError });
 
         await actor.TellAsync(new Boom()); // faults the mailbox
         await Task.Delay(50);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => actor.AskAsync<GetLog, string>(new GetLog())
-        );
+        await Assert.ThrowsAsync<InvalidOperationException>(() => actor.AskAsync<GetLog, string>(new()));
     }
 }

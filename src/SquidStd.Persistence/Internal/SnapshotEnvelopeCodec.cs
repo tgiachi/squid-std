@@ -72,12 +72,12 @@ internal static class SnapshotEnvelopeCodec
         offset += 4;
         var payload = bytes.Slice(offset, payloadLength).ToArray();
 
-        return new SnapshotFileEnvelope
+        return new()
         {
             Version = version,
             LastSequenceId = lastSequenceId,
             Checksum = checksum,
-            Bucket = new EntitySnapshotBucket
+            Bucket = new()
             {
                 TypeId = typeId,
                 TypeName = typeName,

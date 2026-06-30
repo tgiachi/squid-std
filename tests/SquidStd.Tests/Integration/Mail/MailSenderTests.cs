@@ -1,7 +1,5 @@
 using System.Text;
 using SquidStd.Core.Interfaces.Events;
-using SquidStd.Mail.Abstractions.Data;
-using SquidStd.Mail.Abstractions.Data.Config;
 using SquidStd.Mail.Abstractions.Data.Events;
 using SquidStd.Mail.Abstractions.Exceptions;
 using SquidStd.Mail.Abstractions.Types.Mail;
@@ -31,27 +29,27 @@ public class MailSenderTests
         eventBus.RegisterListener(new DelegateListener<MailSentEvent>(e => sent.TrySetResult(e)));
 
         var sender = new MailKitMailSender(
-            new SmtpOptions { Host = _fixture.Host, Port = _fixture.SmtpPort, UseSsl = false },
+            new() { Host = _fixture.Host, Port = _fixture.SmtpPort, UseSsl = false },
             eventBus
         );
 
         await sender.SendAsync(
-                new OutgoingMailMessage
-                {
-                    From = new MailAddress("Sender", "sender@example.com"),
-                    To = [new MailAddress("Target", recipient)],
-                    Subject = "sent-subject",
-                    TextBody = "hello",
-                    Attachments = [new OutgoingAttachment("a.txt", "text/plain", Encoding.UTF8.GetBytes("xyz"))]
-                }
-            )
-            .WaitAsync(Timeout);
+                        new()
+                        {
+                            From = new("Sender", "sender@example.com"),
+                            To = [new("Target", recipient)],
+                            Subject = "sent-subject",
+                            TextBody = "hello",
+                            Attachments = [new("a.txt", "text/plain", Encoding.UTF8.GetBytes("xyz"))]
+                        }
+                    )
+                    .WaitAsync(Timeout);
 
         var sentEvent = await sent.Task.WaitAsync(Timeout);
         Assert.Equal("sent-subject", sentEvent.Subject);
 
         var reader = new ImapMailReader(
-            new MailOptions
+            new()
             {
                 Protocol = MailProtocolType.Imap,
                 Host = _fixture.Host,
@@ -73,17 +71,18 @@ public class MailSenderTests
         var failed = new TaskCompletionSource<MailSendFailedEvent>(TaskCreationOptions.RunContinuationsAsynchronously);
         eventBus.RegisterListener(new DelegateListener<MailSendFailedEvent>(e => failed.TrySetResult(e)));
 
-        var sender = new MailKitMailSender(new SmtpOptions { Host = _fixture.Host, Port = 1, UseSsl = false }, eventBus);
+        var sender = new MailKitMailSender(new() { Host = _fixture.Host, Port = 1, UseSsl = false }, eventBus);
 
-        await Assert.ThrowsAsync<MailSendException>(() => sender.SendAsync(
-                new OutgoingMailMessage
-                {
-                    From = new MailAddress("Sender", "sender@example.com"),
-                    To = [new MailAddress("Target", "x@example.com")],
-                    Subject = "fail-subject"
-                }
-            )
-            .WaitAsync(Timeout)
+        await Assert.ThrowsAsync<MailSendException>(
+            () => sender.SendAsync(
+                            new()
+                            {
+                                From = new("Sender", "sender@example.com"),
+                                To = [new("Target", "x@example.com")],
+                                Subject = "fail-subject"
+                            }
+                        )
+                        .WaitAsync(Timeout)
         );
 
         var failedEvent = await failed.Task.WaitAsync(Timeout);

@@ -8,8 +8,8 @@ using SquidStd.Core.Types.Health;
 namespace SquidStd.Services.Core.Services;
 
 /// <summary>
-///     Runs every registered <see cref="IHealthCheck" /> in parallel with a per-check timeout and
-///     exception isolation, then aggregates the results into a single <see cref="HealthReport" />.
+/// Runs every registered <see cref="IHealthCheck" /> in parallel with a per-check timeout and
+/// exception isolation, then aggregates the results into a single <see cref="HealthReport" />.
 /// </summary>
 public sealed class HealthCheckService : IHealthCheckService
 {
@@ -36,7 +36,7 @@ public sealed class HealthCheckService : IHealthCheckService
 
         if (_checks.Length == 0)
         {
-            return new HealthReport
+            return new()
             {
                 Status = HealthStatus.Healthy,
                 Entries = new Dictionary<string, HealthCheckResult>(StringComparer.Ordinal),
@@ -77,7 +77,7 @@ public sealed class HealthCheckService : IHealthCheckService
             }
         }
 
-        return new HealthReport
+        return new()
         {
             Status = overall,
             Entries = entries,
@@ -105,7 +105,7 @@ public sealed class HealthCheckService : IHealthCheckService
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
             return (check.Name,
-                HealthCheckResult.Unhealthy($"Timed out after {_checkTimeout}.") with { Duration = stopwatch.Elapsed });
+                    HealthCheckResult.Unhealthy($"Timed out after {_checkTimeout}.") with { Duration = stopwatch.Elapsed });
         }
         catch (OperationCanceledException)
         {

@@ -1,11 +1,10 @@
-using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Database.Abstractions.Data.Entities;
 using SquidStd.Database.Abstractions.Interfaces.Data;
 using SquidStd.Database.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 
 var bootstrap = SquidStdBootstrap.Create(
-    new SquidStdOptions
+    new()
     {
         ConfigName = "squidstd",
         RootDirectory = AppContext.BaseDirectory
@@ -24,14 +23,14 @@ await bootstrap.StartAsync();
 
 var products = bootstrap.Resolve<IDataAccess<Product>>();
 
-await products.InsertAsync(new Product { Name = "Squid Plushie", Price = 19.99m });
-await products.InsertAsync(new Product { Name = "Kraken Mug", Price = 12.50m });
+await products.InsertAsync(new() { Name = "Squid Plushie", Price = 19.99m });
+await products.InsertAsync(new() { Name = "Kraken Mug", Price = 12.50m });
 
 var page = await products.GetPagedAsync(
-    1,
-    10,
-    orderBy: product => product.Price
-);
+               1,
+               10,
+               orderBy: product => product.Price
+           );
 
 Console.WriteLine($"Found {page.TotalCount} product(s) on page {page.Page}/{page.TotalPages}:");
 

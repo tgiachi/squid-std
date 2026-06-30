@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
+using SquidStd.Vfs.Abstractions;
 using SquidStd.Vfs.Abstractions.Data;
 using SquidStd.Vfs.Abstractions.Interfaces;
-using SquidStd.Vfs.Abstractions;
 
 namespace SquidStd.Vfs.Services;
 
@@ -18,21 +18,21 @@ public sealed class PhysicalFileSystem : IVirtualFileSystem
     }
 
     public ValueTask<bool> ExistsAsync(string path, CancellationToken cancellationToken = default)
-    {
-        return ValueTask.FromResult(File.Exists(Resolve(path)));
-    }
+        => ValueTask.FromResult(File.Exists(Resolve(path)));
 
     public async ValueTask<byte[]?> ReadAllBytesAsync(string path, CancellationToken cancellationToken = default)
     {
         var full = Resolve(path);
 
         return File.Exists(full)
-            ? await File.ReadAllBytesAsync(full, cancellationToken).ConfigureAwait(false)
-            : null;
+                   ? await File.ReadAllBytesAsync(full, cancellationToken).ConfigureAwait(false)
+                   : null;
     }
 
     public async ValueTask WriteAllBytesAsync(
-        string path, ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default
+        string path,
+        ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken = default
     )
     {
         var full = Resolve(path);
@@ -75,7 +75,8 @@ public sealed class PhysicalFileSystem : IVirtualFileSystem
     }
 
     public async IAsyncEnumerable<VfsEntry> ListAsync(
-        string? prefix = null, [EnumeratorCancellation] CancellationToken cancellationToken = default
+        string? prefix = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
         if (!Directory.Exists(_root))
@@ -97,7 +98,8 @@ public sealed class PhysicalFileSystem : IVirtualFileSystem
             }
 
             var info = new FileInfo(file);
-            yield return new VfsEntry(logical, info.Length, info.LastWriteTimeUtc);
+
+            yield return new(logical, info.Length, info.LastWriteTimeUtc);
 
             await Task.CompletedTask;
         }

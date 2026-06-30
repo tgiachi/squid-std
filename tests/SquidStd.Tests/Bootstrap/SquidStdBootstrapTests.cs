@@ -19,7 +19,7 @@ public class SquidStdBootstrapTests
     {
         using var temp = new TempDirectory();
         await using var bootstrap =
-            SquidStdBootstrap.Create(new SquidStdOptions { ConfigName = "app", RootDirectory = temp.Path });
+            SquidStdBootstrap.Create(new() { ConfigName = "app", RootDirectory = temp.Path });
 
         var resolved = bootstrap.Resolve<ISquidStdBootstrap>();
         var configManager = bootstrap.Resolve<IConfigManagerService>();
@@ -36,7 +36,7 @@ public class SquidStdBootstrapTests
         var container = new Container();
 
         await using var bootstrap = SquidStdBootstrap.Create(
-            new SquidStdOptions
+            new()
             {
                 ConfigName = "app",
                 RootDirectory = temp.Path
@@ -58,15 +58,13 @@ public class SquidStdBootstrapTests
         var container = new Container();
 
         await using (SquidStdBootstrap.Create(
-                         new SquidStdOptions
+                         new()
                          {
                              ConfigName = "app",
                              RootDirectory = temp.Path
                          },
                          container
-                     ))
-        {
-        }
+                     )) { }
 
         container.RegisterInstance("still-open");
 
@@ -82,9 +80,10 @@ public class SquidStdBootstrapTests
         using var cancellation = new CancellationTokenSource();
         var state = new RunTrackedState();
         await using var bootstrap =
-            SquidStdBootstrap.Create(new SquidStdOptions { ConfigName = "app", RootDirectory = temp.Path });
+            SquidStdBootstrap.Create(new() { ConfigName = "app", RootDirectory = temp.Path });
 
-        bootstrap.ConfigureService(container =>
+        bootstrap.ConfigureService(
+            container =>
             {
                 container.RegisterInstance(state);
                 container.Register<RunTrackedService>(Reuse.Singleton);
@@ -127,7 +126,7 @@ public class SquidStdBootstrapTests
             """
         );
         await using var bootstrap =
-            SquidStdBootstrap.Create(new SquidStdOptions { ConfigName = "app", RootDirectory = temp.Path });
+            SquidStdBootstrap.Create(new() { ConfigName = "app", RootDirectory = temp.Path });
 
         await bootstrap.StartAsync(CancellationToken.None);
         await bootstrap.StopAsync(CancellationToken.None);
@@ -153,9 +152,10 @@ public class SquidStdBootstrapTests
         );
         var events = new List<string>();
         await using var bootstrap =
-            SquidStdBootstrap.Create(new SquidStdOptions { ConfigName = "app", RootDirectory = temp.Path });
+            SquidStdBootstrap.Create(new() { ConfigName = "app", RootDirectory = temp.Path });
 
-        bootstrap.ConfigureServices(container =>
+        bootstrap.ConfigureServices(
+            container =>
             {
                 container.RegisterInstance(events);
                 container.Register<ConfigConsumerService>(Reuse.Singleton);
@@ -183,9 +183,10 @@ public class SquidStdBootstrapTests
         using var temp = new TempDirectory();
         var events = new List<string>();
         await using var bootstrap =
-            SquidStdBootstrap.Create(new SquidStdOptions { ConfigName = "app", RootDirectory = temp.Path });
+            SquidStdBootstrap.Create(new() { ConfigName = "app", RootDirectory = temp.Path });
 
-        bootstrap.ConfigureServices(container =>
+        bootstrap.ConfigureServices(
+            container =>
             {
                 container.RegisterInstance(events);
                 container.Register<EarlyTrackedService>(Reuse.Singleton);
@@ -222,9 +223,7 @@ public class SquidStdBootstrapTests
         }
 
         public ValueTask StopAsync(CancellationToken cancellationToken = default)
-        {
-            return ValueTask.CompletedTask;
-        }
+            => ValueTask.CompletedTask;
     }
 
     private sealed class EarlyTrackedService(List<string> events) : ISquidStdService

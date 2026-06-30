@@ -23,9 +23,7 @@ public class SearchIndexNameResolverTests
 
     [Fact]
     public void Resolve_FallsBackToLowercasedTypeName()
-    {
-        Assert.Equal("plaindoc", SearchIndexNameResolver.Resolve(typeof(PlainDoc)));
-    }
+        => Assert.Equal("plaindoc", SearchIndexNameResolver.Resolve(typeof(PlainDoc)));
 
     [Fact]
     public void Resolve_Throws_WhenRequiredVariableMissing()
@@ -36,9 +34,7 @@ public class SearchIndexNameResolverTests
 
     [Fact]
     public void Resolve_UsesAttribute_Lowercased()
-    {
-        Assert.Equal("orders", SearchIndexNameResolver.Resolve(typeof(AttributedDoc)));
-    }
+        => Assert.Equal("orders", SearchIndexNameResolver.Resolve(typeof(AttributedDoc)));
 
     [Fact]
     public void Resolve_UsesDefault_WhenVariableMissing()

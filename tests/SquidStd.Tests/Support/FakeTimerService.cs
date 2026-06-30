@@ -3,9 +3,9 @@ using SquidStd.Core.Interfaces.Timing;
 namespace SquidStd.Tests.Support;
 
 /// <summary>
-///     In-memory <see cref="ITimerService" /> for tests. Timers do not fire on their own:
-///     call <see cref="FireDue" /> to invoke and clear the currently-registered timers
-///     (one-shot semantics). <see cref="UpdateTicksDelta" /> only records that a pump ran.
+/// In-memory <see cref="ITimerService" /> for tests. Timers do not fire on their own:
+/// call <see cref="FireDue" /> to invoke and clear the currently-registered timers
+/// (one-shot semantics). <see cref="UpdateTicksDelta" /> only records that a pump ran.
 /// </summary>
 public sealed class FakeTimerService : ITimerService
 {
@@ -26,14 +26,10 @@ public sealed class FakeTimerService : ITimerService
     }
 
     public void UnregisterAllTimers()
-    {
-        _timers.Clear();
-    }
+        => _timers.Clear();
 
     public bool UnregisterTimer(string timerId)
-    {
-        return _timers.Remove(timerId);
-    }
+        => _timers.Remove(timerId);
 
     public int UnregisterTimersByName(string name)
     {

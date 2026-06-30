@@ -7,7 +7,7 @@ using SquidStd.Workers.Manager.Interfaces;
 namespace SquidStd.Workers.Manager.Endpoints;
 
 /// <summary>
-///     Typed minimal-API handlers for the worker manager surface. Static so they can be unit-tested directly.
+/// Typed minimal-API handlers for the worker manager surface. Static so they can be unit-tested directly.
 /// </summary>
 public static class WorkerManagerEndpoints
 {
@@ -52,7 +52,5 @@ public static class WorkerManagerEndpoints
 
     /// <summary>Lists all known workers.</summary>
     public static Ok<IReadOnlyCollection<WorkerInfo>> GetWorkers(IWorkerRegistry registry)
-    {
-        return TypedResults.Ok(registry.GetAll());
-    }
+        => TypedResults.Ok(registry.GetAll());
 }

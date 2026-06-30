@@ -3,7 +3,7 @@ using SquidStd.Core.Data.Health;
 namespace SquidStd.Core.Interfaces.Health;
 
 /// <summary>
-///     A single health check for one component.
+/// A single health check for one component.
 /// </summary>
 public interface IHealthCheck
 {

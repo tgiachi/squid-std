@@ -22,15 +22,13 @@ public sealed class SquidStdTcpServerTlsOptions
     }
 
     internal SslServerAuthenticationOptions ToAuthenticationOptions()
-    {
-        return new SslServerAuthenticationOptions
+        => new()
         {
             ServerCertificate = ServerCertificate,
             ClientCertificateRequired = ClientCertificateRequired,
             CertificateRevocationCheckMode = CheckCertificateRevocation
-                ? X509RevocationMode.Online
-                : X509RevocationMode.NoCheck,
+                                                 ? X509RevocationMode.Online
+                                                 : X509RevocationMode.NoCheck,
             EnabledSslProtocols = EnabledSslProtocols
         };
-    }
 }

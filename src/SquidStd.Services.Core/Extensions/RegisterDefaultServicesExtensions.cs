@@ -28,7 +28,7 @@ using SquidStd.Storage.Abstractions.Data.Config;
 namespace SquidStd.Services.Core.Extensions;
 
 /// <summary>
-///     Extension methods for registering the default SquidStd core services.
+/// Extension methods for registering the default SquidStd core services.
 /// </summary>
 public static class RegisterDefaultServicesExtensions
 {
@@ -48,16 +48,14 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        ///     Registers the default SquidStd core services using the default config file location.
+        /// Registers the default SquidStd core services using the default config file location.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterCoreServices()
-        {
-            return container.RegisterCoreServices("squidstd", Directory.GetCurrentDirectory());
-        }
+            => container.RegisterCoreServices("squidstd", Directory.GetCurrentDirectory());
 
         /// <summary>
-        ///     Registers the default SquidStd core services and config manager.
+        /// Registers the default SquidStd core services and config manager.
         /// </summary>
         /// <param name="configName">The logical config name or YAML file name.</param>
         /// <param name="configDirectory">The directory where the config file is searched.</param>
@@ -79,14 +77,14 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        ///     Registers the default config manager service as a singleton instance.
+        /// Registers the default config manager service as a singleton instance.
         /// </summary>
         /// <param name="configName">The logical config name or YAML file name.</param>
         /// <param name="configDirectory">The directory where the config file is searched.</param>
         /// <returns>The same container for chaining.</returns>
         /// <summary>
-        ///     Registers the default JSON data serializer for <see cref="IDataSerializer" /> and
-        ///     <see cref="IDataDeserializer" /> (same singleton instance).
+        /// Registers the default JSON data serializer for <see cref="IDataSerializer" /> and
+        /// <see cref="IDataDeserializer" /> (same singleton instance).
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterDataSerializer()
@@ -99,7 +97,7 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        ///     Registers the default SquidStd core configuration sections.
+        /// Registers the default SquidStd core configuration sections.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterDefaultCoreConfigSections()
@@ -115,7 +113,7 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        ///     Registers the default event bus service in the container.
+        /// Registers the default event bus service in the container.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterEventBusService()
@@ -125,18 +123,16 @@ public static class RegisterDefaultServicesExtensions
                 resolver => new EventBusService(resolver.Resolve<EventBusOptions>()),
                 Reuse.Singleton
             );
-            container.AddToRegisterTypedList(
-                new ServiceRegistrationData(typeof(IEventBus), typeof(EventBusService), -1)
-            );
+            container.AddToRegisterTypedList(new ServiceRegistrationData(typeof(IEventBus), typeof(EventBusService), -1));
             container.RegisterStdService<EventListenerActivator, EventListenerActivator>(-900);
 
             return container;
         }
 
         /// <summary>
-        ///     Registers the recursive file watcher service as a singleton resolving the event bus.
-        ///     Not part of <see cref="RegisterCoreServices()" />: opt in, then call
-        ///     <see cref="Core.Interfaces.Files.IFileWatcherService.Watch(string)" /> for the directories to watch.
+        /// Registers the recursive file watcher service as a singleton resolving the event bus.
+        /// Not part of <see cref="RegisterCoreServices()" />: opt in, then call
+        /// <see cref="Core.Interfaces.Files.IFileWatcherService.Watch(string)" /> for the directories to watch.
         /// </summary>
         /// <param name="debounceDelay">Optional debounce window; defaults to 300ms when null.</param>
         /// <returns>The same container for chaining.</returns>
@@ -144,8 +140,8 @@ public static class RegisterDefaultServicesExtensions
         {
             container.RegisterDelegate<IFileWatcherService>(
                 resolver => debounceDelay is { } delay
-                    ? new FileWatcherService(resolver.Resolve<IEventBus>(), delay)
-                    : new FileWatcherService(resolver.Resolve<IEventBus>()),
+                                ? new FileWatcherService(resolver.Resolve<IEventBus>(), delay)
+                                : new FileWatcherService(resolver.Resolve<IEventBus>()),
                 Reuse.Singleton
             );
 
@@ -153,7 +149,7 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        ///     Registers the default job system service in the container.
+        /// Registers the default job system service in the container.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterJobSystemService()
@@ -164,16 +160,14 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        ///     Registers the default main-thread dispatcher service in the container.
+        /// Registers the default main-thread dispatcher service in the container.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterMainThreadDispatcherService()
-        {
-            return container.RegisterStdService<IMainThreadDispatcher, MainThreadDispatcherService>(-1);
-        }
+            => container.RegisterStdService<IMainThreadDispatcher, MainThreadDispatcherService>(-1);
 
         /// <summary>
-        ///     Registers the default metrics collection service in the container.
+        /// Registers the default metrics collection service in the container.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterMetricsCollectionService()
@@ -184,7 +178,7 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        ///     Registers default encrypted local secret services in the container.
+        /// Registers default encrypted local secret services in the container.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterSecretServices()
@@ -197,7 +191,7 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        ///     Registers the default timer wheel service in the container.
+        /// Registers the default timer wheel service in the container.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterTimerWheelService()

@@ -1,7 +1,7 @@
 namespace SquidStd.Actors.Types;
 
 /// <summary>
-///     Behavior when the actor mailbox reaches its bounded capacity.
+/// Behavior when the actor mailbox reaches its bounded capacity.
 /// </summary>
 public enum ActorOverflowPolicy
 {

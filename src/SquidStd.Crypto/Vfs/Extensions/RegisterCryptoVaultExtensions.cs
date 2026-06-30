@@ -13,8 +13,8 @@ public static class RegisterCryptoVaultExtensions
     extension(IContainer container)
     {
         /// <summary>
-        ///     Registers an <see cref="ILockableFileSystem" /> singleton: a crypto vault over a single-file zip at
-        ///     <paramref name="path" />. The consumer calls <see cref="ILockableFileSystem.Unlock" /> at runtime.
+        /// Registers an <see cref="ILockableFileSystem" /> singleton: a crypto vault over a single-file zip at
+        /// <paramref name="path" />. The consumer calls <see cref="ILockableFileSystem.Unlock" /> at runtime.
         /// </summary>
         public IContainer RegisterCryptoVault(string path, CryptoVaultOptions? options = null)
         {

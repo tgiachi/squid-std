@@ -1,12 +1,11 @@
 using System.Text;
-using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Crypto.Pgp.Extensions;
 using SquidStd.Crypto.Pgp.Interfaces;
 using SquidStd.Crypto.Pgp.Services;
 using SquidStd.Services.Core.Services.Bootstrap;
 
 var bootstrap = SquidStdBootstrap.Create(
-    new SquidStdOptions
+    new()
     {
         ConfigName = "squidstd",
         RootDirectory = AppContext.BaseDirectory
@@ -50,11 +49,11 @@ Console.WriteLine($"Generated key {key.KeyId} for {key.Identity}; saved to {keyS
 
 // Encrypt + sign for the recipient, then decrypt + verify the round-trip.
 var armored = await pgp.EncryptAndSignForAsync(
-    identity,
-    Encoding.UTF8.GetBytes("attack at dawn"),
-    identity,
-    passphrase
-);
+                  identity,
+                  Encoding.UTF8.GetBytes("attack at dawn"),
+                  identity,
+                  passphrase
+              );
 
 var result = await pgp.DecryptAndVerifyAsync(armored, passphrase);
 
@@ -70,9 +69,7 @@ Console.WriteLine(
 var reloaded = new PgpKeyring();
 await reloaded.LoadAsync(keyStore);
 
-Console.WriteLine(
-    $"Reloaded {reloaded.Keys.Count} key(s) from disk; contains '{identity}': {reloaded.Contains(identity)}"
-);
+Console.WriteLine($"Reloaded {reloaded.Keys.Count} key(s) from disk; contains '{identity}': {reloaded.Contains(identity)}");
 
 #endregion
 

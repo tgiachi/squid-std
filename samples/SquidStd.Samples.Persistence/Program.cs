@@ -18,10 +18,10 @@ IPersistenceService BuildPersistence()
         new PersistenceEntityDescriptor<Player, int>(
             serializer,
             serializer,
-            typeId: 1,
-            typeName: "Player",
-            schemaVersion: 1,
-            keySelector: player => player.Id
+            1,
+            "Player",
+            1,
+            player => player.Id
         )
     );
 
@@ -50,8 +50,8 @@ foreach (var existing in await players.GetAllAsync())
 
 #region step-2: mutate — every upsert/remove is appended to the journal
 
-var nextId = (await players.CountAsync()) + 1;
-await players.UpsertAsync(new Player { Id = nextId, Name = $"Hero-{nextId}", Level = nextId * 10 });
+var nextId = await players.CountAsync() + 1;
+await players.UpsertAsync(new() { Id = nextId, Name = $"Hero-{nextId}", Level = nextId * 10 });
 
 Console.WriteLine($"Added player #{nextId}; store now holds {await players.CountAsync()} player(s)");
 

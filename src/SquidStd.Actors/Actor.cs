@@ -9,9 +9,9 @@ using ILogger = Serilog.ILogger;
 namespace SquidStd.Actors;
 
 /// <summary>
-///     Base class for an actor: a single-consumer mailbox that processes messages in FIFO order on one
-///     logical thread, so handler state is mutated without locks. Send fire-and-forget messages with
-///     <see cref="TellAsync" /> and request/response messages with <see cref="AskAsync{TRequest,TReply}" />.
+/// Base class for an actor: a single-consumer mailbox that processes messages in FIFO order on one
+/// logical thread, so handler state is mutated without locks. Send fire-and-forget messages with
+/// <see cref="TellAsync" /> and request/response messages with <see cref="AskAsync{TRequest,TReply}" />.
 /// </summary>
 /// <typeparam name="TMessage">The base type of every message this actor accepts.</typeparam>
 public abstract class Actor<TMessage> : IAsyncDisposable
@@ -24,18 +24,15 @@ public abstract class Actor<TMessage> : IAsyncDisposable
     private int _disposed;
 
     /// <summary>Number of messages waiting in the mailbox.</summary>
-    public int PendingCount
-    {
-        get { return _mailbox.InputCount; }
-    }
+    public int PendingCount => _mailbox.InputCount;
 
     /// <summary>Initializes the actor and starts its mailbox consumer.</summary>
     /// <param name="options">Mailbox options; defaults are used when null.</param>
     protected Actor(ActorOptions? options = null)
     {
         _options = options ?? new ActorOptions();
-        _shutdown = new CancellationTokenSource();
-        _outstanding = new ConcurrentDictionary<IActorRequestCore, byte>();
+        _shutdown = new();
+        _outstanding = new();
         _logger = Log.ForContext(GetType());
 
         // The mailbox is deliberately NOT bound to _shutdown.Token: cancelling that token would abort
@@ -46,11 +43,11 @@ public abstract class Actor<TMessage> : IAsyncDisposable
             MaxDegreeOfParallelism = 1,
             EnsureOrdered = true,
             BoundedCapacity = _options.OverflowPolicy == ActorOverflowPolicy.Unbounded
-                ? DataflowBlockOptions.Unbounded
-                : _options.Capacity
+                                  ? DataflowBlockOptions.Unbounded
+                                  : _options.Capacity
         };
 
-        _mailbox = new ActionBlock<TMessage>(ProcessAsync, blockOptions);
+        _mailbox = new(ProcessAsync, blockOptions);
     }
 
     /// <summary>Enqueues a fire-and-forget message. Returns false only when dropped (DropNewest).</summary>
@@ -76,9 +73,7 @@ public abstract class Actor<TMessage> : IAsyncDisposable
     /// <typeparam name="TRequest">The request message type.</typeparam>
     /// <typeparam name="TReply">The reply type.</typeparam>
     /// <returns>The reply.</returns>
-    public async Task<TReply> AskAsync<TRequest, TReply>(
-        TRequest request, CancellationToken cancellationToken = default
-    )
+    public async Task<TReply> AskAsync<TRequest, TReply>(TRequest request, CancellationToken cancellationToken = default)
         where TRequest : TMessage, IActorRequest<TReply>
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -87,8 +82,7 @@ public abstract class Actor<TMessage> : IAsyncDisposable
         _outstanding[request] = 0;
 
         using var registration =
-            cancellationToken.Register(() => request.Fail(new OperationCanceledException(cancellationToken))
-            );
+            cancellationToken.Register(() => request.Fail(new OperationCanceledException(cancellationToken)));
 
         try
         {
@@ -116,9 +110,7 @@ public abstract class Actor<TMessage> : IAsyncDisposable
     /// <param name="message">The message whose handler threw.</param>
     /// <param name="error">The thrown exception.</param>
     protected virtual ValueTask OnErrorAsync(TMessage message, Exception error)
-    {
-        return ValueTask.CompletedTask;
-    }
+        => ValueTask.CompletedTask;
 
     private async Task ProcessAsync(TMessage message)
     {
@@ -193,8 +185,8 @@ public abstract class Actor<TMessage> : IAsyncDisposable
     }
 
     /// <summary>
-    ///     Completes the mailbox and drains queued work within <see cref="ActorOptions.ShutdownDrainTimeout" />,
-    ///     then cancels any handlers still running and faults requests that never completed.
+    /// Completes the mailbox and drains queued work within <see cref="ActorOptions.ShutdownDrainTimeout" />,
+    /// then cancels any handlers still running and faults requests that never completed.
     /// </summary>
     public async ValueTask DisposeAsync()
     {

@@ -14,22 +14,14 @@ public sealed class FakeTimerService : ITimerService
         return "timer-1";
     }
 
-    public void UnregisterAllTimers()
-    {
-    }
+    public void UnregisterAllTimers() { }
 
     public bool UnregisterTimer(string timerId)
-    {
-        return true;
-    }
+        => true;
 
     public int UnregisterTimersByName(string name)
-    {
-        return 0;
-    }
+        => 0;
 
     public int UpdateTicksDelta(long timestampMilliseconds)
-    {
-        return 0;
-    }
+        => 0;
 }

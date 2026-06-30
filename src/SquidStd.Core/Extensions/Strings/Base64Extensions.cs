@@ -3,7 +3,7 @@ using System.Text;
 namespace SquidStd.Core.Extensions.Strings;
 
 /// <summary>
-///     Provides base64 conversion helpers for strings and byte arrays.
+/// Provides base64 conversion helpers for strings and byte arrays.
 /// </summary>
 public static class Base64Extensions
 {
@@ -11,7 +11,7 @@ public static class Base64Extensions
     extension(string value)
     {
         /// <summary>
-        ///     Determines whether the string is a well-formed base64 value.
+        /// Determines whether the string is a well-formed base64 value.
         /// </summary>
         /// <returns><c>true</c> when the string decodes as base64; otherwise <c>false</c>.</returns>
         public bool IsBase64String()
@@ -27,43 +27,35 @@ public static class Base64Extensions
         }
 
         /// <summary>
-        ///     Encodes the UTF-8 bytes of the string as base64.
+        /// Encodes the UTF-8 bytes of the string as base64.
         /// </summary>
         /// <returns>The base64 representation.</returns>
         public string ToBase64()
-        {
-            return Convert.ToBase64String(Encoding.UTF8.GetBytes(value));
-        }
+            => Convert.ToBase64String(Encoding.UTF8.GetBytes(value));
 
         /// <summary>
-        ///     Decodes a base64 string into its UTF-8 text.
+        /// Decodes a base64 string into its UTF-8 text.
         /// </summary>
         /// <returns>The decoded text.</returns>
         public string FromBase64()
-        {
-            return Encoding.UTF8.GetString(Convert.FromBase64String(value));
-        }
+            => Encoding.UTF8.GetString(Convert.FromBase64String(value));
 
         /// <summary>
-        ///     Decodes a base64 string into its raw bytes.
+        /// Decodes a base64 string into its raw bytes.
         /// </summary>
         /// <returns>The decoded bytes.</returns>
         public byte[] FromBase64ToByteArray()
-        {
-            return Convert.FromBase64String(value);
-        }
+            => Convert.FromBase64String(value);
     }
 
     /// <param name="value">The bytes to encode.</param>
     extension(byte[] value)
     {
         /// <summary>
-        ///     Encodes the bytes as base64.
+        /// Encodes the bytes as base64.
         /// </summary>
         /// <returns>The base64 representation.</returns>
         public string ToBase64()
-        {
-            return Convert.ToBase64String(value);
-        }
+            => Convert.ToBase64String(value);
     }
 }

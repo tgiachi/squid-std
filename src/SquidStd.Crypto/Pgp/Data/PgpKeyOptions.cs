@@ -3,7 +3,7 @@ using SquidStd.Crypto.Pgp.Types;
 namespace SquidStd.Crypto.Pgp.Data;
 
 /// <summary>
-///     Options controlling key generation: algorithm, key size, and an optional validity period.
+/// Options controlling key generation: algorithm, key size, and an optional validity period.
 /// </summary>
 public sealed class PgpKeyOptions
 {

@@ -4,7 +4,7 @@ using SquidStd.Core.Types;
 namespace SquidStd.Services.Core.Extensions.Logger;
 
 /// <summary>
-///     Extension methods for converting SquidStd logger options to Serilog values.
+/// Extension methods for converting SquidStd logger options to Serilog values.
 /// </summary>
 public static class SquidStdLogRollingIntervalExtensions
 {
@@ -12,12 +12,11 @@ public static class SquidStdLogRollingIntervalExtensions
     extension(SquidStdLogRollingIntervalType interval)
     {
         /// <summary>
-        ///     Converts a SquidStd rolling interval to a Serilog rolling interval.
+        /// Converts a SquidStd rolling interval to a Serilog rolling interval.
         /// </summary>
         /// <returns>The corresponding Serilog rolling interval.</returns>
         public RollingInterval ToSerilogRollingInterval()
-        {
-            return interval switch
+            => interval switch
             {
                 SquidStdLogRollingIntervalType.Infinite => RollingInterval.Infinite,
                 SquidStdLogRollingIntervalType.Year     => RollingInterval.Year,
@@ -27,6 +26,5 @@ public static class SquidStdLogRollingIntervalExtensions
                 SquidStdLogRollingIntervalType.Minute   => RollingInterval.Minute,
                 _                                       => RollingInterval.Day
             };
-        }
     }
 }

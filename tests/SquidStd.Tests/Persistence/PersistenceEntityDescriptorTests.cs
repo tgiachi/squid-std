@@ -9,12 +9,12 @@ public class PersistenceEntityDescriptorTests
     {
         var serializer = new JsonDataSerializer();
 
-        return new PersistenceEntityDescriptor<Player, int>(serializer, serializer, 1, "Player", 1, p => p.Id);
+        return new(serializer, serializer, 1, "Player", 1, p => p.Id);
     }
 
     [Fact]
     public void GetKey_UsesSelector()
-        => Assert.Equal(5, CreateDescriptor().GetKey(new Player { Id = 5 }));
+        => Assert.Equal(5, CreateDescriptor().GetKey(new() { Id = 5 }));
 
     [Fact]
     public void SerializeDeserializeEntity_RoundTrips()

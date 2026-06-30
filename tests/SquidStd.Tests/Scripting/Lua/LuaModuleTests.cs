@@ -44,7 +44,7 @@ public class LuaModuleTests
     {
         var module = new RandomModule();
 
-        Assert.Throws<ArgumentException>(() => module.Pick(new Table(new Script())));
+        Assert.Throws<ArgumentException>(() => module.Pick(new(new())));
     }
 
     [Fact]
@@ -52,14 +52,14 @@ public class LuaModuleTests
     {
         var script = new Script();
         var entries = script.DoString(
-                """
-                return {
-                    { value = 'a', weight = 0 },
-                    { value = 'b', weight = -3 }
-                }
-                """
-            )
-            .Table;
+                                """
+                                return {
+                                    { value = 'a', weight = 0 },
+                                    { value = 'b', weight = -3 }
+                                }
+                                """
+                            )
+                            .Table;
         var module = new RandomModule();
 
         Assert.Throws<ArgumentException>(() => module.Weighted(entries));
@@ -71,18 +71,12 @@ public class LuaModuleTests
 
         public string? EventName { get; private set; }
 
-        public void Attach(Script script)
-        {
-        }
+        public void Attach(Script script) { }
 
         public DynValue Invoke(Closure callback, IReadOnlyDictionary<string, object?> payload)
-        {
-            return DynValue.Nil;
-        }
+            => DynValue.Nil;
 
-        public void Publish(string eventName, IReadOnlyDictionary<string, object?> payload)
-        {
-        }
+        public void Publish(string eventName, IReadOnlyDictionary<string, object?> payload) { }
 
         public void Register(string eventName, Closure callback)
         {

@@ -56,15 +56,15 @@ container.ApplyPersistedEntityRegistrations();   // builds descriptors into IPer
 
 ## Key types
 
-| Type                                  | Purpose                                                        |
-|---------------------------------------|---------------------------------------------------------------|
-| `PersistenceService`                  | Lifecycle: load + replay, autosave, `GetStore<T,TKey>()`.     |
-| `IEntityStore<TEntity,TKey>`          | In-memory CRUD; reads clone, writes journal.                  |
-| `PersistenceEntityDescriptor<T,TKey>` | Serializer-injected descriptor (serialize/clone/key).         |
-| `PersistenceEntityRegistry`           | Maps `typeId` ↔ descriptor; freezes after registration.       |
-| `BinaryJournalService`                | Append-only framed binary WAL with tail-corruption recovery.  |
-| `SnapshotService`                     | Atomic per-type binary snapshot files with payload checksum.  |
-| `RegisterPersistedEntity<T,TKey>()`   | DI helper recording an entity for descriptor construction.    |
+| Type                                  | Purpose                                                      |
+|---------------------------------------|--------------------------------------------------------------|
+| `PersistenceService`                  | Lifecycle: load + replay, autosave, `GetStore<T,TKey>()`.    |
+| `IEntityStore<TEntity,TKey>`          | In-memory CRUD; reads clone, writes journal.                 |
+| `PersistenceEntityDescriptor<T,TKey>` | Serializer-injected descriptor (serialize/clone/key).        |
+| `PersistenceEntityRegistry`           | Maps `typeId` ↔ descriptor; freezes after registration.      |
+| `BinaryJournalService`                | Append-only framed binary WAL with tail-corruption recovery. |
+| `SnapshotService`                     | Atomic per-type binary snapshot files with payload checksum. |
+| `RegisterPersistedEntity<T,TKey>()`   | DI helper recording an entity for descriptor construction.   |
 
 ### Durability
 

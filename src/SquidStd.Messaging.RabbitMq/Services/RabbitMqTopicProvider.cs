@@ -7,8 +7,8 @@ using SquidStd.Messaging.RabbitMq.Data.Config;
 namespace SquidStd.Messaging.RabbitMq.Services;
 
 /// <summary>
-///     RabbitMQ <see cref="ITopicProvider" />: topics map to fanout exchanges; each subscriber binds an
-///     exclusive auto-delete queue and consumes with auto-ack (transient, at-most-once fan-out).
+/// RabbitMQ <see cref="ITopicProvider" />: topics map to fanout exchanges; each subscriber binds an
+/// exclusive auto-delete queue and consumes with auto-ack (transient, at-most-once fan-out).
 /// </summary>
 public sealed class RabbitMqTopicProvider : ITopicProvider
 {
@@ -102,9 +102,7 @@ public sealed class RabbitMqTopicProvider : ITopicProvider
 
     /// <inheritdoc />
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        return DisposeAsync();
-    }
+        => DisposeAsync();
 
     /// <inheritdoc />
     public IDisposable Subscribe(string topic, Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler)
@@ -176,9 +174,7 @@ public sealed class RabbitMqTopicProvider : ITopicProvider
         }
 
         public void Start()
-        {
-            StartAsync().GetAwaiter().GetResult();
-        }
+            => StartAsync().GetAwaiter().GetResult();
 
         private async Task OnReceivedAsync(object sender, BasicDeliverEventArgs args)
         {

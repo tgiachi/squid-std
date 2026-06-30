@@ -13,7 +13,8 @@ public class MainThreadDispatcherServiceTests
     {
         IMainThreadDispatcher dispatcher = new MainThreadDispatcherService();
         var calls = new List<int>();
-        dispatcher.Post(() =>
+        dispatcher.Post(
+            () =>
             {
                 calls.Add(1);
                 Thread.Sleep(5);
@@ -34,7 +35,8 @@ public class MainThreadDispatcherServiceTests
     {
         IMainThreadDispatcher dispatcher = new MainThreadDispatcherService();
         var calls = new List<int>();
-        dispatcher.Post(() =>
+        dispatcher.Post(
+            () =>
             {
                 calls.Add(1);
                 dispatcher.Post(() => calls.Add(2));

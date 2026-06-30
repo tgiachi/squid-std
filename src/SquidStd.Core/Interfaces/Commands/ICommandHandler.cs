@@ -1,8 +1,8 @@
 namespace SquidStd.Core.Interfaces.Commands;
 
 /// <summary>
-///     Handles a command of type <typeparamref name="TCommand" /> within the ambient
-///     <typeparamref name="TContext" /> (for example the current session or connection).
+/// Handles a command of type <typeparamref name="TCommand" /> within the ambient
+/// <typeparamref name="TContext" /> (for example the current session or connection).
 /// </summary>
 /// <typeparam name="TCommand">The command type handled.</typeparam>
 /// <typeparam name="TContext">The ambient context type passed to the handler.</typeparam>

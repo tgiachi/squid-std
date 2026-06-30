@@ -4,7 +4,7 @@ using SquidStd.Network.Sessions;
 namespace SquidStd.Network.Interfaces.Sessions;
 
 /// <summary>
-///     Tracks active connections and their application state.
+/// Tracks active connections and their application state.
 /// </summary>
 /// <typeparam name="TState">Application-defined per-connection state.</typeparam>
 public interface ISessionManager<TState>

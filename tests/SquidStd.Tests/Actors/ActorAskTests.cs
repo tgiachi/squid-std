@@ -34,7 +34,7 @@ public class ActorAskTests
         await actor.TellAsync(new Append("x"));
         await actor.TellAsync(new Append("y"));
 
-        var log = await actor.AskAsync<GetLog, string>(new GetLog());
+        var log = await actor.AskAsync<GetLog, string>(new());
 
         Assert.Equal("x,y", log);
     }
@@ -47,7 +47,7 @@ public class ActorAskTests
         await actor.TellAsync(new Hold(gate)); // occupy the consumer so the request waits
 
         using var cts = new CancellationTokenSource();
-        var ask = actor.AskAsync<GetLog, string>(new GetLog(), cts.Token);
+        var ask = actor.AskAsync<GetLog, string>(new(), cts.Token);
         cts.Cancel();
 
         await Assert.ThrowsAsync<OperationCanceledException>(() => ask);

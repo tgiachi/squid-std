@@ -14,7 +14,7 @@ public class ActorOrderingTests
             await actor.TellAsync(new Append(i.ToString()));
         }
 
-        var log = await actor.AskAsync<GetLog, string>(new GetLog());
+        var log = await actor.AskAsync<GetLog, string>(new());
 
         Assert.Equal(string.Join(",", Enumerable.Range(0, 100)), log);
     }

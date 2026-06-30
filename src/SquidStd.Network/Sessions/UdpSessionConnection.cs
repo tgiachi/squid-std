@@ -5,8 +5,8 @@ using SquidStd.Network.Server;
 namespace SquidStd.Network.Sessions;
 
 /// <summary>
-///     Virtual per-endpoint connection backing a UDP session. Sends route to the server's
-///     <see cref="SquidStdUdpServer.SendToAsync" />; closing removes the session via a callback.
+/// Virtual per-endpoint connection backing a UDP session. Sends route to the server's
+/// <see cref="SquidStdUdpServer.SendToAsync" />; closing removes the session via a callback.
 /// </summary>
 internal sealed class UdpSessionConnection : INetworkConnection
 {
@@ -38,7 +38,5 @@ internal sealed class UdpSessionConnection : INetworkConnection
     }
 
     public Task SendAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
-    {
-        return _server.SendToAsync(_remoteEndPoint, payload, cancellationToken);
-    }
+        => _server.SendToAsync(_remoteEndPoint, payload, cancellationToken);
 }

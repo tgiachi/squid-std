@@ -16,7 +16,7 @@ public sealed class SnapshotChecksumScopeTests : IDisposable
     public async Task LoadBucketAsync_WhenLastSequenceIdCorrupted_RejectsSnapshot()
     {
         var service = new SnapshotService(_dir, ".snapshot.bin");
-        await service.SaveBucketAsync(Bucket(), lastSequenceId: 42);
+        await service.SaveBucketAsync(Bucket(), 42);
 
         var file = Directory.GetFiles(_dir, "*.snapshot.bin").Single();
         var bytes = await File.ReadAllBytesAsync(file);
@@ -30,17 +30,19 @@ public sealed class SnapshotChecksumScopeTests : IDisposable
     public async Task LoadBucketAsync_LegacyVersion1File_StillLoads()
     {
         var service = new SnapshotService(_dir, ".snapshot.bin");
-        await service.SaveBucketAsync(Bucket(), lastSequenceId: 7); // creates the file at the correct path
+        await service.SaveBucketAsync(Bucket(), 7); // creates the file at the correct path
 
         // Overwrite it with a legacy Version-1 envelope (payload-only checksum), as written before this change.
         var file = Directory.GetFiles(_dir, "*.snapshot.bin").Single();
-        var legacy = SnapshotEnvelopeCodec.Encode(new SnapshotFileEnvelope
-        {
-            Version = 1,
-            LastSequenceId = 7,
-            Checksum = ChecksumUtils.Compute(Bucket().Payload),
-            Bucket = Bucket()
-        });
+        var legacy = SnapshotEnvelopeCodec.Encode(
+            new()
+            {
+                Version = 1,
+                LastSequenceId = 7,
+                Checksum = ChecksumUtils.Compute(Bucket().Payload),
+                Bucket = Bucket()
+            }
+        );
         await File.WriteAllBytesAsync(file, legacy);
 
         var loaded = await service.LoadBucketAsync("Player", 1);

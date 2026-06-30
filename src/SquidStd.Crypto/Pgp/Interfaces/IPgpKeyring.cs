@@ -3,8 +3,8 @@ using SquidStd.Crypto.Pgp.Data;
 namespace SquidStd.Crypto.Pgp.Interfaces;
 
 /// <summary>
-///     In-memory collection of PGP keys, indexed by identity, key id, and fingerprint. Crypto operations look
-///     recipients and signers up here by identity.
+/// In-memory collection of PGP keys, indexed by identity, key id, and fingerprint. Crypto operations look
+/// recipients and signers up here by identity.
 /// </summary>
 public interface IPgpKeyring
 {

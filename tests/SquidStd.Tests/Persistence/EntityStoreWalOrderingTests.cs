@@ -18,7 +18,7 @@ public sealed class EntityStoreWalOrderingTests
         var stateStore = new PersistenceStateStore();
         var store = new EntityStore<Player, int>(stateStore, new ThrowingJournalService(), descriptor);
 
-        await Assert.ThrowsAsync<IOException>(async () => await store.UpsertAsync(new Player { Id = 1, Name = "Bob" }));
+        await Assert.ThrowsAsync<IOException>(async () => await store.UpsertAsync(new() { Id = 1, Name = "Bob" }));
 
         // The failed durable append must NOT have applied the mutation in memory.
         Assert.Null(await store.GetByIdAsync(1));
@@ -34,7 +34,7 @@ public sealed class EntityStoreWalOrderingTests
         var stateStore = new PersistenceStateStore();
         var ok = new CountingJournalService();
         var store = new EntityStore<Player, int>(stateStore, ok, descriptor);
-        await store.UpsertAsync(new Player { Id = 1, Name = "Bob" });
+        await store.UpsertAsync(new() { Id = 1, Name = "Bob" });
 
         ok.FailNextAppend = true;
         await Assert.ThrowsAsync<IOException>(async () => await store.RemoveAsync(1));
@@ -59,7 +59,8 @@ public sealed class EntityStoreWalOrderingTests
         public ValueTask<IReadOnlyCollection<JournalEntry>> ReadAllAsync(CancellationToken cancellationToken = default)
             => ValueTask.FromResult<IReadOnlyCollection<JournalEntry>>([]);
 
-        public ValueTask ResetAsync(CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
+        public ValueTask ResetAsync(CancellationToken cancellationToken = default)
+            => ValueTask.CompletedTask;
 
         public ValueTask TrimThroughSequenceAsync(long inclusiveSequenceId, CancellationToken cancellationToken = default)
             => ValueTask.CompletedTask;
@@ -85,7 +86,8 @@ public sealed class EntityStoreWalOrderingTests
         public ValueTask<IReadOnlyCollection<JournalEntry>> ReadAllAsync(CancellationToken cancellationToken = default)
             => ValueTask.FromResult<IReadOnlyCollection<JournalEntry>>([]);
 
-        public ValueTask ResetAsync(CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
+        public ValueTask ResetAsync(CancellationToken cancellationToken = default)
+            => ValueTask.CompletedTask;
 
         public ValueTask TrimThroughSequenceAsync(long inclusiveSequenceId, CancellationToken cancellationToken = default)
             => ValueTask.CompletedTask;

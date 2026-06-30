@@ -1,4 +1,3 @@
-using MoonSharp.Interpreter;
 using SquidStd.Scripting.Lua.Loaders;
 using SquidStd.Tests.Support;
 
@@ -21,9 +20,7 @@ public class LuaScriptLoaderTests
 
     [Fact]
     public void Constructor_EmptySearchDirectoriesThrows()
-    {
-        Assert.Throws<ArgumentException>(() => new LuaScriptLoader(Array.Empty<string>()));
-    }
+        => Assert.Throws<ArgumentException>(() => new LuaScriptLoader(Array.Empty<string>()));
 
     [Fact]
     public void LoadFile_LoadsContentFromFirstMatchingSearchDirectory()
@@ -33,7 +30,7 @@ public class LuaScriptLoaderTests
         File.WriteAllText(second.Combine("feature.lua"), "return 'loaded'");
         var loader = new LuaScriptLoader([first.Path, second.Path]);
 
-        var content = loader.LoadFile("feature.lua", new Table(new Script()));
+        var content = loader.LoadFile("feature.lua", new(new()));
 
         Assert.Equal("return 'loaded'", content);
     }

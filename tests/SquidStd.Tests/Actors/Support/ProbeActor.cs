@@ -12,9 +12,7 @@ public sealed class ProbeActor : Actor<IProbeMessage>
     public List<string> Errors { get; } = new();
 
     public ProbeActor(ActorOptions? options = null)
-        : base(options)
-    {
-    }
+        : base(options) { }
 
     protected override async ValueTask ReceiveAsync(IProbeMessage message, CancellationToken cancellationToken)
     {
@@ -22,17 +20,21 @@ public sealed class ProbeActor : Actor<IProbeMessage>
         {
             case Append append:
                 _log.Add(append.Value);
+
                 break;
             case Boom:
                 throw new InvalidOperationException("boom");
             case Hold hold:
                 await hold.Gate.Task;
+
                 break;
             case HoldUntilCancelled:
                 await Task.Delay(Timeout.Infinite, cancellationToken);
+
                 break;
             case GetLog getLog:
                 getLog.Reply(string.Join(",", _log));
+
                 break;
             case FailingRequest:
                 throw new InvalidOperationException("ask-boom");

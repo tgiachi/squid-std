@@ -8,8 +8,8 @@ using ILogger = Serilog.ILogger;
 namespace SquidStd.Services.Core.Services;
 
 /// <summary>
-///     In-process command dispatcher with parallel per-handler fan-out, fault isolation, and a dispatch
-///     result. Commands route by their CLR type within the ambient <typeparamref name="TContext" />.
+/// In-process command dispatcher with parallel per-handler fan-out, fault isolation, and a dispatch
+/// result. Commands route by their CLR type within the ambient <typeparamref name="TContext" />.
 /// </summary>
 /// <typeparam name="TContext">The ambient context type.</typeparam>
 public sealed class CommandDispatcher<TContext> : ICommandDispatcher<TContext>, IDisposable
@@ -38,7 +38,9 @@ public sealed class CommandDispatcher<TContext> : ICommandDispatcher<TContext>, 
 
     /// <inheritdoc />
     public async Task<CommandDispatchResult> DispatchAsync<TCommand>(
-        TCommand command, TContext context, CancellationToken cancellationToken = default
+        TCommand command,
+        TContext context,
+        CancellationToken cancellationToken = default
     )
         where TCommand : ICommand
     {
@@ -48,7 +50,7 @@ public sealed class CommandDispatcher<TContext> : ICommandDispatcher<TContext>, 
 
         if (handlers is null)
         {
-            return new CommandDispatchResult(false, 0, []);
+            return new(false, 0, []);
         }
 
         var tasks = new Task<CommandHandlerError?>[handlers.Length];
@@ -61,7 +63,7 @@ public sealed class CommandDispatcher<TContext> : ICommandDispatcher<TContext>, 
         var outcomes = await Task.WhenAll(tasks);
         var errors = outcomes.Where(static error => error is not null).Select(static error => error!).ToArray();
 
-        return new CommandDispatchResult(true, handlers.Length, errors);
+        return new(true, handlers.Length, errors);
     }
 
     private CommandSubscription Add(Type commandType, object handler)
@@ -75,7 +77,7 @@ public sealed class CommandDispatcher<TContext> : ICommandDispatcher<TContext>, 
             bucket.Add(handler);
         }
 
-        return new CommandSubscription(bucket, handler);
+        return new(bucket, handler);
     }
 
     private object[]? Snapshot(Type commandType)
@@ -92,7 +94,10 @@ public sealed class CommandDispatcher<TContext> : ICommandDispatcher<TContext>, 
     }
 
     private async Task<CommandHandlerError?> DispatchSafeAsync<TCommand>(
-        object handler, TCommand command, TContext context, CancellationToken cancellationToken
+        object handler,
+        TCommand command,
+        TContext context,
+        CancellationToken cancellationToken
     )
         where TCommand : ICommand
     {
@@ -118,7 +123,7 @@ public sealed class CommandDispatcher<TContext> : ICommandDispatcher<TContext>, 
                 typeof(TCommand).Name
             );
 
-            return new CommandHandlerError(handler.GetType(), ex);
+            return new(handler.GetType(), ex);
         }
     }
 

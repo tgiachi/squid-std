@@ -1,7 +1,7 @@
 namespace SquidStd.Messaging.Abstractions.Data.Config;
 
 /// <summary>
-///     Configuration for the messaging system.
+/// Configuration for the messaging system.
 /// </summary>
 public sealed class MessagingOptions
 {

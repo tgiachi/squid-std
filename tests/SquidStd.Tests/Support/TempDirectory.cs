@@ -3,12 +3,12 @@ using SysPath = System.IO.Path;
 namespace SquidStd.Tests.Support;
 
 /// <summary>
-///     Creates a unique temporary directory for a test and removes it on dispose.
+/// Creates a unique temporary directory for a test and removes it on dispose.
 /// </summary>
 public sealed class TempDirectory : IDisposable
 {
     /// <summary>
-    ///     Gets the absolute path of the temporary directory.
+    /// Gets the absolute path of the temporary directory.
     /// </summary>
     public string Path { get; }
 
@@ -19,14 +19,12 @@ public sealed class TempDirectory : IDisposable
     }
 
     /// <summary>
-    ///     Combines a relative path with the temporary directory root.
+    /// Combines a relative path with the temporary directory root.
     /// </summary>
     /// <param name="relative">The relative path.</param>
     /// <returns>The combined absolute path.</returns>
     public string Combine(string relative)
-    {
-        return SysPath.Combine(Path, relative);
-    }
+        => SysPath.Combine(Path, relative);
 
     public void Dispose()
     {

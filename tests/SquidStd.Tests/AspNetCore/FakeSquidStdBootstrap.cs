@@ -15,9 +15,7 @@ internal sealed class FakeSquidStdBootstrap : ISquidStdBootstrap
     public IContainer Container { get; } = new Container();
 
     public ISquidStdBootstrap ConfigureService(Func<IContainer, IContainer> configure)
-    {
-        return ConfigureServices(configure);
-    }
+        => ConfigureServices(configure);
 
     public ISquidStdBootstrap ConfigureServices(Func<IContainer, IContainer> configure)
     {
@@ -25,8 +23,8 @@ internal sealed class FakeSquidStdBootstrap : ISquidStdBootstrap
         var configuredContainer = configure(Container);
 
         return ReferenceEquals(configuredContainer, Container)
-            ? this
-            : throw new InvalidOperationException("ConfigureServices must return the bootstrap container instance.");
+                   ? this
+                   : throw new InvalidOperationException("ConfigureServices must return the bootstrap container instance.");
     }
 
     public ValueTask DisposeAsync()
@@ -37,14 +35,10 @@ internal sealed class FakeSquidStdBootstrap : ISquidStdBootstrap
     }
 
     public TService Resolve<TService>()
-    {
-        return Container.Resolve<TService>();
-    }
+        => Container.Resolve<TService>();
 
     public async Task RunAsync(CancellationToken cancellationToken = default)
-    {
-        await StartAsync(cancellationToken);
-    }
+        => await StartAsync(cancellationToken);
 
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
     {

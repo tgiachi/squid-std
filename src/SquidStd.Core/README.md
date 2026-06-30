@@ -49,18 +49,18 @@ pool.Return(builder);
 
 ## Key types
 
-| Type                    | Purpose                                       |
-|-------------------------|-----------------------------------------------|
-| `IConfigEntry`          | A registrable YAML configuration section.     |
-| `IConfigManagerService` | Loads YAML config and exposes typed sections. |
-| `IEventBus`             | Publish/subscribe in-process event bus.       |
-| `IJobSystem`            | Background job scheduling/execution.          |
-| `ITimerService`         | Timer-wheel based scheduling.                 |
-| `IMetricProvider`       | Source of metric samples for collection.      |
-| `IStorageService`       | File/object storage abstraction.              |
-| `IFileWatcherService`   | Recursive, debounced file watcher publishing to the event bus. |
-| `ObjectPool<T>`         | Thread-safe, non-blocking object pool.        |
-| `ICommandDispatcher<TContext>` | Typed protocol command dispatch with context. |
+| Type                           | Purpose                                                        |
+|--------------------------------|----------------------------------------------------------------|
+| `IConfigEntry`                 | A registrable YAML configuration section.                      |
+| `IConfigManagerService`        | Loads YAML config and exposes typed sections.                  |
+| `IEventBus`                    | Publish/subscribe in-process event bus.                        |
+| `IJobSystem`                   | Background job scheduling/execution.                           |
+| `ITimerService`                | Timer-wheel based scheduling.                                  |
+| `IMetricProvider`              | Source of metric samples for collection.                       |
+| `IStorageService`              | File/object storage abstraction.                               |
+| `IFileWatcherService`          | Recursive, debounced file watcher publishing to the event bus. |
+| `ObjectPool<T>`                | Thread-safe, non-blocking object pool.                         |
+| `ICommandDispatcher<TContext>` | Typed protocol command dispatch with context.                  |
 
 ## Related
 

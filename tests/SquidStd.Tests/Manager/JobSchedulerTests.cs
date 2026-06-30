@@ -5,7 +5,6 @@ using SquidStd.Messaging.Extensions;
 using SquidStd.Services.Core.Services;
 using SquidStd.Workers.Abstractions;
 using SquidStd.Workers.Abstractions.Data;
-using SquidStd.Workers.Manager.Data.Config;
 using SquidStd.Workers.Manager.Services;
 
 namespace SquidStd.Tests.Manager;
@@ -26,7 +25,7 @@ public class JobSchedulerTests
             new DelegateListener(job => received.TrySetResult(job))
         );
 
-        var scheduler = new JobScheduler(queue, new WorkerManagerConfig());
+        var scheduler = new JobScheduler(queue, new());
         await scheduler.EnqueueAsync("resize", new Dictionary<string, string> { ["w"] = "100" });
 
         var job = await received.Task.WaitAsync(TimeSpan.FromSeconds(5));

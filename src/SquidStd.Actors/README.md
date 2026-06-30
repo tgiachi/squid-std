@@ -55,23 +55,23 @@ using var sub = session.SubscribeToEventBus(eventBus, (UserJoinedEvent e) => new
 
 ## Key types
 
-| Type                      | Purpose                                            |
-|---------------------------|----------------------------------------------------|
-| `Actor<TMessage>`         | Mailbox base class (`TellAsync` / `AskAsync`).     |
-| `ActorRequest<TReply>`    | Base record for request/response messages.         |
-| `IActorRequest<TReply>`   | Request contract (implement directly if not using the base). |
-| `ActorOptions`            | Capacity / overflow / error configuration.         |
+| Type                    | Purpose                                                      |
+|-------------------------|--------------------------------------------------------------|
+| `Actor<TMessage>`       | Mailbox base class (`TellAsync` / `AskAsync`).               |
+| `ActorRequest<TReply>`  | Base record for request/response messages.                   |
+| `IActorRequest<TReply>` | Request contract (implement directly if not using the base). |
+| `ActorOptions`          | Capacity / overflow / error configuration.                   |
 
 ## Options
 
 `ActorOptions` controls the mailbox:
 
-| Property         | Values                              | Default  |
-|------------------|-------------------------------------|----------|
-| `Capacity`       | bounded mailbox size                | `1024`   |
-| `OverflowPolicy` | `Wait` / `DropNewest` / `Unbounded` | `Wait`   |
-| `ErrorPolicy`    | `Isolate` / `StopOnError`           | `Isolate`|
-| `ShutdownDrainTimeout` | any `TimeSpan`                | `5s`     |
+| Property               | Values                              | Default   |
+|------------------------|-------------------------------------|-----------|
+| `Capacity`             | bounded mailbox size                | `1024`    |
+| `OverflowPolicy`       | `Wait` / `DropNewest` / `Unbounded` | `Wait`    |
+| `ErrorPolicy`          | `Isolate` / `StopOnError`           | `Isolate` |
+| `ShutdownDrainTimeout` | any `TimeSpan`                      | `5s`      |
 
 - **Wait**: `TellAsync` awaits until capacity frees (back-pressure).
 - **DropNewest**: `TellAsync` returns `false` when full.

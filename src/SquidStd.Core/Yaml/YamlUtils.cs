@@ -3,21 +3,21 @@ using YamlDotNet.Serialization;
 namespace SquidStd.Core.Yaml;
 
 /// <summary>
-///     Provides YAML serialization helpers.
+/// Provides YAML serialization helpers.
 /// </summary>
 public static class YamlUtils
 {
     private static readonly ISerializer Serializer = new SerializerBuilder()
-        .DisableAliases()
-        .WithIndentedSequences()
-        .Build();
+                                                     .DisableAliases()
+                                                     .WithIndentedSequences()
+                                                     .Build();
 
     private static readonly IDeserializer Deserializer = new DeserializerBuilder()
-        .IgnoreUnmatchedProperties()
-        .Build();
+                                                         .IgnoreUnmatchedProperties()
+                                                         .Build();
 
     /// <summary>
-    ///     Deserializes YAML text using reflection-based metadata.
+    /// Deserializes YAML text using reflection-based metadata.
     /// </summary>
     /// <param name="yaml">The YAML text to deserialize.</param>
     /// <typeparam name="T">The target type.</typeparam>
@@ -31,7 +31,7 @@ public static class YamlUtils
     }
 
     /// <summary>
-    ///     Deserializes YAML text to the specified runtime type.
+    /// Deserializes YAML text to the specified runtime type.
     /// </summary>
     /// <param name="yaml">The YAML text to deserialize.</param>
     /// <param name="type">The target type.</param>
@@ -46,7 +46,7 @@ public static class YamlUtils
     }
 
     /// <summary>
-    ///     Deserializes YAML from a file using reflection-based metadata.
+    /// Deserializes YAML from a file using reflection-based metadata.
     /// </summary>
     /// <param name="filePath">The YAML file path.</param>
     /// <typeparam name="T">The target type.</typeparam>
@@ -61,7 +61,7 @@ public static class YamlUtils
     }
 
     /// <summary>
-    ///     Deserializes a top-level YAML section to the specified runtime type.
+    /// Deserializes a top-level YAML section to the specified runtime type.
     /// </summary>
     /// <param name="yaml">The YAML document.</param>
     /// <param name="sectionName">The top-level section name.</param>
@@ -84,7 +84,7 @@ public static class YamlUtils
     }
 
     /// <summary>
-    ///     Serializes an object to YAML using reflection-based metadata.
+    /// Serializes an object to YAML using reflection-based metadata.
     /// </summary>
     /// <param name="obj">The object to serialize.</param>
     /// <typeparam name="T">The source type.</typeparam>
@@ -97,7 +97,7 @@ public static class YamlUtils
     }
 
     /// <summary>
-    ///     Serializes top-level YAML sections.
+    /// Serializes top-level YAML sections.
     /// </summary>
     /// <param name="sections">The section map to serialize.</param>
     /// <returns>The serialized YAML document.</returns>
@@ -109,7 +109,7 @@ public static class YamlUtils
     }
 
     /// <summary>
-    ///     Serializes an object to a YAML file using reflection-based metadata.
+    /// Serializes an object to a YAML file using reflection-based metadata.
     /// </summary>
     /// <param name="obj">The object to serialize.</param>
     /// <param name="filePath">The output YAML file path.</param>

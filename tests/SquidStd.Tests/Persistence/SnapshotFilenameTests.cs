@@ -16,8 +16,8 @@ public sealed class SnapshotFilenameTests : IDisposable
     {
         var service = new SnapshotService(_dir, ".snapshot.bin");
 
-        await service.SaveBucketAsync(Bucket(1, 0xAA), lastSequenceId: 1);
-        await service.SaveBucketAsync(Bucket(2, 0xBB), lastSequenceId: 2);
+        await service.SaveBucketAsync(Bucket(1, 0xAA), 1);
+        await service.SaveBucketAsync(Bucket(2, 0xBB), 2);
 
         Assert.Equal(2, Directory.GetFiles(_dir, "*.snapshot.bin").Length);
 
@@ -34,7 +34,7 @@ public sealed class SnapshotFilenameTests : IDisposable
         var service = new SnapshotService(_dir, ".snapshot.bin");
 
         // Write a file at the OLD path (no TypeId) by saving then renaming to the legacy name.
-        await service.SaveBucketAsync(Bucket(1, 0x7), lastSequenceId: 9);
+        await service.SaveBucketAsync(Bucket(1, 0x7), 9);
         var newPath = Directory.GetFiles(_dir, "*.snapshot.bin").Single();
         var legacyPath = Path.Combine(_dir, StringUtils.ToSnakeCase("Player") + ".snapshot.bin");
         File.Move(newPath, legacyPath);
@@ -43,7 +43,7 @@ public sealed class SnapshotFilenameTests : IDisposable
 
         Assert.NotNull(loaded);
         Assert.Equal(9, loaded.LastSequenceId);
-        Assert.False(File.Exists(legacyPath));                 // legacy file was migrated away
+        Assert.False(File.Exists(legacyPath));                                 // legacy file was migrated away
         Assert.True(File.Exists(Path.Combine(_dir, "player_1.snapshot.bin"))); // to the new TypeId path
     }
 

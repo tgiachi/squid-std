@@ -1,7 +1,6 @@
 using DryIoc;
 using SquidStd.Search.Abstractions.Attributes;
 using SquidStd.Search.Abstractions.Interfaces;
-using SquidStd.Search.Elasticsearch.Data.Config;
 using SquidStd.Search.Elasticsearch.Extensions;
 using SquidStd.Search.Elasticsearch.Linq;
 
@@ -86,16 +85,16 @@ public class ElasticSearchServiceTests
     {
         var search = NewService();
         await search.IndexManyAsync(
-                [new Order("a", "open", 50, "A"), new Order("b", "open", 200, "B"), new Order("c", "open", 300, "C")],
-                true
-            )
-            .WaitAsync(Timeout);
+                        [new("a", "open", 50, "A"), new("b", "open", 200, "B"), new Order("c", "open", 300, "C")],
+                        true
+                    )
+                    .WaitAsync(Timeout);
 
         var results = await search.Query<Order>()
-            .Where(o => o.Total > 100)
-            .OrderByDescending(o => o.Total)
-            .Take(1)
-            .ToListAsync();
+                                  .Where(o => o.Total > 100)
+                                  .OrderByDescending(o => o.Total)
+                                  .Take(1)
+                                  .ToListAsync();
 
         Assert.Single(results);
         Assert.Equal("c", results[0].Id);
@@ -104,7 +103,7 @@ public class ElasticSearchServiceTests
     private ISearchService NewService()
     {
         var container = new Container();
-        container.AddElasticsearch(new ElasticsearchOptions { Uri = new Uri(_fixture.ConnectionString) });
+        container.AddElasticsearch(new() { Uri = new(_fixture.ConnectionString) });
 
         return container.Resolve<ISearchService>();
     }

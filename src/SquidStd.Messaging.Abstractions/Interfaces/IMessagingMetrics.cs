@@ -1,7 +1,7 @@
 namespace SquidStd.Messaging.Abstractions.Interfaces;
 
 /// <summary>
-///     Sink for messaging metric events. Implementations must be thread-safe.
+/// Sink for messaging metric events. Implementations must be thread-safe.
 /// </summary>
 public interface IMessagingMetrics
 {

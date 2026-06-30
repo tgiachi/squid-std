@@ -10,15 +10,15 @@ public class TableExtensionsTests
     {
         var script = new Script();
         var table = script.DoString(
-                """
-                return {
-                    Sum = function(left, right)
-                        return left + right
-                    end
-                }
-                """
-            )
-            .Table;
+                              """
+                              return {
+                                  Sum = function(left, right)
+                                      return left + right
+                                  end
+                              }
+                              """
+                          )
+                          .Table;
 
         var proxy = table.ToProxy<ICalculator>();
 
@@ -28,7 +28,7 @@ public class TableExtensionsTests
     [Fact]
     public void ToProxy_MissingFunctionThrowsMissingMethodException()
     {
-        var proxy = new Table(new Script()).ToProxy<ICalculator>();
+        var proxy = new Table(new()).ToProxy<ICalculator>();
 
         Assert.Throws<MissingMethodException>(() => proxy.Sum(1, 2));
     }

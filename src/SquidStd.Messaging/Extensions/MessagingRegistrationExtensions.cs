@@ -10,7 +10,7 @@ using SquidStd.Messaging.Services;
 namespace SquidStd.Messaging.Extensions;
 
 /// <summary>
-///     DryIoc registration helpers for the in-memory messaging system.
+/// DryIoc registration helpers for the in-memory messaging system.
 /// </summary>
 public static class MessagingRegistrationExtensions
 {
@@ -18,7 +18,7 @@ public static class MessagingRegistrationExtensions
     extension(IContainer container)
     {
         /// <summary>
-        ///     Registers the in-memory messaging services (facade, provider, serializer, metrics).
+        /// Registers the in-memory messaging services (facade, provider, serializer, metrics).
         /// </summary>
         /// <param name="options">Optional messaging options; defaults are used when null.</param>
         /// <returns>The container for chaining.</returns>
@@ -47,7 +47,7 @@ public static class MessagingRegistrationExtensions
         }
 
         /// <summary>
-        ///     Registers the in-memory messaging services from a connection string (scheme must be "memory").
+        /// Registers the in-memory messaging services from a connection string (scheme must be "memory").
         /// </summary>
         public IContainer AddInMemoryMessaging(string connectionString)
         {

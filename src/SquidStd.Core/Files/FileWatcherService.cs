@@ -9,11 +9,11 @@ using ILogger = Serilog.ILogger;
 namespace SquidStd.Core.Files;
 
 /// <summary>
-///     Recursive directory watcher that coalesces rapid file-system notifications with a debounce window and
-///     publishes a single <see cref="FileChangedEvent" /> per path on the event bus. Each <see cref="Watch(string,string)" />
-///     call adds one recursive watcher with its own glob filter, so several directories (each with a different
-///     pattern, e.g. <c>*.lua</c> and <c>*.json</c>) can be watched at once. The watcher stays decoupled from
-///     any reload logic.
+/// Recursive directory watcher that coalesces rapid file-system notifications with a debounce window and
+/// publishes a single <see cref="FileChangedEvent" /> per path on the event bus. Each <see cref="Watch(string,string)" />
+/// call adds one recursive watcher with its own glob filter, so several directories (each with a different
+/// pattern, e.g. <c>*.lua</c> and <c>*.json</c>) can be watched at once. The watcher stays decoupled from
+/// any reload logic.
 /// </summary>
 public sealed class FileWatcherService : IFileWatcherService
 {
@@ -28,16 +28,14 @@ public sealed class FileWatcherService : IFileWatcherService
     private bool _disposed;
 
     /// <summary>
-    ///     Initializes the watcher with the default 300ms debounce window.
+    /// Initializes the watcher with the default 300ms debounce window.
     /// </summary>
     /// <param name="eventBus">The bus that receives <see cref="FileChangedEvent" /> notifications.</param>
     public FileWatcherService(IEventBus eventBus)
-        : this(eventBus, TimeSpan.FromMilliseconds(300))
-    {
-    }
+        : this(eventBus, TimeSpan.FromMilliseconds(300)) { }
 
     /// <summary>
-    ///     Initializes the watcher with an explicit debounce window.
+    /// Initializes the watcher with an explicit debounce window.
     /// </summary>
     /// <param name="eventBus">The bus that receives <see cref="FileChangedEvent" /> notifications.</param>
     /// <param name="debounceDelay">How long a path must be quiet before its change is published.</param>
@@ -54,9 +52,7 @@ public sealed class FileWatcherService : IFileWatcherService
 
     /// <inheritdoc />
     public void Watch(string path)
-    {
-        Watch(path, "*");
-    }
+        => Watch(path, "*");
 
     /// <inheritdoc />
     public void Watch(string path, string filter)
@@ -81,7 +77,7 @@ public sealed class FileWatcherService : IFileWatcherService
                 return;
             }
 
-            watcher = new FileSystemWatcher(fullPath, filter)
+            watcher = new(fullPath, filter)
             {
                 NotifyFilter = NotifyFilters.LastWrite |
                                NotifyFilters.FileName |
@@ -173,7 +169,7 @@ public sealed class FileWatcherService : IFileWatcherService
             _                          => FileChangeKind.Changed
         };
 
-        Schedule(new FileChangedEvent(kind, Path.GetFullPath(e.FullPath)));
+        Schedule(new(kind, Path.GetFullPath(e.FullPath)));
     }
 
     private void OnFileRenamed(object sender, RenamedEventArgs e)
@@ -183,9 +179,7 @@ public sealed class FileWatcherService : IFileWatcherService
             return;
         }
 
-        Schedule(
-            new FileChangedEvent(FileChangeKind.Renamed, Path.GetFullPath(e.FullPath), Path.GetFullPath(e.OldFullPath))
-        );
+        Schedule(new(FileChangeKind.Renamed, Path.GetFullPath(e.FullPath), Path.GetFullPath(e.OldFullPath)));
     }
 
     private void Schedule(FileChangedEvent change)
@@ -200,7 +194,7 @@ public sealed class FileWatcherService : IFileWatcherService
 
         var timer = _debounceTimers.AddOrUpdate(
             key,
-            k => new Timer(OnDebounceElapsed, k, _debounce, Timeout.InfiniteTimeSpan),
+            k => new(OnDebounceElapsed, k, _debounce, Timeout.InfiniteTimeSpan),
             (_, existing) =>
             {
                 existing.Change(_debounce, Timeout.InfiniteTimeSpan);
@@ -245,9 +239,7 @@ public sealed class FileWatcherService : IFileWatcherService
     }
 
     private static string KeyFor(string path, string filter)
-    {
-        return path + "|" + filter;
-    }
+        => path + "|" + filter;
 
     private static void DisposeWatcher(FileSystemWatcher watcher)
     {

@@ -1,6 +1,5 @@
 using Serilog;
 using Serilog.Events;
-using SquidStd.Core.Data.Events;
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Services.Core.Services;
 using SquidStd.Tests.Support;
@@ -112,8 +111,7 @@ public class EventBusServiceTests
         using var cts = new CancellationTokenSource();
         await cts.CancelAsync();
 
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => bus.PublishAsync(new TestEvent("payload"), cts.Token)
-        );
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => bus.PublishAsync(new TestEvent("payload"), cts.Token));
     }
 
     [Fact]
@@ -124,8 +122,7 @@ public class EventBusServiceTests
         using var cts = new CancellationTokenSource();
         bus.RegisterListener(new SelfCancellingListener(cts));
 
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => bus.PublishAsync(new TestEvent("payload"), cts.Token)
-        );
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => bus.PublishAsync(new TestEvent("payload"), cts.Token));
     }
 
     [Fact]
@@ -149,7 +146,8 @@ public class EventBusServiceTests
         using var eventBus = new EventBusService();
         IEventBus bus = eventBus;
         var received = new List<string>();
-        var token = bus.Subscribe<TestEvent>((e, _) =>
+        var token = bus.Subscribe<TestEvent>(
+            (e, _) =>
             {
                 received.Add(e.Payload);
 
@@ -228,9 +226,7 @@ public class EventBusServiceTests
     private sealed class ThrowingListener : IEventListener<TestEvent>
     {
         public Task HandleAsync(TestEvent eventData, CancellationToken cancellationToken = default)
-        {
-            throw new InvalidOperationException("listener failure");
-        }
+            => throw new InvalidOperationException("listener failure");
     }
 
     private sealed class SelfCancellingListener : IEventListener<TestEvent>
@@ -254,9 +250,7 @@ public class EventBusServiceTests
     private sealed class SlowListener : IEventListener<TestEvent>
     {
         public async Task HandleAsync(TestEvent eventData, CancellationToken cancellationToken = default)
-        {
-            await Task.Delay(TimeSpan.FromMilliseconds(40), cancellationToken);
-        }
+            => await Task.Delay(TimeSpan.FromMilliseconds(40), cancellationToken);
     }
 
     [Collection(SerilogEventSinkCollection.Name)]
@@ -268,15 +262,15 @@ public class EventBusServiceTests
             var sink = new CapturingLogSink();
             var original = Log.Logger;
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Verbose()
-                .WriteTo.Sink(sink)
-                .CreateLogger();
+                         .MinimumLevel
+                         .Verbose()
+                         .WriteTo
+                         .Sink(sink)
+                         .CreateLogger();
 
             try
             {
-                using var eventBus = new EventBusService(
-                    new EventBusOptions { SlowListenerThreshold = TimeSpan.FromMilliseconds(5) }
-                );
+                using var eventBus = new EventBusService(new() { SlowListenerThreshold = TimeSpan.FromMilliseconds(5) });
                 IEventBus bus = eventBus;
                 bus.RegisterListener(new SlowListener());
 

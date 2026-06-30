@@ -16,7 +16,7 @@ public class ActorEventBusTests
         await bus.PublishAsync(new PingEvent("x"));
         await bus.PublishAsync(new PingEvent("y"));
 
-        var log = await actor.AskAsync<GetLog, string>(new GetLog());
+        var log = await actor.AskAsync<GetLog, string>(new());
         Assert.Equal("x,y", log);
     }
 
@@ -31,7 +31,7 @@ public class ActorEventBusTests
         subscription.Dispose();
         await bus.PublishAsync(new PingEvent("second"));
 
-        var log = await actor.AskAsync<GetLog, string>(new GetLog());
+        var log = await actor.AskAsync<GetLog, string>(new());
         Assert.Equal("first", log);
     }
 }

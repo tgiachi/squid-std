@@ -3,7 +3,7 @@ using SquidStd.Crypto.Pgp.Data;
 namespace SquidStd.Crypto.Pgp.Interfaces;
 
 /// <summary>
-///     Persistence backend for a set of PGP keys. Implementations decide the on-disk representation.
+/// Persistence backend for a set of PGP keys. Implementations decide the on-disk representation.
 /// </summary>
 public interface IPgpKeyStore
 {

@@ -8,8 +8,8 @@ using SquidStd.Crypto.Pgp.Types;
 namespace SquidStd.Crypto.Pgp.Internal;
 
 /// <summary>
-///     Builds a <see cref="PgpKey" /> from armored key material by reading metadata off the public master key.
-///     Shared by key generation, keyring import, and key-store loading.
+/// Builds a <see cref="PgpKey" /> from armored key material by reading metadata off the public master key.
+/// Shared by key generation, keyring import, and key-store loading.
 /// </summary>
 internal static class PgpKeyFactory
 {
@@ -25,7 +25,7 @@ internal static class PgpKeyFactory
         var validSeconds = master.GetValidSeconds();
         DateTimeOffset? expiresUtc = validSeconds > 0 ? createdUtc.AddSeconds(validSeconds) : null;
 
-        return new PgpKey(
+        return new(
             identity,
             keyId,
             fingerprint,
@@ -51,12 +51,10 @@ internal static class PgpKeyFactory
     }
 
     private static PgpKeyAlgorithm MapAlgorithm(PublicKeyAlgorithmTag tag)
-    {
-        return tag switch
+        => tag switch
         {
             PublicKeyAlgorithmTag.RsaGeneral or PublicKeyAlgorithmTag.RsaEncrypt or PublicKeyAlgorithmTag.RsaSign =>
                 PgpKeyAlgorithm.Rsa,
             _ => PgpKeyAlgorithm.Rsa
         };
-    }
 }

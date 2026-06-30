@@ -1,8 +1,8 @@
 namespace SquidStd.Workers.Abstractions;
 
 /// <summary>
-///     Default names of the messaging channels the workers system uses. Shared so the manager
-///     and workers agree out of the box; either side may override them via its own configuration.
+/// Default names of the messaging channels the workers system uses. Shared so the manager
+/// and workers agree out of the box; either side may override them via its own configuration.
 /// </summary>
 public static class WorkerChannels
 {

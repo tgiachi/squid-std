@@ -3,7 +3,7 @@ using SquidStd.Network.Sessions;
 namespace SquidStd.Network.Data.Events;
 
 /// <summary>
-///     Event payload carrying a session and the data it received.
+/// Event payload carrying a session and the data it received.
 /// </summary>
 public sealed class SquidStdSessionDataEventArgs<TState> : EventArgs
 {

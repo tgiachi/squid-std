@@ -16,7 +16,7 @@ public class SeededCommandDispatcherTests
         inner.RegisterHandler(handler);
         var seeded = new SeededCommandDispatcher<Session, Connection>(inner, new ConnectionSessionFactory());
 
-        var result = await seeded.DispatchAsync(new PingCommand("hi"), new Connection("conn-1"));
+        var result = await seeded.DispatchAsync(new PingCommand("hi"), new("conn-1"));
 
         Assert.True(result.Matched);
         Assert.Equal(1, result.HandlerCount);
@@ -35,7 +35,7 @@ public class SeededCommandDispatcherTests
         await container.Resolve<CommandDispatcherActivator<Session>>().StartAsync(CancellationToken.None);
 
         var seeded = container.Resolve<ISeededCommandDispatcher<Session, Connection>>();
-        var result = await seeded.DispatchAsync(new PingCommand("yo"), new Connection("conn-2"));
+        var result = await seeded.DispatchAsync(new PingCommand("yo"), new("conn-2"));
 
         Assert.True(result.Matched);
         var handler = container.Resolve<PingHandler>();
@@ -66,9 +66,7 @@ public class SeededCommandDispatcherTests
     private sealed class ConnectionSessionFactory : ICommandContextFactory<Session, Connection>
     {
         public Session Create(Connection seed)
-        {
-            return new Session(seed.Id);
-        }
+            => new(seed.Id);
     }
 
     private sealed class RecordingHandler : ICommandHandler<PingCommand, Session>

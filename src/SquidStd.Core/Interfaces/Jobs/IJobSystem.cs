@@ -1,32 +1,32 @@
 namespace SquidStd.Core.Interfaces.Jobs;
 
 /// <summary>
-///     Schedules work on a fixed-size pool of worker threads.
+/// Schedules work on a fixed-size pool of worker threads.
 /// </summary>
 public interface IJobSystem : IDisposable
 {
     /// <summary>
-    ///     Gets the number of worker threads.
+    /// Gets the number of worker threads.
     /// </summary>
     int WorkerCount { get; }
 
     /// <summary>
-    ///     Gets the number of jobs waiting in the queue.
+    /// Gets the number of jobs waiting in the queue.
     /// </summary>
     int PendingCount { get; }
 
     /// <summary>
-    ///     Gets the number of jobs currently executing.
+    /// Gets the number of jobs currently executing.
     /// </summary>
     int ActiveCount { get; }
 
     /// <summary>
-    ///     Gets the number of jobs that completed since startup.
+    /// Gets the number of jobs that completed since startup.
     /// </summary>
     long CompletedCount { get; }
 
     /// <summary>
-    ///     Schedules work on a worker thread.
+    /// Schedules work on a worker thread.
     /// </summary>
     /// <param name="work">Work invoked on a worker thread.</param>
     /// <param name="cancellationToken">Token used to cancel the job before it starts.</param>
@@ -34,7 +34,7 @@ public interface IJobSystem : IDisposable
     Task ScheduleAsync(Action work, CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Schedules work on a worker thread and returns the result.
+    /// Schedules work on a worker thread and returns the result.
     /// </summary>
     /// <param name="work">Work invoked on a worker thread.</param>
     /// <param name="cancellationToken">Token used to cancel the job before it starts.</param>

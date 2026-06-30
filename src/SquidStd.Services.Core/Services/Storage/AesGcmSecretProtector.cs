@@ -7,7 +7,7 @@ using SquidStd.Core.Interfaces.Secrets;
 namespace SquidStd.Services.Core.Services.Storage;
 
 /// <summary>
-///     Protects secrets using AES-GCM and a key supplied by environment variable.
+/// Protects secrets using AES-GCM and a key supplied by environment variable.
 /// </summary>
 public sealed class AesGcmSecretProtector : ISecretProtector
 {
@@ -18,7 +18,7 @@ public sealed class AesGcmSecretProtector : ISecretProtector
     private readonly byte[] _key;
 
     /// <summary>
-    ///     Initializes the AES-GCM secret protector.
+    /// Initializes the AES-GCM secret protector.
     /// </summary>
     /// <param name="config">Secret storage configuration.</param>
     public AesGcmSecretProtector(SecretsConfig config)
@@ -75,9 +75,7 @@ public sealed class AesGcmSecretProtector : ISecretProtector
     }
 
     private static byte[] CreateDefaultKey()
-    {
-        return SHA256.HashData(Encoding.UTF8.GetBytes(DefaultKeyMaterial));
-    }
+        => SHA256.HashData(Encoding.UTF8.GetBytes(DefaultKeyMaterial));
 
     private static byte[] ResolveKey(string environmentVariable)
     {
@@ -107,7 +105,7 @@ public sealed class AesGcmSecretProtector : ISecretProtector
         }
 
         return key.Length is 16 or 24 or 32
-            ? key
-            : throw new InvalidOperationException("Secret key must be 16, 24, or 32 bytes after base64 decoding.");
+                   ? key
+                   : throw new InvalidOperationException("Secret key must be 16, 24, or 32 bytes after base64 decoding.");
     }
 }

@@ -10,7 +10,7 @@ public class PersistenceEntityRegistryTests
     {
         var serializer = new JsonDataSerializer();
 
-        return new PersistenceEntityDescriptor<Player, int>(serializer, serializer, typeId, "Player", 1, p => p.Id);
+        return new(serializer, serializer, typeId, "Player", 1, p => p.Id);
     }
 
     [Fact]

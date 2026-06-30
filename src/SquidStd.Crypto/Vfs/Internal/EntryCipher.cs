@@ -13,7 +13,7 @@ internal sealed class EntryCipher : IDisposable
 
     public EntryCipher(byte[] key, int chunkSize)
     {
-        _aes = new AesGcm(key, TagSize);
+        _aes = new(key, TagSize);
         _chunkSize = chunkSize;
     }
 
@@ -58,6 +58,7 @@ internal sealed class EntryCipher : IDisposable
             if (length == 0)
             {
                 _aes.Decrypt(nonce.Span, ReadOnlySpan<byte>.Empty, tag, Span<byte>.Empty);
+
                 break;
             }
 
@@ -120,7 +121,5 @@ internal sealed class EntryCipher : IDisposable
     }
 
     public void Dispose()
-    {
-        _aes.Dispose();
-    }
+        => _aes.Dispose();
 }

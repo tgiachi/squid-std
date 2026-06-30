@@ -8,11 +8,12 @@ public class ObjectPoolTests
     public void Get_WhenEmpty_CreatesThroughFactory()
     {
         var created = 0;
-        using var pool = new ObjectPool<Boxed>(() =>
+        using var pool = new ObjectPool<Boxed>(
+            () =>
             {
                 created++;
 
-                return new Boxed();
+                return new();
             }
         );
 
@@ -25,7 +26,7 @@ public class ObjectPoolTests
     [Fact]
     public void Return_ThenGet_ReusesSameInstance()
     {
-        using var pool = new ObjectPool<Boxed>(() => new Boxed());
+        using var pool = new ObjectPool<Boxed>(() => new());
         var first = pool.Get();
 
         pool.Return(first);
@@ -38,7 +39,7 @@ public class ObjectPoolTests
     [Fact]
     public void Return_InvokesResetCallback()
     {
-        using var pool = new ObjectPool<Boxed>(() => new Boxed(), onReturn: boxed => boxed.Value = 0);
+        using var pool = new ObjectPool<Boxed>(() => new(), onReturn: boxed => boxed.Value = 0);
         var item = pool.Get();
         item.Value = 42;
 
@@ -50,7 +51,7 @@ public class ObjectPoolTests
     [Fact]
     public void Return_BeyondMaxRetained_DisposesInsteadOfPooling()
     {
-        using var pool = new ObjectPool<Boxed>(() => new Boxed(), 1);
+        using var pool = new ObjectPool<Boxed>(() => new(), 1);
         var kept = new Boxed();
         var overflow = new Boxed();
 
@@ -65,7 +66,7 @@ public class ObjectPoolTests
     [Fact]
     public void Dispose_DisposesRetainedInstances()
     {
-        var pool = new ObjectPool<Boxed>(() => new Boxed());
+        var pool = new ObjectPool<Boxed>(() => new());
         var item = pool.Get();
         pool.Return(item);
 
@@ -81,8 +82,6 @@ public class ObjectPoolTests
         public bool Disposed { get; private set; }
 
         public void Dispose()
-        {
-            Disposed = true;
-        }
+            => Disposed = true;
     }
 }

@@ -3,7 +3,7 @@ using SquidStd.Core.Utils;
 namespace SquidStd.Core.Extensions.Crypto;
 
 /// <summary>
-///     String convenience helpers for AES-GCM encryption using a base64-encoded key.
+/// String convenience helpers for AES-GCM encryption using a base64-encoded key.
 /// </summary>
 public static class EncryptExtensions
 {
@@ -11,7 +11,7 @@ public static class EncryptExtensions
     extension(string text)
     {
         /// <summary>
-        ///     Encrypts the string with AES-GCM and returns a base64 payload.
+        /// Encrypts the string with AES-GCM and returns a base64 payload.
         /// </summary>
         /// <param name="base64Key">The base64-encoded key.</param>
         /// <returns>The base64-encoded encrypted payload.</returns>
@@ -23,7 +23,7 @@ public static class EncryptExtensions
         }
 
         /// <summary>
-        ///     Decrypts a base64 payload produced by <see cref="EncryptString" />.
+        /// Decrypts a base64 payload produced by <see cref="EncryptString" />.
         /// </summary>
         /// <param name="base64Key">The base64-encoded key.</param>
         /// <returns>The decrypted text.</returns>
