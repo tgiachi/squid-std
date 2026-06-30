@@ -11,7 +11,7 @@ using SquidStd.Messaging.RabbitMq.Services;
 namespace SquidStd.Messaging.RabbitMq.Extensions;
 
 /// <summary>
-///     DryIoc registration helpers for the RabbitMQ messaging provider.
+/// DryIoc registration helpers for the RabbitMQ messaging provider.
 /// </summary>
 public static class RabbitMqMessagingRegistrationExtensions
 {
@@ -80,8 +80,8 @@ public static class RabbitMqMessagingRegistrationExtensions
                 Password = cs.Password ?? "guest",
                 PrefetchCount = cs.Parameters.TryGetValue("prefetch", out var prefetch) &&
                                 ushort.TryParse(prefetch, out var parsed)
-                    ? parsed
-                    : (ushort)10
+                                    ? parsed
+                                    : (ushort)10
             };
 
             return container.AddRabbitMqMessaging(options, cs.ToMessagingOptions());

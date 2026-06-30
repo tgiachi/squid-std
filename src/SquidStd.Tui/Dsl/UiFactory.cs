@@ -13,31 +13,21 @@ public sealed class UiFactory<TViewModel>
 {
     /// <summary>A label one-way bound to a string property.</summary>
     public LabelNode<TViewModel> Label(Expression<Func<TViewModel, string>> text)
-    {
-        return new LabelNode<TViewModel>(text);
-    }
+        => new(text);
 
     /// <summary>A text field bound to a string property (two-way by default).</summary>
     public TextFieldNode<TViewModel> TextField(Expression<Func<TViewModel, string>> text, BindMode mode = BindMode.TwoWay)
-    {
-        return new TextFieldNode<TViewModel>(text, mode);
-    }
+        => new(text, mode);
 
     /// <summary>A button that runs the command resolved from the ViewModel.</summary>
     public ButtonNode<TViewModel> Button(string caption, Expression<Func<TViewModel, ICommand>> command)
-    {
-        return new ButtonNode<TViewModel>(caption, command);
-    }
+        => new(caption, command);
 
     /// <summary>A vertical stack of child nodes.</summary>
     public StackNode<TViewModel> VStack(params TuiNode<TViewModel>[] children)
-    {
-        return new StackNode<TViewModel>(StackOrientation.Vertical, children);
-    }
+        => new(StackOrientation.Vertical, children);
 
     /// <summary>A horizontal stack of child nodes.</summary>
     public StackNode<TViewModel> HStack(params TuiNode<TViewModel>[] children)
-    {
-        return new StackNode<TViewModel>(StackOrientation.Horizontal, children);
-    }
+        => new(StackOrientation.Horizontal, children);
 }

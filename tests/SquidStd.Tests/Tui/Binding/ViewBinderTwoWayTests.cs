@@ -5,47 +5,6 @@ namespace SquidStd.Tests.Tui.Binding;
 
 public class ViewBinderTwoWayTests
 {
-    private sealed class FakeViewModel : INotifyPropertyChanged
-    {
-        private string _name = string.Empty;
-
-        public string Name
-        {
-            get { return _name; }
-            set
-            {
-                if (string.Equals(_name, value, StringComparison.Ordinal))
-                {
-                    return;
-                }
-
-                _name = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
-            }
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-    }
-
-    private sealed class FakeField
-    {
-        private string _text = string.Empty;
-
-        public string Text
-        {
-            get { return _text; }
-            set { _text = value; }
-        }
-
-        public event Action? Changed;
-
-        public void UserTypes(string value)
-        {
-            _text = value;
-            Changed?.Invoke();
-        }
-    }
-
     [Fact]
     public void TwoWay_PropagatesBothDirections_WithoutLooping()
     {
@@ -54,10 +13,11 @@ public class ViewBinderTwoWayTests
         var binder = new ViewBinder();
 
         binder.TwoWay(
-            vm, nameof(FakeViewModel.Name),
-            applyToTarget: () => field.Text = vm.Name,
-            subscribeTargetChanged: cb => field.Changed += () => cb(),
-            writeToSource: () => vm.Name = field.Text
+            vm,
+            nameof(FakeViewModel.Name),
+            () => field.Text = vm.Name,
+            cb => field.Changed += () => cb(),
+            () => vm.Name = field.Text
         );
 
         Assert.Equal("init", field.Text);
@@ -83,5 +43,40 @@ public class ViewBinderTwoWayTests
 
         field.UserTypes("c");
         Assert.Equal("c", vm.Name);
+    }
+
+    private sealed class FakeViewModel : INotifyPropertyChanged
+    {
+        private string _name = string.Empty;
+
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                if (string.Equals(_name, value, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _name = value;
+                PropertyChanged?.Invoke(this, new(nameof(Name)));
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+    }
+
+    private sealed class FakeField
+    {
+        public string Text { get; set; } = string.Empty;
+
+        public void UserTypes(string value)
+        {
+            Text = value;
+            Changed?.Invoke();
+        }
+
+        public event Action? Changed;
     }
 }

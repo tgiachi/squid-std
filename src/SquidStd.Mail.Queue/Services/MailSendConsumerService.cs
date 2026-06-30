@@ -8,8 +8,8 @@ using SquidStd.Messaging.Abstractions.Interfaces;
 namespace SquidStd.Mail.Queue.Services;
 
 /// <summary>
-///     Consumes queued outbound messages and sends them via <see cref="IMailSender" />. Exceptions propagate so the
-///     messaging layer retries / dead-letters.
+/// Consumes queued outbound messages and sends them via <see cref="IMailSender" />. Exceptions propagate so the
+/// messaging layer retries / dead-letters.
 /// </summary>
 public sealed class MailSendConsumerService : ISquidStdService, IQueueMessageListenerAsync<OutgoingMailMessage>
 {
@@ -28,9 +28,7 @@ public sealed class MailSendConsumerService : ISquidStdService, IQueueMessageLis
 
     /// <inheritdoc />
     public Task HandleAsync(OutgoingMailMessage message, CancellationToken cancellationToken)
-    {
-        return _sender.SendAsync(message, cancellationToken);
-    }
+        => _sender.SendAsync(message, cancellationToken);
 
     /// <inheritdoc />
     public ValueTask StartAsync(CancellationToken cancellationToken = default)

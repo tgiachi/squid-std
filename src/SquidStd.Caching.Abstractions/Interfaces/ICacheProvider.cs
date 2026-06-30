@@ -3,7 +3,7 @@ using SquidStd.Abstractions.Interfaces.Services;
 namespace SquidStd.Caching.Abstractions.Interfaces;
 
 /// <summary>
-///     Byte-level cache backend. Implemented by each provider (in-memory, Redis, ...).
+/// Byte-level cache backend. Implemented by each provider (in-memory, Redis, ...).
 /// </summary>
 public interface ICacheProvider : ISquidStdService
 {

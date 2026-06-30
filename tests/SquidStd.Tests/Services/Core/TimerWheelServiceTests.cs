@@ -1,4 +1,3 @@
-using SquidStd.Core.Data.Timing;
 using SquidStd.Core.Interfaces.Timing;
 using SquidStd.Services.Core.Services;
 
@@ -23,11 +22,13 @@ public class TimerWheelServiceTests
     [Fact]
     public void Ctor_InvalidConfig_Throws()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() =>
-            new TimerWheelService(new TimerWheelConfig { TickDuration = TimeSpan.Zero })
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () =>
+                new TimerWheelService(new() { TickDuration = TimeSpan.Zero })
         );
-        Assert.Throws<ArgumentOutOfRangeException>(() =>
-            new TimerWheelService(new TimerWheelConfig { TickDuration = TimeSpan.FromMilliseconds(8), WheelSize = 0 })
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () =>
+                new TimerWheelService(new() { TickDuration = TimeSpan.FromMilliseconds(8), WheelSize = 0 })
         );
     }
 
@@ -152,13 +153,11 @@ public class TimerWheelServiceTests
     }
 
     private static TimerWheelService NewService(int tickDurationMs = 8, int wheelSize = 16)
-    {
-        return new TimerWheelService(
-            new TimerWheelConfig
+        => new(
+            new()
             {
                 TickDuration = TimeSpan.FromMilliseconds(tickDurationMs),
                 WheelSize = wheelSize
             }
         );
-    }
 }

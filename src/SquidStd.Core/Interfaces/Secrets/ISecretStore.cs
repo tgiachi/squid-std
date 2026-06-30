@@ -1,12 +1,12 @@
 namespace SquidStd.Core.Interfaces.Secrets;
 
 /// <summary>
-///     Stores encrypted secret values by logical name.
+/// Stores encrypted secret values by logical name.
 /// </summary>
 public interface ISecretStore
 {
     /// <summary>
-    ///     Deletes a secret.
+    /// Deletes a secret.
     /// </summary>
     /// <param name="name">The secret name.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
@@ -14,7 +14,7 @@ public interface ISecretStore
     ValueTask<bool> DeleteAsync(string name, CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Checks whether a secret exists.
+    /// Checks whether a secret exists.
     /// </summary>
     /// <param name="name">The secret name.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
@@ -22,7 +22,7 @@ public interface ISecretStore
     ValueTask<bool> ExistsAsync(string name, CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Gets a secret value.
+    /// Gets a secret value.
     /// </summary>
     /// <param name="name">The secret name.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
@@ -30,7 +30,7 @@ public interface ISecretStore
     ValueTask<string?> GetAsync(string name, CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Sets a secret value.
+    /// Sets a secret value.
     /// </summary>
     /// <param name="name">The secret name.</param>
     /// <param name="value">The secret value.</param>
@@ -38,7 +38,7 @@ public interface ISecretStore
     ValueTask SetAsync(string name, string value, CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Enumerates stored secret names, optionally filtered by prefix.
+    /// Enumerates stored secret names, optionally filtered by prefix.
     /// </summary>
     /// <param name="prefix">Optional name prefix; <c>null</c> or empty returns all names.</param>
     /// <param name="cancellationToken">Token used to cancel the enumeration.</param>

@@ -3,7 +3,7 @@ using ZLinq;
 namespace SquidStd.Database.Extensions;
 
 /// <summary>
-///     Zero-allocation, in-memory helpers (ZLinq) over already-materialized result lists.
+/// Zero-allocation, in-memory helpers (ZLinq) over already-materialized result lists.
 /// </summary>
 public static class ZLinqResultExtensions
 {
@@ -11,25 +11,21 @@ public static class ZLinqResultExtensions
     extension<TSource>(IReadOnlyList<TSource> source)
     {
         /// <summary>
-        ///     Projects each materialized item to a new form using ZLinq, returning a list.
+        /// Projects each materialized item to a new form using ZLinq, returning a list.
         /// </summary>
         /// <typeparam name="TSource">The source item type.</typeparam>
         /// <typeparam name="TResult">The projected item type.</typeparam>
         /// <param name="selector">The projection.</param>
         /// <returns>The projected list.</returns>
-        public List<TResult> MapToList<TResult>(
-            Func<TSource, TResult> selector
-        )
-        {
-            return source.AsValueEnumerable().Select(selector).ToList();
-        }
+        public List<TResult> MapToList<TResult>(Func<TSource, TResult> selector)
+            => source.AsValueEnumerable().Select(selector).ToList();
     }
 
     /// <param name="source">The materialized source items.</param>
     extension<T>(IReadOnlyList<T> source)
     {
         /// <summary>
-        ///     Takes an in-memory page of a materialized list using ZLinq (no SQL involved).
+        /// Takes an in-memory page of a materialized list using ZLinq (no SQL involved).
         /// </summary>
         /// <typeparam name="T">The item type.</typeparam>
         /// <param name="page">The 1-based page number.</param>

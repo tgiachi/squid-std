@@ -35,7 +35,8 @@ public class PgpServiceEncryptionTests
     {
         var service = new PgpService(new PgpKeyring());
 
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => service.EncryptForAsync(
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => service.EncryptForAsync(
                 "nobody@squidstd.test",
                 Encoding.UTF8.GetBytes("x")
             )

@@ -3,8 +3,8 @@ using SquidStd.Aws.Abstractions.Data.Config;
 namespace SquidStd.Messaging.Sqs.Data.Config;
 
 /// <summary>
-///     Configuration for the SQS/SNS messaging provider. Connection details live in <see cref="Aws" />;
-///     the remaining knobs tune SQS receive behaviour.
+/// Configuration for the SQS/SNS messaging provider. Connection details live in <see cref="Aws" />;
+/// the remaining knobs tune SQS receive behaviour.
 /// </summary>
 public sealed class SqsOptions
 {

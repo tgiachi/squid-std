@@ -13,7 +13,7 @@ public class EntryCipherTests
         var key = RandomNumberGenerator.GetBytes(32);
         var payload = RandomNumberGenerator.GetBytes(200_000); // > 3 chunks at 64 KiB
 
-        using var cipher = new EntryCipher(key, chunkSize: 65536);
+        using var cipher = new EntryCipher(key, 65536);
         using var encrypted = new MemoryStream();
         await cipher.EncryptAsync(new MemoryStream(payload), encrypted);
 
@@ -34,7 +34,8 @@ public class EntryCipherTests
 
         using var wrong = new EntryCipher(RandomNumberGenerator.GetBytes(32), 65536);
         encrypted.Position = 0;
-        await Assert.ThrowsAsync<AuthenticationTagMismatchException>(() => wrong.DecryptAsync(encrypted, new MemoryStream())
+        await Assert.ThrowsAsync<AuthenticationTagMismatchException>(
+            () => wrong.DecryptAsync(encrypted, new MemoryStream())
         );
     }
 
@@ -49,7 +50,8 @@ public class EntryCipherTests
         BinaryPrimitives.WriteInt32BigEndian(header, chunkSize + 1);
 
         using var cipher = new EntryCipher(RandomNumberGenerator.GetBytes(32), chunkSize);
-        await Assert.ThrowsAsync<InvalidDataException>(() => cipher.DecryptAsync(new MemoryStream(header), new MemoryStream())
+        await Assert.ThrowsAsync<InvalidDataException>(
+            () => cipher.DecryptAsync(new MemoryStream(header), new MemoryStream())
         );
     }
 }

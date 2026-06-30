@@ -5,21 +5,6 @@ namespace SquidStd.Tests.Tui;
 
 public partial class TuiViewModelTests
 {
-    private sealed partial class SampleViewModel : TuiViewModel
-    {
-        [ObservableProperty]
-        private string _title = string.Empty;
-
-        public int Activated { get; private set; }
-
-        public override ValueTask OnActivatedAsync()
-        {
-            Activated++;
-
-            return ValueTask.CompletedTask;
-        }
-    }
-
     [Fact]
     public void ObservableProperty_RaisesPropertyChanged()
     {
@@ -48,5 +33,19 @@ public partial class TuiViewModelTests
         var vm = new SampleViewModel();
 
         await vm.OnDeactivatedAsync(); // does not throw
+    }
+
+    private sealed partial class SampleViewModel : TuiViewModel
+    {
+        [ObservableProperty] private string _title = string.Empty;
+
+        public int Activated { get; private set; }
+
+        public override ValueTask OnActivatedAsync()
+        {
+            Activated++;
+
+            return ValueTask.CompletedTask;
+        }
     }
 }

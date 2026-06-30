@@ -18,7 +18,7 @@ public sealed class PersistenceEndToEndTests : IDisposable
         var journal = new BinaryJournalService(Path.Combine(_dir, config.JournalFileName));
         var snapshot = new SnapshotService(_dir, config.SnapshotFileSuffix);
 
-        return new PersistenceService(registry, journal, snapshot, config, eventBus: null);
+        return new(registry, journal, snapshot, config);
     }
 
     [Fact]
@@ -29,11 +29,11 @@ public sealed class PersistenceEndToEndTests : IDisposable
         var service = Create();
         await service.InitializeAsync();
         var store = service.GetStore<Item, int>();
-        await store.UpsertAsync(new Item { Id = 1, Label = "Sword", Quantity = 1 });
-        await store.UpsertAsync(new Item { Id = 2, Label = "Potion", Quantity = 5 });
-        await service.SaveSnapshotAsync();                                            // snapshot at seq 2
-        await store.UpsertAsync(new Item { Id = 2, Label = "Potion", Quantity = 9 }); // tail update (seq 3)
-        await store.RemoveAsync(1);                                                   // tail remove (seq 4)
+        await store.UpsertAsync(new() { Id = 1, Label = "Sword", Quantity = 1 });
+        await store.UpsertAsync(new() { Id = 2, Label = "Potion", Quantity = 5 });
+        await service.SaveSnapshotAsync();                                         // snapshot at seq 2
+        await store.UpsertAsync(new() { Id = 2, Label = "Potion", Quantity = 9 }); // tail update (seq 3)
+        await store.RemoveAsync(1);                                                // tail remove (seq 4)
 
         var reloaded = Create();
         await reloaded.InitializeAsync();

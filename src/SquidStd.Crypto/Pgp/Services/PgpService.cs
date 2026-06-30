@@ -9,8 +9,8 @@ using BcPgpException = Org.BouncyCastle.Bcpg.OpenPgp.PgpException;
 namespace SquidStd.Crypto.Pgp.Services;
 
 /// <summary>
-///     OpenPGP operations over a keyring, implemented with PgpCore. Every byte/armored-string operation
-///     round-trips through <see cref="MemoryStream" /> so binary payloads survive intact.
+/// OpenPGP operations over a keyring, implemented with PgpCore. Every byte/armored-string operation
+/// round-trips through <see cref="MemoryStream" /> so binary payloads survive intact.
 /// </summary>
 public sealed class PgpService : IPgpService
 {
@@ -51,7 +51,9 @@ public sealed class PgpService : IPgpService
 
     /// <inheritdoc />
     public async Task<string> EncryptForAsync(
-        string recipientIdentity, byte[] data, CancellationToken cancellationToken = default
+        string recipientIdentity,
+        byte[] data,
+        CancellationToken cancellationToken = default
     )
     {
         ArgumentNullException.ThrowIfNull(data);
@@ -68,7 +70,10 @@ public sealed class PgpService : IPgpService
 
     /// <inheritdoc />
     public async Task EncryptForAsync(
-        string recipientIdentity, Stream input, Stream output, CancellationToken cancellationToken = default
+        string recipientIdentity,
+        Stream input,
+        Stream output,
+        CancellationToken cancellationToken = default
     )
     {
         ArgumentNullException.ThrowIfNull(input);
@@ -96,7 +101,10 @@ public sealed class PgpService : IPgpService
 
     /// <inheritdoc />
     public async Task DecryptAsync(
-        Stream input, Stream output, string passphrase, CancellationToken cancellationToken = default
+        Stream input,
+        Stream output,
+        string passphrase,
+        CancellationToken cancellationToken = default
     )
     {
         ArgumentNullException.ThrowIfNull(input);
@@ -116,7 +124,10 @@ public sealed class PgpService : IPgpService
 
     /// <inheritdoc />
     public async Task<string> EncryptAndSignForAsync(
-        string recipientIdentity, byte[] data, string signerIdentity, string signerPassphrase,
+        string recipientIdentity,
+        byte[] data,
+        string signerIdentity,
+        string signerPassphrase,
         CancellationToken cancellationToken = default
     )
     {
@@ -133,7 +144,11 @@ public sealed class PgpService : IPgpService
 
     /// <inheritdoc />
     public async Task EncryptAndSignForAsync(
-        string recipientIdentity, Stream input, Stream output, string signerIdentity, string signerPassphrase,
+        string recipientIdentity,
+        Stream input,
+        Stream output,
+        string signerIdentity,
+        string signerPassphrase,
         CancellationToken cancellationToken = default
     )
     {
@@ -146,7 +161,9 @@ public sealed class PgpService : IPgpService
 
     /// <inheritdoc />
     public async Task<PgpDecryptionResult> DecryptAndVerifyAsync(
-        string armored, string passphrase, CancellationToken cancellationToken = default
+        string armored,
+        string passphrase,
+        CancellationToken cancellationToken = default
     )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(armored);
@@ -161,7 +178,7 @@ public sealed class PgpService : IPgpService
         {
             var plain = await DecryptWith(pgp, armored).ConfigureAwait(false);
 
-            return new PgpDecryptionResult(plain, false, false);
+            return new(plain, false, false);
         }
 
         try
@@ -170,19 +187,22 @@ public sealed class PgpService : IPgpService
             using var output = new MemoryStream();
             await pgp.DecryptAndVerifyAsync(input, output).ConfigureAwait(false);
 
-            return new PgpDecryptionResult(output.ToArray(), true, true);
+            return new(output.ToArray(), true, true);
         }
         catch (Exception ex) when (ex is BcPgpException or InvalidOperationException or ArgumentException or IOException)
         {
             var plain = await DecryptWith(pgp, armored).ConfigureAwait(false);
 
-            return new PgpDecryptionResult(plain, true, false);
+            return new(plain, true, false);
         }
     }
 
     /// <inheritdoc />
     public async Task<string> SignAsync(
-        byte[] data, string signerIdentity, string passphrase, CancellationToken cancellationToken = default
+        byte[] data,
+        string signerIdentity,
+        string passphrase,
+        CancellationToken cancellationToken = default
     )
     {
         ArgumentNullException.ThrowIfNull(data);
@@ -211,6 +231,7 @@ public sealed class PgpService : IPgpService
             var pgp = new PGP(new EncryptionKeys(key.PublicArmored));
 
             bool ok;
+
             try
             {
                 ok = await pgp.VerifyAsync(input, output).ConfigureAwait(false);
@@ -227,11 +248,11 @@ public sealed class PgpService : IPgpService
 
             if (ok)
             {
-                return new PgpVerificationResult(true, recovered);
+                return new(true, recovered);
             }
         }
 
-        return new PgpVerificationResult(false, recovered);
+        return new(false, recovered);
     }
 
     private PGP BuildEncryptAndSign(string recipientIdentity, string signerIdentity, string signerPassphrase)
@@ -239,7 +260,7 @@ public sealed class PgpService : IPgpService
         var recipient = RequireKey(recipientIdentity);
         var signer = RequireKey(signerIdentity);
 
-        return new PGP(new EncryptionKeys(recipient.PublicArmored, signer.PrivateArmored!, signerPassphrase));
+        return new(new EncryptionKeys(recipient.PublicArmored, signer.PrivateArmored!, signerPassphrase));
     }
 
     private static async Task<byte[]> DecryptWith(PGP pgp, string armored)
@@ -255,8 +276,8 @@ public sealed class PgpService : IPgpService
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(identity);
 
-        return _keyring.Find(identity)
-               ?? throw new KeyNotFoundException($"No key for identity '{identity}' in the keyring.");
+        return _keyring.Find(identity) ??
+               throw new KeyNotFoundException($"No key for identity '{identity}' in the keyring.");
     }
 
     private PgpKey RequireSecretFor(string armored)
@@ -275,12 +296,8 @@ public sealed class PgpService : IPgpService
     }
 
     private static long ParseKeyId(string keyId)
-    {
-        return long.Parse(keyId, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-    }
+        => long.Parse(keyId, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
 
     private static string ReadAll(MemoryStream stream)
-    {
-        return Encoding.UTF8.GetString(stream.ToArray());
-    }
+        => Encoding.UTF8.GetString(stream.ToArray());
 }

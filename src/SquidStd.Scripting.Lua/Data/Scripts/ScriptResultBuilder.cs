@@ -1,7 +1,7 @@
 namespace SquidStd.Scripting.Lua.Data.Scripts;
 
 /// <summary>
-///     Builder class for creating ScriptResult instances.
+/// Builder class for creating ScriptResult instances.
 /// </summary>
 public class ScriptResultBuilder
 {
@@ -10,36 +10,30 @@ public class ScriptResultBuilder
     private bool _success;
 
     /// <summary>
-    ///     Builds the ScriptResult instance.
+    /// Builds the ScriptResult instance.
     /// </summary>
     public ScriptResult Build()
-    {
-        return new ScriptResult
+        => new()
         {
             Success = _success,
             Message = _message,
             Data = _data
         };
-    }
 
     /// <summary>
-    ///     Creates a ScriptResultBuilder initialized for an error result.
+    /// Creates a ScriptResultBuilder initialized for an error result.
     /// </summary>
     public static ScriptResultBuilder CreateError()
-    {
-        return new ScriptResultBuilder().WithSuccess(false);
-    }
+        => new ScriptResultBuilder().WithSuccess(false);
 
     /// <summary>
-    ///     Creates a ScriptResultBuilder initialized for a successful result.
+    /// Creates a ScriptResultBuilder initialized for a successful result.
     /// </summary>
     public static ScriptResultBuilder CreateSuccess()
-    {
-        return new ScriptResultBuilder().WithSuccess(true);
-    }
+        => new ScriptResultBuilder().WithSuccess(true);
 
     /// <summary>
-    ///     Sets the result as failed.
+    /// Sets the result as failed.
     /// </summary>
     public ScriptResultBuilder Failure()
     {
@@ -49,7 +43,7 @@ public class ScriptResultBuilder
     }
 
     /// <summary>
-    ///     Sets the result as successful.
+    /// Sets the result as successful.
     /// </summary>
     public ScriptResultBuilder Success()
     {
@@ -59,7 +53,7 @@ public class ScriptResultBuilder
     }
 
     /// <summary>
-    ///     Sets the data of the result.
+    /// Sets the data of the result.
     /// </summary>
     public ScriptResultBuilder WithData(object? data)
     {
@@ -69,7 +63,7 @@ public class ScriptResultBuilder
     }
 
     /// <summary>
-    ///     Sets the message of the result.
+    /// Sets the message of the result.
     /// </summary>
     public ScriptResultBuilder WithMessage(string message)
     {
@@ -79,7 +73,7 @@ public class ScriptResultBuilder
     }
 
     /// <summary>
-    ///     Sets the success status of the result.
+    /// Sets the success status of the result.
     /// </summary>
     public ScriptResultBuilder WithSuccess(bool success)
     {

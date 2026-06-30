@@ -6,12 +6,16 @@ using Terminal.Gui.Views;
 
 namespace SquidStd.Tui.Dsl;
 
-/// <summary>Turns a <see cref="TuiNode{TViewModel}" /> tree into a Terminal.Gui view graph, wiring each
-/// node's binding through the supplied <see cref="ViewBinder" />.</summary>
+/// <summary>
+/// Turns a <see cref="TuiNode{TViewModel}" /> tree into a Terminal.Gui view graph, wiring each
+/// node's binding through the supplied <see cref="ViewBinder" />.
+/// </summary>
 public sealed class TuiNodeMaterializer
 {
-    /// <summary>Materialises <paramref name="node" /> against <paramref name="viewModel" />, registering
-    /// bindings on <paramref name="binder" />, and returns the produced view.</summary>
+    /// <summary>
+    /// Materialises <paramref name="node" /> against <paramref name="viewModel" />, registering
+    /// bindings on <paramref name="binder" />, and returns the produced view.
+    /// </summary>
     public View Materialize<TViewModel>(TuiNode<TViewModel> node, TViewModel viewModel, ViewBinder binder)
         where TViewModel : INotifyPropertyChanged
     {

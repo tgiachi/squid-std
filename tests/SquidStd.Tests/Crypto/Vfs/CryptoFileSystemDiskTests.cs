@@ -8,9 +8,7 @@ namespace SquidStd.Tests.Crypto.Vfs;
 public class CryptoFileSystemDiskTests
 {
     private static CryptoVaultOptions FastOptions()
-    {
-        return new CryptoVaultOptions { Argon2MemoryKib = 8192, Argon2Iterations = 1 };
-    }
+        => new() { Argon2MemoryKib = 8192, Argon2Iterations = 1 };
 
     [Fact]
     public async Task Lock_AfterWrites_OverZipBackend_DoesNotThrow()

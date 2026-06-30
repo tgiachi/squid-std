@@ -25,7 +25,7 @@ internal sealed class VaultIndex
 
     public VaultIndex()
     {
-        _entries = new Dictionary<string, VaultIndexEntry>(StringComparer.Ordinal);
+        _entries = new(StringComparer.Ordinal);
     }
 
     private VaultIndex(Dictionary<string, VaultIndexEntry> entries)
@@ -67,9 +67,9 @@ internal sealed class VaultIndex
 
     public static VaultIndex Parse(byte[] data)
     {
-        var map = JsonSerializer.Deserialize<Dictionary<string, VaultIndexEntry>>(data)
-                  ?? new Dictionary<string, VaultIndexEntry>(StringComparer.Ordinal);
+        var map = JsonSerializer.Deserialize<Dictionary<string, VaultIndexEntry>>(data) ??
+                  new Dictionary<string, VaultIndexEntry>(StringComparer.Ordinal);
 
-        return new VaultIndex(new Dictionary<string, VaultIndexEntry>(map, StringComparer.Ordinal));
+        return new(new(map, StringComparer.Ordinal));
     }
 }

@@ -12,9 +12,9 @@ using SquidStd.Messaging.Sqs.Internal;
 namespace SquidStd.Messaging.Sqs.Services;
 
 /// <summary>
-///     SNS+SQS <see cref="ITopicProvider" />: a topic is an SNS topic; each subscriber gets a dedicated
-///     ephemeral SQS queue subscribed to the topic with raw message delivery, long-polled and torn down
-///     on dispose (transient, at-most-once fan-out). Payloads travel base64-encoded.
+/// SNS+SQS <see cref="ITopicProvider" />: a topic is an SNS topic; each subscriber gets a dedicated
+/// ephemeral SQS queue subscribed to the topic with raw message delivery, long-polled and torn down
+/// on dispose (transient, at-most-once fan-out). Payloads travel base64-encoded.
 /// </summary>
 public sealed class SqsTopicProvider : ITopicProvider
 {
@@ -56,7 +56,7 @@ public sealed class SqsTopicProvider : ITopicProvider
         var arn = await EnsureTopicAsync(topic, cancellationToken);
 
         await sns.PublishAsync(
-            new PublishRequest { TopicArn = arn, Message = Convert.ToBase64String(payload.Span) },
+            new() { TopicArn = arn, Message = Convert.ToBase64String(payload.Span) },
             cancellationToken
         );
     }
@@ -73,9 +73,7 @@ public sealed class SqsTopicProvider : ITopicProvider
 
     /// <inheritdoc />
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        return DisposeAsync();
-    }
+        => DisposeAsync();
 
     /// <inheritdoc />
     public IDisposable Subscribe(string topic, Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler)
@@ -152,13 +150,10 @@ public sealed class SqsTopicProvider : ITopicProvider
         }
 
         public void Start()
-        {
-            _loop = Task.Run(() => RunAsync(_cts.Token));
-        }
+            => _loop = Task.Run(() => RunAsync(_cts.Token));
 
         private static string BuildPolicy(string queueArn, string topicArn)
-        {
-            return JsonSerializer.Serialize(
+            => JsonSerializer.Serialize(
                 new
                 {
                     Version = "2012-10-17",
@@ -175,7 +170,6 @@ public sealed class SqsTopicProvider : ITopicProvider
                     }
                 }
             );
-        }
 
         private async Task RunAsync(CancellationToken cancellationToken)
         {
@@ -186,37 +180,37 @@ public sealed class SqsTopicProvider : ITopicProvider
                 var topicArn = await _provider.EnsureTopicAsync(_topic, cancellationToken);
                 var queueName = SqsNames.Sanitize(_topic) + "-sub-" + _index;
                 queueUrl = (await _provider._sqs!.CreateQueueAsync(
-                    new CreateQueueRequest { QueueName = queueName },
-                    cancellationToken
-                )).QueueUrl;
+                                new CreateQueueRequest { QueueName = queueName },
+                                cancellationToken
+                            )).QueueUrl;
                 _queueUrl = queueUrl;
 
                 var attributes = await _provider._sqs.GetQueueAttributesAsync(
-                    new GetQueueAttributesRequest { QueueUrl = queueUrl, AttributeNames = ["QueueArn"] },
-                    cancellationToken
-                );
+                                     new() { QueueUrl = queueUrl, AttributeNames = ["QueueArn"] },
+                                     cancellationToken
+                                 );
                 var queueArn = attributes.Attributes["QueueArn"];
 
                 await _provider._sqs.SetQueueAttributesAsync(
-                    new SetQueueAttributesRequest
+                    new()
                     {
                         QueueUrl = queueUrl,
-                        Attributes = new Dictionary<string, string> { ["Policy"] = BuildPolicy(queueArn, topicArn) }
+                        Attributes = new() { ["Policy"] = BuildPolicy(queueArn, topicArn) }
                     },
                     cancellationToken
                 );
 
                 _subscriptionArn = (await _provider._sns!.SubscribeAsync(
-                    new SubscribeRequest
-                    {
-                        TopicArn = topicArn,
-                        Protocol = "sqs",
-                        Endpoint = queueArn,
-                        ReturnSubscriptionArn = true,
-                        Attributes = new Dictionary<string, string> { ["RawMessageDelivery"] = "true" }
-                    },
-                    cancellationToken
-                )).SubscriptionArn;
+                                        new()
+                                        {
+                                            TopicArn = topicArn,
+                                            Protocol = "sqs",
+                                            Endpoint = queueArn,
+                                            ReturnSubscriptionArn = true,
+                                            Attributes = new() { ["RawMessageDelivery"] = "true" }
+                                        },
+                                        cancellationToken
+                                    )).SubscriptionArn;
             }
             catch (OperationCanceledException)
             {
@@ -236,14 +230,14 @@ public sealed class SqsTopicProvider : ITopicProvider
                 try
                 {
                     response = await _provider._sqs!.ReceiveMessageAsync(
-                        new ReceiveMessageRequest
-                        {
-                            QueueUrl = queueUrl,
-                            MaxNumberOfMessages = _provider._options.MaxNumberOfMessages,
-                            WaitTimeSeconds = _provider._options.WaitTimeSeconds
-                        },
-                        cancellationToken
-                    );
+                                   new ReceiveMessageRequest
+                                   {
+                                       QueueUrl = queueUrl,
+                                       MaxNumberOfMessages = _provider._options.MaxNumberOfMessages,
+                                       WaitTimeSeconds = _provider._options.WaitTimeSeconds
+                                   },
+                                   cancellationToken
+                               );
                 }
                 catch (OperationCanceledException)
                 {

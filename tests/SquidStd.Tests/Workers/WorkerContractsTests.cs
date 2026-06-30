@@ -33,15 +33,12 @@ public class WorkerContractsTests
         Assert.NotEqual(WorkerChannels.JobQueue, WorkerChannels.HeartbeatTopic);
     }
 
-    [Theory]
-    [InlineData(WorkerStatusType.Idle)]
-    [InlineData(WorkerStatusType.Busy)]
-    [InlineData(WorkerStatusType.Offline)]
+    [Theory, InlineData(WorkerStatusType.Idle), InlineData(WorkerStatusType.Busy), InlineData(WorkerStatusType.Offline)]
     public void WorkerHeartbeat_RoundTrips_EveryStatus(WorkerStatusType status)
     {
         var original = new WorkerHeartbeat(
             "worker-3",
-            new DateTime(2026, 6, 23, 11, 0, 0, DateTimeKind.Utc),
+            new(2026, 6, 23, 11, 0, 0, DateTimeKind.Utc),
             status,
             0,
             4
@@ -57,7 +54,7 @@ public class WorkerContractsTests
     {
         var original = new WorkerHeartbeat(
             "worker-1",
-            new DateTime(2026, 6, 23, 10, 0, 0, DateTimeKind.Utc),
+            new(2026, 6, 23, 10, 0, 0, DateTimeKind.Utc),
             WorkerStatusType.Busy,
             3,
             8
@@ -76,8 +73,8 @@ public class WorkerContractsTests
             WorkerStatusType.Offline,
             2,
             8,
-            new DateTime(2026, 6, 23, 9, 0, 0, DateTimeKind.Utc),
-            new DateTime(2026, 6, 23, 9, 30, 0, DateTimeKind.Utc)
+            new(2026, 6, 23, 9, 0, 0, DateTimeKind.Utc),
+            new(2026, 6, 23, 9, 30, 0, DateTimeKind.Utc)
         );
 
         var restored = Serializer.Deserialize<WorkerInfo>(Serializer.Serialize(original));

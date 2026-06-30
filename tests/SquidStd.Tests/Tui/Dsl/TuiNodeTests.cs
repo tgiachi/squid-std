@@ -8,12 +8,6 @@ namespace SquidStd.Tests.Tui.Dsl;
 
 public class TuiNodeTests
 {
-    private sealed class SampleViewModel
-    {
-        public string Title { get; set; } = string.Empty;
-        public ICommand Save { get; } = new RelayCommand(() => { });
-    }
-
     [Fact]
     public void LabelNode_CapturesTextExpression()
     {
@@ -49,5 +43,11 @@ public class TuiNodeTests
         Assert.Equal(StackOrientation.Vertical, node.Orientation);
         Assert.Single(node.Children);
         Assert.Same(child, node.Children[0]);
+    }
+
+    private sealed class SampleViewModel
+    {
+        public string Title { get; } = string.Empty;
+        public ICommand Save { get; } = new RelayCommand(() => { });
     }
 }

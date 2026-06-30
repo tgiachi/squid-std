@@ -15,14 +15,16 @@ public sealed class DurableWriteTests : IDisposable
         var path = Path.Combine(_dir, "world.journal.bin");
         await using var journal = new BinaryJournalService(path, DurabilityMode.Durable);
 
-        await journal.AppendAsync(new JournalEntry
-        {
-            SequenceId = 1,
-            TimestampUnixMilliseconds = 1000,
-            TypeId = 1,
-            Operation = JournalEntityOperationType.Upsert,
-            Payload = [1, 2, 3]
-        });
+        await journal.AppendAsync(
+            new()
+            {
+                SequenceId = 1,
+                TimestampUnixMilliseconds = 1000,
+                TypeId = 1,
+                Operation = JournalEntityOperationType.Upsert,
+                Payload = [1, 2, 3]
+            }
+        );
 
         var entries = (await journal.ReadAllAsync()).ToArray();
         Assert.Single(entries);
@@ -35,7 +37,7 @@ public sealed class DurableWriteTests : IDisposable
         var service = new SnapshotService(_dir, ".snapshot.bin", DurabilityMode.Durable);
         var bucket = new EntitySnapshotBucket { TypeId = 1, TypeName = "Player", SchemaVersion = 1, Payload = [9, 9] };
 
-        await service.SaveBucketAsync(bucket, lastSequenceId: 5);
+        await service.SaveBucketAsync(bucket, 5);
         var loaded = await service.LoadBucketAsync("Player", 1);
 
         Assert.NotNull(loaded);

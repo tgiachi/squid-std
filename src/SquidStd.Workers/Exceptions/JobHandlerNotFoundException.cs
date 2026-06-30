@@ -1,7 +1,7 @@
 namespace SquidStd.Workers.Exceptions;
 
 /// <summary>
-///     Thrown when a job arrives whose name has no registered <see cref="Interfaces.IJobHandler" />.
+/// Thrown when a job arrives whose name has no registered <see cref="Interfaces.IJobHandler" />.
 /// </summary>
 public sealed class JobHandlerNotFoundException : Exception
 {

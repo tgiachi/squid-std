@@ -60,7 +60,9 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
     }
 
     public async ValueTask<PersistedBucket?> LoadBucketAsync(
-        string typeName, ushort typeId, CancellationToken cancellationToken = default
+        string typeName,
+        ushort typeId,
+        CancellationToken cancellationToken = default
     )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(typeName);
@@ -91,8 +93,8 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
             var envelope = SnapshotEnvelopeCodec.Decode(bytes);
 
             var checksumValid = envelope.Version >= 2
-                ? SnapshotEnvelopeCodec.ComputeFullChecksum(bytes) == envelope.Checksum
-                : ChecksumUtils.Compute(envelope.Bucket.Payload) == envelope.Checksum;
+                                    ? SnapshotEnvelopeCodec.ComputeFullChecksum(bytes) == envelope.Checksum
+                                    : ChecksumUtils.Compute(envelope.Bucket.Payload) == envelope.Checksum;
 
             if (!checksumValid || !string.Equals(envelope.Bucket.TypeName, typeName, StringComparison.Ordinal))
             {
@@ -101,7 +103,7 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
                 return null;
             }
 
-            return new PersistedBucket(envelope.Bucket, envelope.LastSequenceId);
+            return new(envelope.Bucket, envelope.LastSequenceId);
         }
         catch (OperationCanceledException)
         {
@@ -120,7 +122,9 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
     }
 
     public async ValueTask SaveBucketAsync(
-        EntitySnapshotBucket bucket, long lastSequenceId, CancellationToken cancellationToken = default
+        EntitySnapshotBucket bucket,
+        long lastSequenceId,
+        CancellationToken cancellationToken = default
     )
     {
         ArgumentNullException.ThrowIfNull(bucket);
@@ -153,7 +157,7 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
 
                 if (_durability == DurabilityMode.Durable)
                 {
-                    stream.Flush(flushToDisk: true); // fsync the temp file before the atomic rename
+                    stream.Flush(true); // fsync the temp file before the atomic rename
                 }
                 else
                 {
@@ -170,14 +174,10 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
     }
 
     private string PathFor(string typeName, ushort typeId)
-    {
-        return Path.Combine(_directory, SnakeName(typeName) + "_" + typeId + _suffix);
-    }
+        => Path.Combine(_directory, SnakeName(typeName) + "_" + typeId + _suffix);
 
     private string LegacyPathFor(string typeName)
-    {
-        return Path.Combine(_directory, SnakeName(typeName) + _suffix);
-    }
+        => Path.Combine(_directory, SnakeName(typeName) + _suffix);
 
     private string SnakeName(string typeName)
     {

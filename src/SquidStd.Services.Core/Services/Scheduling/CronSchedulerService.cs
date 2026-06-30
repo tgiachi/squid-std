@@ -11,9 +11,9 @@ using SquidStd.Services.Core.Services.Internal;
 namespace SquidStd.Services.Core.Services.Scheduling;
 
 /// <summary>
-///     Cron scheduler built on the timer wheel: each job is a one-shot, self-rescheduling
-///     timer. On fire, the handler is dispatched through <see cref="IJobSystem" />; an occurrence
-///     is skipped when the previous run of the same job is still in flight.
+/// Cron scheduler built on the timer wheel: each job is a one-shot, self-rescheduling
+/// timer. On fire, the handler is dispatched through <see cref="IJobSystem" />; an occurrence
+/// is skipped when the previous run of the same job is still in flight.
 /// </summary>
 public sealed class CronSchedulerService : ICronScheduler, ISquidStdService, IDisposable
 {
@@ -27,18 +27,19 @@ public sealed class CronSchedulerService : ICronScheduler, ISquidStdService, IDi
     /// <inheritdoc />
     public IReadOnlyCollection<CronJobInfo> Jobs
         => _entries.Values
-            .Select(entry => new CronJobInfo
-                {
-                    JobId = entry.JobId,
-                    Name = entry.Name,
-                    CronExpression = entry.CronText,
-                    NextOccurrenceUtc = entry.NextOccurrenceUtc,
-                    IsRunning = Volatile.Read(ref entry.Running) == 1,
-                    LastRunUtc = entry.LastRunUtc,
-                    RunCount = Interlocked.Read(ref entry.RunCount)
-                }
-            )
-            .ToArray();
+                   .Select(
+                       entry => new CronJobInfo
+                       {
+                           JobId = entry.JobId,
+                           Name = entry.Name,
+                           CronExpression = entry.CronText,
+                           NextOccurrenceUtc = entry.NextOccurrenceUtc,
+                           IsRunning = Volatile.Read(ref entry.Running) == 1,
+                           LastRunUtc = entry.LastRunUtc,
+                           RunCount = Interlocked.Read(ref entry.RunCount)
+                       }
+                   )
+                   .ToArray();
 
     public CronSchedulerService(ITimerService timer, IJobSystem jobs)
     {
@@ -105,9 +106,7 @@ public sealed class CronSchedulerService : ICronScheduler, ISquidStdService, IDi
 
     /// <inheritdoc />
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
-    {
-        return ValueTask.CompletedTask;
-    }
+        => ValueTask.CompletedTask;
 
     /// <inheritdoc />
     public ValueTask StopAsync(CancellationToken cancellationToken = default)

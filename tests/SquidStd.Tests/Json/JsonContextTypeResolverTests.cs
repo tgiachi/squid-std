@@ -43,15 +43,11 @@ public class JsonContextTypeResolverTests
 
     [Fact]
     public void IsTypeRegistered_RegisteredType_ReturnsTrue()
-    {
-        Assert.True(JsonContextTypeResolver.IsTypeRegistered(TestJsonContext.Default, typeof(SampleDto)));
-    }
+        => Assert.True(JsonContextTypeResolver.IsTypeRegistered(TestJsonContext.Default, typeof(SampleDto)));
 
     [Fact]
     public void IsTypeRegistered_UnregisteredType_ReturnsFalse()
-    {
-        Assert.False(
+        => Assert.False(
             JsonContextTypeResolver.IsTypeRegistered(TestJsonContext.Default, typeof(JsonContextTypeResolverTests))
         );
-    }
 }

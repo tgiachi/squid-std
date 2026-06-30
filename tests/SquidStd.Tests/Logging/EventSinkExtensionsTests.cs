@@ -13,16 +13,14 @@ public class EventSinkExtensionsTests
         LogEventData? captured = null;
 
         void Handler(object? sender, LogEventData data)
-        {
-            captured = data;
-        }
+            => captured = data;
 
         EventSink.OnLogReceived += Handler;
 
         var logger = new LoggerConfiguration()
-            .WriteTo
-            .EventSink()
-            .CreateLogger();
+                     .WriteTo
+                     .EventSink()
+                     .CreateLogger();
 
         try
         {

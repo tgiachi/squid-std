@@ -3,8 +3,8 @@ using SquidStd.Crypto.Pgp.Data;
 namespace SquidStd.Crypto.Pgp.Interfaces;
 
 /// <summary>
-///     OpenPGP operations over the keyring: key generation, encrypt/decrypt, sign/verify, and the combined
-///     encrypt+sign / decrypt+verify flows. Recipients and signers are resolved from the keyring by identity.
+/// OpenPGP operations over the keyring: key generation, encrypt/decrypt, sign/verify, and the combined
+/// encrypt+sign / decrypt+verify flows. Recipients and signers are resolved from the keyring by identity.
 /// </summary>
 public interface IPgpService
 {
@@ -16,7 +16,10 @@ public interface IPgpService
 
     /// <summary>Encrypts a stream for the recipient, writing an armored message to <paramref name="output" />.</summary>
     Task EncryptForAsync(
-        string recipientIdentity, Stream input, Stream output, CancellationToken cancellationToken = default
+        string recipientIdentity,
+        Stream input,
+        Stream output,
+        CancellationToken cancellationToken = default
     );
 
     /// <summary>Decrypts an armored message using the matching keyring secret key and passphrase.</summary>
@@ -27,24 +30,36 @@ public interface IPgpService
 
     /// <summary>Encrypts <paramref name="data" /> for the recipient and signs it with the signer's secret key.</summary>
     Task<string> EncryptAndSignForAsync(
-        string recipientIdentity, byte[] data, string signerIdentity, string signerPassphrase,
+        string recipientIdentity,
+        byte[] data,
+        string signerIdentity,
+        string signerPassphrase,
         CancellationToken cancellationToken = default
     );
 
     /// <summary>Encrypts and signs a stream for the recipient.</summary>
     Task EncryptAndSignForAsync(
-        string recipientIdentity, Stream input, Stream output, string signerIdentity, string signerPassphrase,
+        string recipientIdentity,
+        Stream input,
+        Stream output,
+        string signerIdentity,
+        string signerPassphrase,
         CancellationToken cancellationToken = default
     );
 
     /// <summary>Decrypts an armored message and reports whether it was signed and whether the signature validated.</summary>
     Task<PgpDecryptionResult> DecryptAndVerifyAsync(
-        string armored, string passphrase, CancellationToken cancellationToken = default
+        string armored,
+        string passphrase,
+        CancellationToken cancellationToken = default
     );
 
     /// <summary>Produces an armored signed message that embeds <paramref name="data" />.</summary>
     Task<string> SignAsync(
-        byte[] data, string signerIdentity, string passphrase, CancellationToken cancellationToken = default
+        byte[] data,
+        string signerIdentity,
+        string passphrase,
+        CancellationToken cancellationToken = default
     );
 
     /// <summary>Verifies an armored signed message against the keyring, recovering the embedded content.</summary>

@@ -10,10 +10,10 @@ using SquidStd.Network.Types.Server;
 namespace SquidStd.Network.Server;
 
 /// <summary>
-///     Connectionless UDP server that binds one socket per local interface address and processes
-///     each received datagram. By default it echoes the payload back to the sender (the behaviour the
-///     UO launcher expects from a shard ping server); supply <see cref="OnDatagram" /> to customise the
-///     response. Supports Start/Stop/Start cycles by recreating the sockets on each Start.
+/// Connectionless UDP server that binds one socket per local interface address and processes
+/// each received datagram. By default it echoes the payload back to the sender (the behaviour the
+/// UO launcher expects from a shard ping server); supply <see cref="OnDatagram" /> to customise the
+/// response. Supports Start/Stop/Start cycles by recreating the sockets on each Start.
 /// </summary>
 public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDisposable
 {
@@ -29,14 +29,14 @@ public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDispo
     private int _started;
 
     /// <summary>
-    ///     Optional response factory. Receives the datagram payload and the sender endpoint and returns
-    ///     the bytes to send back; return <see cref="ReadOnlyMemory{T}.Empty" /> to send no reply.
-    ///     When <c>null</c>, the server echoes the payload unchanged.
+    /// Optional response factory. Receives the datagram payload and the sender endpoint and returns
+    /// the bytes to send back; return <see cref="ReadOnlyMemory{T}.Empty" /> to send no reply.
+    /// When <c>null</c>, the server echoes the payload unchanged.
     /// </summary>
     public Func<ReadOnlyMemory<byte>, IPEndPoint, ReadOnlyMemory<byte>>? OnDatagram { get; set; }
 
     /// <summary>
-    ///     Number of bound listening sockets.
+    /// Number of bound listening sockets.
     /// </summary>
     public int ListenerCount
     {
@@ -50,12 +50,12 @@ public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDispo
     }
 
     /// <summary>
-    ///     Transport type exposed by this server.
+    /// Transport type exposed by this server.
     /// </summary>
     public ServerType ServerType => ServerType.UDP;
 
     /// <summary>
-    ///     Current listening port. Returns 0 when configured for an ephemeral port and stopped.
+    /// Current listening port. Returns 0 when configured for an ephemeral port and stopped.
     /// </summary>
     public int Port
     {
@@ -76,17 +76,17 @@ public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDispo
     }
 
     /// <summary>
-    ///     True when the server is currently listening.
+    /// True when the server is currently listening.
     /// </summary>
     public bool IsRunning => Volatile.Read(ref _started) != 0;
 
     /// <summary>
-    ///     Initializes a UDP server bound to the given endpoint on every <c>StartAsync</c>.
+    /// Initializes a UDP server bound to the given endpoint on every <c>StartAsync</c>.
     /// </summary>
     /// <param name="endPoint">Endpoint supplying the port (and address when not binding all interfaces).</param>
     /// <param name="bindAllInterfaces">
-    ///     When <c>true</c> (default), binds one socket per local unicast address matching the endpoint's
-    ///     address family. When <c>false</c>, binds only <paramref name="endPoint" />.
+    /// When <c>true</c> (default), binds one socket per local unicast address matching the endpoint's
+    /// address family. When <c>false</c>, binds only <paramref name="endPoint" />.
     /// </param>
     public SquidStdUdpServer(IPEndPoint endPoint, bool bindAllInterfaces = true)
     {
@@ -98,13 +98,11 @@ public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDispo
 
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
-    {
-        await StopAsync(CancellationToken.None);
-    }
+        => await StopAsync(CancellationToken.None);
 
     /// <summary>
-    ///     Starts listening, binding sockets and launching a receive loop per socket. Recreates the
-    ///     sockets on every call, so Stop/Start cycles are supported.
+    /// Starts listening, binding sockets and launching a receive loop per socket. Recreates the
+    /// sockets on every call, so Stop/Start cycles are supported.
     /// </summary>
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -138,7 +136,7 @@ public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDispo
     }
 
     /// <summary>
-    ///     Stops listening, closing every socket and awaiting the receive loops.
+    /// Stops listening, closing every socket and awaiting the receive loops.
     /// </summary>
     public async Task StopAsync(CancellationToken cancellationToken)
     {
@@ -199,8 +197,8 @@ public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDispo
     }
 
     /// <summary>
-    ///     Sends a datagram to a specific endpoint, using the listener that last received from it
-    ///     (falling back to the first listener). No-op when no listener is available.
+    /// Sends a datagram to a specific endpoint, using the listener that last received from it
+    /// (falling back to the first listener). No-op when no listener is available.
     /// </summary>
     public async Task SendToAsync(
         IPEndPoint endPoint,
@@ -230,7 +228,7 @@ public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDispo
         catch (Exception ex)
         {
             _logger.Warning(ex, "UDP SendToAsync failed for {EndPoint}", endPoint);
-            OnException?.Invoke(this, new SquidStdTcpExceptionEventArgs(ex));
+            OnException?.Invoke(this, new(ex));
         }
     }
 
@@ -245,7 +243,7 @@ public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDispo
         {
             socket.Bind(endPoint);
 
-            return new UdpClient
+            return new()
             {
                 Client = socket
             };
@@ -274,12 +272,12 @@ public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDispo
                 _endpointListeners[result.RemoteEndPoint] = listener;
                 OnDatagramReceived?.Invoke(
                     this,
-                    new SquidStdUdpDatagramReceivedEventArgs(result.RemoteEndPoint, result.Buffer)
+                    new(result.RemoteEndPoint, result.Buffer)
                 );
 
                 var response = OnDatagram is null
-                    ? result.Buffer
-                    : OnDatagram(result.Buffer, result.RemoteEndPoint);
+                                   ? result.Buffer
+                                   : OnDatagram(result.Buffer, result.RemoteEndPoint);
 
                 if (!response.IsEmpty)
                 {
@@ -301,7 +299,7 @@ public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDispo
             catch (Exception ex)
             {
                 _logger.Warning(ex, "UDP receive loop failed");
-                OnException?.Invoke(this, new SquidStdTcpExceptionEventArgs(ex));
+                OnException?.Invoke(this, new(ex));
             }
         }
     }
@@ -316,24 +314,22 @@ public sealed class SquidStdUdpServer : INetworkServer, IAsyncDisposable, IDispo
         return
         [
             .. NetworkUtils.GetListeningAddresses(_endPoint)
-                .Select(address => new IPEndPoint(address.Address, _endPoint.Port))
+                           .Select(address => new IPEndPoint(address.Address, _endPoint.Port))
         ];
     }
 
     /// <inheritdoc />
     public void Dispose()
-    {
-        DisposeAsync().AsTask().GetAwaiter().GetResult();
-    }
+        => DisposeAsync().AsTask().GetAwaiter().GetResult();
 
     /// <summary>
-    ///     Raised for every datagram received, carrying the sender endpoint. Always raised, regardless of
-    ///     <see cref="OnDatagram" />.
+    /// Raised for every datagram received, carrying the sender endpoint. Always raised, regardless of
+    /// <see cref="OnDatagram" />.
     /// </summary>
     public event EventHandler<SquidStdUdpDatagramReceivedEventArgs>? OnDatagramReceived;
 
     /// <summary>
-    ///     Raised when receive loops throw an unexpected exception.
+    /// Raised when receive loops throw an unexpected exception.
     /// </summary>
     public event EventHandler<SquidStdTcpExceptionEventArgs>? OnException;
 }

@@ -1,7 +1,5 @@
 using DryIoc;
 using MoonSharp.Interpreter;
-using SquidStd.Core.Directories;
-using SquidStd.Scripting.Lua.Data.Config;
 using SquidStd.Scripting.Lua.Data.Internal;
 using SquidStd.Scripting.Lua.Data.Scripts;
 using SquidStd.Scripting.Lua.Interfaces.Events;
@@ -130,7 +128,7 @@ public class LuaScriptEngineServiceTests
             container,
             loadedUserData:
             [
-                new ScriptUserData { UserType = typeof(FiveArgumentUserData) }
+                new() { UserType = typeof(FiveArgumentUserData) }
             ]
         );
 
@@ -191,10 +189,10 @@ public class LuaScriptEngineServiceTests
         var luarcDirectory = temp.Combine("luarc");
         Directory.CreateDirectory(scriptsDirectory);
 
-        return new LuaScriptEngineService(
-            new DirectoriesConfig(temp.Path, []),
+        return new(
+            new(temp.Path, []),
             container,
-            new LuaEngineConfig(luarcDirectory, scriptsDirectory, "SquidStd", "1.0.0"),
+            new(luarcDirectory, scriptsDirectory, "SquidStd", "1.0.0"),
             scriptModules,
             loadedUserData
         );
@@ -210,25 +208,17 @@ public class LuaScriptEngineServiceTests
         public Script? AttachedScript { get; private set; }
 
         public void Attach(Script script)
-        {
-            AttachedScript = script;
-        }
+            => AttachedScript = script;
 
         public DynValue Invoke(
             Closure callback,
             IReadOnlyDictionary<string, object?> payload
         )
-        {
-            return DynValue.Nil;
-        }
+            => DynValue.Nil;
 
-        public void Publish(string eventName, IReadOnlyDictionary<string, object?> payload)
-        {
-        }
+        public void Publish(string eventName, IReadOnlyDictionary<string, object?> payload) { }
 
-        public void Register(string eventName, Closure callback)
-        {
-        }
+        public void Register(string eventName, Closure callback) { }
     }
 
     private sealed record LimitConfig(string Name, int Count);

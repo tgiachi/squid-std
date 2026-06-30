@@ -25,9 +25,9 @@ public class MetricsSnapshotBridgeTests
         using var bridge = new MetricsSnapshotBridge(metrics);
 
         using (var provider = Sdk.CreateMeterProviderBuilder()
-                   .AddMeter(MetricsSnapshotBridge.MeterName)
-                   .AddInMemoryExporter(exported)
-                   .Build())
+                                 .AddMeter(MetricsSnapshotBridge.MeterName)
+                                 .AddInMemoryExporter(exported)
+                                 .Build())
         {
             provider.ForceFlush();
         }
@@ -43,8 +43,8 @@ public class MetricsSnapshotBridgeTests
         foreach (ref readonly var point in metric.GetMetricPoints())
         {
             return metric.MetricType == OtelMetricType.DoubleGauge
-                ? point.GetGaugeLastValueDouble()
-                : point.GetSumDouble();
+                       ? point.GetGaugeLastValueDouble()
+                       : point.GetSumDouble();
         }
 
         return double.NaN;

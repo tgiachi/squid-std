@@ -22,7 +22,7 @@ public class SecretsTests
         try
         {
             Environment.SetEnvironmentVariable(variableName, Convert.ToBase64String(key));
-            var protector = new AesGcmSecretProtector(new SecretsConfig { KeyEnvironmentVariable = variableName });
+            var protector = new AesGcmSecretProtector(new() { KeyEnvironmentVariable = variableName });
             var plaintext = Encoding.UTF8.GetBytes("super-secret-value");
 
             var protectedData = protector.Protect(plaintext);
@@ -49,7 +49,7 @@ public class SecretsTests
         {
             Environment.SetEnvironmentVariable(variableName, null);
             Log.Logger = new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Sink(sink).CreateLogger();
-            var protector = new AesGcmSecretProtector(new SecretsConfig { KeyEnvironmentVariable = variableName });
+            var protector = new AesGcmSecretProtector(new() { KeyEnvironmentVariable = variableName });
             var plaintext = Encoding.UTF8.GetBytes("default-key-secret");
 
             var protectedData = protector.Protect(plaintext);
@@ -110,8 +110,6 @@ public class SecretsTests
         public IReadOnlyList<LogEvent> Events => _events;
 
         public void Emit(LogEvent logEvent)
-        {
-            _events.Add(logEvent);
-        }
+            => _events.Add(logEvent);
     }
 }

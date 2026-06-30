@@ -5,8 +5,8 @@ using SquidStd.Messaging.Abstractions.Interfaces;
 namespace SquidStd.Messaging.Services;
 
 /// <summary>
-///     In-memory <see cref="ITopicProvider" />: fan-out delivery to all current subscribers of a topic.
-///     Transient and at-most-once; exceptions in one subscriber are isolated.
+/// In-memory <see cref="ITopicProvider" />: fan-out delivery to all current subscribers of a topic.
+/// Transient and at-most-once; exceptions in one subscriber are isolated.
 /// </summary>
 public sealed class InMemoryTopicProvider : ITopicProvider
 {
@@ -56,15 +56,11 @@ public sealed class InMemoryTopicProvider : ITopicProvider
 
     /// <inheritdoc />
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
-    {
-        return ValueTask.CompletedTask;
-    }
+        => ValueTask.CompletedTask;
 
     /// <inheritdoc />
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        return DisposeAsync();
-    }
+        => DisposeAsync();
 
     /// <inheritdoc />
     public IDisposable Subscribe(string topic, Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler)
@@ -74,7 +70,7 @@ public sealed class InMemoryTopicProvider : ITopicProvider
 
         var handlers = _topics.GetOrAdd(
             topic,
-            static _ => new ConcurrentDictionary<Guid, Func<ReadOnlyMemory<byte>, CancellationToken, Task>>()
+            static _ => new()
         );
         var id = Guid.NewGuid();
         handlers[id] = handler;

@@ -3,7 +3,7 @@ using SquidStd.Actors.Types;
 namespace SquidStd.Actors.Data;
 
 /// <summary>
-///     Configuration for an <see cref="SquidStd.Actors.Actor{TMessage}" /> mailbox.
+/// Configuration for an <see cref="SquidStd.Actors.Actor{TMessage}" /> mailbox.
 /// </summary>
 public sealed class ActorOptions
 {
@@ -17,9 +17,9 @@ public sealed class ActorOptions
     public ActorErrorPolicy ErrorPolicy { get; init; } = ActorErrorPolicy.Isolate;
 
     /// <summary>
-    ///     How long <see cref="SquidStd.Actors.Actor{TMessage}.DisposeAsync" /> drains queued messages
-    ///     before cancelling in-flight handlers. Queued work runs to completion within this budget;
-    ///     once it elapses, the actor cancels and faults any still-pending requests.
+    /// How long <see cref="SquidStd.Actors.Actor{TMessage}.DisposeAsync" /> drains queued messages
+    /// before cancelling in-flight handlers. Queued work runs to completion within this budget;
+    /// once it elapses, the actor cancels and faults any still-pending requests.
     /// </summary>
     public TimeSpan ShutdownDrainTimeout { get; init; } = TimeSpan.FromSeconds(5);
 }

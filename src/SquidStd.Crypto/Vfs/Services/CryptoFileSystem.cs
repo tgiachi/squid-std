@@ -2,9 +2,9 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using SquidStd.Crypto.Vfs.Data;
 using SquidStd.Crypto.Vfs.Internal;
+using SquidStd.Vfs.Abstractions;
 using SquidStd.Vfs.Abstractions.Data;
 using SquidStd.Vfs.Abstractions.Interfaces;
-using SquidStd.Vfs.Abstractions;
 
 namespace SquidStd.Crypto.Vfs.Services;
 
@@ -35,7 +35,7 @@ public sealed class CryptoFileSystem : ILockableFileSystem, IDisposable
 
         if (headerBytes is null)
         {
-            header = new VaultHeader(
+            header = new(
                 "SQVFS1",
                 1,
                 RandomNumberGenerator.GetBytes(16),
@@ -62,8 +62,8 @@ public sealed class CryptoFileSystem : ILockableFileSystem, IDisposable
 
         var indexBytes = _inner.ReadAllBytesAsync(IndexPath).AsTask().GetAwaiter().GetResult();
         _index = indexBytes is null
-            ? new VaultIndex()
-            : VaultIndex.Parse(VaultBlob.Decrypt(VaultKeyDerivation.DeriveSubKey(master, "index"), indexBytes));
+                     ? new()
+                     : VaultIndex.Parse(VaultBlob.Decrypt(VaultKeyDerivation.DeriveSubKey(master, "index"), indexBytes));
 
         _masterKey = master;
     }
@@ -98,8 +98,8 @@ public sealed class CryptoFileSystem : ILockableFileSystem, IDisposable
             return null;
         }
 
-        var blob = await _inner.ReadAllBytesAsync(entry!.BlobId, cancellationToken).ConfigureAwait(false)
-                   ?? throw new InvalidDataException($"Backing blob '{entry.BlobId}' is missing.");
+        var blob = await _inner.ReadAllBytesAsync(entry!.BlobId, cancellationToken).ConfigureAwait(false) ??
+                   throw new InvalidDataException($"Backing blob '{entry.BlobId}' is missing.");
 
         using var cipher = NewCipher(entry.BlobId);
         using var input = new MemoryStream(blob);
@@ -110,7 +110,9 @@ public sealed class CryptoFileSystem : ILockableFileSystem, IDisposable
     }
 
     public async ValueTask WriteAllBytesAsync(
-        string path, ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default
+        string path,
+        ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken = default
     )
     {
         EnsureUnlocked();
@@ -124,15 +126,15 @@ public sealed class CryptoFileSystem : ILockableFileSystem, IDisposable
         await cipher.EncryptAsync(input, output, cancellationToken).ConfigureAwait(false);
 
         await _inner.WriteAllBytesAsync(blobId, output.ToArray(), cancellationToken).ConfigureAwait(false);
-        _index.Set(normalized, new VaultIndexEntry(blobId, data.Length, DateTimeOffset.UtcNow));
+        _index.Set(normalized, new(blobId, data.Length, DateTimeOffset.UtcNow));
     }
 
     public async Task<Stream> OpenReadAsync(string path, CancellationToken cancellationToken = default)
     {
-        var data = await ReadAllBytesAsync(path, cancellationToken).ConfigureAwait(false)
-                   ?? throw new FileNotFoundException($"No file at '{path}'.", path);
+        var data = await ReadAllBytesAsync(path, cancellationToken).ConfigureAwait(false) ??
+                   throw new FileNotFoundException($"No file at '{path}'.", path);
 
-        return new MemoryStream(data, writable: false);
+        return new MemoryStream(data, false);
     }
 
     public Task<Stream> OpenWriteAsync(string path, CancellationToken cancellationToken = default)
@@ -157,7 +159,8 @@ public sealed class CryptoFileSystem : ILockableFileSystem, IDisposable
     }
 
     public async IAsyncEnumerable<VfsEntry> ListAsync(
-        string? prefix = null, [EnumeratorCancellation] CancellationToken cancellationToken = default
+        string? prefix = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
         EnsureUnlocked();
@@ -170,21 +173,17 @@ public sealed class CryptoFileSystem : ILockableFileSystem, IDisposable
                 continue;
             }
 
-            yield return new VfsEntry(logicalPath, entry.Size, entry.ModifiedUtc);
+            yield return new(logicalPath, entry.Size, entry.ModifiedUtc);
 
             await Task.CompletedTask;
         }
     }
 
     private EntryCipher NewCipher(string blobId)
-    {
-        return new EntryCipher(VaultKeyDerivation.DeriveSubKey(_masterKey!, "entry:" + blobId), _options.ChunkSize);
-    }
+        => new(VaultKeyDerivation.DeriveSubKey(_masterKey!, "entry:" + blobId), _options.ChunkSize);
 
     private static string NewBlobId()
-    {
-        return Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(16));
-    }
+        => Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(16));
 
     private void FlushIndex()
     {
@@ -203,6 +202,7 @@ public sealed class CryptoFileSystem : ILockableFileSystem, IDisposable
 
         var paths = new List<string>();
         var enumerator = _inner.ListAsync().GetAsyncEnumerator();
+
         try
         {
             while (enumerator.MoveNextAsync().AsTask().GetAwaiter().GetResult())
@@ -239,9 +239,11 @@ public sealed class CryptoFileSystem : ILockableFileSystem, IDisposable
         {
             case IDisposable disposable:
                 disposable.Dispose();
+
                 break;
             case IAsyncDisposable asyncDisposable:
                 asyncDisposable.DisposeAsync().AsTask().GetAwaiter().GetResult();
+
                 break;
         }
     }

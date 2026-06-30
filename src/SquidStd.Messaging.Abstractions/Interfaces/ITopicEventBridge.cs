@@ -1,8 +1,8 @@
 namespace SquidStd.Messaging.Abstractions.Interfaces;
 
 /// <summary>
-///     Bridges a topic into the in-process event bus: each message of type <c>T</c> on the topic is republished
-///     as a <c>TopicMessageEvent</c>.
+/// Bridges a topic into the in-process event bus: each message of type <c>T</c> on the topic is republished
+/// as a <c>TopicMessageEvent</c>.
 /// </summary>
 public interface ITopicEventBridge
 {

@@ -1,4 +1,3 @@
-using SquidStd.Actors.Data;
 using SquidStd.Tests.Actors.Support;
 
 namespace SquidStd.Tests.Actors;
@@ -10,11 +9,11 @@ public class ActorLifecycleTests
     {
         var gate = new TaskCompletionSource();
         var actor = new ProbeActor();
-        await actor.TellAsync(new Hold(gate)); // in-flight, blocks until released (ignores cancellation)
-        await actor.TellAsync(new Append("a")); // queued behind the hold
-        await actor.TellAsync(new Append("b")); // queued behind the hold
-        var logTask = actor.AskAsync<GetLog, string>(new GetLog()); // queued last
-        await Task.Delay(50); // let the request enqueue before dispose completes the mailbox
+        await actor.TellAsync(new Hold(gate));               // in-flight, blocks until released (ignores cancellation)
+        await actor.TellAsync(new Append("a"));              // queued behind the hold
+        await actor.TellAsync(new Append("b"));              // queued behind the hold
+        var logTask = actor.AskAsync<GetLog, string>(new()); // queued last
+        await Task.Delay(50);                                // let the request enqueue before dispose completes the mailbox
 
         var disposeTask = actor.DisposeAsync();
         gate.SetResult(); // release the hold so the queue can drain
@@ -29,9 +28,9 @@ public class ActorLifecycleTests
     public async Task DisposeAsync_DrainTimeout_FaultsOutstandingAsk()
     {
         var gate = new TaskCompletionSource();
-        var actor = new ProbeActor(new ActorOptions { ShutdownDrainTimeout = TimeSpan.FromMilliseconds(50) });
-        await actor.TellAsync(new Hold(gate)); // in-flight, never released and ignores cancellation
-        var ask = actor.AskAsync<GetLog, string>(new GetLog()); // queued behind, never reached
+        var actor = new ProbeActor(new() { ShutdownDrainTimeout = TimeSpan.FromMilliseconds(50) });
+        await actor.TellAsync(new Hold(gate));           // in-flight, never released and ignores cancellation
+        var ask = actor.AskAsync<GetLog, string>(new()); // queued behind, never reached
         await Task.Delay(50);
 
         await actor.DisposeAsync(); // drain exceeds the budget; the still-pending request is faulted
@@ -47,8 +46,7 @@ public class ActorLifecycleTests
         var actor = new ProbeActor();
         await actor.DisposeAsync();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(async () => await actor.TellAsync(new Append("x"))
-        );
+        await Assert.ThrowsAsync<ObjectDisposedException>(async () => await actor.TellAsync(new Append("x")));
     }
 
     [Fact]

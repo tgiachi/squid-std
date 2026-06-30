@@ -22,7 +22,8 @@ public static class RegisterConfigSectionExtension
         if (container.IsRegistered<List<ConfigRegistrationData>>())
         {
             var entries = container.Resolve<List<ConfigRegistrationData>>();
-            var sameSection = entries.FirstOrDefault(entry => string.Equals(
+            var sameSection = entries.FirstOrDefault(
+                entry => string.Equals(
                     entry.SectionName,
                     sectionName,
                     StringComparison.Ordinal
@@ -45,7 +46,7 @@ public static class RegisterConfigSectionExtension
             }
         }
 
-        var factory = createDefault ?? (() => new TConfig());
+        var factory = createDefault ?? (() => new());
         container.AddToRegisterTypedList(new ConfigRegistrationData(sectionName, configType, () => factory(), priority));
 
         return container;

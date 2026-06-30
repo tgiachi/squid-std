@@ -3,7 +3,7 @@ using System.Threading.Channels;
 namespace SquidStd.Messaging.Internal;
 
 /// <summary>
-///     Per-queue in-memory state: the buffer channel, the registered handlers, and the round-robin index.
+/// Per-queue in-memory state: the buffer channel, the registered handlers, and the round-robin index.
 /// </summary>
 internal sealed class InMemoryQueue
 {
@@ -13,7 +13,7 @@ internal sealed class InMemoryQueue
     private int _roundRobinIndex;
 
     public Channel<QueuedMessage> Channel { get; } = System.Threading.Channels.Channel.CreateUnbounded<QueuedMessage>(
-        new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }
+        new() { SingleReader = true, SingleWriter = false }
     );
 
     public Task? ConsumerLoop { get; set; }
@@ -39,15 +39,11 @@ internal sealed class InMemoryQueue
 
     /// <summary>Decrements the buffered depth and returns the new value.</summary>
     public int DecrementDepth()
-    {
-        return Interlocked.Decrement(ref _depth);
-    }
+        => Interlocked.Decrement(ref _depth);
 
     /// <summary>Increments the buffered depth and returns the new value.</summary>
     public int IncrementDepth()
-    {
-        return Interlocked.Increment(ref _depth);
-    }
+        => Interlocked.Increment(ref _depth);
 
     /// <summary>Returns the next handler in round-robin order, or null when none are registered.</summary>
     public Func<ReadOnlyMemory<byte>, CancellationToken, Task>? NextHandler()

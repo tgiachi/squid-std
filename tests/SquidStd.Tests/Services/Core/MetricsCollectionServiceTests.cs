@@ -10,7 +10,7 @@ public class MetricsCollectionServiceTests
     [Fact]
     public void GetSnapshot_WhenNotStarted_ReturnsEmptySnapshot()
     {
-        using var service = new MetricsCollectionService([], new MetricsConfig());
+        using var service = new MetricsCollectionService([], new());
 
         var snapshot = service.GetSnapshot();
 
@@ -23,7 +23,7 @@ public class MetricsCollectionServiceTests
     {
         using var service = new MetricsCollectionService(
             [new CountingMetricProvider("jobs", "completed.total", 11)],
-            new MetricsConfig
+            new()
             {
                 IntervalMilliseconds = 10,
                 LogEnabled = false
@@ -45,7 +45,7 @@ public class MetricsCollectionServiceTests
     {
         using var service = new MetricsCollectionService(
             [new CountingMetricProvider("jobs", "pending.total", 7)],
-            new MetricsConfig
+            new()
             {
                 IntervalMilliseconds = 10,
                 LogEnabled = false
@@ -74,7 +74,7 @@ public class MetricsCollectionServiceTests
         bus.RegisterListener(secondListener);
         using var service = new MetricsCollectionService(
             [new CountingMetricProvider("events", "published.total", 5)],
-            new MetricsConfig
+            new()
             {
                 IntervalMilliseconds = 1000,
                 LogEnabled = false
@@ -99,7 +99,7 @@ public class MetricsCollectionServiceTests
         var provider = new CountingMetricProvider("jobs", "pending.total", 7);
         using var service = new MetricsCollectionService(
             [provider],
-            new MetricsConfig
+            new()
             {
                 Enabled = false,
                 IntervalMilliseconds = 10,
@@ -122,7 +122,7 @@ public class MetricsCollectionServiceTests
                 new ThrowingMetricProvider("broken"),
                 new CountingMetricProvider("timer", "callbacks.total", 3)
             ],
-            new MetricsConfig
+            new()
             {
                 IntervalMilliseconds = 10,
                 LogEnabled = false
@@ -144,7 +144,7 @@ public class MetricsCollectionServiceTests
         var provider = new CountingMetricProvider("bus", "dispatch.total", 1);
         using var service = new MetricsCollectionService(
             [provider],
-            new MetricsConfig
+            new()
             {
                 IntervalMilliseconds = 10,
                 LogEnabled = false
@@ -199,7 +199,7 @@ public class MetricsCollectionServiceTests
         {
             Interlocked.Increment(ref _collectionCount);
 
-            return ValueTask.FromResult<IReadOnlyList<MetricSample>>([new MetricSample(_metricName, _value)]);
+            return ValueTask.FromResult<IReadOnlyList<MetricSample>>([new(_metricName, _value)]);
         }
     }
 
@@ -213,9 +213,7 @@ public class MetricsCollectionServiceTests
         }
 
         public ValueTask<IReadOnlyList<MetricSample>> CollectAsync(CancellationToken cancellationToken = default)
-        {
-            throw new InvalidOperationException("Synthetic test failure.");
-        }
+            => throw new InvalidOperationException("Synthetic test failure.");
     }
 
     private sealed class MetricsCollectedListener : IEventListener<MetricsCollectedEvent>

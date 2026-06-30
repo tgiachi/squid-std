@@ -38,12 +38,12 @@ builder.Services.AddSquidStdTelemetry(new TelemetryOptions { ServiceName = "orde
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `OpenTelemetryContainerExtensions` | `AddSquidStdTelemetry(...)` for the DryIoc/worker host. |
-| `OpenTelemetryServiceCollectionExtensions` | `AddSquidStdTelemetry(...)` for the ASP.NET Core host. |
-| `TelemetryService` | Configures tracing/metrics providers and exporters from `TelemetryOptions`. |
-| `MetricsSnapshotBridge` | Exports the existing SquidStd metrics snapshot to OTel instruments. |
+| Type                                       | Purpose                                                                     |
+|--------------------------------------------|-----------------------------------------------------------------------------|
+| `OpenTelemetryContainerExtensions`         | `AddSquidStdTelemetry(...)` for the DryIoc/worker host.                     |
+| `OpenTelemetryServiceCollectionExtensions` | `AddSquidStdTelemetry(...)` for the ASP.NET Core host.                      |
+| `TelemetryService`                         | Configures tracing/metrics providers and exporters from `TelemetryOptions`. |
+| `MetricsSnapshotBridge`                    | Exports the existing SquidStd metrics snapshot to OTel instruments.         |
 
 ## License
 

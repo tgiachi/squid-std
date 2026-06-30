@@ -32,12 +32,12 @@ container.AddSqsMessaging(new SqsOptions { Aws = new AwsConfigEntry { Region = "
 
 ## Key types
 
-| Type                                | Purpose                                  |
-|-------------------------------------|------------------------------------------|
-| `SqsMessagingRegistrationExtensions` | `AddSqsMessaging(...)` registration.    |
-| `SqsQueueProvider`                  | SQS-backed `IQueueProvider`.             |
-| `SqsTopicProvider`                  | SNS+SQS-backed `ITopicProvider`.         |
-| `SqsOptions`                        | AWS connection + queue/topic configuration. |
+| Type                                 | Purpose                                     |
+|--------------------------------------|---------------------------------------------|
+| `SqsMessagingRegistrationExtensions` | `AddSqsMessaging(...)` registration.        |
+| `SqsQueueProvider`                   | SQS-backed `IQueueProvider`.                |
+| `SqsTopicProvider`                   | SNS+SQS-backed `ITopicProvider`.            |
+| `SqsOptions`                         | AWS connection + queue/topic configuration. |
 
 ## Related
 

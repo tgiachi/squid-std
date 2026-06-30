@@ -25,11 +25,11 @@ captures every `SquidStd.*` source automatically.
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
+| Type               | Purpose                                                                    |
+|--------------------|----------------------------------------------------------------------------|
 | `TelemetryOptions` | Service name, OTLP endpoint/protocol, sampling and exporter configuration. |
-| `OtlpProtocolType` | OTLP transport: gRPC or HTTP. |
-| `SquidStdActivity` | Shared `ActivitySource` and the `SquidStd.*` source naming convention. |
+| `OtlpProtocolType` | OTLP transport: gRPC or HTTP.                                              |
+| `SquidStdActivity` | Shared `ActivitySource` and the `SquidStd.*` source naming convention.     |
 
 ## License
 

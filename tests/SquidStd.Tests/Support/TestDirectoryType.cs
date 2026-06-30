@@ -1,7 +1,7 @@
 namespace SquidStd.Tests.Support;
 
 /// <summary>
-///     Directory type values used to exercise <c>DirectoriesConfig</c> enum overloads.
+/// Directory type values used to exercise <c>DirectoriesConfig</c> enum overloads.
 /// </summary>
 public enum TestDirectoryType
 {

@@ -3,7 +3,7 @@ using SquidStd.Workers.Abstractions.Data;
 namespace SquidStd.Workers.Manager.Interfaces;
 
 /// <summary>
-///     Read access to the manager's in-memory view of known workers.
+/// Read access to the manager's in-memory view of known workers.
 /// </summary>
 public interface IWorkerRegistry
 {

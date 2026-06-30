@@ -4,8 +4,8 @@ using SquidStd.Network.Interfaces.Client;
 namespace SquidStd.Tests.Support;
 
 /// <summary>
-///     In-memory <see cref="INetworkConnection" /> for testing sessions without sockets.
-///     Records sent payloads and close calls; SendCallback can inject failures.
+/// In-memory <see cref="INetworkConnection" /> for testing sessions without sockets.
+/// Records sent payloads and close calls; SendCallback can inject failures.
 /// </summary>
 public sealed class FakeNetworkConnection : INetworkConnection
 {

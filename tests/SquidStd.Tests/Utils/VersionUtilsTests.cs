@@ -24,7 +24,5 @@ public class VersionUtilsTests
 
     [Fact]
     public void GetVersion_NullAssembly_Throws()
-    {
-        Assert.Throws<ArgumentNullException>(() => VersionUtils.GetVersion(null!));
-    }
+        => Assert.Throws<ArgumentNullException>(() => VersionUtils.GetVersion(null!));
 }

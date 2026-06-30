@@ -8,36 +8,10 @@ namespace SquidStd.Tests.Network;
 
 public sealed class TcpMaxFrameLengthTests
 {
-    // 4-byte big-endian length prefix framer.
-    private sealed class LengthPrefixFramer : INetFramer
-    {
-        public bool TryReadFrame(ReadOnlySpan<byte> buffer, out int frameLength)
-        {
-            frameLength = 0;
-
-            if (buffer.Length < 4)
-            {
-                return false;
-            }
-
-            var payloadLength = BinaryPrimitives.ReadInt32BigEndian(buffer);
-            var total = 4 + payloadLength;
-
-            if (buffer.Length < total)
-            {
-                return false;
-            }
-
-            frameLength = total;
-
-            return true;
-        }
-    }
-
     [Fact]
     public async Task OversizedDeclaredFrame_ClosesConnection()
     {
-        var (server, client) = await ConnectedPairAsync(maxFrameLength: 1024);
+        var (server, client) = await ConnectedPairAsync(1024);
 
         try
         {
@@ -61,7 +35,7 @@ public sealed class TcpMaxFrameLengthTests
     [Fact]
     public async Task FrameAtTheLimit_IsDelivered()
     {
-        var (server, client) = await ConnectedPairAsync(maxFrameLength: 1024);
+        var (server, client) = await ConnectedPairAsync(1024);
         var received = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
         client.OnDataReceived += (_, e) => received.TrySetResult(e.Data.ToArray());
 
@@ -99,8 +73,13 @@ public sealed class TcpMaxFrameLengthTests
 
         // "server" side here is just the sending end; the receiving end (client) enforces the cap.
         var server = new SquidStdTcpClient(serverSocket);
-        var client = new SquidStdTcpClient(clientSocket, middlewares: null, framer: new LengthPrefixFramer(),
-            codec: null, maxFrameLength: maxFrameLength);
+        var client = new SquidStdTcpClient(
+            clientSocket,
+            middlewares: null,
+            new LengthPrefixFramer(),
+            null,
+            maxFrameLength: maxFrameLength
+        );
 
         await server.StartAsync(CancellationToken.None);
         await client.StartAsync(CancellationToken.None);
@@ -123,5 +102,31 @@ public sealed class TcpMaxFrameLengthTests
         }
 
         return condition();
+    }
+
+    // 4-byte big-endian length prefix framer.
+    private sealed class LengthPrefixFramer : INetFramer
+    {
+        public bool TryReadFrame(ReadOnlySpan<byte> buffer, out int frameLength)
+        {
+            frameLength = 0;
+
+            if (buffer.Length < 4)
+            {
+                return false;
+            }
+
+            var payloadLength = BinaryPrimitives.ReadInt32BigEndian(buffer);
+            var total = 4 + payloadLength;
+
+            if (buffer.Length < total)
+            {
+                return false;
+            }
+
+            frameLength = total;
+
+            return true;
+        }
     }
 }

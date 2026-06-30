@@ -16,8 +16,8 @@ public static class MailRegistrationExtensions
     extension(IContainer container)
     {
         /// <summary>
-        ///     Registers a single mailbox poller: the options, the protocol-specific <see cref="IMailReader" />, the
-        ///     polling service, and the timer-wheel pump (only if not already registered).
+        /// Registers a single mailbox poller: the options, the protocol-specific <see cref="IMailReader" />, the
+        /// polling service, and the timer-wheel pump (only if not already registered).
         /// </summary>
         public IContainer AddMail(MailOptions options)
         {

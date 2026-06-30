@@ -6,8 +6,8 @@ using HttpMethod = Elastic.Transport.HttpMethod;
 namespace SquidStd.Search.Elasticsearch.Linq;
 
 /// <summary>
-///     Executes a translated <see cref="ElasticQuery" /> against Elasticsearch. Synchronous LINQ execution is not
-///     supported — use the async terminals in <see cref="ElasticQueryableExtensions" />.
+/// Executes a translated <see cref="ElasticQuery" /> against Elasticsearch. Synchronous LINQ execution is not
+/// supported — use the async terminals in <see cref="ElasticQueryableExtensions" />.
 /// </summary>
 public sealed class ElasticQueryProvider : IQueryProvider
 {
@@ -23,28 +23,20 @@ public sealed class ElasticQueryProvider : IQueryProvider
     }
 
     public IQueryable CreateQuery(Expression expression)
-    {
-        return (IQueryable)Activator.CreateInstance(
+        => (IQueryable)Activator.CreateInstance(
             typeof(ElasticQueryable<>).MakeGenericType(_elementType),
             this,
             expression
         )!;
-    }
 
     public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
-    {
-        return new ElasticQueryable<TElement>(this, expression);
-    }
+        => new ElasticQueryable<TElement>(this, expression);
 
     public object? Execute(Expression expression)
-    {
-        throw new NotSupportedException("Use the async terminals (ToListAsync/CountAsync/FirstOrDefaultAsync).");
-    }
+        => throw new NotSupportedException("Use the async terminals (ToListAsync/CountAsync/FirstOrDefaultAsync).");
 
     public TResult Execute<TResult>(Expression expression)
-    {
-        throw new NotSupportedException("Use the async terminals (ToListAsync/CountAsync/FirstOrDefaultAsync).");
-    }
+        => throw new NotSupportedException("Use the async terminals (ToListAsync/CountAsync/FirstOrDefaultAsync).");
 
     /// <summary>Runs a count and returns the total.</summary>
     public async Task<long> CountAsync(Expression expression, CancellationToken cancellationToken)
@@ -61,11 +53,11 @@ public sealed class ElasticQueryProvider : IQueryProvider
     {
         var query = ElasticExpressionTranslator.Translate(expression, _elementType);
         var (status, body) = await _transport.SendAsync(
-            HttpMethod.POST,
-            $"/{_index}/_search",
-            query.ToRequestBody(),
-            cancellationToken
-        );
+                                 HttpMethod.POST,
+                                 $"/{_index}/_search",
+                                 query.ToRequestBody(),
+                                 cancellationToken
+                             );
 
         if (status == 404)
         {

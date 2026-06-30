@@ -70,14 +70,14 @@ public sealed class CounterView : TuiComposedView<CounterViewModel>
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `TuiViewModel` | ViewModel base (ObservableObject + activation hooks + `Navigator`). |
-| `TuiView<TViewModel>` | View base: a Terminal.Gui `Window` with a typed ViewModel and a binder. |
-| `ViewBinder` | One-way / two-way / command binding; fluent typed + `AutoBind` by convention. |
-| `ITuiNavigator` | ViewModel-first stack navigation (`NavigateToAsync`, `BackAsync`). |
-| `TuiApplicationHost` | Boots the Terminal.Gui loop with a root ViewModel. |
-| `RegisterTui()` / `RegisterView<,>()` | DryIoc registration. |
+| Type                                  | Purpose                                                                       |
+|---------------------------------------|-------------------------------------------------------------------------------|
+| `TuiViewModel`                        | ViewModel base (ObservableObject + activation hooks + `Navigator`).           |
+| `TuiView<TViewModel>`                 | View base: a Terminal.Gui `Window` with a typed ViewModel and a binder.       |
+| `ViewBinder`                          | One-way / two-way / command binding; fluent typed + `AutoBind` by convention. |
+| `ITuiNavigator`                       | ViewModel-first stack navigation (`NavigateToAsync`, `BackAsync`).            |
+| `TuiApplicationHost`                  | Boots the Terminal.Gui loop with a root ViewModel.                            |
+| `RegisterTui()` / `RegisterView<,>()` | DryIoc registration.                                                          |
 
 ## License
 

@@ -13,7 +13,7 @@ public class SnapshotEnvelopeCodecTests
             Version = 1,
             LastSequenceId = 99,
             Checksum = 123456u,
-            Bucket = new EntitySnapshotBucket
+            Bucket = new()
             {
                 TypeId = 3,
                 TypeName = "PlayerData",

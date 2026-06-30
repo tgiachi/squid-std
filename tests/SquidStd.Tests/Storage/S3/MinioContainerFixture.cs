@@ -3,7 +3,7 @@ using Testcontainers.Minio;
 namespace SquidStd.Tests.Storage.S3;
 
 /// <summary>
-///     Starts a MinIO container once for the whole collection and exposes its endpoint and credentials.
+/// Starts a MinIO container once for the whole collection and exposes its endpoint and credentials.
 /// </summary>
 public sealed class MinioContainerFixture : IAsyncLifetime
 {
@@ -18,14 +18,10 @@ public sealed class MinioContainerFixture : IAsyncLifetime
     public string SecretKey => _container.GetSecretKey();
 
     public Task DisposeAsync()
-    {
-        return _container.DisposeAsync().AsTask();
-    }
+        => _container.DisposeAsync().AsTask();
 
     public Task InitializeAsync()
-    {
-        return _container.StartAsync();
-    }
+        => _container.StartAsync();
 }
 
 [CollectionDefinition(Name)]

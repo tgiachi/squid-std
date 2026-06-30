@@ -8,8 +8,8 @@ using SquidStd.Templating.Interfaces;
 namespace SquidStd.Templating.Services;
 
 /// <summary>
-///     Scriban-backed <see cref="ITemplateRenderer" />. Named templates are compiled and cached; ad-hoc
-///     strings are parsed per call. On start it auto-loads <c>templates/**/*.tmpl</c>.
+/// Scriban-backed <see cref="ITemplateRenderer" />. Named templates are compiled and cached; ad-hoc
+/// strings are parsed per call. On start it auto-loads <c>templates/**/*.tmpl</c>.
 /// </summary>
 public sealed class ScribanTemplateRenderer : ITemplateRenderer, ISquidStdService
 {
@@ -45,9 +45,7 @@ public sealed class ScribanTemplateRenderer : ITemplateRenderer, ISquidStdServic
 
     /// <inheritdoc />
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        return ValueTask.CompletedTask;
-    }
+        => ValueTask.CompletedTask;
 
     /// <inheritdoc />
     public void Register(string name, string template)

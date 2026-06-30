@@ -33,9 +33,7 @@ public class DirectoriesUtilsTests
 
     [Fact]
     public void GetFiles_NonExistentDirectory_ReturnsEmpty()
-    {
-        Assert.Empty(DirectoriesUtils.GetFiles(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))));
-    }
+        => Assert.Empty(DirectoriesUtils.GetFiles(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))));
 
     [Fact]
     public void GetFiles_NonRecursive_ExcludesNestedFiles()

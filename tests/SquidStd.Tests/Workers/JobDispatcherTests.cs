@@ -26,7 +26,8 @@ public class JobDispatcherTests
         var boom = new RecordingJobHandler("resize") { ThrowOnHandle = new InvalidOperationException("boom") };
         var dispatcher = new JobDispatcher([boom]);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => dispatcher.DispatchAsync(
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => dispatcher.DispatchAsync(
                 Job("resize"),
                 CancellationToken.None
             )
@@ -38,15 +39,14 @@ public class JobDispatcherTests
     {
         var dispatcher = new JobDispatcher([new RecordingJobHandler("resize")]);
 
-        var ex = await Assert.ThrowsAsync<JobHandlerNotFoundException>(() =>
-            dispatcher.DispatchAsync(Job("unknown"), CancellationToken.None)
-        );
+        var ex = await Assert.ThrowsAsync<JobHandlerNotFoundException>(
+                     () =>
+                         dispatcher.DispatchAsync(Job("unknown"), CancellationToken.None)
+                 );
 
         Assert.Equal("unknown", ex.JobName);
     }
 
     private static JobRequest Job(string name)
-    {
-        return new JobRequest(name, new Dictionary<string, string>());
-    }
+        => new(name, new Dictionary<string, string>());
 }

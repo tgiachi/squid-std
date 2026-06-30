@@ -5,14 +5,14 @@ using SquidStd.Storage.Abstractions.Interfaces;
 namespace SquidStd.Storage.Services;
 
 /// <summary>
-///     YAML object storage built on top of binary storage.
+/// YAML object storage built on top of binary storage.
 /// </summary>
 public sealed class YamlObjectStorageService : IObjectStorageService
 {
     private readonly IStorageService _storageService;
 
     /// <summary>
-    ///     Initializes YAML object storage.
+    /// Initializes YAML object storage.
     /// </summary>
     /// <param name="storageService">Underlying binary storage service.</param>
     public YamlObjectStorageService(IStorageService storageService)
@@ -22,21 +22,15 @@ public sealed class YamlObjectStorageService : IObjectStorageService
 
     /// <inheritdoc />
     public ValueTask<bool> DeleteAsync(string key, CancellationToken cancellationToken = default)
-    {
-        return _storageService.DeleteAsync(key, cancellationToken);
-    }
+        => _storageService.DeleteAsync(key, cancellationToken);
 
     /// <inheritdoc />
     public ValueTask<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
-    {
-        return _storageService.ExistsAsync(key, cancellationToken);
-    }
+        => _storageService.ExistsAsync(key, cancellationToken);
 
     /// <inheritdoc />
     public IAsyncEnumerable<string> ListKeysAsync(string? prefix = null, CancellationToken cancellationToken = default)
-    {
-        return _storageService.ListKeysAsync(prefix, cancellationToken);
-    }
+        => _storageService.ListKeysAsync(prefix, cancellationToken);
 
     /// <inheritdoc />
     public async ValueTask<T?> LoadAsync<T>(string key, CancellationToken cancellationToken = default)

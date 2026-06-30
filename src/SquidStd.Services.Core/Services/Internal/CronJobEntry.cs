@@ -3,7 +3,7 @@ using Cronos;
 namespace SquidStd.Services.Core.Services.Internal;
 
 /// <summary>
-///     Internal mutable state for a registered cron job.
+/// Internal mutable state for a registered cron job.
 /// </summary>
 internal sealed class CronJobEntry
 {

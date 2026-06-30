@@ -4,7 +4,7 @@ using System.Web;
 namespace SquidStd.Caching.Abstractions.Data.Config;
 
 /// <summary>
-///     Parsed cache connection string of the form <c>scheme://[user:pass@]host[:port][?params]</c>.
+/// Parsed cache connection string of the form <c>scheme://[user:pass@]host[:port][?params]</c>.
 /// </summary>
 public sealed class CacheConnectionString
 {
@@ -62,14 +62,14 @@ public sealed class CacheConnectionString
 
         var query = HttpUtility.ParseQueryString(uri.Query);
         var parameters = query.AllKeys
-            .Where(static key => key is not null)
-            .ToFrozenDictionary(
-                key => key!,
-                key => query[key] ?? string.Empty,
-                StringComparer.OrdinalIgnoreCase
-            );
+                              .Where(static key => key is not null)
+                              .ToFrozenDictionary(
+                                  key => key!,
+                                  key => query[key] ?? string.Empty,
+                                  StringComparer.OrdinalIgnoreCase
+                              );
 
-        return new CacheConnectionString(
+        return new(
             uri.Scheme,
             uri.Host,
             uri.Port > 0 ? uri.Port : null,
@@ -81,13 +81,11 @@ public sealed class CacheConnectionString
 
     /// <summary>Builds <see cref="CacheOptions" /> from the query parameters.</summary>
     public CacheOptions ToCacheOptions()
-    {
-        return new CacheOptions
+        => new()
         {
             DefaultTtl = Parameters.TryGetValue("defaultTtlSeconds", out var ttl) && int.TryParse(ttl, out var seconds)
-                ? TimeSpan.FromSeconds(seconds)
-                : null,
+                             ? TimeSpan.FromSeconds(seconds)
+                             : null,
             KeyPrefix = Parameters.TryGetValue("keyPrefix", out var prefix) ? prefix : string.Empty
         };
-    }
 }

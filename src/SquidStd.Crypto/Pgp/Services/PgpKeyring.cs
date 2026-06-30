@@ -9,7 +9,7 @@ using SquidStd.Crypto.Pgp.Internal;
 namespace SquidStd.Crypto.Pgp.Services;
 
 /// <summary>
-///     Thread-safe in-memory keyring indexed by identity, key id, and fingerprint.
+/// Thread-safe in-memory keyring indexed by identity, key id, and fingerprint.
 /// </summary>
 public sealed class PgpKeyring : IPgpKeyring
 {
@@ -25,8 +25,8 @@ public sealed class PgpKeyring : IPgpKeyring
         ArgumentException.ThrowIfNullOrWhiteSpace(armored);
 
         var key = armored.Contains(SecretHeader, StringComparison.Ordinal)
-            ? PgpKeyFactory.FromArmored(ExportPublic(armored), armored)
-            : PgpKeyFactory.FromArmored(armored, null);
+                      ? PgpKeyFactory.FromArmored(ExportPublic(armored), armored)
+                      : PgpKeyFactory.FromArmored(armored, null);
 
         _byKeyId[key.KeyId] = key;
 
@@ -67,9 +67,7 @@ public sealed class PgpKeyring : IPgpKeyring
 
     /// <inheritdoc />
     public bool Contains(string identityOrKeyIdOrFingerprint)
-    {
-        return Find(identityOrKeyIdOrFingerprint) is not null;
-    }
+        => Find(identityOrKeyIdOrFingerprint) is not null;
 
     /// <inheritdoc />
     public async Task LoadAsync(IPgpKeyStore store, CancellationToken cancellationToken = default)
@@ -95,15 +93,14 @@ public sealed class PgpKeyring : IPgpKeyring
 
     private static string ExportPublic(string secretArmored)
     {
-        using var input = PgpUtilities.GetDecoderStream(
-            new MemoryStream(Encoding.UTF8.GetBytes(secretArmored))
-        );
-        var ring = new PgpSecretKeyRingBundle(input).GetKeyRings().Cast<PgpSecretKeyRing>().First();
+        using var input = PgpUtilities.GetDecoderStream(new MemoryStream(Encoding.UTF8.GetBytes(secretArmored)));
+        var ring = new PgpSecretKeyRingBundle(input).GetKeyRings().First();
 
         using var output = new MemoryStream();
+
         using (var armor = new ArmoredOutputStream(output))
         {
-            foreach (PgpSecretKey secretKey in ring.GetSecretKeys())
+            foreach (var secretKey in ring.GetSecretKeys())
             {
                 secretKey.PublicKey.Encode(armor);
             }

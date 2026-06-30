@@ -20,13 +20,9 @@ public abstract class TuiComposedView<TViewModel> : TuiView<TViewModel>
     /// <summary>Returns the declarative node tree for this view.</summary>
     protected abstract TuiNode<TViewModel> Compose();
 
-    protected sealed override void BuildLayout()
-    {
-    }
+    protected sealed override void BuildLayout() { }
 
-    protected sealed override void Bind(ViewBinder binder)
-    {
-    }
+    protected sealed override void Bind(ViewBinder binder) { }
 
     protected override void OnInitialize(ViewBinder binder)
     {

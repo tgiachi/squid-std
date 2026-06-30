@@ -18,9 +18,7 @@ public class ResourceUtilsTests
 
     [Fact]
     public void ConvertResourceNameToPath_NoExtension_Throws()
-    {
-        Assert.Throws<ArgumentException>(() => ResourceUtils.ConvertResourceNameToPath("Asm.file", "Asm"));
-    }
+        => Assert.Throws<ArgumentException>(() => ResourceUtils.ConvertResourceNameToPath("Asm.file", "Asm"));
 
     [Fact]
     public void ConvertResourceNameToPath_ValidName_ReturnsFilePath()
@@ -32,15 +30,11 @@ public class ResourceUtilsTests
 
     [Fact]
     public void ConvertResourceNameToPath_WrongNamespace_Throws()
-    {
-        Assert.Throws<ArgumentException>(() => ResourceUtils.ConvertResourceNameToPath("Other.cfg.json", "Asm"));
-    }
+        => Assert.Throws<ArgumentException>(() => ResourceUtils.ConvertResourceNameToPath("Other.cfg.json", "Asm"));
 
     [Fact]
     public void EmbeddedNameToPath_StripsPrefixAndConvertsDots()
-    {
-        Assert.Equal("Folder/file/txt", ResourceUtils.EmbeddedNameToPath("Asm.Folder.file.txt", "Asm"));
-    }
+        => Assert.Equal("Folder/file/txt", ResourceUtils.EmbeddedNameToPath("Asm.Folder.file.txt", "Asm"));
 
     [Fact]
     public void GetDirectoryPathFromResourceName_RemovesBaseNamespace()
@@ -68,11 +62,10 @@ public class ResourceUtilsTests
 
     [Fact]
     public void GetEmbeddedResourceStream_MissingResource_Throws()
-    {
-        Assert.Throws<FileNotFoundException>(() =>
-            ResourceUtils.GetEmbeddedResourceStream(TestAssembly, "does-not-exist.bin")
+        => Assert.Throws<FileNotFoundException>(
+            () =>
+                ResourceUtils.GetEmbeddedResourceStream(TestAssembly, "does-not-exist.bin")
         );
-    }
 
     [Fact]
     public void GetEmbeddedResourceString_ExistingResource_ReturnsContent()
@@ -84,18 +77,11 @@ public class ResourceUtilsTests
 
     [Fact]
     public void GetFileNameFromResourceName_ReturnsFileNameWithExtension()
-    {
-        Assert.Equal("DefaultUiFont.ttf", ResourceUtils.GetFileNameFromResourceName("Assets.Fonts.DefaultUiFont.ttf"));
-    }
+        => Assert.Equal("DefaultUiFont.ttf", ResourceUtils.GetFileNameFromResourceName("Assets.Fonts.DefaultUiFont.ttf"));
 
-    [Theory]
-    [InlineData("a/b/c.txt", "c.txt")]
-    [InlineData("a\\b\\c.txt", "c.txt")]
-    [InlineData("c.txt", "c.txt")]
+    [Theory, InlineData("a/b/c.txt", "c.txt"), InlineData("a\\b\\c.txt", "c.txt"), InlineData("c.txt", "c.txt")]
     public void GetFileNameFromResourcePath_ReturnsFinalSegment(string input, string expected)
-    {
-        Assert.Equal(expected, ResourceUtils.GetFileNameFromResourcePath(input));
-    }
+        => Assert.Equal(expected, ResourceUtils.GetFileNameFromResourcePath(input));
 
     [Fact]
     public void ReadEmbeddedResource_ExistingResource_ReturnsContent()
@@ -108,8 +94,7 @@ public class ResourceUtilsTests
 
     [Fact]
     public void ReadEmbeddedResource_MissingResource_Throws()
-    {
-        Assert.Throws<FileNotFoundException>(() => ResourceUtils.ReadEmbeddedResource("does-not-exist.bin", TestAssembly)
+        => Assert.Throws<FileNotFoundException>(
+            () => ResourceUtils.ReadEmbeddedResource("does-not-exist.bin", TestAssembly)
         );
-    }
 }

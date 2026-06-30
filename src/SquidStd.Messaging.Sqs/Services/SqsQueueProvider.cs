@@ -13,10 +13,10 @@ using SquidStd.Messaging.Sqs.Internal;
 namespace SquidStd.Messaging.Sqs.Services;
 
 /// <summary>
-///     AWS SQS <see cref="IQueueProvider" />: named queues are created with a redrive policy to a
-///     "&lt;queue&gt;&lt;suffix&gt;" dead-letter queue (maxReceiveCount = MaxDeliveryAttempts). Subscribers
-///     long-poll; a handler that throws leaves the message un-acked so SQS redelivers and eventually
-///     dead-letters it. Payloads travel base64-encoded in the message body.
+/// AWS SQS <see cref="IQueueProvider" />: named queues are created with a redrive policy to a
+/// "&lt;queue&gt;&lt;suffix&gt;" dead-letter queue (maxReceiveCount = MaxDeliveryAttempts). Subscribers
+/// long-poll; a handler that throws leaves the message un-acked so SQS redelivers and eventually
+/// dead-letters it. Payloads travel base64-encoded in the message body.
 /// </summary>
 public sealed class SqsQueueProvider : IQueueProvider
 {
@@ -66,7 +66,7 @@ public sealed class SqsQueueProvider : IQueueProvider
         var url = await EnsureQueueAsync(queueName, cancellationToken);
 
         await client.SendMessageAsync(
-            new SendMessageRequest { QueueUrl = url, MessageBody = Convert.ToBase64String(payload.Span) },
+            new() { QueueUrl = url, MessageBody = Convert.ToBase64String(payload.Span) },
             cancellationToken
         );
 
@@ -83,9 +83,7 @@ public sealed class SqsQueueProvider : IQueueProvider
 
     /// <inheritdoc />
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        return DisposeAsync();
-    }
+        => DisposeAsync();
 
     /// <inheritdoc />
     public IDisposable Subscribe(string queueName, Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler)
@@ -132,9 +130,9 @@ public sealed class SqsQueueProvider : IQueueProvider
             {
                 var dlqName = name + _deadLetterSuffix;
                 var dlqUrl = (await client.CreateQueueAsync(
-                    new CreateQueueRequest { QueueName = dlqName },
-                    cancellationToken
-                )).QueueUrl;
+                                  new CreateQueueRequest { QueueName = dlqName },
+                                  cancellationToken
+                              )).QueueUrl;
                 var dlqArn = await GetQueueArnAsync(client, dlqUrl, cancellationToken);
 
                 var redrivePolicy = JsonSerializer.Serialize(
@@ -146,13 +144,13 @@ public sealed class SqsQueueProvider : IQueueProvider
                 );
 
                 url = (await client.CreateQueueAsync(
-                    new CreateQueueRequest
-                    {
-                        QueueName = name,
-                        Attributes = new Dictionary<string, string> { ["RedrivePolicy"] = redrivePolicy }
-                    },
-                    cancellationToken
-                )).QueueUrl;
+                           new CreateQueueRequest
+                           {
+                               QueueName = name,
+                               Attributes = new() { ["RedrivePolicy"] = redrivePolicy }
+                           },
+                           cancellationToken
+                       )).QueueUrl;
             }
 
             _queueUrls[name] = url;
@@ -172,9 +170,9 @@ public sealed class SqsQueueProvider : IQueueProvider
     )
     {
         var response = await client.GetQueueAttributesAsync(
-            new GetQueueAttributesRequest { QueueUrl = queueUrl, AttributeNames = ["QueueArn"] },
-            cancellationToken
-        );
+                           new() { QueueUrl = queueUrl, AttributeNames = ["QueueArn"] },
+                           cancellationToken
+                       );
 
         return response.Attributes["QueueArn"];
     }
@@ -203,9 +201,7 @@ public sealed class SqsQueueProvider : IQueueProvider
         }
 
         public void Start()
-        {
-            _loop = Task.Run(() => RunAsync(_cts.Token));
-        }
+            => _loop = Task.Run(() => RunAsync(_cts.Token));
 
         private async Task RunAsync(CancellationToken cancellationToken)
         {
@@ -233,15 +229,15 @@ public sealed class SqsQueueProvider : IQueueProvider
                 try
                 {
                     response = await _client.ReceiveMessageAsync(
-                        new ReceiveMessageRequest
-                        {
-                            QueueUrl = url,
-                            MaxNumberOfMessages = _provider._options.MaxNumberOfMessages,
-                            WaitTimeSeconds = _provider._options.WaitTimeSeconds,
-                            VisibilityTimeout = (int)_provider._options.VisibilityTimeout.TotalSeconds
-                        },
-                        cancellationToken
-                    );
+                                   new ReceiveMessageRequest
+                                   {
+                                       QueueUrl = url,
+                                       MaxNumberOfMessages = _provider._options.MaxNumberOfMessages,
+                                       WaitTimeSeconds = _provider._options.WaitTimeSeconds,
+                                       VisibilityTimeout = (int)_provider._options.VisibilityTimeout.TotalSeconds
+                                   },
+                                   cancellationToken
+                               );
                 }
                 catch (OperationCanceledException)
                 {

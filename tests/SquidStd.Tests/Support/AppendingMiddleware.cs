@@ -4,8 +4,8 @@ using SquidStd.Network.Interfaces.Middleware;
 namespace SquidStd.Tests.Support;
 
 /// <summary>
-///     Test middleware that appends a marker byte to every payload, on both receive and send paths.
-///     Used to verify pipeline ordering and transformation.
+/// Test middleware that appends a marker byte to every payload, on both receive and send paths.
+/// Used to verify pipeline ordering and transformation.
 /// </summary>
 public sealed class AppendingMiddleware : INetMiddleware
 {
@@ -21,18 +21,14 @@ public sealed class AppendingMiddleware : INetMiddleware
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default
     )
-    {
-        return ValueTask.FromResult<ReadOnlyMemory<byte>>(Append(data));
-    }
+        => ValueTask.FromResult<ReadOnlyMemory<byte>>(Append(data));
 
     public ValueTask<ReadOnlyMemory<byte>> ProcessSendAsync(
         SquidStdTcpClient? client,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default
     )
-    {
-        return ValueTask.FromResult<ReadOnlyMemory<byte>>(Append(data));
-    }
+        => ValueTask.FromResult<ReadOnlyMemory<byte>>(Append(data));
 
     private byte[] Append(ReadOnlyMemory<byte> data)
     {

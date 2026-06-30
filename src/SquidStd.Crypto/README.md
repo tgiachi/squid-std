@@ -52,14 +52,14 @@ await keyring.LoadAsync(container.Resolve<IPgpKeyStore>());
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `IPgpService` | Key generation, encrypt/decrypt, sign/verify, and combined encrypt+sign / decrypt+verify. |
-| `IPgpKeyring` | Stateful, indexed keyring: import keys and save/load via an `IPgpKeyStore`. |
-| `IPgpKeyStore` | Pluggable keyring persistence backend. |
-| `FilePgpKeyStore` | One armored `.asc` per key (gpg-interoperable). |
-| `AesGcmPgpKeyStore` | The whole keyring serialized to a single file, encrypted at rest via `ISecretProtector`. |
-| `CryptoFileSystem` | `ILockableFileSystem` that encrypts content and names over any `IVirtualFileSystem`. |
+| Type                | Purpose                                                                                   |
+|---------------------|-------------------------------------------------------------------------------------------|
+| `IPgpService`       | Key generation, encrypt/decrypt, sign/verify, and combined encrypt+sign / decrypt+verify. |
+| `IPgpKeyring`       | Stateful, indexed keyring: import keys and save/load via an `IPgpKeyStore`.               |
+| `IPgpKeyStore`      | Pluggable keyring persistence backend.                                                    |
+| `FilePgpKeyStore`   | One armored `.asc` per key (gpg-interoperable).                                           |
+| `AesGcmPgpKeyStore` | The whole keyring serialized to a single file, encrypted at rest via `ISecretProtector`.  |
+| `CryptoFileSystem`  | `ILockableFileSystem` that encrypts content and names over any `IVirtualFileSystem`.      |
 
 ## Key stores
 

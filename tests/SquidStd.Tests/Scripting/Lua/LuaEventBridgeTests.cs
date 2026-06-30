@@ -12,13 +12,13 @@ public class LuaEventBridgeTests
         var bridge = new LuaEventBridge();
         bridge.Attach(script);
         var callback = script.DoString(
-                """
-                return function(payload)
-                    return payload.actor.name .. ':' .. payload.values[2]
-                end
-                """
-            )
-            .Function;
+                                 """
+                                 return function(payload)
+                                     return payload.actor.name .. ':' .. payload.values[2]
+                                 end
+                                 """
+                             )
+                             .Function;
 
         var result = bridge.Invoke(
             callback,
@@ -49,16 +49,16 @@ public class LuaEventBridgeTests
         var bridge = new LuaEventBridge();
         bridge.Attach(script);
         var callback = script.DoString(
-                """
-                calls = 0
-                captured = nil
-                return function(payload)
-                    calls = calls + 1
-                    captured = payload.name
-                end
-                """
-            )
-            .Function;
+                                 """
+                                 calls = 0
+                                 captured = nil
+                                 return function(payload)
+                                     calls = calls + 1
+                                     captured = payload.name
+                                 end
+                                 """
+                             )
+                             .Function;
 
         bridge.Register("Spawned", callback);
         bridge.Publish("spawned", new Dictionary<string, object?> { ["name"] = "slime" });

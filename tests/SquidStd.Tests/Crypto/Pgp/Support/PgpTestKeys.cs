@@ -1,10 +1,11 @@
+using System.Text;
 using PgpCore;
 
 namespace SquidStd.Tests.Crypto.Pgp.Support;
 
 /// <summary>
-///     Generates two throwaway armored RSA-2048 key pairs once for the whole assembly. Key generation is
-///     expensive, so tests share this fixture via <see cref="PgpKeysCollection" />.
+/// Generates two throwaway armored RSA-2048 key pairs once for the whole assembly. Key generation is
+/// expensive, so tests share this fixture via <see cref="PgpKeysCollection" />.
 /// </summary>
 public sealed class PgpTestKeys
 {
@@ -38,7 +39,5 @@ public sealed class PgpTestKeys
     }
 
     private static string ReadAll(MemoryStream stream)
-    {
-        return System.Text.Encoding.UTF8.GetString(stream.ToArray());
-    }
+        => Encoding.UTF8.GetString(stream.ToArray());
 }

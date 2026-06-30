@@ -3,9 +3,9 @@ using SquidStd.Network.Interfaces.Codecs;
 namespace SquidStd.Tests.Support;
 
 /// <summary>
-///     Deterministic stateful test codec: XORs each byte with a counter-based keystream (seed + position).
-///     Decode and Encode keep independent positions, mirroring the separate receive/send state of real
-///     stream ciphers. Two codecs created with the same seed cancel out (one encodes, the other decodes).
+/// Deterministic stateful test codec: XORs each byte with a counter-based keystream (seed + position).
+/// Decode and Encode keep independent positions, mirroring the separate receive/send state of real
+/// stream ciphers. Two codecs created with the same seed cancel out (one encodes, the other decodes).
 /// </summary>
 public sealed class CountingXorCodec : ITransportCodec
 {

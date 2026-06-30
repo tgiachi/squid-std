@@ -108,7 +108,8 @@ public class SquidStdAspNetCoreBuilderExtensionsTests
         using var temp = new TempDirectory();
         var builder = CreateBuilder(temp.Path);
 
-        var ex = Assert.Throws<InvalidOperationException>(() => builder.UseSquidStd(
+        var ex = Assert.Throws<InvalidOperationException>(
+            () => builder.UseSquidStd(
                 options => options.ConfigName = "app",
                 _ => new Container()
             )

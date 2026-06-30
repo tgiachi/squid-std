@@ -15,13 +15,9 @@ public abstract class TuiViewModel : ObservableObject
 
     /// <summary>Invoked after the screen becomes active. Default is a no-op.</summary>
     public virtual ValueTask OnActivatedAsync()
-    {
-        return ValueTask.CompletedTask;
-    }
+        => ValueTask.CompletedTask;
 
     /// <summary>Invoked after the screen is removed or hidden. Default is a no-op.</summary>
     public virtual ValueTask OnDeactivatedAsync()
-    {
-        return ValueTask.CompletedTask;
-    }
+        => ValueTask.CompletedTask;
 }

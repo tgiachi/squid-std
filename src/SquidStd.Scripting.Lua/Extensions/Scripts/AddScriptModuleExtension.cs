@@ -6,7 +6,7 @@ using SquidStd.Scripting.Lua.Data.Internal;
 namespace SquidStd.Scripting.Lua.Extensions.Scripts;
 
 /// <summary>
-///     Extension methods for registering Lua script modules in the dependency injection container.
+/// Extension methods for registering Lua script modules in the dependency injection container.
 /// </summary>
 public static class AddScriptModuleExtension
 {
@@ -14,7 +14,7 @@ public static class AddScriptModuleExtension
     extension(IContainer container)
     {
         /// <summary>
-        ///     Registers a user data type with the container for Lua scripting.
+        /// Registers a user data type with the container for Lua scripting.
         /// </summary>
         public IContainer RegisterLuaUserData(Type userDataType)
         {
@@ -29,7 +29,7 @@ public static class AddScriptModuleExtension
         }
 
         /// <summary>
-        ///     Registers a user data type with the container for Lua scripting using generics.
+        /// Registers a user data type with the container for Lua scripting using generics.
         /// </summary>
         public IContainer RegisterLuaUserData<TUserData>()
         {
@@ -39,7 +39,7 @@ public static class AddScriptModuleExtension
         }
 
         /// <summary>
-        ///     Registers a Lua script module type with the container.
+        /// Registers a Lua script module type with the container.
         /// </summary>
         /// <param name="scriptModule">The type of the script module to register.</param>
         /// <returns>The container for method chaining.</returns>
@@ -59,13 +59,11 @@ public static class AddScriptModuleExtension
         }
 
         /// <summary>
-        ///     Registers a Lua script module type with the container using a generic type parameter.
+        /// Registers a Lua script module type with the container using a generic type parameter.
         /// </summary>
         /// <typeparam name="TScriptModule">The type of the script module to register.</typeparam>
         /// <returns>The container for method chaining.</returns>
         public IContainer RegisterScriptModule<TScriptModule>() where TScriptModule : class
-        {
-            return container.RegisterScriptModule(typeof(TScriptModule));
-        }
+            => container.RegisterScriptModule(typeof(TScriptModule));
     }
 }

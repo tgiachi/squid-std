@@ -13,8 +13,8 @@ using SquidStd.Network.Pipeline;
 namespace SquidStd.Network.Client;
 
 /// <summary>
-///     Represents a connected TCP client with async send/receive loops,
-///     middleware processing, lifecycle events, and recent byte history.
+/// Represents a connected TCP client with async send/receive loops,
+/// middleware processing, lifecycle events, and recent byte history.
 /// </summary>
 public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, IDisposable
 {
@@ -44,12 +44,12 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     private int _started;
 
     /// <summary>
-    ///     Receives payload chunk size in bytes.
+    /// Receives payload chunk size in bytes.
     /// </summary>
     public int ReceiveBufferSize { get; }
 
     /// <summary>
-    ///     Local endpoint used for this connection, when available.
+    /// Local endpoint used for this connection, when available.
     /// </summary>
     public EndPoint? LocalEndPoint
     {
@@ -67,7 +67,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    ///     Gets the number of bytes currently available in the receive circular buffer.
+    /// Gets the number of bytes currently available in the receive circular buffer.
     /// </summary>
     public int AvailableBytes
     {
@@ -81,7 +81,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    ///     Gets whether the receive circular buffer is full.
+    /// Gets whether the receive circular buffer is full.
     /// </summary>
     public bool IsReceiveBufferFull
     {
@@ -95,12 +95,12 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    ///     Unique session identifier for this client connection.
+    /// Unique session identifier for this client connection.
     /// </summary>
     public long SessionId { get; }
 
     /// <summary>
-    ///     Client remote endpoint, when connected.
+    /// Client remote endpoint, when connected.
     /// </summary>
     public EndPoint? RemoteEndPoint
     {
@@ -118,18 +118,18 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    ///     True when the underlying socket is connected and client not closed.
+    /// True when the underlying socket is connected and client not closed.
     /// </summary>
     public bool IsConnected => _socket.Connected && Volatile.Read(ref _closed) == 0;
 
     /// <summary>
-    ///     Creates a client wrapper for an accepted socket.
+    /// Creates a client wrapper for an accepted socket.
     /// </summary>
     /// <param name="socket">Connected socket.</param>
     /// <param name="middlewares">Optional middleware list.</param>
     /// <param name="framer">
-    ///     Optional framer. When supplied, the receive loop accumulates middleware output and
-    ///     emits <see cref="OnDataReceived" /> once per complete frame instead of once per socket read.
+    /// Optional framer. When supplied, the receive loop accumulates middleware output and
+    /// emits <see cref="OnDataReceived" /> once per complete frame instead of once per socket read.
     /// </param>
     /// <param name="receiveBufferSize">Receive chunk size in bytes.</param>
     /// <param name="historyBufferCapacity">Max number of received bytes to keep in history.</param>
@@ -150,12 +150,10 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
         receiveBufferSize,
         historyBufferCapacity,
         maxFrameLength
-    )
-    {
-    }
+    ) { }
 
     /// <summary>
-    ///     Creates a client wrapper for an accepted socket using the supplied transport stream.
+    /// Creates a client wrapper for an accepted socket using the supplied transport stream.
     /// </summary>
     public SquidStdTcpClient(
         Socket socket,
@@ -173,10 +171,10 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
 
         _socket = socket;
         _stream = stream;
-        _middlewarePipeline = new NetMiddlewarePipeline(middlewares);
+        _middlewarePipeline = new(middlewares);
         _framer = framer;
         _codec = codec;
-        _receiveBuffer = new CircularBuffer<byte>(historyBufferCapacity);
+        _receiveBuffer = new(historyBufferCapacity);
         ReceiveBufferSize = receiveBufferSize;
         _maxFrameLength = maxFrameLength;
         SessionId = Interlocked.Increment(ref _sessionIdSequence);
@@ -207,7 +205,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    ///     Closes the client connection and raises disconnect event once.
+    /// Closes the client connection and raises disconnect event once.
     /// </summary>
     public async Task CloseAsync(CancellationToken cancellationToken = default)
     {
@@ -248,7 +246,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    ///     Sends a payload to the connected socket.
+    /// Sends a payload to the connected socket.
     /// </summary>
     public async Task SendAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
@@ -304,7 +302,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    ///     Adds a middleware component to this client pipeline.
+    /// Adds a middleware component to this client pipeline.
     /// </summary>
     public SquidStdTcpClient AddMiddleware(INetMiddleware middleware)
     {
@@ -314,7 +312,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    ///     Creates an outbound client and connects to the specified endpoint.
+    /// Creates an outbound client and connects to the specified endpoint.
     /// </summary>
     public static async Task<SquidStdTcpClient> ConnectAsync(
         IPEndPoint endPoint,
@@ -334,7 +332,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    ///     Consumes bytes from the front of the receive circular buffer.
+    /// Consumes bytes from the front of the receive circular buffer.
     /// </summary>
     public int ConsumeBytes(int count)
     {
@@ -357,24 +355,20 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    ///     Checks whether this client pipeline contains at least one middleware instance of the specified type.
+    /// Checks whether this client pipeline contains at least one middleware instance of the specified type.
     /// </summary>
     public bool ContainsMiddleware<TMiddleware>()
         where TMiddleware : INetMiddleware
-    {
-        return _middlewarePipeline.ContainsMiddleware<TMiddleware>();
-    }
+        => _middlewarePipeline.ContainsMiddleware<TMiddleware>();
 
     /// <summary>
-    ///     Returns a snapshot of recent received bytes from the circular history buffer.
+    /// Returns a snapshot of recent received bytes from the circular history buffer.
     /// </summary>
     public byte[] GetRecentReceivedBytes()
-    {
-        return PeekData();
-    }
+        => PeekData();
 
     /// <summary>
-    ///     Peeks at data in the receive circular buffer without consuming it.
+    /// Peeks at data in the receive circular buffer without consuming it.
     /// </summary>
     public byte[] PeekData(int count = 0)
     {
@@ -398,26 +392,22 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
     }
 
     /// <summary>
-    ///     Atomically swaps the transport codec for this connection. The new codec takes effect from the next
-    ///     socket read; the caller must trigger the swap at a read boundary (no old-regime bytes still pending).
+    /// Atomically swaps the transport codec for this connection. The new codec takes effect from the next
+    /// socket read; the caller must trigger the swap at a read boundary (no old-regime bytes still pending).
     /// </summary>
     /// <param name="codec">The new codec, or null to remove transport transformation.</param>
     public void SwapCodec(ITransportCodec? codec)
-    {
-        Volatile.Write(ref _codec, codec);
-    }
+        => Volatile.Write(ref _codec, codec);
 
     /// <summary>
-    ///     Removes all middleware components of the specified type from this client pipeline.
+    /// Removes all middleware components of the specified type from this client pipeline.
     /// </summary>
     public bool RemoveMiddleware<TMiddleware>()
         where TMiddleware : INetMiddleware
-    {
-        return _middlewarePipeline.RemoveMiddleware<TMiddleware>();
-    }
+        => _middlewarePipeline.RemoveMiddleware<TMiddleware>();
 
     /// <summary>
-    ///     Starts the receive loop and raises connect event.
+    /// Starts the receive loop and raises connect event.
     /// </summary>
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -495,9 +485,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
                 // receive loop close the connection before the buffer grows further.
                 if (_pendingLength > _maxFrameLength)
                 {
-                    throw new InvalidDataException(
-                        $"Incoming frame exceeds the maximum of {_maxFrameLength} bytes."
-                    );
+                    throw new InvalidDataException($"Incoming frame exceeds the maximum of {_maxFrameLength} bytes.");
                 }
 
                 break;
@@ -524,7 +512,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
 
             ConsumePending(frameLength);
 
-            OnDataReceived?.Invoke(this, new SquidStdTcpDataReceivedEventArgs(this, frame));
+            OnDataReceived?.Invoke(this, new(this, frame));
         }
     }
 
@@ -535,7 +523,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
             SessionId,
             RemoteEndPoint
         );
-        OnConnected?.Invoke(this, new SquidStdTcpClientEventArgs(this));
+        OnConnected?.Invoke(this, new(this));
     }
 
     private void RaiseDisconnected()
@@ -545,7 +533,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
             SessionId,
             RemoteEndPoint
         );
-        OnDisconnected?.Invoke(this, new SquidStdTcpClientEventArgs(this));
+        OnDisconnected?.Invoke(this, new(this));
     }
 
     private void RaiseException(Exception exception)
@@ -556,7 +544,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
             SessionId,
             RemoteEndPoint
         );
-        OnException?.Invoke(this, new SquidStdTcpExceptionEventArgs(exception, this));
+        OnException?.Invoke(this, new(exception, this));
     }
 
     private async Task ReceiveLoopAsync()
@@ -568,9 +556,9 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
             while (!_internalCancellationTokenSource.IsCancellationRequested && IsConnected)
             {
                 var received = await _stream.ReadAsync(
-                    buffer.AsMemory(0, ReceiveBufferSize),
-                    _internalCancellationTokenSource.Token
-                );
+                                   buffer.AsMemory(0, ReceiveBufferSize),
+                                   _internalCancellationTokenSource.Token
+                               );
 
                 if (received <= 0)
                 {
@@ -592,10 +580,10 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
 
                     var chunkMemory = new ReadOnlyMemory<byte>(chunk, 0, received);
                     var processed = await _middlewarePipeline.ExecuteAsync(
-                        this,
-                        chunkMemory,
-                        _internalCancellationTokenSource.Token
-                    );
+                                        this,
+                                        chunkMemory,
+                                        _internalCancellationTokenSource.Token
+                                    );
 
                     if (processed.IsEmpty)
                     {
@@ -607,7 +595,7 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
                         // Fresh copy so the event handler can outlive the pooled chunk.
                         var payload = new byte[processed.Length];
                         processed.CopyTo(payload);
-                        OnDataReceived?.Invoke(this, new SquidStdTcpDataReceivedEventArgs(this, payload));
+                        OnDataReceived?.Invoke(this, new(this, payload));
                     }
                     else
                     {
@@ -652,27 +640,25 @@ public sealed class SquidStdTcpClient : INetworkConnection, IAsyncDisposable, ID
 
     /// <inheritdoc />
     public void Dispose() // Sync-over-async: best effort. Prefer DisposeAsync.
-    {
-        DisposeAsync().AsTask().GetAwaiter().GetResult();
-    }
+        => DisposeAsync().AsTask().GetAwaiter().GetResult();
 
     /// <summary>
-    ///     Raised when the client is fully connected and receive loop starts.
+    /// Raised when the client is fully connected and receive loop starts.
     /// </summary>
     public event EventHandler<SquidStdTcpClientEventArgs>? OnConnected;
 
     /// <summary>
-    ///     Raised when the client is disconnected.
+    /// Raised when the client is disconnected.
     /// </summary>
     public event EventHandler<SquidStdTcpClientEventArgs>? OnDisconnected;
 
     /// <summary>
-    ///     Raised when data is received (after middleware pipeline).
+    /// Raised when data is received (after middleware pipeline).
     /// </summary>
     public event EventHandler<SquidStdTcpDataReceivedEventArgs>? OnDataReceived;
 
     /// <summary>
-    ///     Raised when receive/send loops throw an exception.
+    /// Raised when receive/send loops throw an exception.
     /// </summary>
     public event EventHandler<SquidStdTcpExceptionEventArgs>? OnException;
 }

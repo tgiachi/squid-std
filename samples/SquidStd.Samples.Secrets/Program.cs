@@ -1,12 +1,10 @@
 using System.Text;
-using SquidStd.Aws.Abstractions.Data.Config;
-using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Interfaces.Secrets;
 using SquidStd.Secrets.Aws.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 
 var bootstrap = SquidStdBootstrap.Create(
-    new SquidStdOptions
+    new()
     {
         ConfigName = "squidstd",
         RootDirectory = AppContext.BaseDirectory
@@ -16,30 +14,36 @@ var bootstrap = SquidStdBootstrap.Create(
 #region step-1
 
 // Wire the KMS-backed protector and the Secrets Manager store against a LocalStack endpoint.
-bootstrap.ConfigureServices(container =>
-{
-    container.RegisterKmsSecretProtector(options =>
+bootstrap.ConfigureServices(
+    container =>
     {
-        options.KeyId = "alias/app";
-        options.Aws = new AwsConfigEntry
-        {
-            Region = "us-east-1",
-            ServiceUrl = "http://localhost:4566"
-        };
-    });
+        container.RegisterKmsSecretProtector(
+            options =>
+            {
+                options.KeyId = "alias/app";
+                options.Aws = new()
+                {
+                    Region = "us-east-1",
+                    ServiceUrl = "http://localhost:4566"
+                };
+            }
+        );
 
-    container.RegisterAwsSecretsManagerStore(options =>
-    {
-        options.NamePrefix = "myapp/";
-        options.Aws = new AwsConfigEntry
-        {
-            Region = "us-east-1",
-            ServiceUrl = "http://localhost:4566"
-        };
-    });
+        container.RegisterAwsSecretsManagerStore(
+            options =>
+            {
+                options.NamePrefix = "myapp/";
+                options.Aws = new()
+                {
+                    Region = "us-east-1",
+                    ServiceUrl = "http://localhost:4566"
+                };
+            }
+        );
 
-    return container;
-});
+        return container;
+    }
+);
 
 #endregion
 
@@ -54,6 +58,7 @@ if (Environment.GetEnvironmentVariable("SQUIDSTD_RUN_AWS") is null)
 {
     Console.WriteLine("Set SQUIDSTD_RUN_AWS=1 with LocalStack running to exercise the live calls.");
     await bootstrap.StopAsync();
+
     return;
 }
 

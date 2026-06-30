@@ -4,23 +4,13 @@ namespace SquidStd.Tests.Tui.Internal;
 
 public class PropertyPathTests
 {
-    private sealed class Sample
-    {
-        public string Name { get; set; } = string.Empty;
-        public int Count;
-    }
-
     [Fact]
     public void NameOf_Property_ReturnsName()
-    {
-        Assert.Equal("Name", PropertyPath.NameOf<Sample, string>(s => s.Name));
-    }
+        => Assert.Equal("Name", PropertyPath.NameOf<Sample, string>(s => s.Name));
 
     [Fact]
     public void NameOf_Field_ReturnsName()
-    {
-        Assert.Equal("Count", PropertyPath.NameOf<Sample, int>(s => s.Count));
-    }
+        => Assert.Equal("Count", PropertyPath.NameOf<Sample, int>(s => s.Count));
 
     [Fact]
     public void Setter_Property_WritesValue()
@@ -35,7 +25,11 @@ public class PropertyPathTests
 
     [Fact]
     public void NameOf_NonMemberExpression_Throws()
+        => Assert.Throws<ArgumentException>(() => PropertyPath.NameOf<Sample, int>(s => s.Count + 1));
+
+    private sealed class Sample
     {
-        Assert.Throws<ArgumentException>(() => PropertyPath.NameOf<Sample, int>(s => s.Count + 1));
+        public int Count;
+        public string Name { get; set; } = string.Empty;
     }
 }

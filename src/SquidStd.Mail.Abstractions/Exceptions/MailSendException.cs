@@ -5,7 +5,5 @@ public sealed class MailSendException : Exception
 {
     /// <summary>Initializes the exception with a message and the underlying cause.</summary>
     public MailSendException(string message, Exception innerException)
-        : base(message, innerException)
-    {
-    }
+        : base(message, innerException) { }
 }

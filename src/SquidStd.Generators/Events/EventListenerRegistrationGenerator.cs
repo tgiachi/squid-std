@@ -51,6 +51,7 @@ public sealed class EventListenerRegistrationGenerator : IIncrementalGenerator
         for (var i = 0; i < listenerType.AllInterfaces.Length; i++)
         {
             var interfaceType = listenerType.AllInterfaces[i];
+
             if (!IsEventListenerInterface(interfaceType))
             {
                 continue;
@@ -61,12 +62,12 @@ public sealed class EventListenerRegistrationGenerator : IIncrementalGenerator
                 continue;
             }
 
-            var isSupported = !listenerType.IsGenericType
-                              && IsAccessibleFromGeneratedSource(listenerType)
-                              && IsAccessibleFromGeneratedSource(eventType);
+            var isSupported = !listenerType.IsGenericType &&
+                              IsAccessibleFromGeneratedSource(listenerType) &&
+                              IsAccessibleFromGeneratedSource(eventType);
 
             candidates.Add(
-                new EventListenerCandidate(
+                new(
                     eventType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                     listenerType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                     listenerType.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat),
@@ -83,8 +84,8 @@ public sealed class EventListenerRegistrationGenerator : IIncrementalGenerator
     {
         var originalDefinition = interfaceType.OriginalDefinition;
 
-        return originalDefinition.MetadataName == EventListenerMetadataName
-               && originalDefinition.ContainingNamespace.ToDisplayString() == EventListenerNamespace;
+        return originalDefinition.MetadataName == EventListenerMetadataName &&
+               originalDefinition.ContainingNamespace.ToDisplayString() == EventListenerNamespace;
     }
 
     private static bool IsAccessibleFromGeneratedSource(INamedTypeSymbol type)
@@ -134,6 +135,7 @@ public sealed class EventListenerRegistrationGenerator : IIncrementalGenerator
                 }
 
                 var key = candidate.EventTypeName + "|" + candidate.ListenerTypeName;
+
                 if (seenKeys.Add(key))
                 {
                     candidates.Add(candidate);
@@ -141,7 +143,8 @@ public sealed class EventListenerRegistrationGenerator : IIncrementalGenerator
             }
         }
 
-        candidates.Sort(static (left, right) => string.Compare(
+        candidates.Sort(
+            static (left, right) => string.Compare(
                 left.ListenerTypeName,
                 right.ListenerTypeName,
                 StringComparison.Ordinal

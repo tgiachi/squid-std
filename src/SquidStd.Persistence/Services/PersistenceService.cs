@@ -234,7 +234,5 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
     }
 
     public async ValueTask DisposeAsync()
-    {
-        await StopAsync(CancellationToken.None);
-    }
+        => await StopAsync(CancellationToken.None);
 }

@@ -65,12 +65,12 @@ await sender.SendAsync(new OutgoingMailMessage
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `MailRegistrationExtensions` | `AddMail(...)` registration (IMAP/POP3 polling). |
-| `MailSenderRegistrationExtensions` | `AddMailSender(...)` registration (SMTP). |
-| `ImapMailReader` / `Pop3MailReader` | `IMailReader` implementations. |
-| `MailKitMailSender` | `IMailSender` implementation over SMTP. |
+| Type                                | Purpose                                          |
+|-------------------------------------|--------------------------------------------------|
+| `MailRegistrationExtensions`        | `AddMail(...)` registration (IMAP/POP3 polling). |
+| `MailSenderRegistrationExtensions`  | `AddMailSender(...)` registration (SMTP).        |
+| `ImapMailReader` / `Pop3MailReader` | `IMailReader` implementations.                   |
+| `MailKitMailSender`                 | `IMailSender` implementation over SMTP.          |
 
 ## Related
 

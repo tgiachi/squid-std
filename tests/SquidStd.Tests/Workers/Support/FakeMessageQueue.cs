@@ -6,24 +6,16 @@ namespace SquidStd.Tests.Workers.Support;
 public sealed class FakeMessageQueue : IMessageQueue
 {
     public Task PublishAsync<TMessage>(string queueName, TMessage message, CancellationToken cancellationToken = default)
-    {
-        return Task.CompletedTask;
-    }
+        => Task.CompletedTask;
 
     public IDisposable Subscribe<TMessage>(string queueName, IQueueMessageListener<TMessage> listener)
-    {
-        return new Subscription();
-    }
+        => new Subscription();
 
     public IDisposable Subscribe<TMessage>(string queueName, IQueueMessageListenerAsync<TMessage> listener)
-    {
-        return new Subscription();
-    }
+        => new Subscription();
 
     private sealed class Subscription : IDisposable
     {
-        public void Dispose()
-        {
-        }
+        public void Dispose() { }
     }
 }

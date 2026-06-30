@@ -3,10 +3,10 @@ using System.Collections.Concurrent;
 namespace SquidStd.Core.Pool;
 
 /// <summary>
-///     Thread-safe, non-blocking object pool. <see cref="Get" /> reuses a retained instance or creates a new
-///     one through the factory; <see cref="Return" /> stocks the instance back (up to a bound), optionally
-///     resetting it first. Instances dropped over the bound, and those still pooled on dispose, are disposed
-///     when <typeparamref name="T" /> implements <see cref="IDisposable" />.
+/// Thread-safe, non-blocking object pool. <see cref="Get" /> reuses a retained instance or creates a new
+/// one through the factory; <see cref="Return" /> stocks the instance back (up to a bound), optionally
+/// resetting it first. Instances dropped over the bound, and those still pooled on dispose, are disposed
+/// when <typeparamref name="T" /> implements <see cref="IDisposable" />.
 /// </summary>
 /// <typeparam name="T">The pooled reference type.</typeparam>
 public sealed class ObjectPool<T> : IDisposable
@@ -20,12 +20,12 @@ public sealed class ObjectPool<T> : IDisposable
     private bool _disposed;
 
     /// <summary>
-    ///     Gets the number of instances currently retained for reuse.
+    /// Gets the number of instances currently retained for reuse.
     /// </summary>
     public int Count => Volatile.Read(ref _retained);
 
     /// <summary>
-    ///     Initializes the pool.
+    /// Initializes the pool.
     /// </summary>
     /// <param name="factory">Creates a new instance when the pool is empty.</param>
     /// <param name="maxRetained">Maximum number of instances kept for reuse. Defaults to 1024.</param>
@@ -45,7 +45,7 @@ public sealed class ObjectPool<T> : IDisposable
     }
 
     /// <summary>
-    ///     Rents an instance from the pool, creating one through the factory when the pool is empty.
+    /// Rents an instance from the pool, creating one through the factory when the pool is empty.
     /// </summary>
     /// <returns>A pooled or freshly created instance.</returns>
     public T Get()
@@ -61,7 +61,7 @@ public sealed class ObjectPool<T> : IDisposable
     }
 
     /// <summary>
-    ///     Returns an instance to the pool. Instances beyond the retained bound are disposed instead of kept.
+    /// Returns an instance to the pool. Instances beyond the retained bound are disposed instead of kept.
     /// </summary>
     /// <param name="item">The instance to return.</param>
     public void Return(T item)
@@ -82,7 +82,7 @@ public sealed class ObjectPool<T> : IDisposable
     }
 
     /// <summary>
-    ///     Disposes every retained instance that implements <see cref="IDisposable" />.
+    /// Disposes every retained instance that implements <see cref="IDisposable" />.
     /// </summary>
     public void Dispose()
     {

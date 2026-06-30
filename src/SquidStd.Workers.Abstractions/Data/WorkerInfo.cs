@@ -3,7 +3,7 @@ using SquidStd.Workers.Abstractions.Types;
 namespace SquidStd.Workers.Abstractions.Data;
 
 /// <summary>
-///     The manager-side view of a worker, folded from incoming heartbeats.
+/// The manager-side view of a worker, folded from incoming heartbeats.
 /// </summary>
 /// <param name="WorkerId">Stable identity of the worker.</param>
 /// <param name="Status">Last known status; the manager sets <see cref="WorkerStatusType.Offline" /> on missed heartbeats.</param>

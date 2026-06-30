@@ -51,14 +51,14 @@ Logical paths are normalized (forward slashes, root-relative) and reject `..` tr
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `IVirtualFileSystem` | Path-based filesystem over a pluggable backend. |
-| `PhysicalFileSystem` | Maps logical paths onto a real directory tree. |
-| `ZipFileSystem` | A single `.zip` archive opened in update mode; `IAsyncDisposable`. |
-| `InMemoryFileSystem` | Ephemeral, in-process; handy for tests and as a decorator target. |
-| `VfsDirectories` | Named directory layout (`DirectoriesConfig` analogue) over any backend. |
-| `RegisterVfsExtensions` | `RegisterVfs(...)` registration. |
+| Type                    | Purpose                                                                 |
+|-------------------------|-------------------------------------------------------------------------|
+| `IVirtualFileSystem`    | Path-based filesystem over a pluggable backend.                         |
+| `PhysicalFileSystem`    | Maps logical paths onto a real directory tree.                          |
+| `ZipFileSystem`         | A single `.zip` archive opened in update mode; `IAsyncDisposable`.      |
+| `InMemoryFileSystem`    | Ephemeral, in-process; handy for tests and as a decorator target.       |
+| `VfsDirectories`        | Named directory layout (`DirectoriesConfig` analogue) over any backend. |
+| `RegisterVfsExtensions` | `RegisterVfs(...)` registration.                                        |
 
 ## Related
 

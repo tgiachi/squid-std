@@ -8,7 +8,7 @@ using SquidStd.Services.Core.Services.Internal;
 namespace SquidStd.Services.Core.Services;
 
 /// <summary>
-///     Schedules jobs on a fixed set of worker threads.
+/// Schedules jobs on a fixed set of worker threads.
 /// </summary>
 public sealed class JobSystemService : IJobSystem, ISquidStdService
 {
@@ -36,7 +36,7 @@ public sealed class JobSystemService : IJobSystem, ISquidStdService
     public int WorkerCount { get; }
 
     /// <summary>
-    ///     Initializes the job system service.
+    /// Initializes the job system service.
     /// </summary>
     /// <param name="config">Job system configuration.</param>
     public JobSystemService(JobsConfig config)
@@ -45,7 +45,7 @@ public sealed class JobSystemService : IJobSystem, ISquidStdService
         _config = config;
         WorkerCount = ResolveWorkerCount(config.WorkerThreadCount);
         _channel = Channel.CreateUnbounded<JobItem>(
-            new UnboundedChannelOptions
+            new()
             {
                 SingleReader = false,
                 SingleWriter = false
@@ -200,9 +200,7 @@ public sealed class JobSystemService : IJobSystem, ISquidStdService
     }
 
     private static int ResolveWorkerCount(int configured)
-    {
-        return configured > 0 ? configured : Math.Max(1, Environment.ProcessorCount - 1);
-    }
+        => configured > 0 ? configured : Math.Max(1, Environment.ProcessorCount - 1);
 
     private void Stop(CancellationToken cancellationToken)
     {
@@ -315,10 +313,8 @@ public sealed class JobSystemService : IJobSystem, ISquidStdService
     }
 
     /// <summary>
-    ///     Releases worker resources.
+    /// Releases worker resources.
     /// </summary>
     public void Dispose()
-    {
-        Stop(CancellationToken.None);
-    }
+        => Stop(CancellationToken.None);
 }

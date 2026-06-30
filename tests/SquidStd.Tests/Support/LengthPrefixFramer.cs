@@ -3,8 +3,8 @@ using SquidStd.Network.Interfaces.Framing;
 namespace SquidStd.Tests.Support;
 
 /// <summary>
-///     Test framer: a single length-prefix byte followed by that many payload bytes. The emitted frame
-///     length includes the prefix byte.
+/// Test framer: a single length-prefix byte followed by that many payload bytes. The emitted frame
+/// length includes the prefix byte.
 /// </summary>
 public sealed class LengthPrefixFramer : INetFramer
 {

@@ -6,7 +6,7 @@ using SquidStd.Core.Types.Metrics;
 namespace SquidStd.Caching.Abstractions.Services;
 
 /// <summary>
-///     Accumulates aggregate cache metrics and exposes them to the metrics collection system.
+/// Accumulates aggregate cache metrics and exposes them to the metrics collection system.
 /// </summary>
 public sealed class CacheMetricsProvider : ICacheMetrics, IMetricProvider
 {
@@ -20,27 +20,19 @@ public sealed class CacheMetricsProvider : ICacheMetrics, IMetricProvider
 
     /// <inheritdoc />
     public void OnHit(string key)
-    {
-        Interlocked.Increment(ref _hits);
-    }
+        => Interlocked.Increment(ref _hits);
 
     /// <inheritdoc />
     public void OnMiss(string key)
-    {
-        Interlocked.Increment(ref _misses);
-    }
+        => Interlocked.Increment(ref _misses);
 
     /// <inheritdoc />
     public void OnRemove(string key)
-    {
-        Interlocked.Increment(ref _removes);
-    }
+        => Interlocked.Increment(ref _removes);
 
     /// <inheritdoc />
     public void OnSet(string key)
-    {
-        Interlocked.Increment(ref _sets);
-    }
+        => Interlocked.Increment(ref _sets);
 
     /// <inheritdoc />
     public ValueTask<IReadOnlyList<MetricSample>> CollectAsync(CancellationToken cancellationToken = default)

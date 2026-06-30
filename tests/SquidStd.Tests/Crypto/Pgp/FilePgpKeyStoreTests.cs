@@ -38,7 +38,7 @@ public class FilePgpKeyStoreTests
         {
             if (Directory.Exists(dir))
             {
-                Directory.Delete(dir, recursive: true);
+                Directory.Delete(dir, true);
             }
         }
     }

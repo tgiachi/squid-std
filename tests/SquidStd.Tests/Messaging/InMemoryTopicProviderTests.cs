@@ -87,7 +87,5 @@ public class InMemoryTopicProviderTests
     }
 
     private static ReadOnlyMemory<byte> Bytes(string s)
-    {
-        return Encoding.UTF8.GetBytes(s);
-    }
+        => Encoding.UTF8.GetBytes(s);
 }

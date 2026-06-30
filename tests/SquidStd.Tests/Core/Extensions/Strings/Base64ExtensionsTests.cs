@@ -31,13 +31,7 @@ public class Base64ExtensionsTests
         Assert.Equal(bytes, encoded.FromBase64ToByteArray());
     }
 
-    [Theory]
-    [InlineData("c3F1aWQ=", true)]
-    [InlineData("not base64!", false)]
-    [InlineData("abc", false)]
-    [InlineData("", false)]
+    [Theory, InlineData("c3F1aWQ=", true), InlineData("not base64!", false), InlineData("abc", false), InlineData("", false)]
     public void IsBase64String_DetectsValidPayloads(string value, bool expected)
-    {
-        Assert.Equal(expected, value.IsBase64String());
-    }
+        => Assert.Equal(expected, value.IsBase64String());
 }

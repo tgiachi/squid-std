@@ -9,23 +9,20 @@ public sealed class LocalStackSecretsFixture : IAsyncLifetime
     private readonly LocalStackContainer _container =
         new LocalStackBuilder().WithImage("localstack/localstack:3").Build();
 
-    public AwsConfigEntry Aws => new()
-    {
-        Region = "us-east-1",
-        AccessKey = "test",
-        SecretKey = "test",
-        ServiceUrl = _container.GetConnectionString()
-    };
+    public AwsConfigEntry Aws
+        => new()
+        {
+            Region = "us-east-1",
+            AccessKey = "test",
+            SecretKey = "test",
+            ServiceUrl = _container.GetConnectionString()
+        };
 
     public Task DisposeAsync()
-    {
-        return _container.DisposeAsync().AsTask();
-    }
+        => _container.DisposeAsync().AsTask();
 
     public Task InitializeAsync()
-    {
-        return _container.StartAsync();
-    }
+        => _container.StartAsync();
 }
 
 [CollectionDefinition(Name)]

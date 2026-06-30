@@ -1,6 +1,5 @@
 using DryIoc;
 using SquidStd.Core.Interfaces.Events;
-using SquidStd.Mail.Abstractions.Data.Config;
 using SquidStd.Mail.Abstractions.Interfaces;
 using SquidStd.Mail.MailKit.Extensions;
 using SquidStd.Mail.MailKit.Services;
@@ -15,7 +14,7 @@ public class MailSenderRegistrationExtensionsTests
     {
         using var container = NewContainer();
 
-        container.AddMailSender(new SmtpOptions { Host = "smtp.example.com", Port = 587 });
+        container.AddMailSender(new() { Host = "smtp.example.com", Port = 587 });
 
         Assert.IsType<MailKitMailSender>(container.Resolve<IMailSender>());
     }
@@ -25,8 +24,8 @@ public class MailSenderRegistrationExtensionsTests
     {
         using var container = NewContainer();
 
-        Assert.Throws<ArgumentException>(() => container.AddMailSender(new SmtpOptions { Host = string.Empty, Port = 587 }));
-        Assert.Throws<ArgumentException>(() => container.AddMailSender(new SmtpOptions { Host = "h", Port = 0 }));
+        Assert.Throws<ArgumentException>(() => container.AddMailSender(new() { Host = string.Empty, Port = 587 }));
+        Assert.Throws<ArgumentException>(() => container.AddMailSender(new() { Host = "h", Port = 0 }));
     }
 
     private static Container NewContainer()

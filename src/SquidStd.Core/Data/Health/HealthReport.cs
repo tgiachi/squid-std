@@ -3,7 +3,7 @@ using SquidStd.Core.Types.Health;
 namespace SquidStd.Core.Data.Health;
 
 /// <summary>
-///     Aggregated result of running every registered health check.
+/// Aggregated result of running every registered health check.
 /// </summary>
 public sealed record HealthReport
 {

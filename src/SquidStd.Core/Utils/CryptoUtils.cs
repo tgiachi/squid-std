@@ -4,8 +4,8 @@ using System.Text;
 namespace SquidStd.Core.Utils;
 
 /// <summary>
-///     Authenticated symmetric encryption helpers built on AES-GCM. Produced payloads are laid out as
-///     <c>nonce (12 bytes) | tag (16 bytes) | ciphertext</c>.
+/// Authenticated symmetric encryption helpers built on AES-GCM. Produced payloads are laid out as
+/// <c>nonce (12 bytes) | tag (16 bytes) | ciphertext</c>.
 /// </summary>
 public static class CryptoUtils
 {
@@ -13,7 +13,7 @@ public static class CryptoUtils
     private const int TagSize = 16;
 
     /// <summary>
-    ///     Generates a random symmetric key and returns it as a base64 string.
+    /// Generates a random symmetric key and returns it as a base64 string.
     /// </summary>
     /// <param name="sizeInBytes">Key length in bytes; must be 16, 24, or 32.</param>
     /// <returns>The base64-encoded key.</returns>
@@ -28,7 +28,7 @@ public static class CryptoUtils
     }
 
     /// <summary>
-    ///     Encrypts a UTF-8 string with AES-GCM under the supplied key.
+    /// Encrypts a UTF-8 string with AES-GCM under the supplied key.
     /// </summary>
     /// <param name="plaintext">The text to encrypt.</param>
     /// <param name="key">The 16, 24, or 32 byte key.</param>
@@ -55,7 +55,7 @@ public static class CryptoUtils
     }
 
     /// <summary>
-    ///     Decrypts a payload produced by <see cref="Encrypt" /> back into its UTF-8 string.
+    /// Decrypts a payload produced by <see cref="Encrypt" /> back into its UTF-8 string.
     /// </summary>
     /// <param name="payload">The <c>nonce | tag | ciphertext</c> payload.</param>
     /// <param name="key">The key used to encrypt the payload.</param>

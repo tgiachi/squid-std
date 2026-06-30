@@ -7,15 +7,6 @@ namespace SquidStd.Tests.Tui.Dsl;
 
 public partial class TuiNodeMaterializerTests
 {
-    private sealed partial class SampleViewModel : ObservableObject
-    {
-        [ObservableProperty]
-        private string _title = "start";
-
-        [ObservableProperty]
-        private string _name = string.Empty;
-    }
-
     [Fact]
     public void Materialize_VStack_ProducesChildrenAndAppliesOneWay()
     {
@@ -45,5 +36,12 @@ public partial class TuiNodeMaterializerTests
 
         vm.Name = "from-vm";
         Assert.Equal("from-vm", field.Text);
+    }
+
+    private sealed partial class SampleViewModel : ObservableObject
+    {
+        [ObservableProperty] private string _title = "start";
+
+        [ObservableProperty] private string _name = string.Empty;
     }
 }

@@ -1,6 +1,5 @@
 using System.Globalization;
 using DryIoc;
-using SquidStd.Aws.Abstractions.Data.Config;
 using SquidStd.Core.Interfaces.Metrics;
 using SquidStd.Core.Interfaces.Serialization;
 using SquidStd.Core.Json;
@@ -13,7 +12,7 @@ using SquidStd.Messaging.Sqs.Services;
 namespace SquidStd.Messaging.Sqs.Extensions;
 
 /// <summary>
-///     DryIoc registration helpers for the AWS SQS/SNS messaging provider.
+/// DryIoc registration helpers for the AWS SQS/SNS messaging provider.
 /// </summary>
 public static class SqsMessagingRegistrationExtensions
 {
@@ -30,9 +29,9 @@ public static class SqsMessagingRegistrationExtensions
             );
         }
 
-        return new SqsOptions
+        return new()
         {
-            Aws = new AwsConfigEntry
+            Aws = new()
             {
                 Region = string.IsNullOrEmpty(cs.Host) ? "us-east-1" : cs.Host,
                 AccessKey = cs.UserName,
@@ -42,16 +41,16 @@ public static class SqsMessagingRegistrationExtensions
             },
             MaxNumberOfMessages = cs.Parameters.TryGetValue("maxMessages", out var max) &&
                                   int.TryParse(max, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedMax)
-                ? parsedMax
-                : 10,
+                                      ? parsedMax
+                                      : 10,
             VisibilityTimeout = cs.Parameters.TryGetValue("visibilityTimeoutSec", out var vis) &&
                                 int.TryParse(vis, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedVis)
-                ? TimeSpan.FromSeconds(parsedVis)
-                : TimeSpan.FromSeconds(30),
+                                    ? TimeSpan.FromSeconds(parsedVis)
+                                    : TimeSpan.FromSeconds(30),
             WaitTimeSeconds = cs.Parameters.TryGetValue("waitTimeSec", out var wait) &&
                               int.TryParse(wait, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedWait)
-                ? parsedWait
-                : 20
+                                  ? parsedWait
+                                  : 20
         };
     }
 

@@ -1,4 +1,3 @@
-using SquidStd.Actors.Data;
 using SquidStd.Actors.Types;
 using SquidStd.Tests.Actors.Support;
 
@@ -10,9 +9,7 @@ public class ActorOverflowTests
     public async Task Wait_BlocksUntilCapacityFrees()
     {
         var gate = new TaskCompletionSource();
-        await using var actor = new ProbeActor(
-            new ActorOptions { Capacity = 2, OverflowPolicy = ActorOverflowPolicy.Wait }
-        );
+        await using var actor = new ProbeActor(new() { Capacity = 2, OverflowPolicy = ActorOverflowPolicy.Wait });
 
         await actor.TellAsync(new Hold(gate));  // occupies the consumer (slot 1)
         await actor.TellAsync(new Append("a")); // buffered (slot 2) -> full
@@ -29,9 +26,7 @@ public class ActorOverflowTests
     public async Task DropNewest_ReturnsFalseWhenFull()
     {
         var gate = new TaskCompletionSource();
-        await using var actor = new ProbeActor(
-            new ActorOptions { Capacity = 1, OverflowPolicy = ActorOverflowPolicy.DropNewest }
-        );
+        await using var actor = new ProbeActor(new() { Capacity = 1, OverflowPolicy = ActorOverflowPolicy.DropNewest });
 
         await actor.TellAsync(new Hold(gate)); // occupies the only slot
 
@@ -44,16 +39,14 @@ public class ActorOverflowTests
     [Fact]
     public async Task Unbounded_AcceptsEveryMessage()
     {
-        await using var actor = new ProbeActor(
-            new ActorOptions { OverflowPolicy = ActorOverflowPolicy.Unbounded }
-        );
+        await using var actor = new ProbeActor(new() { OverflowPolicy = ActorOverflowPolicy.Unbounded });
 
         for (var i = 0; i < 500; i++)
         {
             Assert.True(await actor.TellAsync(new Append(i.ToString())));
         }
 
-        var log = await actor.AskAsync<GetLog, string>(new GetLog());
+        var log = await actor.AskAsync<GetLog, string>(new());
         Assert.Equal(500, log.Split(",").Length);
     }
 }

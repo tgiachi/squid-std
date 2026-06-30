@@ -5,8 +5,8 @@ using SquidStd.Messaging.Abstractions.Interfaces;
 namespace SquidStd.Messaging.Abstractions.Services;
 
 /// <summary>
-///     One-way Topic → EventBus bridge. Subscribes a topic and republishes each message as a
-///     <see cref="TopicMessageEvent" /> on the <see cref="IEventBus" />.
+/// One-way Topic → EventBus bridge. Subscribes a topic and republishes each message as a
+/// <see cref="TopicMessageEvent" /> on the <see cref="IEventBus" />.
 /// </summary>
 public sealed class TopicEventBridge : ITopicEventBridge
 {
@@ -21,10 +21,8 @@ public sealed class TopicEventBridge : ITopicEventBridge
 
     /// <inheritdoc />
     public IDisposable Bridge<T>(string topic)
-    {
-        return _topic.Subscribe<T>(
+        => _topic.Subscribe<T>(
             topic,
             (data, cancellationToken) => _eventBus.PublishAsync(new TopicMessageEvent(topic, data!), cancellationToken)
         );
-    }
 }

@@ -75,7 +75,5 @@ public class SslUtilsTests
 
     [Fact]
     public void LoadFromPem_WhenPathBlank_Throws()
-    {
-        Assert.Throws<ArgumentException>(() => SslUtils.LoadFromPem(" "));
-    }
+        => Assert.Throws<ArgumentException>(() => SslUtils.LoadFromPem(" "));
 }

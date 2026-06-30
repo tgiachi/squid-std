@@ -6,8 +6,8 @@ using SquidStd.Core.Interfaces.Commands;
 namespace SquidStd.Services.Core.Services;
 
 /// <summary>
-///     Subscribes every DI-registered command handler to the dispatcher at startup, before publishing
-///     services run.
+/// Subscribes every DI-registered command handler to the dispatcher at startup, before publishing
+/// services run.
 /// </summary>
 /// <typeparam name="TContext">The dispatcher context type.</typeparam>
 internal sealed class CommandDispatcherActivator<TContext> : ISquidStdService
@@ -37,7 +37,5 @@ internal sealed class CommandDispatcherActivator<TContext> : ISquidStdService
     }
 
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        return ValueTask.CompletedTask;
-    }
+        => ValueTask.CompletedTask;
 }

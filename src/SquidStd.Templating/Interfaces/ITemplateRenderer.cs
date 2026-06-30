@@ -1,7 +1,7 @@
 namespace SquidStd.Templating.Interfaces;
 
 /// <summary>
-///     Renders Scriban templates from strings or registered named templates.
+/// Renders Scriban templates from strings or registered named templates.
 /// </summary>
 public interface ITemplateRenderer
 {

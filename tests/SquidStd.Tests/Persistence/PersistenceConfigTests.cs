@@ -7,9 +7,7 @@ public class PersistenceConfigTests
 {
     [Fact]
     public void DurabilityMode_DefaultsToBuffered()
-    {
-        Assert.Equal(DurabilityMode.Buffered, new PersistenceConfig().DurabilityMode);
-    }
+        => Assert.Equal(DurabilityMode.Buffered, new PersistenceConfig().DurabilityMode);
 
     [Fact]
     public void DurabilityMode_CanBeSetToDurable()

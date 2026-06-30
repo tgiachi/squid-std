@@ -1,8 +1,8 @@
 namespace SquidStd.Workers.Abstractions.Types;
 
 /// <summary>
-///     Lifecycle status of a worker. Workers report <see cref="Idle" /> or <see cref="Busy" />;
-///     the manager assigns <see cref="Offline" /> when a worker's heartbeats stop arriving.
+/// Lifecycle status of a worker. Workers report <see cref="Idle" /> or <see cref="Busy" />;
+/// the manager assigns <see cref="Offline" /> when a worker's heartbeats stop arriving.
 /// </summary>
 public enum WorkerStatusType
 {

@@ -4,7 +4,7 @@ using SquidStd.Core.Types.Files;
 namespace SquidStd.Core.Data.Files;
 
 /// <summary>
-///     Published on the event bus when a watched file changes, after debouncing.
+/// Published on the event bus when a watched file changes, after debouncing.
 /// </summary>
 /// <param name="Kind">The kind of change observed.</param>
 /// <param name="FullPath">The absolute path of the affected file.</param>

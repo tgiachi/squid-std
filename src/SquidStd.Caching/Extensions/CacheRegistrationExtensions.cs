@@ -11,7 +11,7 @@ using SquidStd.Core.Json;
 namespace SquidStd.Caching.Extensions;
 
 /// <summary>
-///     DryIoc registration helpers for the in-memory cache.
+/// DryIoc registration helpers for the in-memory cache.
 /// </summary>
 public static class CacheRegistrationExtensions
 {

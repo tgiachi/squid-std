@@ -3,7 +3,7 @@ using System.Net;
 namespace SquidStd.Network.Data.Events;
 
 /// <summary>
-///     Event payload for a datagram received by the UDP server, carrying the sender endpoint.
+/// Event payload for a datagram received by the UDP server, carrying the sender endpoint.
 /// </summary>
 public sealed class SquidStdUdpDatagramReceivedEventArgs : EventArgs
 {

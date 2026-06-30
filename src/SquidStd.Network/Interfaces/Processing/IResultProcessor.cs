@@ -3,13 +3,13 @@ using SquidStd.Network.Interfaces.Client;
 namespace SquidStd.Network.Interfaces.Processing;
 
 /// <summary>
-///     Processes a framed network payload into a typed result.
+/// Processes a framed network payload into a typed result.
 /// </summary>
 /// <typeparam name="T">The processed result type.</typeparam>
 public interface IResultProcessor<T>
 {
     /// <summary>
-    ///     Processes one complete framed payload for a network connection.
+    /// Processes one complete framed payload for a network connection.
     /// </summary>
     /// <param name="connection">The connection that produced the payload.</param>
     /// <param name="data">The framed payload bytes.</param>

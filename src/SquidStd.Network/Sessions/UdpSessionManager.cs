@@ -9,8 +9,8 @@ using SquidStd.Network.Server;
 namespace SquidStd.Network.Sessions;
 
 /// <summary>
-///     Tracks per-endpoint UDP sessions over a <see cref="SquidStdUdpServer" />. Sessions are created on
-///     the first datagram from an endpoint and removed by idle-timeout sweep or explicit disconnect.
+/// Tracks per-endpoint UDP sessions over a <see cref="SquidStdUdpServer" />. Sessions are created on
+/// the first datagram from an endpoint and removed by idle-timeout sweep or explicit disconnect.
 /// </summary>
 /// <typeparam name="TState">Application-defined per-connection state.</typeparam>
 public sealed class UdpSessionManager<TState> : ISessionManager<TState>, IDisposable
@@ -75,19 +75,15 @@ public sealed class UdpSessionManager<TState> : ISessionManager<TState>, IDispos
 
     /// <inheritdoc />
     public Task DisconnectAsync(long sessionId, CancellationToken cancellationToken = default)
-    {
-        return TryGetSession(sessionId, out var session)
-            ? session!.CloseAsync(cancellationToken)
-            : Task.CompletedTask;
-    }
+        => TryGetSession(sessionId, out var session)
+               ? session!.CloseAsync(cancellationToken)
+               : Task.CompletedTask;
 
     /// <inheritdoc />
     public Task SendAsync(long sessionId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
-    {
-        return TryGetSession(sessionId, out var session)
-            ? session!.SendAsync(payload, cancellationToken)
-            : Task.CompletedTask;
-    }
+        => TryGetSession(sessionId, out var session)
+               ? session!.SendAsync(payload, cancellationToken)
+               : Task.CompletedTask;
 
     /// <inheritdoc />
     public bool TryGetSession(long sessionId, out Session<TState>? session)
@@ -106,19 +102,15 @@ public sealed class UdpSessionManager<TState> : ISessionManager<TState>, IDispos
 
     /// <summary>Closes the session for the given endpoint. No-op when unknown.</summary>
     public Task DisconnectAsync(IPEndPoint endPoint, CancellationToken cancellationToken = default)
-    {
-        return TryGetSession(endPoint, out var session)
-            ? session!.CloseAsync(cancellationToken)
-            : Task.CompletedTask;
-    }
+        => TryGetSession(endPoint, out var session)
+               ? session!.CloseAsync(cancellationToken)
+               : Task.CompletedTask;
 
     /// <summary>Sends a payload to the session for the given endpoint. No-op when unknown.</summary>
     public Task SendToAsync(IPEndPoint endPoint, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
-    {
-        return TryGetSession(endPoint, out var session)
-            ? session!.SendAsync(payload, cancellationToken)
-            : Task.CompletedTask;
-    }
+        => TryGetSession(endPoint, out var session)
+               ? session!.SendAsync(payload, cancellationToken)
+               : Task.CompletedTask;
 
     /// <summary>Looks up a session by remote endpoint.</summary>
     public bool TryGetSession(IPEndPoint endPoint, out Session<TState>? session)
@@ -198,15 +190,13 @@ public sealed class UdpSessionManager<TState> : ISessionManager<TState>, IDispos
     }
 
     private void HandleServerDatagram(object? sender, SquidStdUdpDatagramReceivedEventArgs e)
-    {
-        HandleDatagram(e.RemoteEndPoint, e.Data);
-    }
+        => HandleDatagram(e.RemoteEndPoint, e.Data);
 
     private void RaiseSessionCreated(Session<TState> session)
     {
         try
         {
-            OnSessionCreated?.Invoke(this, new SquidStdSessionEventArgs<TState>(session));
+            OnSessionCreated?.Invoke(this, new(session));
         }
         catch (Exception ex)
         {
@@ -218,7 +208,7 @@ public sealed class UdpSessionManager<TState> : ISessionManager<TState>, IDispos
     {
         try
         {
-            OnSessionData?.Invoke(this, new SquidStdSessionDataEventArgs<TState>(session, data));
+            OnSessionData?.Invoke(this, new(session, data));
         }
         catch (Exception ex)
         {
@@ -230,7 +220,7 @@ public sealed class UdpSessionManager<TState> : ISessionManager<TState>, IDispos
     {
         try
         {
-            OnSessionRemoved?.Invoke(this, new SquidStdSessionEventArgs<TState>(session));
+            OnSessionRemoved?.Invoke(this, new(session));
         }
         catch (Exception ex)
         {

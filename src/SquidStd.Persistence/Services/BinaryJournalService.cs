@@ -55,7 +55,7 @@ public sealed class BinaryJournalService : IJournalService, IAsyncDisposable
 
             if (_durability == DurabilityMode.Durable)
             {
-                stream.Flush(flushToDisk: true);
+                stream.Flush(true);
             }
         }
         finally
@@ -65,7 +65,8 @@ public sealed class BinaryJournalService : IJournalService, IAsyncDisposable
     }
 
     public async ValueTask AppendBatchAsync(
-        IReadOnlyList<JournalEntry> entries, CancellationToken cancellationToken = default
+        IReadOnlyList<JournalEntry> entries,
+        CancellationToken cancellationToken = default
     )
     {
         ArgumentNullException.ThrowIfNull(entries);
@@ -83,7 +84,7 @@ public sealed class BinaryJournalService : IJournalService, IAsyncDisposable
 
             if (_durability == DurabilityMode.Durable)
             {
-                stream.Flush(flushToDisk: true);
+                stream.Flush(true);
             }
         }
         finally
@@ -137,8 +138,8 @@ public sealed class BinaryJournalService : IJournalService, IAsyncDisposable
             }
 
             var kept = ParseAll(await File.ReadAllBytesAsync(_path, cancellationToken))
-                .Where(entry => entry.SequenceId > inclusiveSequenceId)
-                .ToArray();
+                       .Where(entry => entry.SequenceId > inclusiveSequenceId)
+                       .ToArray();
 
             await RewriteAsync(kept, cancellationToken);
         }
@@ -152,7 +153,7 @@ public sealed class BinaryJournalService : IJournalService, IAsyncDisposable
     {
         var options = _durability == DurabilityMode.Durable ? FileOptions.WriteThrough : FileOptions.None;
 
-        return new FileStream(_path, FileMode.Append, FileAccess.Write, FileShare.Read, bufferSize: 4096, options);
+        return new(_path, FileMode.Append, FileAccess.Write, FileShare.Read, 4096, options);
     }
 
     private List<JournalEntry> ParseAll(byte[] bytes)
@@ -208,7 +209,9 @@ public sealed class BinaryJournalService : IJournalService, IAsyncDisposable
     }
 
     private static async ValueTask WriteRecordAsync(
-        FileStream stream, JournalEntry entry, CancellationToken cancellationToken
+        FileStream stream,
+        JournalEntry entry,
+        CancellationToken cancellationToken
     )
     {
         var record = JournalRecordCodec.Encode(entry);

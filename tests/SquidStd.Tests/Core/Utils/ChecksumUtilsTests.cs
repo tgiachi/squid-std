@@ -11,10 +11,9 @@ public class ChecksumUtilsTests
 
     [Fact]
     public void Compute_KnownVector_MatchesFnv1a()
-    {
+
         // FNV-1a 32-bit of ASCII "a" = 0xE40C292C.
-        Assert.Equal(0xE40C292Cu, ChecksumUtils.Compute("a"u8));
-    }
+        => Assert.Equal(0xE40C292Cu, ChecksumUtils.Compute("a"u8));
 
     [Fact]
     public void Compute_IsStableAcrossCalls()

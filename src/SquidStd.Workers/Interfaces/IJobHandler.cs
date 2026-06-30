@@ -3,7 +3,7 @@ using SquidStd.Workers.Abstractions.Data;
 namespace SquidStd.Workers.Interfaces;
 
 /// <summary>
-///     Handles jobs of a single named kind. Implemented by consumers of the worker library.
+/// Handles jobs of a single named kind. Implemented by consumers of the worker library.
 /// </summary>
 public interface IJobHandler
 {

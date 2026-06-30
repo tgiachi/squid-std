@@ -29,8 +29,8 @@ client at that endpoint instead of the regional AWS endpoint.
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
+| Type             | Purpose                                                                           |
+|------------------|-----------------------------------------------------------------------------------|
 | `AwsConfigEntry` | Region, optional credentials and an optional endpoint override (e.g. LocalStack). |
 
 ## License

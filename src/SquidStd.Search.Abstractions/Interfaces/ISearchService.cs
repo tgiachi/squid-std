@@ -1,7 +1,7 @@
 namespace SquidStd.Search.Abstractions.Interfaces;
 
 /// <summary>
-///     Indexes, deletes, and queries <see cref="IIndexableEntity" /> documents.
+/// Indexes, deletes, and queries <see cref="IIndexableEntity" /> documents.
 /// </summary>
 public interface ISearchService
 {

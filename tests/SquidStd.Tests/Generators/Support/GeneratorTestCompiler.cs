@@ -33,10 +33,11 @@ internal static class GeneratorTestCompiler
             "SquidStdGeneratorTests",
             new[] { syntaxTree },
             references,
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+            new(OutputKind.DynamicallyLinkedLibrary)
         );
 
         ISourceGenerator[] selectedGenerators;
+
         if (generators.Length == 0)
         {
             selectedGenerators = new[] { new EventListenerRegistrationGenerator().AsSourceGenerator() };
@@ -60,10 +61,10 @@ internal static class GeneratorTestCompiler
     {
         var trustedPlatformAssemblies = (string?)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") ?? string.Empty;
         var references = trustedPlatformAssemblies
-            .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)
-            .Select(path => MetadataReference.CreateFromFile(path))
-            .Cast<MetadataReference>()
-            .ToList();
+                         .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)
+                         .Select(path => MetadataReference.CreateFromFile(path))
+                         .Cast<MetadataReference>()
+                         .ToList();
 
         AddReference(references, typeof(IEvent).Assembly.Location);
         AddReference(references, typeof(RegisterEventListenerAttribute).Assembly.Location);

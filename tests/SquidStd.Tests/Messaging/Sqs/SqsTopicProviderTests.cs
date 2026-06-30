@@ -1,5 +1,4 @@
 using System.Text;
-using SquidStd.Messaging.Sqs.Data.Config;
 using SquidStd.Messaging.Sqs.Services;
 
 namespace SquidStd.Tests.Messaging.Sqs;
@@ -29,6 +28,7 @@ public class SqsTopicProviderTests
             (payload, _) =>
             {
                 a.TrySetResult(Text(payload));
+
                 return Task.CompletedTask;
             }
         );
@@ -37,6 +37,7 @@ public class SqsTopicProviderTests
             (payload, _) =>
             {
                 b.TrySetResult(Text(payload));
+
                 return Task.CompletedTask;
             }
         );
@@ -50,22 +51,14 @@ public class SqsTopicProviderTests
     }
 
     private SqsTopicProvider NewProvider()
-    {
-        return new SqsTopicProvider(new SqsOptions { Aws = _fixture.Aws, WaitTimeSeconds = 1 });
-    }
+        => new(new() { Aws = _fixture.Aws, WaitTimeSeconds = 1 });
 
     private static ReadOnlyMemory<byte> Bytes(string s)
-    {
-        return Encoding.UTF8.GetBytes(s);
-    }
+        => Encoding.UTF8.GetBytes(s);
 
     private static string Text(ReadOnlyMemory<byte> b)
-    {
-        return Encoding.UTF8.GetString(b.Span);
-    }
+        => Encoding.UTF8.GetString(b.Span);
 
     private static string Topic()
-    {
-        return "topic-" + Guid.NewGuid().ToString("N");
-    }
+        => "topic-" + Guid.NewGuid().ToString("N");
 }

@@ -3,7 +3,7 @@ using SquidStd.Workers.Abstractions.Types;
 namespace SquidStd.Workers.Interfaces;
 
 /// <summary>
-///     Shared runtime state of a worker, read by the heartbeat service and mutated by the consumer.
+/// Shared runtime state of a worker, read by the heartbeat service and mutated by the consumer.
 /// </summary>
 public interface IWorkerState
 {

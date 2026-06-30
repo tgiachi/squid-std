@@ -3,12 +3,12 @@ using System.Security.Cryptography.X509Certificates;
 namespace SquidStd.Core.Utils;
 
 /// <summary>
-///     Helpers for loading X.509 certificates used to secure TLS endpoints.
+/// Helpers for loading X.509 certificates used to secure TLS endpoints.
 /// </summary>
 public static class SslUtils
 {
     /// <summary>
-    ///     Loads a certificate from a PEM file, optionally combining it with a separate private-key PEM.
+    /// Loads a certificate from a PEM file, optionally combining it with a separate private-key PEM.
     /// </summary>
     /// <param name="certificatePath">Path to the certificate PEM file.</param>
     /// <param name="privateKeyPath">Optional path to the private-key PEM file.</param>
@@ -21,7 +21,7 @@ public static class SslUtils
     }
 
     /// <summary>
-    ///     Loads a certificate (with its private key) from a PKCS#12 / PFX file.
+    /// Loads a certificate (with its private key) from a PKCS#12 / PFX file.
     /// </summary>
     /// <param name="path">Path to the PFX file.</param>
     /// <param name="password">Optional password protecting the PFX file.</param>

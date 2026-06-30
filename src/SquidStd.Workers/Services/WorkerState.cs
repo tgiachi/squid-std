@@ -5,8 +5,8 @@ using SquidStd.Workers.Interfaces;
 namespace SquidStd.Workers.Services;
 
 /// <summary>
-///     Default <see cref="IWorkerState" /> backed by an interlocked counter; resolves identity and
-///     concurrency from <see cref="WorkersConfig" /> at construction.
+/// Default <see cref="IWorkerState" /> backed by an interlocked counter; resolves identity and
+/// concurrency from <see cref="WorkersConfig" /> at construction.
 /// </summary>
 public sealed class WorkerState : IWorkerState
 {
@@ -32,13 +32,9 @@ public sealed class WorkerState : IWorkerState
 
     /// <inheritdoc />
     public void JobFinished()
-    {
-        Interlocked.Decrement(ref _activeJobs);
-    }
+        => Interlocked.Decrement(ref _activeJobs);
 
     /// <inheritdoc />
     public void JobStarted()
-    {
-        Interlocked.Increment(ref _activeJobs);
-    }
+        => Interlocked.Increment(ref _activeJobs);
 }

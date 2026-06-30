@@ -8,47 +8,6 @@ namespace SquidStd.Tests.Tui.Navigation;
 
 public class TuiNavigatorTests
 {
-    private sealed class HomeViewModel : TuiViewModel
-    {
-    }
-
-    private sealed class DetailViewModel : TuiViewModel
-    {
-    }
-
-    // Non-generic fake view that records the ViewModel it was given and that it was initialised.
-    private sealed class FakeView : ITuiView
-    {
-        public object? BoundViewModel { get; private set; }
-        public bool Initialized { get; private set; }
-
-        public void Bind(object viewModel)
-        {
-            BoundViewModel = viewModel;
-        }
-
-        public void Initialize()
-        {
-            Initialized = true;
-        }
-    }
-
-    private sealed class FakeViewHost : ITuiViewHost
-    {
-        public List<object> Shown { get; } = new();
-        public List<object> Removed { get; } = new();
-
-        public void Show(object view)
-        {
-            Shown.Add(view);
-        }
-
-        public void Remove(object view)
-        {
-            Removed.Add(view);
-        }
-    }
-
     private static (TuiNavigator Navigator, FakeViewHost Host) Build()
     {
         var container = new Container();
@@ -107,42 +66,6 @@ public class TuiNavigatorTests
         Assert.Equal(1, navigator.Depth); // refuses to pop the root
     }
 
-    private sealed class TrackingHomeViewModel : TuiViewModel
-    {
-        public int Activated { get; private set; }
-        public int Deactivated { get; private set; }
-
-        public override ValueTask OnActivatedAsync()
-        {
-            Activated++;
-            return ValueTask.CompletedTask;
-        }
-
-        public override ValueTask OnDeactivatedAsync()
-        {
-            Deactivated++;
-            return ValueTask.CompletedTask;
-        }
-    }
-
-    private sealed class TrackingDetailViewModel : TuiViewModel
-    {
-        public int Activated { get; private set; }
-        public int Deactivated { get; private set; }
-
-        public override ValueTask OnActivatedAsync()
-        {
-            Activated++;
-            return ValueTask.CompletedTask;
-        }
-
-        public override ValueTask OnDeactivatedAsync()
-        {
-            Deactivated++;
-            return ValueTask.CompletedTask;
-        }
-    }
-
     [Fact]
     public async Task ForwardThenBack_PairsActivationHooks_NoDoubleActivateWithoutDeactivate()
     {
@@ -159,7 +82,7 @@ public class TuiNavigatorTests
         var home = container.Resolve<TrackingHomeViewModel>();
         var detail = container.Resolve<TrackingDetailViewModel>();
 
-        await navigator.NavigateToAsync<TrackingHomeViewModel>();   // home: A1 D0
+        await navigator.NavigateToAsync<TrackingHomeViewModel>(); // home: A1 D0
         Assert.Equal(1, home.Activated);
         Assert.Equal(0, home.Deactivated);
 
@@ -168,9 +91,78 @@ public class TuiNavigatorTests
         Assert.Equal(1, home.Deactivated);
         Assert.Equal(1, detail.Activated);
 
-        await navigator.BackAsync();                                 // detail D1; home reactivated
+        await navigator.BackAsync(); // detail D1; home reactivated
         Assert.Equal(1, detail.Deactivated);
         Assert.Equal(2, home.Activated);
         Assert.Equal(1, home.Deactivated); // still 1 — every activate is now paired with a prior deactivate
+    }
+
+    private sealed class HomeViewModel : TuiViewModel { }
+
+    private sealed class DetailViewModel : TuiViewModel { }
+
+    // Non-generic fake view that records the ViewModel it was given and that it was initialised.
+    private sealed class FakeView : ITuiView
+    {
+        public object? BoundViewModel { get; private set; }
+        public bool Initialized { get; private set; }
+
+        public void Bind(object viewModel)
+            => BoundViewModel = viewModel;
+
+        public void Initialize()
+            => Initialized = true;
+    }
+
+    private sealed class FakeViewHost : ITuiViewHost
+    {
+        public List<object> Shown { get; } = new();
+        public List<object> Removed { get; } = new();
+
+        public void Show(object view)
+            => Shown.Add(view);
+
+        public void Remove(object view)
+            => Removed.Add(view);
+    }
+
+    private sealed class TrackingHomeViewModel : TuiViewModel
+    {
+        public int Activated { get; private set; }
+        public int Deactivated { get; private set; }
+
+        public override ValueTask OnActivatedAsync()
+        {
+            Activated++;
+
+            return ValueTask.CompletedTask;
+        }
+
+        public override ValueTask OnDeactivatedAsync()
+        {
+            Deactivated++;
+
+            return ValueTask.CompletedTask;
+        }
+    }
+
+    private sealed class TrackingDetailViewModel : TuiViewModel
+    {
+        public int Activated { get; private set; }
+        public int Deactivated { get; private set; }
+
+        public override ValueTask OnActivatedAsync()
+        {
+            Activated++;
+
+            return ValueTask.CompletedTask;
+        }
+
+        public override ValueTask OnDeactivatedAsync()
+        {
+            Deactivated++;
+
+            return ValueTask.CompletedTask;
+        }
     }
 }

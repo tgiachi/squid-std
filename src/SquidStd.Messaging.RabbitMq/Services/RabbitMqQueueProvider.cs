@@ -10,8 +10,8 @@ using SquidStd.Messaging.RabbitMq.Data.Config;
 namespace SquidStd.Messaging.RabbitMq.Services;
 
 /// <summary>
-///     RabbitMQ <see cref="IQueueProvider" />: named queues map to quorum queues with a delivery limit
-///     and a dead-letter exchange; round-robin is the broker's native competing-consumers behaviour.
+/// RabbitMQ <see cref="IQueueProvider" />: named queues map to quorum queues with a delivery limit
+/// and a dead-letter exchange; round-robin is the broker's native competing-consumers behaviour.
 /// </summary>
 public sealed class RabbitMqQueueProvider : IQueueProvider
 {
@@ -120,9 +120,7 @@ public sealed class RabbitMqQueueProvider : IQueueProvider
 
     /// <inheritdoc />
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        return DisposeAsync();
-    }
+        => DisposeAsync();
 
     /// <inheritdoc />
     public IDisposable Subscribe(string queueName, Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler)
@@ -228,9 +226,7 @@ public sealed class RabbitMqQueueProvider : IQueueProvider
         }
 
         public void Start()
-        {
-            StartAsync().GetAwaiter().GetResult();
-        }
+            => StartAsync().GetAwaiter().GetResult();
 
         private async Task OnReceivedAsync(object sender, BasicDeliverEventArgs args)
         {

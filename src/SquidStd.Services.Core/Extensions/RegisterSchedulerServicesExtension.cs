@@ -8,7 +8,7 @@ using SquidStd.Services.Core.Services.Scheduling;
 namespace SquidStd.Services.Core.Extensions;
 
 /// <summary>
-///     Extension methods for registering the SquidStd cron scheduler.
+/// Extension methods for registering the SquidStd cron scheduler.
 /// </summary>
 public static class RegisterSchedulerServicesExtension
 {
@@ -16,8 +16,8 @@ public static class RegisterSchedulerServicesExtension
     extension(IContainer container)
     {
         /// <summary>
-        ///     Registers the timer wheel pump and the cron scheduler. Must be called after
-        ///     <c>RegisterCoreServices</c> so that <c>ITimerService</c> and <c>IJobSystem</c> exist.
+        /// Registers the timer wheel pump and the cron scheduler. Must be called after
+        /// <c>RegisterCoreServices</c> so that <c>ITimerService</c> and <c>IJobSystem</c> exist.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterSchedulerServices()

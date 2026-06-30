@@ -5,23 +5,6 @@ namespace SquidStd.Tests.Tui.Binding;
 
 public class ViewBinderOneWayTests
 {
-    private sealed class FakeViewModel : INotifyPropertyChanged
-    {
-        private string _title = string.Empty;
-
-        public string Title
-        {
-            get { return _title; }
-            set
-            {
-                _title = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Title)));
-            }
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-    }
-
     [Fact]
     public void OneWay_AppliesInitialValueAndUpdates()
     {
@@ -56,11 +39,34 @@ public class ViewBinderOneWayTests
     {
         var vm = new FakeViewModel();
         var marshalled = 0;
-        var binder = new ViewBinder(action => { marshalled++; action(); });
+        var binder = new ViewBinder(
+            action =>
+            {
+                marshalled++;
+                action();
+            }
+        );
         binder.OneWay(vm, nameof(FakeViewModel.Title), () => { });
 
         vm.Title = "x";
 
         Assert.Equal(1, marshalled); // change marshalled once; the initial apply is NOT marshalled
+    }
+
+    private sealed class FakeViewModel : INotifyPropertyChanged
+    {
+        private string _title = string.Empty;
+
+        public string Title
+        {
+            get => _title;
+            set
+            {
+                _title = value;
+                PropertyChanged?.Invoke(this, new(nameof(Title)));
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }

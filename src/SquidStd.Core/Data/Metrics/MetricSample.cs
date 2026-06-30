@@ -3,7 +3,7 @@ using SquidStd.Core.Types.Metrics;
 namespace SquidStd.Core.Data.Metrics;
 
 /// <summary>
-///     Represents one collected metric value.
+/// Represents one collected metric value.
 /// </summary>
 /// <param name="Name">Metric name emitted by the provider.</param>
 /// <param name="Value">Metric numeric value.</param>

@@ -14,9 +14,7 @@ public class EventSinkTests
         var invoked = false;
 
         void Handler(object? sender, LogEventData data)
-        {
-            invoked = true;
-        }
+            => invoked = true;
 
         EventSink.OnLogReceived += Handler;
         EventSink.ClearSubscribers();
@@ -50,9 +48,7 @@ public class EventSinkTests
         LogEventData? captured = null;
 
         void Handler(object? sender, LogEventData data)
-        {
-            captured = data;
-        }
+            => captured = data;
 
         EventSink.OnLogReceived += Handler;
 
@@ -84,6 +80,6 @@ public class EventSinkTests
     {
         var parsedTemplate = new MessageTemplateParser().Parse(template);
 
-        return new LogEvent(DateTimeOffset.UtcNow, level, null, parsedTemplate, properties);
+        return new(DateTimeOffset.UtcNow, level, null, parsedTemplate, properties);
     }
 }

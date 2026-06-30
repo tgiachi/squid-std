@@ -14,7 +14,7 @@ using SquidStd.Services.Core.Types;
 namespace SquidStd.Services.Core.Services.Bootstrap;
 
 /// <summary>
-///     Default SquidStd bootstrapper and service lifecycle orchestrator.
+/// Default SquidStd bootstrapper and service lifecycle orchestrator.
 /// </summary>
 public sealed class SquidStdBootstrap : ISquidStdBootstrap
 {
@@ -32,21 +32,17 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
     public IContainer Container { get; }
 
     /// <summary>
-    ///     Initializes a bootstrapper with default options.
+    /// Initializes a bootstrapper with default options.
     /// </summary>
     public SquidStdBootstrap()
-        : this(new SquidStdOptions())
-    {
-    }
+        : this(new()) { }
 
     /// <summary>
-    ///     Initializes a bootstrapper with the specified options.
+    /// Initializes a bootstrapper with the specified options.
     /// </summary>
     /// <param name="options">Bootstrap options used to register core services.</param>
     public SquidStdBootstrap(SquidStdOptions options)
-        : this(options, new Container(), true)
-    {
-    }
+        : this(options, new Container(), true) { }
 
     private SquidStdBootstrap(SquidStdOptions options, IContainer container, bool ownsContainer)
     {
@@ -67,9 +63,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 
     /// <inheritdoc />
     public ISquidStdBootstrap ConfigureService(Func<IContainer, IContainer> configure)
-    {
-        return ConfigureServices(configure);
-    }
+        => ConfigureServices(configure);
 
     /// <inheritdoc />
     public ISquidStdBootstrap ConfigureServices(Func<IContainer, IContainer> configure)
@@ -88,8 +82,8 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         var configuredContainer = configure(Container);
 
         return !ReferenceEquals(configuredContainer, Container)
-            ? throw new InvalidOperationException("ConfigureServices must return the bootstrap container instance.")
-            : this;
+                   ? throw new InvalidOperationException("ConfigureServices must return the bootstrap container instance.")
+                   : this;
     }
 
     /// <inheritdoc />
@@ -135,9 +129,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         {
             await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
         finally
         {
             await StopAsync(CancellationToken.None);
@@ -207,34 +199,28 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
     }
 
     /// <summary>
-    ///     Creates a bootstrapper with default options.
+    /// Creates a bootstrapper with default options.
     /// </summary>
     /// <returns>The created bootstrapper.</returns>
     public static SquidStdBootstrap Create()
-    {
-        return new SquidStdBootstrap();
-    }
+        => new();
 
     /// <summary>
-    ///     Creates a bootstrapper with the specified options.
+    /// Creates a bootstrapper with the specified options.
     /// </summary>
     /// <param name="options">Bootstrap options used to register core services.</param>
     /// <returns>The created bootstrapper.</returns>
     public static SquidStdBootstrap Create(SquidStdOptions options)
-    {
-        return new SquidStdBootstrap(options);
-    }
+        => new(options);
 
     /// <summary>
-    ///     Creates a bootstrapper using an externally owned DryIoc container.
+    /// Creates a bootstrapper using an externally owned DryIoc container.
     /// </summary>
     /// <param name="options">Bootstrap options used to register core services.</param>
     /// <param name="container">Externally owned container that receives SquidStd services.</param>
     /// <returns>The created bootstrapper.</returns>
     public static SquidStdBootstrap Create(SquidStdOptions options, IContainer container)
-    {
-        return new SquidStdBootstrap(options, container, false);
-    }
+        => new(options, container, false);
 
     private void ConfigureLogger()
     {
@@ -282,9 +268,9 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         return
         [
             .. Container.Resolve<List<ServiceRegistrationData>>()
-                .OrderBy(registration => registration.Priority)
-                .ThenBy(registration => registration.ServiceType.FullName, StringComparer.Ordinal)
-                .ThenBy(registration => registration.ImplementationType.FullName, StringComparer.Ordinal)
+                        .OrderBy(registration => registration.Priority)
+                        .ThenBy(registration => registration.ServiceType.FullName, StringComparer.Ordinal)
+                        .ThenBy(registration => registration.ImplementationType.FullName, StringComparer.Ordinal)
         ];
     }
 
@@ -341,8 +327,8 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         var logDirectory = string.IsNullOrWhiteSpace(options.LogDirectory) ? "logs" : options.LogDirectory;
         var fileName = string.IsNullOrWhiteSpace(options.FileName) ? "squidstd-.log" : options.FileName;
         var directory = Path.IsPathRooted(logDirectory)
-            ? logDirectory
-            : Path.Combine(Options.RootDirectory, logDirectory);
+                            ? logDirectory
+                            : Path.Combine(Options.RootDirectory, logDirectory);
 
         return Path.Combine(directory, fileName);
     }
