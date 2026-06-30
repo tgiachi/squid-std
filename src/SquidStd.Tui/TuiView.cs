@@ -31,8 +31,17 @@ public abstract class TuiView<TViewModel> : Window, ITuiView
 
     void ITuiView.Initialize()
     {
+        OnInitialize(_binder);
+    }
+
+    /// <summary>
+    /// Builds the view. The default runs <see cref="BuildLayout" /> then <see cref="Bind" />; the
+    /// declarative base overrides this to materialise a node tree instead.
+    /// </summary>
+    protected virtual void OnInitialize(ViewBinder binder)
+    {
         BuildLayout();
-        Bind(_binder);
+        Bind(binder);
     }
 
     /// <summary>Creates the Terminal.Gui widgets for this view.</summary>
