@@ -18,6 +18,10 @@ public sealed class PbkdfCost
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(iterations);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(parallelism);
 
+        // The envelope stores parallelism in a single byte, so reject values that would truncate and
+        // silently produce an undecryptable blob. Real Argon2 lane counts are far below this.
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(parallelism, 255);
+
         MemoryKib = memoryKib;
         Iterations = iterations;
         Parallelism = parallelism;

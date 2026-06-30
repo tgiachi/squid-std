@@ -35,4 +35,8 @@ public class PbkdfCostTests
     [InlineData(1024, 3, 0)]
     public void Custom_RejectsNonPositiveParameters(int memoryKib, int iterations, int parallelism)
         => Assert.Throws<ArgumentOutOfRangeException>(() => new PbkdfCost(memoryKib, iterations, parallelism));
+
+    [Fact]
+    public void Custom_RejectsParallelismAbove255()
+        => Assert.Throws<ArgumentOutOfRangeException>(() => new PbkdfCost(1024, 3, 256));
 }

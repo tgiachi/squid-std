@@ -70,4 +70,20 @@ public class PasswordCipherTests
 
         Assert.Equal(new byte[] { 7 }, PasswordCipher.Decrypt(blob, "pw"));
     }
+
+    [Fact]
+    public void Encrypt_EmptyPlaintext_RoundTrips()
+    {
+        var blob = PasswordCipher.Encrypt([], "pw", Fast);
+
+        Assert.Equal([], PasswordCipher.Decrypt(blob, "pw"));
+    }
+
+    [Fact]
+    public void EncryptString_NonAsciiPassword_RoundTrips()
+    {
+        var blob = PasswordCipher.EncryptString("payload", "pâsswörd-日本語-🔐", Fast);
+
+        Assert.Equal("payload", PasswordCipher.DecryptString(blob, "pâsswörd-日本語-🔐"));
+    }
 }
