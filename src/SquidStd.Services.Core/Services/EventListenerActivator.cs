@@ -6,7 +6,7 @@ using SquidStd.Core.Interfaces.Events;
 namespace SquidStd.Services.Core.Services;
 
 /// <summary>
-///     Subscribes every DI-registered event listener to the bus at startup, before publishing services run.
+/// Subscribes every DI-registered event listener to the bus at startup, before publishing services run.
 /// </summary>
 internal sealed class EventListenerActivator : ISquidStdService
 {
@@ -35,7 +35,5 @@ internal sealed class EventListenerActivator : ISquidStdService
     }
 
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        return ValueTask.CompletedTask;
-    }
+        => ValueTask.CompletedTask;
 }

@@ -25,12 +25,14 @@ public class FileSecretStoreEnumerationTests
             await store.SetAsync("api/key", "c");
 
             var all = new List<string>();
+
             await foreach (var name in store.ListNamesAsync())
             {
                 all.Add(name);
             }
 
             var db = new List<string>();
+
             await foreach (var name in store.ListNamesAsync("db/"))
             {
                 db.Add(name);

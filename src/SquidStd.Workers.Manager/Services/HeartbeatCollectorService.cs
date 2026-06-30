@@ -9,8 +9,8 @@ using SquidStd.Workers.Manager.Data.Config;
 namespace SquidStd.Workers.Manager.Services;
 
 /// <summary>
-///     Subscribes to the heartbeat topic and folds each <see cref="WorkerHeartbeat" /> into the registry,
-///     publishing any resulting status transition on the event bus.
+/// Subscribes to the heartbeat topic and folds each <see cref="WorkerHeartbeat" /> into the registry,
+/// publishing any resulting status transition on the event bus.
 /// </summary>
 public sealed class HeartbeatCollectorService : ISquidStdService
 {
@@ -32,8 +32,8 @@ public sealed class HeartbeatCollectorService : ISquidStdService
         _registry = registry;
         _eventBus = eventBus;
         _topicName = string.IsNullOrWhiteSpace(config.HeartbeatTopic)
-            ? WorkerChannels.HeartbeatTopic
-            : config.HeartbeatTopic;
+                         ? WorkerChannels.HeartbeatTopic
+                         : config.HeartbeatTopic;
     }
 
     /// <inheritdoc />

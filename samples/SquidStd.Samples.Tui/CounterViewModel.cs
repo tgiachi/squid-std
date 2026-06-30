@@ -6,15 +6,11 @@ namespace SquidStd.Samples.Tui;
 
 public sealed partial class CounterViewModel : TuiViewModel
 {
-    [ObservableProperty]
-    private string _title = "SquidStd.Tui — Counter";
+    [ObservableProperty] private string _title = "SquidStd.Tui — Counter";
 
-    [ObservableProperty]
-    private string _value = "0";
+    [ObservableProperty] private string _value = "0";
 
     [RelayCommand]
     private void Increment()
-    {
-        Value = (int.Parse(Value) + 1).ToString();
-    }
+        => Value = (int.Parse(Value) + 1).ToString();
 }

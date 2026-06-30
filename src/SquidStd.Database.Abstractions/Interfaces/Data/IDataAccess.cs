@@ -6,7 +6,7 @@ using SquidStd.Database.Abstractions.Data.Entities;
 namespace SquidStd.Database.Abstractions.Interfaces.Data;
 
 /// <summary>
-///     Generic data access for a <see cref="BaseEntity" /> type: CRUD, bulk, and querying.
+/// Generic data access for a <see cref="BaseEntity" /> type: CRUD, bulk, and querying.
 /// </summary>
 /// <typeparam name="TEntity">The entity type.</typeparam>
 public interface IDataAccess<TEntity>

@@ -18,14 +18,14 @@ public sealed class EntityStoreTests : IAsyncDisposable
         var serializer = new JsonDataSerializer();
         IPersistenceEntityDescriptor<Player, int> descriptor =
             new PersistenceEntityDescriptor<Player, int>(serializer, serializer, 1, "Player", 1, p => p.Id);
-        _journal = new BinaryJournalService(Path.Combine(_dir, "world.journal.bin"));
-        _store = new EntityStore<Player, int>(_stateStore, _journal, descriptor);
+        _journal = new(Path.Combine(_dir, "world.journal.bin"));
+        _store = new(_stateStore, _journal, descriptor);
     }
 
     [Fact]
     public async Task Upsert_ThenGetById_ReturnsClone()
     {
-        await _store.UpsertAsync(new Player { Id = 1, Name = "Bob" });
+        await _store.UpsertAsync(new() { Id = 1, Name = "Bob" });
 
         var fetched = await _store.GetByIdAsync(1);
 
@@ -36,7 +36,7 @@ public sealed class EntityStoreTests : IAsyncDisposable
     [Fact]
     public async Task GetById_ReturnsDetachedClone()
     {
-        await _store.UpsertAsync(new Player { Id = 1, Tags = ["a"] });
+        await _store.UpsertAsync(new() { Id = 1, Tags = ["a"] });
 
         var first = await _store.GetByIdAsync(1);
         first!.Tags.Add("mutated");
@@ -48,7 +48,7 @@ public sealed class EntityStoreTests : IAsyncDisposable
     [Fact]
     public async Task Upsert_AppendsToJournal()
     {
-        await _store.UpsertAsync(new Player { Id = 1 });
+        await _store.UpsertAsync(new() { Id = 1 });
 
         Assert.Single(await _journal.ReadAllAsync());
     }
@@ -56,7 +56,7 @@ public sealed class EntityStoreTests : IAsyncDisposable
     [Fact]
     public async Task Remove_ExistingKey_ReturnsTrueAndJournals()
     {
-        await _store.UpsertAsync(new Player { Id = 1 });
+        await _store.UpsertAsync(new() { Id = 1 });
 
         Assert.True(await _store.RemoveAsync(1));
         Assert.Null(await _store.GetByIdAsync(1));
@@ -73,8 +73,8 @@ public sealed class EntityStoreTests : IAsyncDisposable
     [Fact]
     public async Task CountAndGetAll_ReflectState()
     {
-        await _store.UpsertAsync(new Player { Id = 1 });
-        await _store.UpsertAsync(new Player { Id = 2 });
+        await _store.UpsertAsync(new() { Id = 1 });
+        await _store.UpsertAsync(new() { Id = 2 });
 
         Assert.Equal(2, await _store.CountAsync());
         Assert.Equal(2, (await _store.GetAllAsync()).Count);
@@ -83,8 +83,8 @@ public sealed class EntityStoreTests : IAsyncDisposable
     [Fact]
     public async Task Query_ReturnsQueryableClones()
     {
-        await _store.UpsertAsync(new Player { Id = 1, Name = "Alice" });
-        await _store.UpsertAsync(new Player { Id = 2, Name = "Bob" });
+        await _store.UpsertAsync(new() { Id = 1, Name = "Alice" });
+        await _store.UpsertAsync(new() { Id = 2, Name = "Bob" });
 
         var names = _store.Query().Where(p => p.Name.StartsWith('A')).Select(p => p.Name).ToArray();
 

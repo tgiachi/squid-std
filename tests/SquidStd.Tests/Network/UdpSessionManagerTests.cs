@@ -82,7 +82,7 @@ public class UdpSessionManagerTests
     {
         var timeout = TimeSpan.FromSeconds(5);
 
-        await using var server = new SquidStdUdpServer(new IPEndPoint(IPAddress.Loopback, 0), false);
+        await using var server = new SquidStdUdpServer(new(IPAddress.Loopback, 0), false);
         using var manager = new UdpSessionManager<string>(server, c => $"state-{c.SessionId}");
 
         var created = new TaskCompletionSource<Session<string>>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -93,14 +93,14 @@ public class UdpSessionManagerTests
         await server.StartAsync(CancellationToken.None);
         var serverPort = server.Port;
 
-        await using var client = new SquidStdUdpClient(new IPEndPoint(IPAddress.Loopback, 0));
+        await using var client = new SquidStdUdpClient(new(IPAddress.Loopback, 0));
         var clientReceived = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
         client.OnDataReceived += (_, e) => clientReceived.TrySetResult(e.Data.ToArray());
         await client.StartAsync(CancellationToken.None);
 
         await client.SendToAsync(
             new byte[] { 1, 2, 3 },
-            new IPEndPoint(IPAddress.Loopback, serverPort),
+            new(IPAddress.Loopback, serverPort),
             CancellationToken.None
         );
 
@@ -168,23 +168,17 @@ public class UdpSessionManagerTests
     }
 
     private static UdpSessionManager<string> NewManager(SquidStdUdpServer server, FakeTimeProvider time)
-    {
-        return new UdpSessionManager<string>(
+        => new(
             server,
             connection => $"state-{connection.SessionId}",
             TimeSpan.FromSeconds(30),
             TimeSpan.FromSeconds(10),
             time
         );
-    }
 
     private static SquidStdUdpServer NewServer()
-    {
-        return new SquidStdUdpServer(new IPEndPoint(IPAddress.Loopback, 0), false);
-    }
+        => new(new(IPAddress.Loopback, 0), false);
 
     private static IPEndPoint Peer(int port)
-    {
-        return new IPEndPoint(IPAddress.Loopback, port);
-    }
+        => new(IPAddress.Loopback, port);
 }

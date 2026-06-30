@@ -15,9 +15,9 @@ public static class MimeMessageMapper
         var to = message.To.Mailboxes.Select(ToAddress).ToArray();
         var cc = message.Cc.Mailboxes.Select(ToAddress).ToArray();
         var attachments = message.Attachments
-            .OfType<MimePart>()
-            .Select(part => ToAttachment(part, includeAttachmentContent))
-            .ToArray();
+                                 .OfType<MimePart>()
+                                 .Select(part => ToAttachment(part, includeAttachmentContent))
+                                 .ToArray();
 
         byte[]? rawEml = null;
 
@@ -28,7 +28,7 @@ public static class MimeMessageMapper
             rawEml = stream.ToArray();
         }
 
-        return new MailMessage(
+        return new(
             from,
             to,
             cc,
@@ -43,9 +43,7 @@ public static class MimeMessageMapper
     }
 
     private static MailAddress ToAddress(MailboxAddress mailbox)
-    {
-        return new MailAddress(mailbox.Name ?? string.Empty, mailbox.Address);
-    }
+        => new(mailbox.Name ?? string.Empty, mailbox.Address);
 
     private static MailAttachment ToAttachment(MimePart part, bool includeContent)
     {
@@ -65,6 +63,6 @@ public static class MimeMessageMapper
 
         var fileName = part.FileName ?? string.Empty;
 
-        return new MailAttachment(fileName, part.ContentType.MimeType, size, content);
+        return new(fileName, part.ContentType.MimeType, size, content);
     }
 }

@@ -6,7 +6,7 @@ using SquidStd.Workers.Interfaces;
 namespace SquidStd.Workers.Services;
 
 /// <summary>
-///     Default <see cref="IJobDispatcher" />: indexes the registered handlers by job name.
+/// Default <see cref="IJobDispatcher" />: indexes the registered handlers by job name.
 /// </summary>
 public sealed class JobDispatcher : IJobDispatcher
 {

@@ -1,7 +1,7 @@
 namespace SquidStd.Core.Types.Files;
 
 /// <summary>
-///     The kind of change observed on a watched file.
+/// The kind of change observed on a watched file.
 /// </summary>
 public enum FileChangeKind
 {

@@ -4,12 +4,12 @@ using System.Net.NetworkInformation;
 namespace SquidStd.Core.Utils;
 
 /// <summary>
-///     Utility methods for network configuration parsing.
+/// Utility methods for network configuration parsing.
 /// </summary>
 public static class NetworkUtils
 {
     /// <summary>
-    ///     Enumerates local unicast endpoints matching the supplied endpoint address family.
+    /// Enumerates local unicast endpoints matching the supplied endpoint address family.
     /// </summary>
     /// <param name="endPoint">The template endpoint supplying address family and port.</param>
     /// <returns>The matching local endpoints.</returns>
@@ -18,16 +18,17 @@ public static class NetworkUtils
         ArgumentNullException.ThrowIfNull(endPoint);
 
         return NetworkInterface.GetAllNetworkInterfaces()
-            .SelectMany(adapter =>
-                adapter.GetIPProperties()
-                    .UnicastAddresses
-                    .Where(unicast => endPoint.AddressFamily == unicast.Address.AddressFamily)
-                    .Select(unicast => new IPEndPoint(unicast.Address, endPoint.Port))
-            );
+                               .SelectMany(
+                                   adapter =>
+                                       adapter.GetIPProperties()
+                                              .UnicastAddresses
+                                              .Where(unicast => endPoint.AddressFamily == unicast.Address.AddressFamily)
+                                              .Select(unicast => new IPEndPoint(unicast.Address, endPoint.Port))
+                               );
     }
 
     /// <summary>
-    ///     Parses an IP address, treating "*" as every IPv4 interface.
+    /// Parses an IP address, treating "*" as every IPv4 interface.
     /// </summary>
     /// <param name="ipAddress">The IP address or "*".</param>
     /// <returns>The parsed IP address.</returns>
@@ -39,7 +40,7 @@ public static class NetworkUtils
     }
 
     /// <summary>
-    ///     Parses a comma-separated port list with optional ranges.
+    /// Parses a comma-separated port list with optional ranges.
     /// </summary>
     /// <param name="ports">The ports string, such as "6666-6668,6669,8000".</param>
     /// <returns>The parsed ports.</returns>

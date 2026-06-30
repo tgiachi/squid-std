@@ -29,9 +29,9 @@ container.RegisterInstance<IDataDeserializer>(new MessagePackDataSerializer());
 
 ## Key types
 
-| Type                       | Purpose                                                  |
-|----------------------------|----------------------------------------------------------|
-| `MessagePackDataSerializer`| Contractless MessagePack `IDataSerializer`/`IDataDeserializer`. |
+| Type                        | Purpose                                                         |
+|-----------------------------|-----------------------------------------------------------------|
+| `MessagePackDataSerializer` | Contractless MessagePack `IDataSerializer`/`IDataDeserializer`. |
 
 ## License
 

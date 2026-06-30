@@ -6,14 +6,14 @@ using SquidStd.Storage.Internal;
 namespace SquidStd.Storage.Services;
 
 /// <summary>
-///     Local file-backed binary storage.
+/// Local file-backed binary storage.
 /// </summary>
 public sealed class FileStorageService : IStorageService
 {
     private readonly string _rootDirectory;
 
     /// <summary>
-    ///     Initializes local file storage.
+    /// Initializes local file storage.
     /// </summary>
     /// <param name="config">Storage configuration.</param>
     public FileStorageService(StorageConfig config)
@@ -126,7 +126,5 @@ public sealed class FileStorageService : IStorageService
     }
 
     private string ResolvePath(string key)
-    {
-        return StoragePathResolver.ResolveFilePath(_rootDirectory, key);
-    }
+        => StoragePathResolver.ResolveFilePath(_rootDirectory, key);
 }

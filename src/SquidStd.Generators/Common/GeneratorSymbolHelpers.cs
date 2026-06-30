@@ -5,24 +5,16 @@ namespace SquidStd.Generators.Common;
 internal static class GeneratorSymbolHelpers
 {
     public static string FullyQualified(ITypeSymbol symbol)
-    {
-        return symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-    }
+        => symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
     public static string DisplayName(ISymbol symbol)
-    {
-        return symbol.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat);
-    }
+        => symbol.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat);
 
     public static Location? PrimaryLocation(ISymbol symbol)
-    {
-        return symbol.Locations.FirstOrDefault();
-    }
+        => symbol.Locations.FirstOrDefault();
 
     public static bool IsConcreteNonGenericClass(INamedTypeSymbol type)
-    {
-        return type.TypeKind == TypeKind.Class && !type.IsAbstract && !type.IsGenericType;
-    }
+        => type.TypeKind == TypeKind.Class && !type.IsAbstract && !type.IsGenericType;
 
     public static bool IsAccessibleFromGeneratedSource(INamedTypeSymbol type)
     {
@@ -42,16 +34,15 @@ internal static class GeneratorSymbolHelpers
     }
 
     public static bool ImplementsInterface(INamedTypeSymbol type, string metadataName, string namespaceName)
-    {
-        return type.AllInterfaces.Any(interfaceType =>
+        => type.AllInterfaces.Any(
+            interfaceType =>
             {
                 var originalDefinition = interfaceType.OriginalDefinition;
 
-                return originalDefinition.MetadataName == metadataName
-                       && originalDefinition.ContainingNamespace.ToDisplayString() == namespaceName;
+                return originalDefinition.MetadataName == metadataName &&
+                       originalDefinition.ContainingNamespace.ToDisplayString() == namespaceName;
             }
         );
-    }
 
     public static bool IsAssignableTo(INamedTypeSymbol implementationType, INamedTypeSymbol serviceType)
     {
@@ -68,15 +59,15 @@ internal static class GeneratorSymbolHelpers
             }
         }
 
-        return implementationType.AllInterfaces.Any(interfaceType =>
-            SymbolEqualityComparer.Default.Equals(interfaceType, serviceType)
+        return implementationType.AllInterfaces.Any(
+            interfaceType =>
+                SymbolEqualityComparer.Default.Equals(interfaceType, serviceType)
         );
     }
 
     public static bool HasPublicParameterlessConstructor(INamedTypeSymbol type)
-    {
-        return type.InstanceConstructors.Any(constructor =>
-            constructor.Parameters.Length == 0 && constructor.DeclaredAccessibility == Accessibility.Public
+        => type.InstanceConstructors.Any(
+            constructor =>
+                constructor.Parameters.Length == 0 && constructor.DeclaredAccessibility == Accessibility.Public
         );
-    }
 }

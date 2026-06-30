@@ -7,16 +7,16 @@ namespace SquidStd.Tests.Integration.Mail;
 public sealed class GreenMailContainerFixture : IAsyncLifetime
 {
     private readonly IContainer _container = new ContainerBuilder()
-        .WithImage("greenmail/standalone:2.1.0")
-        .WithEnvironment(
-            "GREENMAIL_OPTS",
-            "-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled -Dgreenmail.verbose"
-        )
-        .WithPortBinding(3025, true)
-        .WithPortBinding(3143, true)
-        .WithPortBinding(3110, true)
-        .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(3143))
-        .Build();
+                                             .WithImage("greenmail/standalone:2.1.0")
+                                             .WithEnvironment(
+                                                 "GREENMAIL_OPTS",
+                                                 "-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled -Dgreenmail.verbose"
+                                             )
+                                             .WithPortBinding(3025, true)
+                                             .WithPortBinding(3143, true)
+                                             .WithPortBinding(3110, true)
+                                             .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(3143))
+                                             .Build();
 
     public string Host => _container.Hostname;
 
@@ -27,14 +27,10 @@ public sealed class GreenMailContainerFixture : IAsyncLifetime
     public int Pop3Port => _container.GetMappedPublicPort(3110);
 
     public Task DisposeAsync()
-    {
-        return _container.DisposeAsync().AsTask();
-    }
+        => _container.DisposeAsync().AsTask();
 
     public Task InitializeAsync()
-    {
-        return _container.StartAsync();
-    }
+        => _container.StartAsync();
 }
 
 [CollectionDefinition(Name)]

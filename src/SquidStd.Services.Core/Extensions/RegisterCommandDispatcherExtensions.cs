@@ -6,7 +6,7 @@ using SquidStd.Services.Core.Services;
 namespace SquidStd.Services.Core.Extensions;
 
 /// <summary>
-///     Extension methods for registering a command dispatcher and its context factory.
+/// Extension methods for registering a command dispatcher and its context factory.
 /// </summary>
 public static class RegisterCommandDispatcherExtensions
 {
@@ -14,7 +14,7 @@ public static class RegisterCommandDispatcherExtensions
     extension(IContainer container)
     {
         /// <summary>
-        ///     Registers an <see cref="ICommandDispatcher{TContext}" /> singleton and its bootstrap activator.
+        /// Registers an <see cref="ICommandDispatcher{TContext}" /> singleton and its bootstrap activator.
         /// </summary>
         /// <typeparam name="TContext">The dispatcher context type.</typeparam>
         /// <returns>The same container for chaining.</returns>
@@ -27,9 +27,9 @@ public static class RegisterCommandDispatcherExtensions
         }
 
         /// <summary>
-        ///     Registers a seeded context factory and an <see cref="ISeededCommandDispatcher{TContext,TSeed}" />
-        ///     singleton over the existing <see cref="ICommandDispatcher{TContext}" /> (which must already be
-        ///     registered via <see cref="RegisterCommandDispatcher{TContext}" />).
+        /// Registers a seeded context factory and an <see cref="ISeededCommandDispatcher{TContext,TSeed}" />
+        /// singleton over the existing <see cref="ICommandDispatcher{TContext}" /> (which must already be
+        /// registered via <see cref="RegisterCommandDispatcher{TContext}" />).
         /// </summary>
         /// <typeparam name="TContext">The dispatcher context type.</typeparam>
         /// <typeparam name="TSeed">The seed the context is built from.</typeparam>

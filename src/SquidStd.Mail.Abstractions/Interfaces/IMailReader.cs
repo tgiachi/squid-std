@@ -6,8 +6,8 @@ namespace SquidStd.Mail.Abstractions.Interfaces;
 public interface IMailReader
 {
     /// <summary>
-    ///     Connects, fetches the new (unseen) messages, marks them seen / deletes them per options, disconnects,
-    ///     and returns the parsed messages.
+    /// Connects, fetches the new (unseen) messages, marks them seen / deletes them per options, disconnects,
+    /// and returns the parsed messages.
     /// </summary>
     Task<IReadOnlyList<MailMessage>> FetchNewAsync(CancellationToken cancellationToken = default);
 }

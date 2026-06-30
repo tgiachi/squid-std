@@ -31,12 +31,15 @@ public sealed partial class ViewBinder
             {
                 case Button button:
                     BindCommandByName(vmType, viewModel, ConventionNames.CommandName(id), button);
+
                     break;
                 case TextField field:
-                    BindStringByName(vmType, viewModel, ConventionNames.MemberName(id), field, twoWay: true, null);
+                    BindStringByName(vmType, viewModel, ConventionNames.MemberName(id), field, true, null);
+
                     break;
                 case Label label:
-                    BindStringByName(vmType, viewModel, ConventionNames.MemberName(id), null, twoWay: false, label);
+                    BindStringByName(vmType, viewModel, ConventionNames.MemberName(id), null, false, label);
+
                     break;
             }
         }
@@ -53,7 +56,12 @@ public sealed partial class ViewBinder
     }
 
     private void BindStringByName(
-        Type vmType, INotifyPropertyChanged vm, string memberName, TextField? field, bool twoWay, Label? label
+        Type vmType,
+        INotifyPropertyChanged vm,
+        string memberName,
+        TextField? field,
+        bool twoWay,
+        Label? label
     )
     {
         var property = vmType.GetProperty(memberName, BindingFlags.Public | BindingFlags.Instance);

@@ -1,8 +1,8 @@
 namespace SquidStd.Actors.Interfaces;
 
 /// <summary>
-///     Non-generic request facet allowing the actor infrastructure to fault a pending request
-///     without knowing its reply type.
+/// Non-generic request facet allowing the actor infrastructure to fault a pending request
+/// without knowing its reply type.
 /// </summary>
 public interface IActorRequestCore
 {

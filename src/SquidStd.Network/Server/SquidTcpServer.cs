@@ -15,8 +15,8 @@ using SquidStd.Network.Types.Server;
 namespace SquidStd.Network.Server;
 
 /// <summary>
-///     High-throughput TCP server with client lifecycle events and middleware-enabled payload dispatch.
-///     Supports Start/Stop/Start cycles by recreating the underlying socket on each Start.
+/// High-throughput TCP server with client lifecycle events and middleware-enabled payload dispatch.
+/// Supports Start/Stop/Start cycles by recreating the underlying socket on each Start.
 /// </summary>
 public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposable
 {
@@ -40,34 +40,34 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
     private int _started;
 
     /// <summary>
-    ///     Transport type exposed by this server.
+    /// Transport type exposed by this server.
     /// </summary>
     public ServerType ServerType => ServerType.TCP;
 
     /// <summary>
-    ///     Current listening port. Returns 0 when the server is stopped.
+    /// Current listening port. Returns 0 when the server is stopped.
     /// </summary>
     public int Port => ((IPEndPoint?)_serverSocket?.LocalEndPoint)?.Port ?? 0;
 
     /// <summary>
-    ///     True when the server is currently accepting connections.
+    /// True when the server is currently accepting connections.
     /// </summary>
     public bool IsRunning => Volatile.Read(ref _started) != 0;
 
     /// <summary>
-    ///     Initializes a TCP server bound to the given endpoint.
+    /// Initializes a TCP server bound to the given endpoint.
     /// </summary>
     /// <param name="endPoint">Endpoint to bind on every <c>StartAsync</c>.</param>
     /// <param name="framer">
-    ///     Optional framer template. The same instance is shared by all accepted clients,
-    ///     so implementations must be stateless or thread-safe.
+    /// Optional framer template. The same instance is shared by all accepted clients,
+    /// so implementations must be stateless or thread-safe.
     /// </param>
     /// <param name="receiveBufferSize">Per-client receive chunk size.</param>
     /// <param name="historyBufferCapacity">Per-client history buffer capacity.</param>
     /// <param name="connectionPipelineFactory">
-    ///     Optional factory invoked once per accepted connection to produce its transport configuration.
-    ///     It MUST return fresh per-connection state — in particular a new <c>ITransportCodec</c> instance per
-    ///     call — because codecs are stateful and must not be shared across connections.
+    /// Optional factory invoked once per accepted connection to produce its transport configuration.
+    /// It MUST return fresh per-connection state — in particular a new <c>ITransportCodec</c> instance per
+    /// call — because codecs are stateful and must not be shared across connections.
     /// </param>
     public SquidTcpServer(
         IPEndPoint endPoint,
@@ -90,13 +90,11 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
 
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
-    {
-        await StopAsync(CancellationToken.None);
-    }
+        => await StopAsync(CancellationToken.None);
 
     /// <summary>
-    ///     Starts accepting clients. Recreates the listening socket on every call,
-    ///     so Stop/Start cycles are supported.
+    /// Starts accepting clients. Recreates the listening socket on every call,
+    /// so Stop/Start cycles are supported.
     /// </summary>
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -105,7 +103,7 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
             return Task.CompletedTask;
         }
 
-        _serverSocket = new Socket(_endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        _serverSocket = new(_endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         _serverSocket.Bind(_endPoint);
         _serverSocket.Listen(DefaultBacklog);
 
@@ -118,7 +116,7 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
     }
 
     /// <summary>
-    ///     Stops accepting new clients and closes all active clients.
+    /// Stops accepting new clients and closes all active clients.
     /// </summary>
     public async Task StopAsync(CancellationToken cancellationToken)
     {
@@ -173,7 +171,7 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
     }
 
     /// <summary>
-    ///     Registers middleware in execution order.
+    /// Registers middleware in execution order.
     /// </summary>
     public SquidTcpServer AddMiddleware(INetMiddleware middleware)
     {
@@ -232,7 +230,7 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
             catch (Exception ex)
             {
                 _logger.Error(ex, "Accept loop failed");
-                OnException?.Invoke(this, new SquidStdTcpExceptionEventArgs(ex));
+                OnException?.Invoke(this, new(ex));
             }
         }
     }
@@ -251,10 +249,10 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
         try
         {
             await sslStream.AuthenticateAsServerAsync(
-                    _tlsOptions.ToAuthenticationOptions(),
-                    cancellationToken
-                )
-                .ConfigureAwait(false);
+                               _tlsOptions.ToAuthenticationOptions(),
+                               cancellationToken
+                           )
+                           .ConfigureAwait(false);
 
             return sslStream;
         }
@@ -270,67 +268,65 @@ public sealed class SquidTcpServer : INetworkServer, IAsyncDisposable, IDisposab
     private void WireClientEvents(SquidStdTcpClient client)
     {
         client.OnConnected += (_, args) =>
-        {
-            _logger.Debug(
-                "OnClientConnect. SessionId={SessionId}, RemoteEndPoint={RemoteEndPoint}",
-                args.Client.SessionId,
-                args.Client.RemoteEndPoint
-            );
-            OnClientConnect?.Invoke(this, args);
-        };
+                              {
+                                  _logger.Debug(
+                                      "OnClientConnect. SessionId={SessionId}, RemoteEndPoint={RemoteEndPoint}",
+                                      args.Client.SessionId,
+                                      args.Client.RemoteEndPoint
+                                  );
+                                  OnClientConnect?.Invoke(this, args);
+                              };
         client.OnDataReceived += (_, args) =>
-        {
-            _logger.Verbose(
-                "OnDataReceived. SessionId={SessionId}, Bytes={Bytes}",
-                args.Client.SessionId,
-                args.Data.Length
-            );
-            OnDataReceived?.Invoke(this, args);
-        };
+                                 {
+                                     _logger.Verbose(
+                                         "OnDataReceived. SessionId={SessionId}, Bytes={Bytes}",
+                                         args.Client.SessionId,
+                                         args.Data.Length
+                                     );
+                                     OnDataReceived?.Invoke(this, args);
+                                 };
         client.OnException += (_, args) =>
-        {
-            _logger.Error(
-                args.Exception,
-                "OnException. SessionId={SessionId}",
-                args.Client?.SessionId
-            );
-            OnException?.Invoke(this, args);
-        };
+                              {
+                                  _logger.Error(
+                                      args.Exception,
+                                      "OnException. SessionId={SessionId}",
+                                      args.Client?.SessionId
+                                  );
+                                  OnException?.Invoke(this, args);
+                              };
         client.OnDisconnected += (_, args) =>
-        {
-            _clients.TryRemove(args.Client.SessionId, out var _);
-            _logger.Debug(
-                "OnClientDisconnect. SessionId={SessionId}, RemoteEndPoint={RemoteEndPoint}",
-                args.Client.SessionId,
-                args.Client.RemoteEndPoint
-            );
-            OnClientDisconnect?.Invoke(this, args);
-        };
+                                 {
+                                     _clients.TryRemove(args.Client.SessionId, out var _);
+                                     _logger.Debug(
+                                         "OnClientDisconnect. SessionId={SessionId}, RemoteEndPoint={RemoteEndPoint}",
+                                         args.Client.SessionId,
+                                         args.Client.RemoteEndPoint
+                                     );
+                                     OnClientDisconnect?.Invoke(this, args);
+                                 };
     }
 
     /// <inheritdoc />
     public void Dispose()
-    {
-        DisposeAsync().AsTask().GetAwaiter().GetResult();
-    }
+        => DisposeAsync().AsTask().GetAwaiter().GetResult();
 
     /// <summary>
-    ///     Raised when a client connects.
+    /// Raised when a client connects.
     /// </summary>
     public event EventHandler<SquidStdTcpClientEventArgs>? OnClientConnect;
 
     /// <summary>
-    ///     Raised when a client disconnects.
+    /// Raised when a client disconnects.
     /// </summary>
     public event EventHandler<SquidStdTcpClientEventArgs>? OnClientDisconnect;
 
     /// <summary>
-    ///     Raised when a client sends data after middleware processing.
+    /// Raised when a client sends data after middleware processing.
     /// </summary>
     public event EventHandler<SquidStdTcpDataReceivedEventArgs>? OnDataReceived;
 
     /// <summary>
-    ///     Raised when an exception happens in accept loop or client loops.
+    /// Raised when an exception happens in accept loop or client loops.
     /// </summary>
     public event EventHandler<SquidStdTcpExceptionEventArgs>? OnException;
 }

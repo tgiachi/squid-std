@@ -12,10 +12,7 @@ public sealed class TuiNavigator : ITuiNavigator
     private readonly ITuiViewHost _viewHost;
     private readonly Stack<Screen> _stack = new();
 
-    public int Depth
-    {
-        get { return _stack.Count; }
-    }
+    public int Depth => _stack.Count;
 
     public TuiNavigator(IResolver resolver, TuiViewRegistry registry, ITuiViewHost viewHost)
     {
@@ -40,7 +37,7 @@ public sealed class TuiNavigator : ITuiNavigator
             await _stack.Peek().ViewModel.OnDeactivatedAsync();
         }
 
-        _stack.Push(new Screen(viewModel, view));
+        _stack.Push(new(viewModel, view));
         _viewHost.Show(view);
 
         await viewModel.OnActivatedAsync();

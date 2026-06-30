@@ -10,8 +10,8 @@ using SquidStd.Workers.Interfaces;
 namespace SquidStd.Workers.Services;
 
 /// <summary>
-///     Subscribes to the jobs queue and dispatches each <see cref="JobRequest" /> to its handler,
-///     bounded by <see cref="IWorkerState.MaxConcurrency" />.
+/// Subscribes to the jobs queue and dispatches each <see cref="JobRequest" /> to its handler,
+/// bounded by <see cref="IWorkerState.MaxConcurrency" />.
 /// </summary>
 public sealed class WorkerConsumerService : ISquidStdService, IQueueMessageListenerAsync<JobRequest>
 {
@@ -29,7 +29,7 @@ public sealed class WorkerConsumerService : ISquidStdService, IQueueMessageListe
         _queue = queue;
         _dispatcher = dispatcher;
         _state = state;
-        _semaphore = new SemaphoreSlim(state.MaxConcurrency);
+        _semaphore = new(state.MaxConcurrency);
         _queueName = string.IsNullOrWhiteSpace(config.JobQueue) ? WorkerChannels.JobQueue : config.JobQueue;
     }
 

@@ -3,8 +3,8 @@ using SquidStd.Aws.Abstractions.Data.Config;
 namespace SquidStd.Storage.S3.Data.Config;
 
 /// <summary>
-///     Connection options for the S3-compatible (MinIO) storage provider. Connection details live in
-///     <see cref="Aws" /> (shared with other AWS-SDK providers); <see cref="Bucket" /> is storage-specific.
+/// Connection options for the S3-compatible (MinIO) storage provider. Connection details live in
+/// <see cref="Aws" /> (shared with other AWS-SDK providers); <see cref="Bucket" /> is storage-specific.
 /// </summary>
 public sealed class S3StorageOptions
 {

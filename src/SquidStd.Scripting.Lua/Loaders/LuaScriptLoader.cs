@@ -6,8 +6,8 @@ using SquidStd.Core.Extensions.Directories;
 namespace SquidStd.Scripting.Lua.Loaders;
 
 /// <summary>
-///     Custom script loader for MoonSharp that loads Lua modules from the configured Scripts directory.
-///     Implements the MoonSharp script loader interface to provide require() functionality.
+/// Custom script loader for MoonSharp that loads Lua modules from the configured Scripts directory.
+/// Implements the MoonSharp script loader interface to provide require() functionality.
 /// </summary>
 public class LuaScriptLoader : ScriptLoaderBase
 {
@@ -15,14 +15,14 @@ public class LuaScriptLoader : ScriptLoaderBase
     private readonly List<string> _scriptsDirectories;
 
     /// <summary>
-    ///     Initializes a new instance of the LuaScriptLoader class.
+    /// Initializes a new instance of the LuaScriptLoader class.
     /// </summary>
     /// <param name="directoriesConfig">The directories configuration to resolve the scripts directory.</param>
     public LuaScriptLoader(string rootDirectory)
     {
         ArgumentNullException.ThrowIfNull(rootDirectory);
 
-        _scriptsDirectories = new List<string> { Path.GetFullPath(rootDirectory) };
+        _scriptsDirectories = new() { Path.GetFullPath(rootDirectory) };
 
         // Configure default module search paths
         ModulePaths =
@@ -37,13 +37,11 @@ public class LuaScriptLoader : ScriptLoaderBase
     }
 
     /// <summary>
-    ///     Initializes a new instance of the LuaScriptLoader class with multiple search directories.
+    /// Initializes a new instance of the LuaScriptLoader class with multiple search directories.
     /// </summary>
     /// <param name="searchDirectories">Ordered list of directories to search.</param>
     public LuaScriptLoader(IReadOnlyList<string> searchDirectories)
-        : this(searchDirectories, true)
-    {
-    }
+        : this(searchDirectories, true) { }
 
     private LuaScriptLoader(IReadOnlyList<string> searchDirectories, bool _)
     {
@@ -55,9 +53,9 @@ public class LuaScriptLoader : ScriptLoaderBase
         }
 
         _scriptsDirectories = searchDirectories.Where(d => !string.IsNullOrWhiteSpace(d))
-            .Select(d => Path.GetFullPath(d.ResolvePathAndEnvs()).ResolvePathAndEnvs())
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
+                                               .Select(d => Path.GetFullPath(d.ResolvePathAndEnvs()).ResolvePathAndEnvs())
+                                               .Distinct(StringComparer.OrdinalIgnoreCase)
+                                               .ToList();
 
         if (_scriptsDirectories.Count == 0)
         {
@@ -94,7 +92,7 @@ public class LuaScriptLoader : ScriptLoaderBase
     }
 
     /// <summary>
-    ///     Loads a Lua script file from the configured scripts directory.
+    /// Loads a Lua script file from the configured scripts directory.
     /// </summary>
     /// <param name="file">The filename or module name to load.</param>
     /// <param name="globalContext">The global context table.</param>
@@ -132,7 +130,7 @@ public class LuaScriptLoader : ScriptLoaderBase
     }
 
     /// <summary>
-    ///     Checks if a script file exists in the configured scripts directory.
+    /// Checks if a script file exists in the configured scripts directory.
     /// </summary>
     /// <param name="name">The filename or module name to check.</param>
     /// <returns>True if the file exists, false otherwise.</returns>
@@ -147,7 +145,7 @@ public class LuaScriptLoader : ScriptLoaderBase
     }
 
     /// <summary>
-    ///     Resolves a module name to a full file path by searching through configured module paths.
+    /// Resolves a module name to a full file path by searching through configured module paths.
     /// </summary>
     /// <param name="moduleName">The module name to resolve.</param>
     /// <returns>The full path to the module file, or null if not found.</returns>

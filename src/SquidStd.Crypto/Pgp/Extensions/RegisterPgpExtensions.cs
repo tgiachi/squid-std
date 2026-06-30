@@ -11,8 +11,8 @@ public static class RegisterPgpExtensions
     extension(IContainer container)
     {
         /// <summary>
-        ///     Registers the PGP keyring, service, and the chosen key store (all singletons). The keyring is not
-        ///     auto-loaded; call <see cref="IPgpKeyring.LoadAsync" /> at startup if persistence is desired.
+        /// Registers the PGP keyring, service, and the chosen key store (all singletons). The keyring is not
+        /// auto-loaded; call <see cref="IPgpKeyring.LoadAsync" /> at startup if persistence is desired.
         /// </summary>
         /// <param name="keyStoreFactory">Builds the <see cref="IPgpKeyStore" /> from the resolver.</param>
         /// <returns>The same container for chaining.</returns>

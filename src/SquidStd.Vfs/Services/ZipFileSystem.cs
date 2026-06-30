@@ -1,8 +1,8 @@
 using System.IO.Compression;
 using System.Runtime.CompilerServices;
+using SquidStd.Vfs.Abstractions;
 using SquidStd.Vfs.Abstractions.Data;
 using SquidStd.Vfs.Abstractions.Interfaces;
-using SquidStd.Vfs.Abstractions;
 
 namespace SquidStd.Vfs.Services;
 
@@ -16,14 +16,12 @@ public sealed class ZipFileSystem : IVirtualFileSystem, IAsyncDisposable, IDispo
     public ZipFileSystem(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        _file = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-        _archive = new ZipArchive(_file, ZipArchiveMode.Update, leaveOpen: true);
+        _file = new(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+        _archive = new(_file, ZipArchiveMode.Update, true);
     }
 
     public ValueTask<bool> ExistsAsync(string path, CancellationToken cancellationToken = default)
-    {
-        return ValueTask.FromResult(_archive.GetEntry(VfsPath.Normalize(path)) is not null);
-    }
+        => ValueTask.FromResult(_archive.GetEntry(VfsPath.Normalize(path)) is not null);
 
     public async ValueTask<byte[]?> ReadAllBytesAsync(string path, CancellationToken cancellationToken = default)
     {
@@ -42,7 +40,9 @@ public sealed class ZipFileSystem : IVirtualFileSystem, IAsyncDisposable, IDispo
     }
 
     public async ValueTask WriteAllBytesAsync(
-        string path, ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default
+        string path,
+        ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken = default
     )
     {
         var name = VfsPath.Normalize(path);
@@ -59,16 +59,14 @@ public sealed class ZipFileSystem : IVirtualFileSystem, IAsyncDisposable, IDispo
 
     public async Task<Stream> OpenReadAsync(string path, CancellationToken cancellationToken = default)
     {
-        var data = await ReadAllBytesAsync(path, cancellationToken).ConfigureAwait(false)
-                   ?? throw new FileNotFoundException($"No file at '{path}'.", path);
+        var data = await ReadAllBytesAsync(path, cancellationToken).ConfigureAwait(false) ??
+                   throw new FileNotFoundException($"No file at '{path}'.", path);
 
-        return new MemoryStream(data, writable: false);
+        return new MemoryStream(data, false);
     }
 
     public Task<Stream> OpenWriteAsync(string path, CancellationToken cancellationToken = default)
-    {
-        return Task.FromResult<Stream>(new WriteBackStream(this, path));
-    }
+        => Task.FromResult<Stream>(new WriteBackStream(this, path));
 
     public ValueTask<bool> DeleteAsync(string path, CancellationToken cancellationToken = default)
     {
@@ -87,7 +85,8 @@ public sealed class ZipFileSystem : IVirtualFileSystem, IAsyncDisposable, IDispo
     }
 
     public async IAsyncEnumerable<VfsEntry> ListAsync(
-        string? prefix = null, [EnumeratorCancellation] CancellationToken cancellationToken = default
+        string? prefix = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
         var normalizedPrefix = string.IsNullOrEmpty(prefix) ? null : VfsPath.Normalize(prefix);
@@ -99,7 +98,7 @@ public sealed class ZipFileSystem : IVirtualFileSystem, IAsyncDisposable, IDispo
                 continue;
             }
 
-            yield return new VfsEntry(entry.FullName, EntrySize(entry), entry.LastWriteTime);
+            yield return new(entry.FullName, EntrySize(entry), entry.LastWriteTime);
 
             await Task.CompletedTask;
         }

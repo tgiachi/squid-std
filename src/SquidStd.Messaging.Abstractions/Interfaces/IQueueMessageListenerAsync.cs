@@ -1,7 +1,7 @@
 namespace SquidStd.Messaging.Abstractions.Interfaces;
 
 /// <summary>
-///     Handles a queue message asynchronously.
+/// Handles a queue message asynchronously.
 /// </summary>
 /// <typeparam name="TMessage">The message payload type.</typeparam>
 public interface IQueueMessageListenerAsync<in TMessage>

@@ -8,13 +8,6 @@ namespace SquidStd.Tests.Tui.Dsl;
 
 public class UiFactoryTests
 {
-    private sealed class SampleViewModel
-    {
-        public string Title { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public ICommand Save { get; } = new RelayCommand(() => { });
-    }
-
     private readonly UiFactory<SampleViewModel> _ui = new();
 
     [Fact]
@@ -50,5 +43,12 @@ public class UiFactoryTests
         Assert.Equal(2, v.Children.Count);
         Assert.Equal(StackOrientation.Horizontal, h.Orientation);
         Assert.Single(h.Children);
+    }
+
+    private sealed class SampleViewModel
+    {
+        public string Title { get; } = string.Empty;
+        public string Name { get; } = string.Empty;
+        public ICommand Save { get; } = new RelayCommand(() => { });
     }
 }

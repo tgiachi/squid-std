@@ -1,7 +1,7 @@
 namespace SquidStd.Caching.Abstractions.Interfaces;
 
 /// <summary>
-///     Sink for cache instrumentation events.
+/// Sink for cache instrumentation events.
 /// </summary>
 public interface ICacheMetrics
 {

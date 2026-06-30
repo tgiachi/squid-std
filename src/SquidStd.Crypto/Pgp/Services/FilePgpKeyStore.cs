@@ -6,8 +6,8 @@ using SquidStd.Crypto.Pgp.Internal;
 namespace SquidStd.Crypto.Pgp.Services;
 
 /// <summary>
-///     Key store backed by a directory of armored <c>.asc</c> files (one public, optionally one secret, per
-///     key). gpg-interoperable.
+/// Key store backed by a directory of armored <c>.asc</c> files (one public, optionally one secret, per
+/// key). gpg-interoperable.
 /// </summary>
 public sealed class FilePgpKeyStore : IPgpKeyStore
 {
@@ -31,20 +31,20 @@ public sealed class FilePgpKeyStore : IPgpKeyStore
         {
             var stem = Stem(key);
             await File.WriteAllTextAsync(
-                    Path.Combine(_directory, stem + PublicSuffix),
-                    key.PublicArmored,
-                    cancellationToken
-                )
-                .ConfigureAwait(false);
+                          Path.Combine(_directory, stem + PublicSuffix),
+                          key.PublicArmored,
+                          cancellationToken
+                      )
+                      .ConfigureAwait(false);
 
             if (key.PrivateArmored is not null)
             {
                 await File.WriteAllTextAsync(
-                        Path.Combine(_directory, stem + SecretSuffix),
-                        key.PrivateArmored,
-                        cancellationToken
-                    )
-                    .ConfigureAwait(false);
+                              Path.Combine(_directory, stem + SecretSuffix),
+                              key.PrivateArmored,
+                              cancellationToken
+                          )
+                          .ConfigureAwait(false);
             }
         }
     }
@@ -65,9 +65,9 @@ public sealed class FilePgpKeyStore : IPgpKeyStore
             var publicArmored = await File.ReadAllTextAsync(publicPath, cancellationToken).ConfigureAwait(false);
 
             var secretPath = Path.Combine(_directory, stem + SecretSuffix);
-            string? secretArmored = File.Exists(secretPath)
-                ? await File.ReadAllTextAsync(secretPath, cancellationToken).ConfigureAwait(false)
-                : null;
+            var secretArmored = File.Exists(secretPath)
+                                    ? await File.ReadAllTextAsync(secretPath, cancellationToken).ConfigureAwait(false)
+                                    : null;
 
             result.Add(PgpKeyFactory.FromArmored(publicArmored, secretArmored));
         }
@@ -78,6 +78,7 @@ public sealed class FilePgpKeyStore : IPgpKeyStore
     private static string Stem(PgpKey key)
     {
         var safeIdentity = new StringBuilder(key.Identity.Length);
+
         foreach (var ch in key.Identity)
         {
             safeIdentity.Append(char.IsLetterOrDigit(ch) ? ch : '_');

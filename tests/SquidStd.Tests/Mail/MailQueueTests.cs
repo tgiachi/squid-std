@@ -25,9 +25,9 @@ public class MailQueueTests
 
         var queue = new MailQueue(messageQueue, options);
         await queue.EnqueueAsync(
-            new OutgoingMailMessage
+            new()
             {
-                To = [new MailAddress("Bob", "bob@example.com")],
+                To = [new("Bob", "bob@example.com")],
                 Subject = "queued"
             }
         );

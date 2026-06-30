@@ -1,5 +1,4 @@
 using System.Text;
-using SquidStd.Core.Data.Storage;
 using SquidStd.Crypto.Pgp.Services;
 using SquidStd.Services.Core.Services.Storage;
 using SquidStd.Tests.Crypto.Pgp.Support;
@@ -20,7 +19,7 @@ public class AesGcmPgpKeyStoreTests
     public async Task SaveThenLoad_RoundTripsAndBlobIsNotPlaintext()
     {
         var path = Path.Combine(Path.GetTempPath(), "squidstd-pgp-" + Guid.NewGuid().ToString("N") + ".bin");
-        var protector = new AesGcmSecretProtector(new SecretsConfig());
+        var protector = new AesGcmSecretProtector(new());
 
         try
         {

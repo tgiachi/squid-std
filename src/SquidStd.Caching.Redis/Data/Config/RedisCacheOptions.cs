@@ -1,7 +1,7 @@
 namespace SquidStd.Caching.Redis.Data.Config;
 
 /// <summary>
-///     Connection options for the Redis cache provider.
+/// Connection options for the Redis cache provider.
 /// </summary>
 public sealed class RedisCacheOptions
 {

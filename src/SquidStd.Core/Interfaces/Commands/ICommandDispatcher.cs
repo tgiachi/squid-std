@@ -3,8 +3,8 @@ using SquidStd.Core.Data.Commands;
 namespace SquidStd.Core.Interfaces.Commands;
 
 /// <summary>
-///     Dispatches typed commands to registered handlers within an ambient <typeparamref name="TContext" />,
-///     fanning a command out to every handler registered for its type.
+/// Dispatches typed commands to registered handlers within an ambient <typeparamref name="TContext" />,
+/// fanning a command out to every handler registered for its type.
 /// </summary>
 /// <typeparam name="TContext">The ambient context type.</typeparam>
 public interface ICommandDispatcher<TContext>
@@ -28,7 +28,9 @@ public interface ICommandDispatcher<TContext>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The dispatch result.</returns>
     Task<CommandDispatchResult> DispatchAsync<TCommand>(
-        TCommand command, TContext context, CancellationToken cancellationToken = default
+        TCommand command,
+        TContext context,
+        CancellationToken cancellationToken = default
     )
         where TCommand : ICommand;
 }

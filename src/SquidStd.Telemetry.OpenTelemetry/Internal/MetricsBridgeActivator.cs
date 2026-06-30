@@ -4,8 +4,8 @@ using SquidStd.Telemetry.OpenTelemetry.Services;
 namespace SquidStd.Telemetry.OpenTelemetry.Internal;
 
 /// <summary>
-///     Warms the <see cref="MetricsSnapshotBridge" /> at host start so its observable instruments exist
-///     for the MeterProvider's first collection (ASP.NET Core host path).
+/// Warms the <see cref="MetricsSnapshotBridge" /> at host start so its observable instruments exist
+/// for the MeterProvider's first collection (ASP.NET Core host path).
 /// </summary>
 internal sealed class MetricsBridgeActivator : IHostedService
 {
@@ -24,7 +24,5 @@ internal sealed class MetricsBridgeActivator : IHostedService
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
+        => Task.CompletedTask;
 }

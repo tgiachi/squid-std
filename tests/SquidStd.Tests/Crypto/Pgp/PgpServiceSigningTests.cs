@@ -37,10 +37,10 @@ public class PgpServiceSigningTests
         var service = new PgpService(keyring);
 
         var signed = await service.SignAsync(
-            Encoding.UTF8.GetBytes("original"),
-            PgpTestKeys.AliceIdentity,
-            PgpTestKeys.AlicePassphrase
-        );
+                         Encoding.UTF8.GetBytes("original"),
+                         PgpTestKeys.AliceIdentity,
+                         PgpTestKeys.AlicePassphrase
+                     );
         var tampered = MutateBody(signed);
 
         var result = await service.VerifyAsync(tampered);
@@ -58,11 +58,11 @@ public class PgpServiceSigningTests
         var payload = Encoding.UTF8.GetBytes("confidential and signed");
 
         var armored = await service.EncryptAndSignForAsync(
-            PgpTestKeys.AliceIdentity,
-            payload,
-            PgpTestKeys.BobIdentity,
-            PgpTestKeys.BobPassphrase
-        );
+                          PgpTestKeys.AliceIdentity,
+                          payload,
+                          PgpTestKeys.BobIdentity,
+                          PgpTestKeys.BobPassphrase
+                      );
         var result = await service.DecryptAndVerifyAsync(armored, PgpTestKeys.AlicePassphrase);
 
         Assert.Equal(payload, result.Data);
@@ -80,11 +80,11 @@ public class PgpServiceSigningTests
         var signingService = new PgpService(signingKeyring);
         var payload = Encoding.UTF8.GetBytes("signed by an unknown party");
         var armored = await signingService.EncryptAndSignForAsync(
-            PgpTestKeys.AliceIdentity,
-            payload,
-            PgpTestKeys.BobIdentity,
-            PgpTestKeys.BobPassphrase
-        );
+                          PgpTestKeys.AliceIdentity,
+                          payload,
+                          PgpTestKeys.BobIdentity,
+                          PgpTestKeys.BobPassphrase
+                      );
 
         var recipientOnly = new PgpKeyring();
         recipientOnly.Import(_keys.AlicePrivate); // no Bob public key
@@ -107,7 +107,7 @@ public class PgpServiceSigningTests
         {
             var chars = lines[mid].ToCharArray();
             chars[2] = chars[2] == 'A' ? 'B' : 'A';
-            lines[mid] = new string(chars);
+            lines[mid] = new(chars);
         }
 
         return string.Join('\n', lines);

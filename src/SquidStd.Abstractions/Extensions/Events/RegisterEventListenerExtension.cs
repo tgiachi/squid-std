@@ -6,7 +6,7 @@ using SquidStd.Core.Interfaces.Events;
 namespace SquidStd.Abstractions.Extensions.Events;
 
 /// <summary>
-///     Registers event listeners for DI-native auto-subscription at bootstrap.
+/// Registers event listeners for DI-native auto-subscription at bootstrap.
 /// </summary>
 public static class RegisterEventListenerExtension
 {
@@ -14,7 +14,7 @@ public static class RegisterEventListenerExtension
     extension(IContainer container)
     {
         /// <summary>
-        ///     Registers a listener implementation as a singleton and records it for auto-subscription.
+        /// Registers a listener implementation as a singleton and records it for auto-subscription.
         /// </summary>
         /// <typeparam name="TEvent">The event type the listener handles.</typeparam>
         /// <typeparam name="TListener">The listener implementation type.</typeparam>

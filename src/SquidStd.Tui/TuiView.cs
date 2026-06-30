@@ -21,18 +21,14 @@ public abstract class TuiView<TViewModel> : Window, ITuiView
 
     protected TuiView()
     {
-        _binder = new ViewBinder(Application.Invoke);
+        _binder = new(Application.Invoke);
     }
 
     void ITuiView.Bind(object viewModel)
-    {
-        ViewModel = (TViewModel)viewModel;
-    }
+        => ViewModel = (TViewModel)viewModel;
 
     void ITuiView.Initialize()
-    {
-        OnInitialize(_binder);
-    }
+        => OnInitialize(_binder);
 
     /// <summary>
     /// Builds the view. The default runs <see cref="BuildLayout" /> then <see cref="Bind" />; the

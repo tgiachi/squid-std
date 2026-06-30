@@ -4,8 +4,8 @@ using SquidStd.Crypto.Pgp.Data;
 namespace SquidStd.Crypto.Pgp.Internal;
 
 /// <summary>
-///     Encodes a set of keys into a single byte blob (one base64 record per line) and back. Only armored
-///     material is stored; metadata is re-derived on load.
+/// Encodes a set of keys into a single byte blob (one base64 record per line) and back. Only armored
+/// material is stored; metadata is re-derived on load.
 /// </summary>
 internal static class PgpKeyStoreCodec
 {
@@ -17,8 +17,8 @@ internal static class PgpKeyStoreCodec
         {
             var pub = Convert.ToBase64String(Encoding.UTF8.GetBytes(key.PublicArmored));
             var sec = key.PrivateArmored is null
-                ? string.Empty
-                : Convert.ToBase64String(Encoding.UTF8.GetBytes(key.PrivateArmored));
+                          ? string.Empty
+                          : Convert.ToBase64String(Encoding.UTF8.GetBytes(key.PrivateArmored));
             builder.Append(pub).Append('\t').Append(sec).Append('\n');
         }
 
@@ -34,9 +34,9 @@ internal static class PgpKeyStoreCodec
         {
             var parts = line.Split('\t');
             var publicArmored = Encoding.UTF8.GetString(Convert.FromBase64String(parts[0]));
-            string? privateArmored = parts.Length > 1 && parts[1].Length > 0
-                ? Encoding.UTF8.GetString(Convert.FromBase64String(parts[1]))
-                : null;
+            var privateArmored = parts.Length > 1 && parts[1].Length > 0
+                                     ? Encoding.UTF8.GetString(Convert.FromBase64String(parts[1]))
+                                     : null;
 
             result.Add(PgpKeyFactory.FromArmored(publicArmored, privateArmored));
         }

@@ -8,8 +8,8 @@ using SquidStd.Messaging.Internal;
 namespace SquidStd.Messaging.Services;
 
 /// <summary>
-///     In-memory <see cref="IQueueProvider" />: one buffered channel + consumer loop per named queue,
-///     round-robin delivery, retry and dead-lettering.
+/// In-memory <see cref="IQueueProvider" />: one buffered channel + consumer loop per named queue,
+/// round-robin delivery, retry and dead-lettering.
 /// </summary>
 public sealed class InMemoryQueueProvider : IQueueProvider
 {
@@ -73,7 +73,7 @@ public sealed class InMemoryQueueProvider : IQueueProvider
         ArgumentException.ThrowIfNullOrWhiteSpace(queueName);
         cancellationToken.ThrowIfCancellationRequested();
 
-        Enqueue(queueName, new QueuedMessage(payload, 0));
+        Enqueue(queueName, new(payload, 0));
         _metrics.OnPublished(queueName);
 
         return Task.CompletedTask;
@@ -81,15 +81,11 @@ public sealed class InMemoryQueueProvider : IQueueProvider
 
     /// <inheritdoc />
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
-    {
-        return ValueTask.CompletedTask;
-    }
+        => ValueTask.CompletedTask;
 
     /// <inheritdoc />
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        return DisposeAsync();
-    }
+        => DisposeAsync();
 
     /// <inheritdoc />
     public IDisposable Subscribe(string queueName, Func<ReadOnlyMemory<byte>, CancellationToken, Task> handler)
@@ -145,13 +141,10 @@ public sealed class InMemoryQueueProvider : IQueueProvider
     }
 
     private void Enqueue(string queueName, QueuedMessage message)
-    {
-        Write(GetOrCreate(queueName), queueName, message);
-    }
+        => Write(GetOrCreate(queueName), queueName, message);
 
     private InMemoryQueue GetOrCreate(string queueName)
-    {
-        return _queues.GetOrAdd(
+        => _queues.GetOrAdd(
             queueName,
             name =>
             {
@@ -164,7 +157,6 @@ public sealed class InMemoryQueueProvider : IQueueProvider
                 return queue;
             }
         );
-    }
 
     private void HandleFailure(string queueName, InMemoryQueue queue, QueuedMessage message, Exception exception)
     {
@@ -186,7 +178,7 @@ public sealed class InMemoryQueueProvider : IQueueProvider
             nextAttempt
         );
         _metrics.OnDeadLettered(queueName);
-        Enqueue(queueName + _options.DeadLetterQueueSuffix, new QueuedMessage(message.Payload, 0));
+        Enqueue(queueName + _options.DeadLetterQueueSuffix, new(message.Payload, 0));
     }
 
     private async Task RequeueAsync(InMemoryQueue queue, string queueName, QueuedMessage message)

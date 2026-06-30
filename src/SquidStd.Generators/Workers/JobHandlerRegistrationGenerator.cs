@@ -31,15 +31,15 @@ public sealed class JobHandlerRegistrationGenerator : IIncrementalGenerator
         cancellationToken.ThrowIfCancellationRequested();
 
         var handlerType = (INamedTypeSymbol)context.TargetSymbol;
-        var isSupported = GeneratorSymbolHelpers.IsConcreteNonGenericClass(handlerType)
-                          && GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(handlerType)
-                          && GeneratorSymbolHelpers.ImplementsInterface(
+        var isSupported = GeneratorSymbolHelpers.IsConcreteNonGenericClass(handlerType) &&
+                          GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(handlerType) &&
+                          GeneratorSymbolHelpers.ImplementsInterface(
                               handlerType,
                               "IJobHandler",
                               "SquidStd.Workers.Interfaces"
                           );
 
-        return new JobHandlerRegistrationCandidate(
+        return new(
             GeneratorSymbolHelpers.FullyQualified(handlerType),
             GeneratorSymbolHelpers.DisplayName(handlerType),
             GeneratorSymbolHelpers.PrimaryLocation(handlerType),
@@ -76,7 +76,8 @@ public sealed class JobHandlerRegistrationGenerator : IIncrementalGenerator
             }
         }
 
-        supported.Sort(static (left, right) => string.Compare(
+        supported.Sort(
+            static (left, right) => string.Compare(
                 left.HandlerTypeName,
                 right.HandlerTypeName,
                 StringComparison.Ordinal

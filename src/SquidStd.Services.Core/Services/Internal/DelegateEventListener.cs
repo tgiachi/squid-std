@@ -3,7 +3,7 @@ using SquidStd.Core.Interfaces.Events;
 namespace SquidStd.Services.Core.Services.Internal;
 
 /// <summary>
-///     Adapts a delegate handler to <see cref="IEventListener{TEvent}" /> so the bus has a single dispatch path.
+/// Adapts a delegate handler to <see cref="IEventListener{TEvent}" /> so the bus has a single dispatch path.
 /// </summary>
 /// <typeparam name="TEvent">The event type.</typeparam>
 internal sealed class DelegateEventListener<TEvent> : IEventListener<TEvent>
@@ -17,7 +17,5 @@ internal sealed class DelegateEventListener<TEvent> : IEventListener<TEvent>
     }
 
     public Task HandleAsync(TEvent eventData, CancellationToken cancellationToken = default)
-    {
-        return _handler(eventData, cancellationToken);
-    }
+        => _handler(eventData, cancellationToken);
 }

@@ -10,6 +10,7 @@ public class ViewBinderCommandTests
     {
         var executed = 0;
         var canRun = false;
+
         // ReSharper disable once AccessToModifiedClosure
         var command = new RelayCommand(() => executed++, () => canRun);
         var enabled = true;
@@ -18,13 +19,13 @@ public class ViewBinderCommandTests
 
         binder.Command(command, isEnabled => enabled = isEnabled, cb => trigger = cb);
 
-        Assert.False(enabled);               // initial CanExecute == false -> disabled
+        Assert.False(enabled); // initial CanExecute == false -> disabled
 
         canRun = true;
         command.NotifyCanExecuteChanged();
-        Assert.True(enabled);                // CanExecuteChanged -> enabled
+        Assert.True(enabled); // CanExecuteChanged -> enabled
 
-        trigger!();                          // user activates the control
+        trigger!(); // user activates the control
         Assert.Equal(1, executed);
     }
 

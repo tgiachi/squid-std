@@ -7,8 +7,8 @@ using SquidStd.Workers.Manager.Data.Config;
 namespace SquidStd.Workers.Manager.Services;
 
 /// <summary>
-///     Periodically marks workers Offline whose heartbeats have stopped, using the timer wheel
-///     (<see cref="ITimerService" />), and publishes the resulting transitions.
+/// Periodically marks workers Offline whose heartbeats have stopped, using the timer wheel
+/// (<see cref="ITimerService" />), and publishes the resulting transitions.
 /// </summary>
 public sealed class WorkerOfflineSweepService : ISquidStdService
 {
@@ -83,7 +83,5 @@ public sealed class WorkerOfflineSweepService : ISquidStdService
     }
 
     private void OnTick()
-    {
-        _ = RunSweepAsync();
-    }
+        => _ = RunSweepAsync();
 }

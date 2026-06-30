@@ -8,9 +8,7 @@ namespace SquidStd.Tests.Crypto.Vfs;
 public class CryptoFileSystemLockTests
 {
     private static CryptoVaultOptions FastOptions()
-    {
-        return new CryptoVaultOptions { Argon2MemoryKib = 8192, Argon2Iterations = 1 };
-    }
+        => new() { Argon2MemoryKib = 8192, Argon2Iterations = 1 };
 
     [Fact]
     public async Task LockedOperations_Throw_UntilUnlocked()
@@ -18,8 +16,7 @@ public class CryptoFileSystemLockTests
         var vault = new CryptoFileSystem(new InMemoryFileSystem(), FastOptions());
 
         Assert.False(vault.IsUnlocked);
-        await Assert.ThrowsAsync<InvalidOperationException>(() => vault.WriteAllBytesAsync("a", new byte[] { 1 }).AsTask()
-        );
+        await Assert.ThrowsAsync<InvalidOperationException>(() => vault.WriteAllBytesAsync("a", new byte[] { 1 }).AsTask());
 
         vault.Unlock("pw");
         Assert.True(vault.IsUnlocked);

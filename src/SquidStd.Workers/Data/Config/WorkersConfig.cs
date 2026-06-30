@@ -3,13 +3,13 @@ using SquidStd.Workers.Abstractions;
 namespace SquidStd.Workers.Data.Config;
 
 /// <summary>
-///     Configuration for the worker runtime (config section "workers").
+/// Configuration for the worker runtime (config section "workers").
 /// </summary>
 public sealed class WorkersConfig
 {
     /// <summary>
-    ///     Stable worker identity. When blank, the runtime falls back to the machine name
-    ///     (in Docker, the container hostname).
+    /// Stable worker identity. When blank, the runtime falls back to the machine name
+    /// (in Docker, the container hostname).
     /// </summary>
     public string WorkerId { get; set; } = string.Empty;
 

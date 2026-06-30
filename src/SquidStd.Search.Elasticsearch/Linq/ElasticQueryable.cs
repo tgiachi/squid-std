@@ -25,12 +25,8 @@ public sealed class ElasticQueryable<T> : IOrderedQueryable<T>
     }
 
     public IEnumerator<T> GetEnumerator()
-    {
-        throw new NotSupportedException("Use the async terminals (ToListAsync/CountAsync/FirstOrDefaultAsync).");
-    }
+        => throw new NotSupportedException("Use the async terminals (ToListAsync/CountAsync/FirstOrDefaultAsync).");
 
     IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
+        => GetEnumerator();
 }

@@ -11,10 +11,10 @@ public class VaultHeaderTests
             "SQVFS1",
             1,
             [1, 2, 3, 4],
-            MemoryKib: 8192,
-            Iterations: 2,
-            Parallelism: 1,
-            ChunkSize: 65536
+            8192,
+            2,
+            1,
+            65536
         );
 
         var parsed = VaultHeader.Parse(header.Serialize());

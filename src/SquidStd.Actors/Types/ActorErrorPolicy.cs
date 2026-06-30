@@ -1,7 +1,7 @@
 namespace SquidStd.Actors.Types;
 
 /// <summary>
-///     Behavior when a handler throws while processing a fire-and-forget message.
+/// Behavior when a handler throws while processing a fire-and-forget message.
 /// </summary>
 public enum ActorErrorPolicy
 {

@@ -1,9 +1,7 @@
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Services.Core.Services;
 using SquidStd.Tests.Manager.Support;
-using SquidStd.Workers.Abstractions.Data;
 using SquidStd.Workers.Abstractions.Types;
-using SquidStd.Workers.Manager.Data.Config;
 using SquidStd.Workers.Manager.Data.Events;
 using SquidStd.Workers.Manager.Services;
 
@@ -14,15 +12,15 @@ public class WorkerOfflineSweepServiceTests
     [Fact]
     public async Task RunSweepAsync_MarksOverdueWorkerOffline_AndPublishesTransition()
     {
-        var registry = new WorkerRegistry(new WorkerManagerConfig { OfflineTimeoutSeconds = 1 });
-        registry.Record(new WorkerHeartbeat("w1", DateTime.UtcNow, WorkerStatusType.Idle, 0, 8));
+        var registry = new WorkerRegistry(new() { OfflineTimeoutSeconds = 1 });
+        registry.Record(new("w1", DateTime.UtcNow, WorkerStatusType.Idle, 0, 8));
         await Task.Delay(1100);
 
         var eventBus = new EventBusService();
         var offline = new TaskCompletionSource<WorkerStatusChangedEvent>();
         eventBus.RegisterListener(new DelegateListener(e => offline.TrySetResult(e)));
 
-        var service = new WorkerOfflineSweepService(new FakeTimerService(), registry, eventBus, new WorkerManagerConfig());
+        var service = new WorkerOfflineSweepService(new FakeTimerService(), registry, eventBus, new());
         await service.RunSweepAsync();
 
         var change = await offline.Task.WaitAsync(TimeSpan.FromSeconds(5));
@@ -35,12 +33,12 @@ public class WorkerOfflineSweepServiceTests
     public async Task StartAsync_RegistersRepeatingTimer_StopAsyncUnregisters()
     {
         var timer = new FakeTimerService();
-        var registry = new WorkerRegistry(new WorkerManagerConfig());
+        var registry = new WorkerRegistry(new());
         var service = new WorkerOfflineSweepService(
             timer,
             registry,
             new EventBusService(),
-            new WorkerManagerConfig { SweepIntervalSeconds = 5 }
+            new() { SweepIntervalSeconds = 5 }
         );
 
         await service.StartAsync();

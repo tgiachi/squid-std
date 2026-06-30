@@ -37,12 +37,12 @@ Anything else throws `NotSupportedException` — drop down to the native `Elasti
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `SearchRegistrationExtensions` | `AddElasticsearch(...)` registration. |
-| `ElasticSearchService` | `ISearchService` backed by the Elasticsearch client. |
-| `ElasticsearchOptions` | Connection options (URI, credentials). |
-| `ElasticQueryable` | Constrained `IQueryable<T>` translated to the Elasticsearch query DSL. |
+| Type                           | Purpose                                                                |
+|--------------------------------|------------------------------------------------------------------------|
+| `SearchRegistrationExtensions` | `AddElasticsearch(...)` registration.                                  |
+| `ElasticSearchService`         | `ISearchService` backed by the Elasticsearch client.                   |
+| `ElasticsearchOptions`         | Connection options (URI, credentials).                                 |
+| `ElasticQueryable`             | Constrained `IQueryable<T>` translated to the Elasticsearch query DSL. |
 
 ## Related
 

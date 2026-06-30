@@ -2,7 +2,6 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
 using SquidStd.Core.Interfaces.Events;
-using SquidStd.Mail.Abstractions.Data.Config;
 using SquidStd.Mail.Abstractions.Data.Events;
 using SquidStd.Mail.Abstractions.Types.Mail;
 using SquidStd.Mail.MailKit.Services;
@@ -45,7 +44,7 @@ public class MailPollingServiceTests
         eventBus.RegisterListener(new DelegateListener(e => received.TrySetResult(e)));
 
         var reader = new ImapMailReader(
-            new MailOptions
+            new()
             {
                 Protocol = MailProtocolType.Imap,
                 Host = _fixture.Host,
@@ -60,7 +59,7 @@ public class MailPollingServiceTests
             reader,
             eventBus,
             new FakeTimerService(),
-            new MailOptions { PollIntervalSeconds = 60 }
+            new() { PollIntervalSeconds = 60 }
         );
         await service.PollOnceAsync();
 

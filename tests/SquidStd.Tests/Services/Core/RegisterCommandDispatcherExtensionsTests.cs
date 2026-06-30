@@ -40,9 +40,7 @@ public class RegisterCommandDispatcherExtensionsTests
         Assert.Equal("hi", container.Resolve<PingHandler>().LastText);
     }
 
-    private sealed class Session
-    {
-    }
+    private sealed class Session { }
 
     private sealed class PingHandler : ICommandHandler<PingCommand, Session>
     {

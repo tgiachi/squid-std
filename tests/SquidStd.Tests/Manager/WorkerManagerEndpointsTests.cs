@@ -6,8 +6,6 @@ using SquidStd.Messaging.Extensions;
 using SquidStd.Services.Core.Services;
 using SquidStd.Workers.Abstractions.Data;
 using SquidStd.Workers.Abstractions.Types;
-using SquidStd.Workers.Manager.Data;
-using SquidStd.Workers.Manager.Data.Config;
 using SquidStd.Workers.Manager.Endpoints;
 using SquidStd.Workers.Manager.Services;
 
@@ -19,10 +17,10 @@ public class WorkerManagerEndpointsTests
     public async Task EnqueueJob_ReturnsAccepted_AndSchedulesJob()
     {
         var result = await WorkerManagerEndpoints.EnqueueJob(
-            new EnqueueJobRequest("resize", new Dictionary<string, string>()),
-            NewScheduler(),
-            CancellationToken.None
-        );
+                         new("resize", new Dictionary<string, string>()),
+                         NewScheduler(),
+                         CancellationToken.None
+                     );
 
         Assert.IsType<Accepted>(result.Result);
     }
@@ -31,10 +29,10 @@ public class WorkerManagerEndpointsTests
     public async Task EnqueueJob_ReturnsBadRequest_WhenJobNameBlank()
     {
         var result = await WorkerManagerEndpoints.EnqueueJob(
-            new EnqueueJobRequest("   ", null),
-            NewScheduler(),
-            CancellationToken.None
-        );
+                         new("   ", null),
+                         NewScheduler(),
+                         CancellationToken.None
+                     );
 
         Assert.IsType<BadRequest<string>>(result.Result);
     }
@@ -69,16 +67,16 @@ public class WorkerManagerEndpointsTests
         container.RegisterInstance<IEventBus>(new EventBusService());
         container.AddInMemoryMessaging();
 
-        return new JobScheduler(container.Resolve<IMessageQueue>(), new WorkerManagerConfig());
+        return new(container.Resolve<IMessageQueue>(), new());
     }
 
     private static WorkerRegistry RegistryWith(params string[] workerIds)
     {
-        var registry = new WorkerRegistry(new WorkerManagerConfig());
+        var registry = new WorkerRegistry(new());
 
         foreach (var id in workerIds)
         {
-            registry.Record(new WorkerHeartbeat(id, DateTime.UtcNow, WorkerStatusType.Idle, 0, 8));
+            registry.Record(new(id, DateTime.UtcNow, WorkerStatusType.Idle, 0, 8));
         }
 
         return registry;

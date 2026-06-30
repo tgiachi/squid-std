@@ -3,9 +3,9 @@ using SquidStd.Core.Interfaces.Jobs;
 namespace SquidStd.Tests.Support;
 
 /// <summary>
-///     Single-threaded <see cref="IJobSystem" /> for tests: <see cref="ScheduleAsync(Action, CancellationToken)" />
-///     queues the work; call <see cref="RunAll" /> to execute it. This keeps overlap and
-///     rescheduling tests fully deterministic.
+/// Single-threaded <see cref="IJobSystem" /> for tests: <see cref="ScheduleAsync(Action, CancellationToken)" />
+/// queues the work; call <see cref="RunAll" /> to execute it. This keeps overlap and
+/// rescheduling tests fully deterministic.
 /// </summary>
 public sealed class ManualJobSystem : IJobSystem
 {
@@ -49,7 +49,5 @@ public sealed class ManualJobSystem : IJobSystem
         return snapshot.Length;
     }
 
-    public void Dispose()
-    {
-    }
+    public void Dispose() { }
 }

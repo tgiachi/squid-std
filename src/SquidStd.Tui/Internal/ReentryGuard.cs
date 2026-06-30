@@ -3,16 +3,11 @@ namespace SquidStd.Tui.Internal;
 /// <summary>Single-threaded reentrancy flag used to stop two-way binding write-back loops.</summary>
 internal sealed class ReentryGuard
 {
-    private bool _busy;
-
-    public bool IsBusy
-    {
-        get { return _busy; }
-    }
+    public bool IsBusy { get; private set; }
 
     public IDisposable Enter()
     {
-        _busy = true;
+        IsBusy = true;
 
         return new Scope(this);
     }
@@ -27,8 +22,6 @@ internal sealed class ReentryGuard
         }
 
         public void Dispose()
-        {
-            _owner._busy = false;
-        }
+            => _owner.IsBusy = false;
     }
 }

@@ -9,37 +9,6 @@ namespace SquidStd.Tests.Tui.Extensions;
 
 public class RegisterTuiExtensionsTests
 {
-    private sealed class HomeViewModel : TuiViewModel
-    {
-    }
-
-    private sealed class HomeView : ITuiView
-    {
-        public void Bind(object viewModel)
-        {
-        }
-
-        public void Initialize()
-        {
-        }
-    }
-
-    // Real views derive from Window (IDisposable); this fake reproduces that shape.
-    private sealed class DisposableView : ITuiView, IDisposable
-    {
-        public void Bind(object viewModel)
-        {
-        }
-
-        public void Initialize()
-        {
-        }
-
-        public void Dispose()
-        {
-        }
-    }
-
     [Fact]
     public void RegisterTui_RegistersNavigatorAndRegistry()
     {
@@ -77,5 +46,24 @@ public class RegisterTuiExtensionsTests
         container.RegisterView<DisposableView, HomeViewModel>();
 
         Assert.NotNull(container.Resolve<DisposableView>());
+    }
+
+    private sealed class HomeViewModel : TuiViewModel { }
+
+    private sealed class HomeView : ITuiView
+    {
+        public void Bind(object viewModel) { }
+
+        public void Initialize() { }
+    }
+
+    // Real views derive from Window (IDisposable); this fake reproduces that shape.
+    private sealed class DisposableView : ITuiView, IDisposable
+    {
+        public void Bind(object viewModel) { }
+
+        public void Initialize() { }
+
+        public void Dispose() { }
     }
 }

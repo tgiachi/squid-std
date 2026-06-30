@@ -1,5 +1,4 @@
 using System.Text;
-using SquidStd.Storage.Abstractions.Data.Config;
 using SquidStd.Storage.Services;
 using SquidStd.Tests.Support;
 
@@ -11,7 +10,7 @@ public class FileStorageServiceTests
     public async Task DeleteAsync_RemovesStoredValue()
     {
         using var temp = new TempDirectory();
-        var service = new FileStorageService(new StorageConfig { RootDirectory = temp.Path });
+        var service = new FileStorageService(new() { RootDirectory = temp.Path });
         await service.SaveAsync("cache/value.bin", new byte[] { 1, 2, 3 });
 
         var deleted = await service.DeleteAsync("cache/value.bin");
@@ -25,7 +24,7 @@ public class FileStorageServiceTests
     public async Task ListKeysAsync_EmptyStore_ReturnsEmpty()
     {
         using var temp = new TempDirectory();
-        var service = new FileStorageService(new StorageConfig { RootDirectory = temp.Path });
+        var service = new FileStorageService(new() { RootDirectory = temp.Path });
 
         Assert.Empty(await ToListAsync(service.ListKeysAsync()));
     }
@@ -34,7 +33,7 @@ public class FileStorageServiceTests
     public async Task ListKeysAsync_ReturnsSavedKeys_AndFiltersByPrefix()
     {
         using var temp = new TempDirectory();
-        var service = new FileStorageService(new StorageConfig { RootDirectory = temp.Path });
+        var service = new FileStorageService(new() { RootDirectory = temp.Path });
         await service.SaveAsync("a/one.bin", new byte[] { 1 });
         await service.SaveAsync("a/two.bin", new byte[] { 2 });
         await service.SaveAsync("b/three.bin", new byte[] { 3 });
@@ -50,7 +49,7 @@ public class FileStorageServiceTests
     public async Task ObjectStorage_ListKeysAsync_ReturnsSavedKeys()
     {
         using var temp = new TempDirectory();
-        var storage = new FileStorageService(new StorageConfig { RootDirectory = temp.Path });
+        var storage = new FileStorageService(new() { RootDirectory = temp.Path });
         var objects = new YamlObjectStorageService(storage);
         await objects.SaveAsync("objects/x.yaml", new SampleObject { Name = "x", Value = 1 });
 
@@ -63,7 +62,7 @@ public class FileStorageServiceTests
     public async Task ObjectStorage_SaveAsync_LoadAsync_RoundTripsYamlObject()
     {
         using var temp = new TempDirectory();
-        var storage = new FileStorageService(new StorageConfig { RootDirectory = temp.Path });
+        var storage = new FileStorageService(new() { RootDirectory = temp.Path });
         var objects = new YamlObjectStorageService(storage);
         var expected = new SampleObject
         {
@@ -84,7 +83,7 @@ public class FileStorageServiceTests
     public async Task SaveAsync_LoadAsync_RoundTripsBytes()
     {
         using var temp = new TempDirectory();
-        var service = new FileStorageService(new StorageConfig { RootDirectory = temp.Path });
+        var service = new FileStorageService(new() { RootDirectory = temp.Path });
         var data = Encoding.UTF8.GetBytes("hello storage");
 
         await service.SaveAsync("profiles/main.bin", data);
@@ -95,14 +94,11 @@ public class FileStorageServiceTests
         Assert.True(await service.ExistsAsync("profiles/main.bin"));
     }
 
-    [Theory]
-    [InlineData("../escape.bin")]
-    [InlineData("/absolute.bin")]
-    [InlineData("nested/../../escape.bin")]
+    [Theory, InlineData("../escape.bin"), InlineData("/absolute.bin"), InlineData("nested/../../escape.bin")]
     public async Task SaveAsync_RejectsUnsafeKeys(string key)
     {
         using var temp = new TempDirectory();
-        var service = new FileStorageService(new StorageConfig { RootDirectory = temp.Path });
+        var service = new FileStorageService(new() { RootDirectory = temp.Path });
 
         await Assert.ThrowsAsync<ArgumentException>(() => service.SaveAsync(key, new byte[] { 1 }).AsTask());
     }

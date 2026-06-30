@@ -12,12 +12,12 @@ internal static class VaultKeyDerivation
     public static byte[] DeriveMasterKey(string passphrase, byte[] salt, CryptoVaultOptions options)
     {
         var parameters = new Argon2Parameters.Builder(Argon2Parameters.Argon2id)
-            .WithVersion(Argon2Parameters.Version13)
-            .WithSalt(salt)
-            .WithIterations(options.Argon2Iterations)
-            .WithMemoryAsKB(options.Argon2MemoryKib)
-            .WithParallelism(options.Argon2Parallelism)
-            .Build();
+                         .WithVersion(Argon2Parameters.Version13)
+                         .WithSalt(salt)
+                         .WithIterations(options.Argon2Iterations)
+                         .WithMemoryAsKB(options.Argon2MemoryKib)
+                         .WithParallelism(options.Argon2Parallelism)
+                         .Build();
 
         var generator = new Argon2BytesGenerator();
         generator.Init(parameters);

@@ -6,9 +6,9 @@ using SquidStd.Core.Types.Metrics;
 namespace SquidStd.Telemetry.OpenTelemetry.Services;
 
 /// <summary>
-///     Bridges the SquidStd metrics snapshot (<see cref="IMetricsCollectionService" />) to OpenTelemetry
-///     observable instruments: counters become observable counters, everything else an observable gauge,
-///     each callback reading the latest snapshot value for its metric name.
+/// Bridges the SquidStd metrics snapshot (<see cref="IMetricsCollectionService" />) to OpenTelemetry
+/// observable instruments: counters become observable counters, everything else an observable gauge,
+/// each callback reading the latest snapshot value for its metric name.
 /// </summary>
 public sealed class MetricsSnapshotBridge : IDisposable
 {
@@ -24,7 +24,7 @@ public sealed class MetricsSnapshotBridge : IDisposable
     public MetricsSnapshotBridge(IMetricsCollectionService metrics)
     {
         _metrics = metrics;
-        _meter = new Meter(MeterName);
+        _meter = new(MeterName);
         EnsureInstruments();
     }
 
@@ -57,10 +57,10 @@ public sealed class MetricsSnapshotBridge : IDisposable
         }
 
         var tags = sample.Tags is { Count: > 0 }
-            ? sample.Tags.Select(kv => new KeyValuePair<string, object?>(kv.Key, kv.Value)).ToArray()
-            : [];
+                       ? sample.Tags.Select(kv => new KeyValuePair<string, object?>(kv.Key, kv.Value)).ToArray()
+                       : [];
 
-        return [new Measurement<double>(sample.Value, tags)];
+        return [new(sample.Value, tags)];
     }
 
     public void Dispose()

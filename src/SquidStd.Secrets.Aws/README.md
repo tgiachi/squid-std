@@ -46,12 +46,12 @@ await foreach (var name in store.ListNamesAsync("db/")) { /* ... */ }
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `KmsSecretProtector` | `ISecretProtector` using AWS KMS data keys (envelope encryption). |
-| `AwsSecretsManagerStore` | `ISecretStore` backed by AWS Secrets Manager. |
-| `KmsSecretProtectorOptions` | KMS key id/ARN/alias, region and credentials. |
-| `AwsSecretsManagerOptions` | Optional name prefix, region and credentials. |
+| Type                        | Purpose                                                           |
+|-----------------------------|-------------------------------------------------------------------|
+| `KmsSecretProtector`        | `ISecretProtector` using AWS KMS data keys (envelope encryption). |
+| `AwsSecretsManagerStore`    | `ISecretStore` backed by AWS Secrets Manager.                     |
+| `KmsSecretProtectorOptions` | KMS key id/ARN/alias, region and credentials.                     |
+| `AwsSecretsManagerOptions`  | Optional name prefix, region and credentials.                     |
 
 ## Notes
 

@@ -6,7 +6,7 @@ using SquidStd.Core.Interfaces.Commands;
 namespace SquidStd.Abstractions.Extensions.Commands;
 
 /// <summary>
-///     Registers command handlers for DI-native auto-subscription at bootstrap.
+/// Registers command handlers for DI-native auto-subscription at bootstrap.
 /// </summary>
 public static class RegisterCommandHandlerExtension
 {
@@ -14,7 +14,7 @@ public static class RegisterCommandHandlerExtension
     extension(IContainer container)
     {
         /// <summary>
-        ///     Registers a command handler as a singleton and records it for auto-subscription.
+        /// Registers a command handler as a singleton and records it for auto-subscription.
         /// </summary>
         /// <typeparam name="TCommand">The command type the handler handles.</typeparam>
         /// <typeparam name="TContext">The dispatcher context type.</typeparam>

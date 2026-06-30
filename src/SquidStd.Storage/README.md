@@ -30,11 +30,11 @@ enumerates stored keys (`/`-separated), excluding in-flight temp files.
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
+| Type                            | Purpose                                                                                     |
+|---------------------------------|---------------------------------------------------------------------------------------------|
 | `StorageRegistrationExtensions` | `AddFileStorage(...)` registration (file `IStorageService` + YAML `IObjectStorageService`). |
-| `FileStorageService` | Filesystem-backed `IStorageService`. |
-| `YamlObjectStorageService` | YAML-backed `IObjectStorageService` over a blob store. |
+| `FileStorageService`            | Filesystem-backed `IStorageService`.                                                        |
+| `YamlObjectStorageService`      | YAML-backed `IObjectStorageService` over a blob store.                                      |
 
 ## Related
 

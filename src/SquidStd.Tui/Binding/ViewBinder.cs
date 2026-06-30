@@ -69,30 +69,34 @@ public sealed partial class ViewBinder : IDisposable
                 return;
             }
 
-            _marshal(() =>
-            {
-                using (guard.Enter())
+            _marshal(
+                () =>
                 {
-                    applyToTarget();
+                    using (guard.Enter())
+                    {
+                        applyToTarget();
+                    }
                 }
-            });
+            );
         }
 
         source.PropertyChanged += SourceHandler;
         _subscriptions.Add(new Unsubscriber(() => source.PropertyChanged -= SourceHandler));
 
-        subscribeTargetChanged(() =>
-        {
-            if (guard.IsBusy)
+        subscribeTargetChanged(
+            () =>
             {
-                return;
-            }
+                if (guard.IsBusy)
+                {
+                    return;
+                }
 
-            using (guard.Enter())
-            {
-                writeToSource();
+                using (guard.Enter())
+                {
+                    writeToSource();
+                }
             }
-        });
+        );
     }
 
     /// <summary>
@@ -104,20 +108,20 @@ public sealed partial class ViewBinder : IDisposable
         setEnabled(command.CanExecute(null));
 
         void CanHandler(object? sender, EventArgs e)
-        {
-            _marshal(() => setEnabled(command.CanExecute(null)));
-        }
+            => _marshal(() => setEnabled(command.CanExecute(null)));
 
         command.CanExecuteChanged += CanHandler;
         _subscriptions.Add(new Unsubscriber(() => command.CanExecuteChanged -= CanHandler));
 
-        subscribeTrigger(() =>
-        {
-            if (command.CanExecute(null))
+        subscribeTrigger(
+            () =>
             {
-                command.Execute(null);
+                if (command.CanExecute(null))
+                {
+                    command.Execute(null);
+                }
             }
-        });
+        );
     }
 
     /// <summary>Disposes all active subscriptions created by this binder.</summary>

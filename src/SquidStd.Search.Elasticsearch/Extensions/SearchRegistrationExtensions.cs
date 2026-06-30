@@ -28,7 +28,7 @@ public static class SearchRegistrationExtensions
             settings = settings.ServerCertificateValidationCallback((_, _, _, _) => true);
         }
 
-        return new ElasticsearchClient(settings);
+        return new(settings);
     }
 
     extension(IContainer container)

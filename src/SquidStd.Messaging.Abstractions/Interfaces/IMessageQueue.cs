@@ -1,7 +1,7 @@
 namespace SquidStd.Messaging.Abstractions.Interfaces;
 
 /// <summary>
-///     Typed facade for publishing to and subscribing to named queues.
+/// Typed facade for publishing to and subscribing to named queues.
 /// </summary>
 public interface IMessageQueue
 {

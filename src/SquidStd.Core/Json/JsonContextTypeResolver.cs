@@ -5,12 +5,12 @@ using System.Text.Json.Serialization.Metadata;
 namespace SquidStd.Core.Json;
 
 /// <summary>
-///     Utility class to retrieve registered types from JsonSerializerContext at runtime.
+/// Utility class to retrieve registered types from JsonSerializerContext at runtime.
 /// </summary>
 public static class JsonContextTypeResolver
 {
     /// <summary>
-    ///     Gets all types registered in the specified JsonSerializerContext.
+    /// Gets all types registered in the specified JsonSerializerContext.
     /// </summary>
     /// <param name="context">The JsonSerializerContext to query.</param>
     /// <returns>A collection of registered Type objects.</returns>
@@ -18,10 +18,11 @@ public static class JsonContextTypeResolver
     {
         // Get all JsonTypeInfo properties from the context
         var properties = GetContextType(context)
-            .GetProperties()
-            .Where(p => p.PropertyType.IsGenericType &&
-                        p.PropertyType.GetGenericTypeDefinition() == typeof(JsonTypeInfo<>)
-            );
+                         .GetProperties()
+                         .Where(
+                             p => p.PropertyType.IsGenericType &&
+                                  p.PropertyType.GetGenericTypeDefinition() == typeof(JsonTypeInfo<>)
+                         );
 
         foreach (var property in properties)
         {
@@ -33,19 +34,17 @@ public static class JsonContextTypeResolver
     }
 
     /// <summary>
-    ///     Gets all registered types that inherit from a specific base type.
+    /// Gets all registered types that inherit from a specific base type.
     /// </summary>
     /// <param name="context">The JsonSerializerContext to query.</param>
     /// <typeparam name="TBase">The base type to filter by.</typeparam>
     /// <returns>A collection of types that inherit from TBase.</returns>
     public static IEnumerable<Type> GetRegisteredTypes<TBase>(JsonSerializerContext context)
-    {
-        return GetRegisteredTypes(context)
+        => GetRegisteredTypes(context)
             .Where(t => typeof(TBase).IsAssignableFrom(t));
-    }
 
     /// <summary>
-    ///     Gets all registered types with their corresponding JsonTypeInfo.
+    /// Gets all registered types with their corresponding JsonTypeInfo.
     /// </summary>
     /// <param name="context">The JsonSerializerContext to query.</param>
     /// <returns>A dictionary mapping Type to JsonTypeInfo.</returns>
@@ -54,10 +53,11 @@ public static class JsonContextTypeResolver
         var result = new Dictionary<Type, JsonTypeInfo>();
 
         var properties = GetContextType(context)
-            .GetProperties()
-            .Where(p => p.PropertyType.IsGenericType &&
-                        p.PropertyType.GetGenericTypeDefinition() == typeof(JsonTypeInfo<>)
-            );
+                         .GetProperties()
+                         .Where(
+                             p => p.PropertyType.IsGenericType &&
+                                  p.PropertyType.GetGenericTypeDefinition() == typeof(JsonTypeInfo<>)
+                         );
 
         foreach (var property in properties)
         {
@@ -74,7 +74,7 @@ public static class JsonContextTypeResolver
     }
 
     /// <summary>
-    ///     Gets the JsonTypeInfo for a specific type if registered.
+    /// Gets the JsonTypeInfo for a specific type if registered.
     /// </summary>
     /// <param name="context">The JsonSerializerContext to query.</param>
     /// <typeparam name="T">The type to get info for.</typeparam>
@@ -90,15 +90,13 @@ public static class JsonContextTypeResolver
     }
 
     /// <summary>
-    ///     Checks if a specific type is registered in the context.
+    /// Checks if a specific type is registered in the context.
     /// </summary>
     /// <param name="context">The JsonSerializerContext to query.</param>
     /// <param name="type">The type to check.</param>
     /// <returns>True if the type is registered, false otherwise.</returns>
     public static bool IsTypeRegistered(JsonSerializerContext context, Type type)
-    {
-        return GetRegisteredTypes(context).Contains(type);
-    }
+        => GetRegisteredTypes(context).Contains(type);
 
     [UnconditionalSuppressMessage(
         "Trimming",
@@ -107,7 +105,5 @@ public static class JsonContextTypeResolver
     )]
     [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
     private static Type GetContextType(JsonSerializerContext context)
-    {
-        return context.GetType();
-    }
+        => context.GetType();
 }

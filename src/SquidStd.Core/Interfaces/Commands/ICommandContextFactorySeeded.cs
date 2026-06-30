@@ -1,8 +1,8 @@
 namespace SquidStd.Core.Interfaces.Commands;
 
 /// <summary>
-///     Produces a <typeparamref name="TContext" /> from a seed (for example the connection a message
-///     arrived on), so a dispatch can carry the context that belongs to that seed.
+/// Produces a <typeparamref name="TContext" /> from a seed (for example the connection a message
+/// arrived on), so a dispatch can carry the context that belongs to that seed.
 /// </summary>
 /// <typeparam name="TContext">The context type produced.</typeparam>
 /// <typeparam name="TSeed">The seed the context is built from.</typeparam>

@@ -1,7 +1,7 @@
 namespace SquidStd.Actors.Interfaces;
 
 /// <summary>
-///     A request message that an actor answers with a single typed reply.
+/// A request message that an actor answers with a single typed reply.
 /// </summary>
 /// <typeparam name="TReply">The reply type.</typeparam>
 public interface IActorRequest<TReply> : IActorRequestCore

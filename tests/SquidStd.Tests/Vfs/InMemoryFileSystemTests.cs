@@ -15,6 +15,7 @@ public class InMemoryFileSystemTests
         Assert.Equal("x", Encoding.UTF8.GetString((await fs.ReadAllBytesAsync("a/b.txt"))!));
 
         var paths = new List<string>();
+
         await foreach (var e in fs.ListAsync("a"))
         {
             paths.Add(e.Path);

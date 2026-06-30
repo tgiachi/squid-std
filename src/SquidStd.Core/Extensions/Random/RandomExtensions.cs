@@ -5,7 +5,7 @@ using SquidStd.Core.Utils;
 namespace SquidStd.Core.Extensions.Random;
 
 /// <summary>
-///     Shuffling and random-selection helpers over collections, built on <see cref="BuiltInRng" />.
+/// Shuffling and random-selection helpers over collections, built on <see cref="BuiltInRng" />.
 /// </summary>
 public static class RandomExtensions
 {
@@ -15,16 +15,12 @@ public static class RandomExtensions
         /// <summary>Shuffles the array in place.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Shuffle()
-        {
-            BuiltInRng.Generator.Shuffle(array.AsSpan());
-        }
+            => BuiltInRng.Generator.Shuffle(array.AsSpan());
 
         /// <summary>Returns a random element from the array.</summary>
         /// <returns>A random element, or <c>default</c> when the array is empty.</returns>
         public T? RandomElement()
-        {
-            return array.Length == 0 ? default : array[RandomUtils.Random(array.Length)];
-        }
+            => array.Length == 0 ? default : array[RandomUtils.Random(array.Length)];
 
         /// <summary>Returns a random sample of distinct elements without modifying the source.</summary>
         /// <param name="count">Number of elements to sample.</param>
@@ -63,9 +59,7 @@ public static class RandomExtensions
         /// <summary>Shuffles the list in place.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Shuffle()
-        {
-            BuiltInRng.Generator.Shuffle(CollectionsMarshal.AsSpan(list));
-        }
+            => BuiltInRng.Generator.Shuffle(CollectionsMarshal.AsSpan(list));
 
         /// <summary>Returns a random sample of distinct elements without modifying the source.</summary>
         /// <param name="count">Number of elements to sample.</param>
@@ -105,8 +99,6 @@ public static class RandomExtensions
         /// <summary>Returns a random element from the list.</summary>
         /// <returns>A random element, or <c>default</c> when the list is empty.</returns>
         public T? RandomElement()
-        {
-            return list.Count == 0 ? default : list[RandomUtils.Random(list.Count)];
-        }
+            => list.Count == 0 ? default : list[RandomUtils.Random(list.Count)];
     }
 }

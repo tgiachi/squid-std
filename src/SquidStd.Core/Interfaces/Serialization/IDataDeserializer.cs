@@ -1,7 +1,7 @@
 namespace SquidStd.Core.Interfaces.Serialization;
 
 /// <summary>
-///     Deserializes bytes to typed values.
+/// Deserializes bytes to typed values.
 /// </summary>
 public interface IDataDeserializer
 {

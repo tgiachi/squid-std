@@ -18,9 +18,7 @@ public class ElasticExpressionTranslatorTests
 
     [Fact]
     public void UnsupportedExpression_Throws()
-    {
-        Assert.Throws<NotSupportedException>(() => Translate(s => s.Where(d => d.Name.ToUpperInvariant() == "X")));
-    }
+        => Assert.Throws<NotSupportedException>(() => Translate(s => s.Where(d => d.Name.ToUpperInvariant() == "X")));
 
     [Fact]
     public void Where_Equality_ProducesTermOnKeyword()
@@ -68,34 +66,22 @@ public class ElasticExpressionTranslatorTests
         }
 
         public IEnumerator<T> GetEnumerator()
-        {
-            throw new NotSupportedException();
-        }
+            => throw new NotSupportedException();
 
         IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotSupportedException();
-        }
+            => throw new NotSupportedException();
 
         public IQueryable CreateQuery(Expression expression)
-        {
-            return new TranslateOnlyQueryable<T>(expression);
-        }
+            => new TranslateOnlyQueryable<T>(expression);
 
         public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
-        {
-            return new TranslateOnlyQueryable<TElement>(expression);
-        }
+            => new TranslateOnlyQueryable<TElement>(expression);
 
         public object? Execute(Expression expression)
-        {
-            throw new NotSupportedException();
-        }
+            => throw new NotSupportedException();
 
         public TResult Execute<TResult>(Expression expression)
-        {
-            throw new NotSupportedException();
-        }
+            => throw new NotSupportedException();
     }
 
     private sealed record Doc(string Status, int Total, string Name) : IIndexableEntity

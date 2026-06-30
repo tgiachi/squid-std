@@ -2,14 +2,13 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using SquidStd.Core.Data.Storage;
 using SquidStd.Core.Interfaces.Secrets;
-using SquidStd.Storage.Abstractions.Data.Config;
 using SquidStd.Storage.Abstractions.Interfaces;
 using SquidStd.Storage.Services;
 
 namespace SquidStd.Services.Core.Services.Storage;
 
 /// <summary>
-///     File-backed encrypted secret store.
+/// File-backed encrypted secret store.
 /// </summary>
 public sealed class FileSecretStore : ISecretStore
 {
@@ -17,7 +16,7 @@ public sealed class FileSecretStore : ISecretStore
     private readonly IStorageService _storageService;
 
     /// <summary>
-    ///     Initializes the encrypted file secret store.
+    /// Initializes the encrypted file secret store.
     /// </summary>
     /// <param name="config">Secret storage configuration.</param>
     /// <param name="secretProtector">Secret protector used for encryption.</param>
@@ -27,20 +26,16 @@ public sealed class FileSecretStore : ISecretStore
         ArgumentNullException.ThrowIfNull(secretProtector);
 
         _secretProtector = secretProtector;
-        _storageService = new FileStorageService(new StorageConfig { RootDirectory = config.RootDirectory });
+        _storageService = new FileStorageService(new() { RootDirectory = config.RootDirectory });
     }
 
     /// <inheritdoc />
     public ValueTask<bool> DeleteAsync(string name, CancellationToken cancellationToken = default)
-    {
-        return _storageService.DeleteAsync(ToStorageKey(name), cancellationToken);
-    }
+        => _storageService.DeleteAsync(ToStorageKey(name), cancellationToken);
 
     /// <inheritdoc />
     public ValueTask<bool> ExistsAsync(string name, CancellationToken cancellationToken = default)
-    {
-        return _storageService.ExistsAsync(ToStorageKey(name), cancellationToken);
-    }
+        => _storageService.ExistsAsync(ToStorageKey(name), cancellationToken);
 
     /// <inheritdoc />
     public async ValueTask<string?> GetAsync(string name, CancellationToken cancellationToken = default)
@@ -70,7 +65,8 @@ public sealed class FileSecretStore : ISecretStore
 
     /// <inheritdoc />
     public async IAsyncEnumerable<string> ListNamesAsync(
-        string? prefix = null, [EnumeratorCancellation] CancellationToken cancellationToken = default
+        string? prefix = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
         const string suffix = ".secret";

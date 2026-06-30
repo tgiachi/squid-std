@@ -3,7 +3,7 @@ using SquidStd.Core.Data.Scheduling;
 namespace SquidStd.Core.Interfaces.Scheduling;
 
 /// <summary>
-///     Schedules asynchronous jobs on standard 5-field cron expressions (UTC).
+/// Schedules asynchronous jobs on standard 5-field cron expressions (UTC).
 /// </summary>
 public interface ICronScheduler
 {
@@ -11,7 +11,7 @@ public interface ICronScheduler
     IReadOnlyCollection<CronJobInfo> Jobs { get; }
 
     /// <summary>
-    ///     Registers a cron job.
+    /// Registers a cron job.
     /// </summary>
     /// <param name="name">Logical job name.</param>
     /// <param name="cronExpression">Standard 5-field cron expression, evaluated in UTC.</param>

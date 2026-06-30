@@ -24,7 +24,8 @@ public static class OpenTelemetryServiceCollectionExtensions
 
             if (options.EnableTracing)
             {
-                builder.WithTracing(tracing =>
+                builder.WithTracing(
+                    tracing =>
                     {
                         TelemetryPipeline.ConfigureTracing(tracing, options, true);
                         TelemetryPipeline.AddTraceExporters(tracing, options);
@@ -35,7 +36,8 @@ public static class OpenTelemetryServiceCollectionExtensions
             if (options.EnableMetrics)
             {
                 services.AddHostedService<MetricsBridgeActivator>();
-                builder.WithMetrics(metrics =>
+                builder.WithMetrics(
+                    metrics =>
                     {
                         TelemetryPipeline.ConfigureMetrics(metrics, options);
                         TelemetryPipeline.AddMetricExporters(metrics, options);

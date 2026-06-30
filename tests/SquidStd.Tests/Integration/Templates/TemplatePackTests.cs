@@ -3,9 +3,9 @@ using System.Diagnostics;
 namespace SquidStd.Tests.Integration.Templates;
 
 /// <summary>
-///     Packs SquidStd.Templates, installs it into an isolated dotnet-new hive, instantiates each template, and
-///     asserts the generated output (name substitution, version-sentinel replacement, messaging branch). No build
-///     of the generated projects: the referenced SquidStd.* packages may not be published yet.
+/// Packs SquidStd.Templates, installs it into an isolated dotnet-new hive, instantiates each template, and
+/// asserts the generated output (name substitution, version-sentinel replacement, messaging branch). No build
+/// of the generated projects: the referenced SquidStd.* packages may not be published yet.
 /// </summary>
 public sealed class TemplatePackTests : IDisposable
 {
@@ -37,12 +37,12 @@ public sealed class TemplatePackTests : IDisposable
         Assert.True(TryRun("dotnet", $"pack \"{project}\" -c Release", _repoRoot, out _), "pack failed");
 
         var nupkg = Directory
-            .GetFiles(
-                Path.Combine(_repoRoot, "src", "SquidStd.Templates", "bin", "Release"),
-                "SquidStd.Templates.*.nupkg"
-            )
-            .OrderByDescending(File.GetLastWriteTimeUtc)
-            .First();
+                    .GetFiles(
+                        Path.Combine(_repoRoot, "src", "SquidStd.Templates", "bin", "Release"),
+                        "SquidStd.Templates.*.nupkg"
+                    )
+                    .OrderByDescending(File.GetLastWriteTimeUtc)
+                    .First();
 
         _installed = TryRun("dotnet", $"new install \"{nupkg}\" --debug:custom-hive \"{_hive}\"", _repoRoot, out _);
     }

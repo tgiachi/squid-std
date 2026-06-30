@@ -6,15 +6,15 @@ using SquidStd.Templating.Services;
 namespace SquidStd.Templating.Extensions;
 
 /// <summary>
-///     DryIoc registration helpers for the templating module.
+/// DryIoc registration helpers for the templating module.
 /// </summary>
 public static class TemplatingRegistrationExtensions
 {
     extension(IContainer container)
     {
         /// <summary>
-        ///     Registers the Scriban template renderer as a singleton SquidStd service (so its startup
-        ///     auto-load of <c>templates/*.tmpl</c> runs with the host). Requires a registered <c>DirectoriesConfig</c>.
+        /// Registers the Scriban template renderer as a singleton SquidStd service (so its startup
+        /// auto-load of <c>templates/*.tmpl</c> runs with the host). Requires a registered <c>DirectoriesConfig</c>.
         /// </summary>
         public IContainer AddTemplating()
         {

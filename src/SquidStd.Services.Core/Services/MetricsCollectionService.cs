@@ -9,7 +9,7 @@ using SquidStd.Core.Types;
 namespace SquidStd.Services.Core.Services;
 
 /// <summary>
-///     Periodically collects metrics from registered providers and stores the latest snapshot.
+/// Periodically collects metrics from registered providers and stores the latest snapshot.
 /// </summary>
 public sealed class MetricsCollectionService : IMetricsCollectionService, ISquidStdService, IDisposable
 {
@@ -31,7 +31,7 @@ public sealed class MetricsCollectionService : IMetricsCollectionService, ISquid
     private int _started;
 
     /// <summary>
-    ///     Initializes the metrics collection service.
+    /// Initializes the metrics collection service.
     /// </summary>
     /// <param name="providers">Metric providers to collect from.</param>
     /// <param name="config">Metrics collection configuration.</param>
@@ -66,9 +66,7 @@ public sealed class MetricsCollectionService : IMetricsCollectionService, ISquid
 
     /// <inheritdoc />
     public MetricsSnapshot GetStatus()
-    {
-        return GetSnapshot();
-    }
+        => GetSnapshot();
 
     /// <inheritdoc />
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
@@ -89,7 +87,7 @@ public sealed class MetricsCollectionService : IMetricsCollectionService, ISquid
         if (_lifetimeCts.IsCancellationRequested)
         {
             _lifetimeCts.Dispose();
-            _lifetimeCts = new CancellationTokenSource();
+            _lifetimeCts = new();
         }
 
         _collectionTask = Task.Run(() => RunCollectionLoopAsync(_lifetimeCts.Token), _lifetimeCts.Token);
@@ -113,9 +111,7 @@ public sealed class MetricsCollectionService : IMetricsCollectionService, ISquid
         {
             await _collectionTask;
         }
-        catch (OperationCanceledException)
-        {
-        }
+        catch (OperationCanceledException) { }
     }
 
     private async Task CollectOnceAsync(CancellationToken cancellationToken)
@@ -161,10 +157,8 @@ public sealed class MetricsCollectionService : IMetricsCollectionService, ISquid
     }
 
     private static string CreateMetricKey(string providerName, string metricName)
-    {
-        return string.IsNullOrWhiteSpace(providerName) ? metricName :
-            string.IsNullOrWhiteSpace(metricName) ? providerName : providerName + "." + metricName;
-    }
+        => string.IsNullOrWhiteSpace(providerName) ? metricName :
+           string.IsNullOrWhiteSpace(metricName) ? providerName : providerName + "." + metricName;
 
     private void LogProviderCollection(IMetricProvider provider, int metricCount)
     {
@@ -225,7 +219,7 @@ public sealed class MetricsCollectionService : IMetricsCollectionService, ISquid
     }
 
     /// <summary>
-    ///     Releases metrics collection resources.
+    /// Releases metrics collection resources.
     /// </summary>
     public void Dispose()
     {
@@ -242,9 +236,7 @@ public sealed class MetricsCollectionService : IMetricsCollectionService, ISquid
             {
                 _collectionTask.GetAwaiter().GetResult();
             }
-            catch (OperationCanceledException)
-            {
-            }
+            catch (OperationCanceledException) { }
         }
 
         _lifetimeCts.Dispose();

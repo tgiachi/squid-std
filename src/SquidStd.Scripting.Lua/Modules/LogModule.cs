@@ -10,19 +10,13 @@ public class LogModule
 
     [ScriptFunction(helpText: "Logs a message at the ERROR level.")]
     public void Error(string message, params object[]? args)
-    {
-        _logger.Error(message, args);
-    }
+        => _logger.Error(message, args);
 
     [ScriptFunction(helpText: "Logs a message at the INFO level.")]
     public void Info(string message, params object[]? args)
-    {
-        _logger.Information(message, args);
-    }
+        => _logger.Information(message, args);
 
     [ScriptFunction(helpText: "Logs a message at the WARNING level.")]
     public void Warning(string message, params object[]? args)
-    {
-        _logger.Warning(message, args);
-    }
+        => _logger.Warning(message, args);
 }

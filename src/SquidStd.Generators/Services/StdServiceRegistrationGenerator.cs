@@ -35,13 +35,13 @@ public sealed class StdServiceRegistrationGenerator : IIncrementalGenerator
         var serviceType = GetServiceType(attribute);
         var priority = GetIntNamedArgument(attribute, "Priority");
 
-        var isSupported = serviceType is not null
-                          && GeneratorSymbolHelpers.IsConcreteNonGenericClass(implementationType)
-                          && GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(implementationType)
-                          && GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(serviceType)
-                          && GeneratorSymbolHelpers.IsAssignableTo(implementationType, serviceType);
+        var isSupported = serviceType is not null &&
+                          GeneratorSymbolHelpers.IsConcreteNonGenericClass(implementationType) &&
+                          GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(implementationType) &&
+                          GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(serviceType) &&
+                          GeneratorSymbolHelpers.IsAssignableTo(implementationType, serviceType);
 
-        return new StdServiceRegistrationCandidate(
+        return new(
             serviceType is null ? string.Empty : GeneratorSymbolHelpers.FullyQualified(serviceType),
             GeneratorSymbolHelpers.FullyQualified(implementationType),
             GeneratorSymbolHelpers.DisplayName(implementationType),
@@ -95,13 +95,15 @@ public sealed class StdServiceRegistrationGenerator : IIncrementalGenerator
             }
 
             var key = candidate.ServiceTypeName + "|" + candidate.ImplementationTypeName;
+
             if (seenKeys.Add(key))
             {
                 supported.Add(candidate);
             }
         }
 
-        supported.Sort(static (left, right) => string.Compare(
+        supported.Sort(
+            static (left, right) => string.Compare(
                 left.ImplementationTypeName,
                 right.ImplementationTypeName,
                 StringComparison.Ordinal

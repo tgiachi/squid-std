@@ -1,7 +1,7 @@
 namespace SquidStd.Messaging.Sqs.Internal;
 
 /// <summary>
-///     Sanitizes queue/topic names to the SQS/SNS allowed alphabet (letters, digits, '-', '_').
+/// Sanitizes queue/topic names to the SQS/SNS allowed alphabet (letters, digits, '-', '_').
 /// </summary>
 internal static class SqsNames
 {
@@ -17,6 +17,6 @@ internal static class SqsNames
             buffer[i] = char.IsAsciiLetterOrDigit(c) || c is '-' or '_' ? c : '-';
         }
 
-        return new string(buffer);
+        return new(buffer);
     }
 }

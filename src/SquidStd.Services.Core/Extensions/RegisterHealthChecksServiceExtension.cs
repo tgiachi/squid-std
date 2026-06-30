@@ -7,7 +7,7 @@ using SquidStd.Services.Core.Services;
 namespace SquidStd.Services.Core.Extensions;
 
 /// <summary>
-///     Extension methods for registering the health-check aggregator.
+/// Extension methods for registering the health-check aggregator.
 /// </summary>
 public static class RegisterHealthChecksServiceExtension
 {
@@ -15,8 +15,8 @@ public static class RegisterHealthChecksServiceExtension
     extension(IContainer container)
     {
         /// <summary>
-        ///     Registers the health-check aggregator (<see cref="IHealthCheckService" />) as a singleton.
-        ///     Concrete checks register themselves as <c>IHealthCheck</c> and are collected automatically.
+        /// Registers the health-check aggregator (<see cref="IHealthCheckService" />) as a singleton.
+        /// Concrete checks register themselves as <c>IHealthCheck</c> and are collected automatically.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterHealthChecksService()

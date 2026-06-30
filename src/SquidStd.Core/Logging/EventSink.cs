@@ -4,13 +4,13 @@ using Serilog.Events;
 namespace SquidStd.Core.Logging;
 
 /// <summary>
-///     A Serilog sink that raises events when logs are received.
-///     Subscribe to <see cref="OnLogReceived" /> to receive log events.
+/// A Serilog sink that raises events when logs are received.
+/// Subscribe to <see cref="OnLogReceived" /> to receive log events.
 /// </summary>
 public class EventSink : ILogEventSink
 {
     /// <summary>
-    ///     Emits a log event to all subscribers.
+    /// Emits a log event to all subscribers.
     /// </summary>
     /// <param name="logEvent">The log event to emit.</param>
     public void Emit(LogEvent logEvent)
@@ -60,16 +60,14 @@ public class EventSink : ILogEventSink
     }
 
     /// <summary>
-    ///     Clears all event subscribers.
-    ///     Useful for cleanup or testing.
+    /// Clears all event subscribers.
+    /// Useful for cleanup or testing.
     /// </summary>
     public static void ClearSubscribers()
-    {
-        OnLogReceived = null;
-    }
+        => OnLogReceived = null;
 
     /// <summary>
-    ///     Event raised when a log event is received.
+    /// Event raised when a log event is received.
     /// </summary>
     public static event EventHandler<LogEventData>? OnLogReceived;
 }

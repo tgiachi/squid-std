@@ -41,8 +41,8 @@ public class MailRegistrationExtensionsTests
     {
         using var container = NewContainer();
 
-        Assert.Throws<ArgumentException>(() => container.AddMail(new MailOptions { Host = string.Empty, Port = 993 }));
-        Assert.Throws<ArgumentException>(() => container.AddMail(new MailOptions { Host = "h", Port = 0 }));
+        Assert.Throws<ArgumentException>(() => container.AddMail(new() { Host = string.Empty, Port = 993 }));
+        Assert.Throws<ArgumentException>(() => container.AddMail(new() { Host = "h", Port = 0 }));
     }
 
     private static Container NewContainer()
@@ -55,8 +55,5 @@ public class MailRegistrationExtensionsTests
     }
 
     private static MailOptions ValidOptions(MailProtocolType protocol)
-    {
-        return new MailOptions
-            { Protocol = protocol, Host = "mail.example.com", Port = 993, Username = "u", Password = "p" };
-    }
+        => new() { Protocol = protocol, Host = "mail.example.com", Port = 993, Username = "u", Password = "p" };
 }

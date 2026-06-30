@@ -1,5 +1,4 @@
 using System.Text;
-using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Crypto.Vfs.Services;
 using SquidStd.Services.Core.Services.Bootstrap;
 using SquidStd.Vfs.Abstractions.Interfaces;
@@ -7,7 +6,7 @@ using SquidStd.Vfs.Extensions;
 using SquidStd.Vfs.Services;
 
 var bootstrap = SquidStdBootstrap.Create(
-    new SquidStdOptions
+    new()
     {
         ConfigName = "squidstd",
         RootDirectory = AppContext.BaseDirectory

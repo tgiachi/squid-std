@@ -1,5 +1,4 @@
 using SquidStd.Actors;
-using SquidStd.Actors.Interfaces;
 
 await using var counter = new CounterActor();
 
@@ -14,7 +13,7 @@ await counter.TellAsync(new Increment(3));
 #region step-3
 
 // Request/response: AskAsync enqueues a request and awaits its typed reply.
-var total = await counter.AskAsync<GetTotal, int>(new GetTotal());
+var total = await counter.AskAsync<GetTotal, int>(new());
 
 Console.WriteLine($"Total: {total}");
 
@@ -40,9 +39,11 @@ internal sealed class CounterActor : Actor<ICounterMessage>
         {
             case Increment increment:
                 _total += increment.By;
+
                 break;
             case GetTotal request:
                 request.Reply(_total);
+
                 break;
         }
 

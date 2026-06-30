@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace SquidStd.Core.Extensions.Env;
 
 /// <summary>
-///     Provides extension methods for expanding environment variables in strings
+/// Provides extension methods for expanding environment variables in strings
 /// </summary>
 public static class EnvExtensions
 {
@@ -17,7 +17,7 @@ public static class EnvExtensions
     extension(string input)
     {
         /// <summary>
-        ///     Expands environment variables in a string using custom $VARIABLE syntax
+        /// Expands environment variables in a string using custom $VARIABLE syntax
         /// </summary>
         /// <returns>The string with environment variables expanded to their values</returns>
         public string ExpandEnvironmentVariables()
@@ -38,8 +38,8 @@ public static class EnvExtensions
         }
 
         /// <summary>
-        ///     Replaces "$VAR" tokens with the matching environment variable value. Unknown variables are
-        ///     left unchanged.
+        /// Replaces "$VAR" tokens with the matching environment variable value. Unknown variables are
+        /// left unchanged.
         /// </summary>
         /// <returns>The string with known $VAR tokens substituted.</returns>
         public string ReplaceEnv()

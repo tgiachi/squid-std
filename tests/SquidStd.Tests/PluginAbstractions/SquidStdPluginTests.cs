@@ -25,7 +25,7 @@ public class SquidStdPluginTests
         using var container = new Container();
         var plugin = new FakePlugin();
 
-        ((ISquidStdPlugin)plugin).Configure(container, new PluginContext());
+        ((ISquidStdPlugin)plugin).Configure(container, new());
 
         Assert.Same(plugin, container.Resolve<FakePlugin>());
     }
@@ -36,6 +36,6 @@ public class SquidStdPluginTests
         ISquidStdPlugin plugin = new FakePlugin();
 
         Assert.Equal("squidstd.fake", plugin.Metadata.Id);
-        Assert.Equal(new Version(1, 2, 3), plugin.Metadata.Version);
+        Assert.Equal(new(1, 2, 3), plugin.Metadata.Version);
     }
 }

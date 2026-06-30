@@ -6,8 +6,8 @@ using SquidStd.Crypto.Pgp.Internal;
 namespace SquidStd.Crypto.Pgp.Services;
 
 /// <summary>
-///     Key store that serializes the keyring to a single file encrypted at rest with the application key via
-///     <see cref="ISecretProtector" />.
+/// Key store that serializes the keyring to a single file encrypted at rest with the application key via
+/// <see cref="ISecretProtector" />.
 /// </summary>
 public sealed class AesGcmPgpKeyStore : IPgpKeyStore
 {
@@ -30,6 +30,7 @@ public sealed class AesGcmPgpKeyStore : IPgpKeyStore
         var protectedBytes = _protector.Protect(plaintext);
 
         var directory = Path.GetDirectoryName(_path);
+
         if (!string.IsNullOrEmpty(directory))
         {
             Directory.CreateDirectory(directory);

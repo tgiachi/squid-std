@@ -4,7 +4,7 @@ using SquidStd.Caching.Abstractions.Interfaces;
 namespace SquidStd.Caching.Services;
 
 /// <summary>
-///     In-memory <see cref="ICacheProvider" /> backed by <see cref="IMemoryCache" />.
+/// In-memory <see cref="ICacheProvider" /> backed by <see cref="IMemoryCache" />.
 /// </summary>
 public sealed class InMemoryCacheProvider : ICacheProvider
 {
@@ -17,9 +17,7 @@ public sealed class InMemoryCacheProvider : ICacheProvider
 
     /// <inheritdoc />
     public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
-    {
-        return Task.FromResult(_cache.TryGetValue(key, out _));
-    }
+        => Task.FromResult(_cache.TryGetValue(key, out _));
 
     /// <inheritdoc />
     public Task<ReadOnlyMemory<byte>?> GetAsync(string key, CancellationToken cancellationToken = default)
@@ -63,13 +61,9 @@ public sealed class InMemoryCacheProvider : ICacheProvider
 
     /// <inheritdoc />
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
-    {
-        return ValueTask.CompletedTask;
-    }
+        => ValueTask.CompletedTask;
 
     /// <inheritdoc />
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
-    {
-        return ValueTask.CompletedTask;
-    }
+        => ValueTask.CompletedTask;
 }

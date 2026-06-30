@@ -4,7 +4,7 @@ using SquidStd.Core.Types;
 namespace SquidStd.Core.Extensions.Logger;
 
 /// <summary>
-///     Extension methods for converting log levels between different logging frameworks.
+/// Extension methods for converting log levels between different logging frameworks.
 /// </summary>
 public static class LogLevelExtensions
 {
@@ -12,12 +12,11 @@ public static class LogLevelExtensions
     extension(LogLevelType logLevel)
     {
         /// <summary>
-        ///     Converts a LogLevelType to a Serilog LogEventLevel.
+        /// Converts a LogLevelType to a Serilog LogEventLevel.
         /// </summary>
         /// <returns>The corresponding Serilog log event level.</returns>
         public LogEventLevel ToSerilogLogLevel()
-        {
-            return logLevel switch
+            => logLevel switch
             {
                 LogLevelType.Trace       => LogEventLevel.Verbose,
                 LogLevelType.Debug       => LogEventLevel.Debug,
@@ -27,6 +26,5 @@ public static class LogLevelExtensions
                 LogLevelType.Critical    => LogEventLevel.Fatal,
                 _                        => LogEventLevel.Information
             };
-        }
     }
 }

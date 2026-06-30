@@ -19,7 +19,5 @@ internal static class ConventionNames
     }
 
     public static string CommandName(string widgetId)
-    {
-        return MemberName(widgetId) + "Command";
-    }
+        => MemberName(widgetId) + "Command";
 }

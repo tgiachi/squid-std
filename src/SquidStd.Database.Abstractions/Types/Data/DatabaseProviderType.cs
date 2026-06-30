@@ -1,7 +1,7 @@
 namespace SquidStd.Database.Abstractions.Types.Data;
 
 /// <summary>
-///     Supported database providers.
+/// Supported database providers.
 /// </summary>
 public enum DatabaseProviderType
 {

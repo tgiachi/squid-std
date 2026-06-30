@@ -6,7 +6,7 @@ using SquidStd.Storage.S3.Services;
 namespace SquidStd.Storage.S3.Extensions;
 
 /// <summary>
-///     DryIoc registration helpers for the S3-compatible (MinIO) storage provider.
+/// DryIoc registration helpers for the S3-compatible (MinIO) storage provider.
 /// </summary>
 public static class S3StorageRegistrationExtensions
 {

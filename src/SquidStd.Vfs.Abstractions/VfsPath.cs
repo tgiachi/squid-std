@@ -9,7 +9,7 @@ public static class VfsPath
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
         var segments = path.Replace('\\', '/')
-            .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                           .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
         foreach (var segment in segments)
         {

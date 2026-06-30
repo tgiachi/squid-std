@@ -21,7 +21,7 @@ public class WorkersRegistrationExtensionsTests
         container.AddJobHandler<EchoJobHandler>();
 
         var dispatcher = container.Resolve<IJobDispatcher>();
-        await dispatcher.DispatchAsync(new JobRequest("echo", new Dictionary<string, string>()), CancellationToken.None);
+        await dispatcher.DispatchAsync(new("echo", new Dictionary<string, string>()), CancellationToken.None);
 
         Assert.Equal(1, EchoJobHandler.Calls);
     }

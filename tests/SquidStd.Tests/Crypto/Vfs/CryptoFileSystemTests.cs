@@ -9,9 +9,7 @@ namespace SquidStd.Tests.Crypto.Vfs;
 public class CryptoFileSystemTests
 {
     private static CryptoVaultOptions FastOptions()
-    {
-        return new CryptoVaultOptions { Argon2MemoryKib = 8192, Argon2Iterations = 1 };
-    }
+        => new() { Argon2MemoryKib = 8192, Argon2Iterations = 1 };
 
     [Fact]
     public async Task Write_Read_List_Delete_RoundTrips()
@@ -23,6 +21,7 @@ public class CryptoFileSystemTests
         Assert.Equal("hello", Encoding.UTF8.GetString((await vault.ReadAllBytesAsync("docs/cv.pdf"))!));
 
         var paths = new List<string>();
+
         await foreach (var e in vault.ListAsync())
         {
             paths.Add(e.Path);

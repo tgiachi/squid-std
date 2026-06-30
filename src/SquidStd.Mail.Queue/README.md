@@ -37,13 +37,13 @@ Retry/backoff/dead-letter are configured via `MessagingOptions` (`MaxDeliveryAtt
 
 ## Key types
 
-| Type | Purpose |
-|------|---------|
-| `IMailQueue` | Enqueue an `OutgoingMailMessage` for background delivery. |
-| `MailQueue` | `IMailQueue` implementation over the SquidStd messaging queue. |
-| `MailSendConsumerService` | Background consumer that sends queued messages via `IMailSender`. |
-| `MailQueueRegistrationExtensions` | `AddMailQueue(...)` registration. |
-| `MailQueueOptions` | Queue name and send options. |
+| Type                              | Purpose                                                           |
+|-----------------------------------|-------------------------------------------------------------------|
+| `IMailQueue`                      | Enqueue an `OutgoingMailMessage` for background delivery.         |
+| `MailQueue`                       | `IMailQueue` implementation over the SquidStd messaging queue.    |
+| `MailSendConsumerService`         | Background consumer that sends queued messages via `IMailSender`. |
+| `MailQueueRegistrationExtensions` | `AddMailQueue(...)` registration.                                 |
+| `MailQueueOptions`                | Queue name and send options.                                      |
 
 ## Related
 

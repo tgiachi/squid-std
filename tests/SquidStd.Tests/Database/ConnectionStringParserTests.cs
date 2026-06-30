@@ -7,9 +7,7 @@ public class ConnectionStringParserTests
 {
     [Fact]
     public void Parse_MissingHostForServerProvider_Throws()
-    {
-        Assert.Throws<FormatException>(() => ConnectionStringParser.Parse("postgres:///db"));
-    }
+        => Assert.Throws<FormatException>(() => ConnectionStringParser.Parse("postgres:///db"));
 
     [Fact]
     public void Parse_MySql_BuildsNativeString()
@@ -78,7 +76,5 @@ public class ConnectionStringParserTests
 
     [Fact]
     public void Parse_UnknownScheme_Throws()
-    {
-        Assert.Throws<NotSupportedException>(() => ConnectionStringParser.Parse("oracle://h/db"));
-    }
+        => Assert.Throws<NotSupportedException>(() => ConnectionStringParser.Parse("oracle://h/db"));
 }

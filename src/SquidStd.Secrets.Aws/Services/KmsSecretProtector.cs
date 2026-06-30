@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using Amazon.KeyManagementService;
-using Amazon.KeyManagementService.Model;
 using SquidStd.Core.Interfaces.Secrets;
 using SquidStd.Secrets.Aws.Data;
 using SquidStd.Secrets.Aws.Internal;
@@ -19,7 +18,7 @@ public sealed class KmsSecretProtector : ISecretProtector, IDisposable
         ArgumentException.ThrowIfNullOrWhiteSpace(options.KeyId);
 
         _keyId = options.KeyId;
-        _kms = new AmazonKeyManagementServiceClient(
+        _kms = new(
             AwsClientFactory.Credentials(options.Aws),
             AwsClientFactory.KmsConfig(options.Aws)
         );
@@ -30,11 +29,9 @@ public sealed class KmsSecretProtector : ISecretProtector, IDisposable
     {
         ArgumentNullException.ThrowIfNull(plaintext);
 
-        var generated = _kms.GenerateDataKeyAsync(
-                new GenerateDataKeyRequest { KeyId = _keyId, KeySpec = DataKeySpec.AES_256 }
-            )
-            .GetAwaiter()
-            .GetResult();
+        var generated = _kms.GenerateDataKeyAsync(new() { KeyId = _keyId, KeySpec = DataKeySpec.AES_256 })
+                            .GetAwaiter()
+                            .GetResult();
 
         var dataKey = generated.Plaintext.ToArray();
 
@@ -54,11 +51,9 @@ public sealed class KmsSecretProtector : ISecretProtector, IDisposable
         ArgumentNullException.ThrowIfNull(protectedData);
 
         var wrappedKey = KmsEnvelope.ReadWrappedKey(protectedData);
-        var decrypted = _kms.DecryptAsync(
-                new DecryptRequest { CiphertextBlob = new MemoryStream(wrappedKey) }
-            )
-            .GetAwaiter()
-            .GetResult();
+        var decrypted = _kms.DecryptAsync(new() { CiphertextBlob = new(wrappedKey) })
+                            .GetAwaiter()
+                            .GetResult();
 
         var dataKey = decrypted.Plaintext.ToArray();
 
@@ -74,7 +69,5 @@ public sealed class KmsSecretProtector : ISecretProtector, IDisposable
 
     /// <inheritdoc />
     public void Dispose()
-    {
-        _kms.Dispose();
-    }
+        => _kms.Dispose();
 }

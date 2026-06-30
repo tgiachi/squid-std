@@ -35,12 +35,12 @@ public sealed class ConfigSectionRegistrationGenerator : IIncrementalGenerator
         var sectionName = GetSectionName(attribute);
         var priority = GetIntNamedArgument(attribute, "Priority");
 
-        var isSupported = !string.IsNullOrWhiteSpace(sectionName)
-                          && GeneratorSymbolHelpers.IsConcreteNonGenericClass(configType)
-                          && GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(configType)
-                          && GeneratorSymbolHelpers.HasPublicParameterlessConstructor(configType);
+        var isSupported = !string.IsNullOrWhiteSpace(sectionName) &&
+                          GeneratorSymbolHelpers.IsConcreteNonGenericClass(configType) &&
+                          GeneratorSymbolHelpers.IsAccessibleFromGeneratedSource(configType) &&
+                          GeneratorSymbolHelpers.HasPublicParameterlessConstructor(configType);
 
-        return new ConfigSectionRegistrationCandidate(
+        return new(
             GeneratorSymbolHelpers.FullyQualified(configType),
             sectionName ?? string.Empty,
             GeneratorSymbolHelpers.DisplayName(configType),
@@ -97,19 +97,21 @@ public sealed class ConfigSectionRegistrationGenerator : IIncrementalGenerator
             }
 
             var key = candidate.SectionName + "|" + candidate.ConfigTypeName;
+
             if (seenKeys.Add(key))
             {
                 supported.Add(candidate);
             }
         }
 
-        supported.Sort(static (left, right) =>
+        supported.Sort(
+            static (left, right) =>
             {
                 var sectionComparison = string.Compare(left.SectionName, right.SectionName, StringComparison.Ordinal);
 
                 return sectionComparison != 0
-                    ? sectionComparison
-                    : string.Compare(left.ConfigTypeName, right.ConfigTypeName, StringComparison.Ordinal);
+                           ? sectionComparison
+                           : string.Compare(left.ConfigTypeName, right.ConfigTypeName, StringComparison.Ordinal);
             }
         );
 

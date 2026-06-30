@@ -89,13 +89,9 @@ public sealed class MailPollingService : ISquidStdService, IDisposable
     }
 
     private void OnTick()
-    {
-        _ = PollOnceAsync();
-    }
+        => _ = PollOnceAsync();
 
     /// <inheritdoc />
     public void Dispose()
-    {
-        _gate.Dispose();
-    }
+        => _gate.Dispose();
 }

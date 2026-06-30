@@ -8,31 +8,6 @@ namespace SquidStd.Tests.Tui.Binding;
 
 public partial class ViewBinderAutoBindTests
 {
-    private sealed partial class AutoBindViewModel : ObservableObject
-    {
-        [ObservableProperty]
-        private string _title = string.Empty;
-
-        [ObservableProperty]
-        private string _name = string.Empty;
-
-        // Wrong type on purpose — used by the "wrong type" skip-path test.
-        public int Count { get; } = 42;
-
-        private bool _canSave;
-
-        [RelayCommand(CanExecute = nameof(CanSave))]
-        private void Save() { }
-
-        private bool CanSave() => _canSave;
-
-        public void SetCanSave(bool value)
-        {
-            _canSave = value;
-            SaveCommand.NotifyCanExecuteChanged();
-        }
-    }
-
     // -------------------------------------------------------------------
     // Label one-way
     // -------------------------------------------------------------------
@@ -160,5 +135,29 @@ public partial class ViewBinderAutoBindTests
 
         Assert.Null(ex);
         Assert.Equal(string.Empty, label.Text); // left untouched
+    }
+
+    private sealed partial class AutoBindViewModel : ObservableObject
+    {
+        [ObservableProperty] private string _title = string.Empty;
+
+        [ObservableProperty] private string _name = string.Empty;
+
+        private bool _canSave;
+
+        // Wrong type on purpose — used by the "wrong type" skip-path test.
+        public int Count { get; } = 42;
+
+        [RelayCommand(CanExecute = nameof(CanSave))]
+        private void Save() { }
+
+        private bool CanSave()
+            => _canSave;
+
+        public void SetCanSave(bool value)
+        {
+            _canSave = value;
+            SaveCommand.NotifyCanExecuteChanged();
+        }
     }
 }

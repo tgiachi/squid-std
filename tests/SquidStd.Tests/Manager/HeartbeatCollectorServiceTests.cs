@@ -6,7 +6,6 @@ using SquidStd.Services.Core.Services;
 using SquidStd.Workers.Abstractions;
 using SquidStd.Workers.Abstractions.Data;
 using SquidStd.Workers.Abstractions.Types;
-using SquidStd.Workers.Manager.Data.Config;
 using SquidStd.Workers.Manager.Data.Events;
 using SquidStd.Workers.Manager.Services;
 
@@ -23,12 +22,12 @@ public class HeartbeatCollectorServiceTests
         container.AddInMemoryMessaging();
 
         var topic = container.Resolve<IMessageTopic>();
-        var registry = new WorkerRegistry(new WorkerManagerConfig());
+        var registry = new WorkerRegistry(new());
 
         var discovered = new TaskCompletionSource<WorkerStatusChangedEvent>();
         eventBus.RegisterListener(new DelegateListener(e => discovered.TrySetResult(e)));
 
-        var service = new HeartbeatCollectorService(topic, registry, eventBus, new WorkerManagerConfig());
+        var service = new HeartbeatCollectorService(topic, registry, eventBus, new());
         await service.StartAsync();
 
         await topic.PublishAsync(

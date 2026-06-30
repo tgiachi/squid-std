@@ -26,20 +26,21 @@ container.RegisterConfigSection<MyConfig>("my");
 
 ## Key types
 
-| Type                             | Purpose                                          |
-|----------------------------------|--------------------------------------------------|
-| `ISquidStdService`               | Async start/stop lifecycle for managed services. |
-| `RegisterEventListenerAttribute`  | Marks event listeners for generated registration. |
-| `RegisterStdServiceAttribute`     | Marks services for generated registration.        |
-| `RegisterConfigSectionAttribute`  | Marks config sections for generated registration. |
-| `RegisterStdServiceExtension`     | `RegisterStdService<,>` container extension.      |
-| `RegisterConfigSectionExtension`  | `RegisterConfigSection<>` container extension.    |
-| `ServiceRegistrationData`         | Ordered service registration record.              |
-| `ConfigRegistrationData`          | Config section registration record.               |
+| Type                             | Purpose                                           |
+|----------------------------------|---------------------------------------------------|
+| `ISquidStdService`               | Async start/stop lifecycle for managed services.  |
+| `RegisterEventListenerAttribute` | Marks event listeners for generated registration. |
+| `RegisterStdServiceAttribute`    | Marks services for generated registration.        |
+| `RegisterConfigSectionAttribute` | Marks config sections for generated registration. |
+| `RegisterStdServiceExtension`    | `RegisterStdService<,>` container extension.      |
+| `RegisterConfigSectionExtension` | `RegisterConfigSection<>` container extension.    |
+| `ServiceRegistrationData`        | Ordered service registration record.              |
+| `ConfigRegistrationData`         | Config section registration record.               |
 
 ## Related
 
-- Tutorial: [Source generators: registration](https://tgiachi.github.io/squid-std/tutorials/source-generators-registration.html)
+-
+Tutorial: [Source generators: registration](https://tgiachi.github.io/squid-std/tutorials/source-generators-registration.html)
 
 ## License
 

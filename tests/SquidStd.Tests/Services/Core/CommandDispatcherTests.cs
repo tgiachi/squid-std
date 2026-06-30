@@ -30,7 +30,7 @@ public class CommandDispatcherTests
     {
         using var dispatcher = new CommandDispatcher<Session>();
 
-        var result = await dispatcher.DispatchAsync(new PingCommand("x"), new Session());
+        var result = await dispatcher.DispatchAsync(new PingCommand("x"), new());
 
         Assert.False(result.Matched);
         Assert.Equal(0, result.HandlerCount);
@@ -45,7 +45,7 @@ public class CommandDispatcherTests
         dispatcher.RegisterHandler(new ThrowingHandler());
         dispatcher.RegisterHandler(healthy);
 
-        var result = await dispatcher.DispatchAsync(new PingCommand("go"), new Session());
+        var result = await dispatcher.DispatchAsync(new PingCommand("go"), new());
 
         Assert.True(result.Matched);
         Assert.Equal(2, result.HandlerCount);
@@ -61,7 +61,8 @@ public class CommandDispatcherTests
         using var dispatcher = new CommandDispatcher<Session>();
         using var cts = new CancellationTokenSource();
         await cts.CancelAsync();
-        dispatcher.Subscribe<PingCommand>((_, _, token) =>
+        dispatcher.Subscribe<PingCommand>(
+            (_, _, token) =>
             {
                 token.ThrowIfCancellationRequested();
 
@@ -69,9 +70,10 @@ public class CommandDispatcherTests
             }
         );
 
-        await Assert.ThrowsAsync<OperationCanceledException>(() => dispatcher.DispatchAsync(
+        await Assert.ThrowsAsync<OperationCanceledException>(
+            () => dispatcher.DispatchAsync(
                 new PingCommand("x"),
-                new Session(),
+                new(),
                 cts.Token
             )
         );
@@ -85,7 +87,7 @@ public class CommandDispatcherTests
         var token = dispatcher.RegisterHandler(handler);
 
         token.Dispose();
-        var result = await dispatcher.DispatchAsync(new PingCommand("x"), new Session());
+        var result = await dispatcher.DispatchAsync(new PingCommand("x"), new());
 
         Assert.False(result.Matched);
         Assert.Null(handler.LastText);
@@ -97,7 +99,8 @@ public class CommandDispatcherTests
         using var dispatcher = new CommandDispatcher<Session>();
         string? seen = null;
         Session? seenContext = null;
-        dispatcher.Subscribe<PingCommand>((command, context, _) =>
+        dispatcher.Subscribe<PingCommand>(
+            (command, context, _) =>
             {
                 seen = command.Text;
                 seenContext = context;
@@ -114,9 +117,7 @@ public class CommandDispatcherTests
         Assert.Same(session, seenContext);
     }
 
-    private sealed class Session
-    {
-    }
+    private sealed class Session { }
 
     private sealed class RecordingHandler : ICommandHandler<PingCommand, Session>
     {
@@ -136,9 +137,7 @@ public class CommandDispatcherTests
     private sealed class ThrowingHandler : ICommandHandler<PingCommand, Session>
     {
         public Task HandleAsync(PingCommand command, Session context, CancellationToken cancellationToken = default)
-        {
-            throw new InvalidOperationException("Synthetic failure.");
-        }
+            => throw new InvalidOperationException("Synthetic failure.");
     }
 
     private sealed record PingCommand(string Text) : ICommand;

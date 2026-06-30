@@ -3,7 +3,7 @@ using SquidStd.Core.Interfaces.Threading;
 namespace SquidStd.Services.Core.Services.Internal;
 
 /// <summary>
-///     Synchronization context that forwards asynchronous posts to a main-thread dispatcher.
+/// Synchronization context that forwards asynchronous posts to a main-thread dispatcher.
 /// </summary>
 internal sealed class MainThreadSynchronizationContext : SynchronizationContext
 {

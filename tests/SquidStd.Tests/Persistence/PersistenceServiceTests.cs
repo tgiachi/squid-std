@@ -18,7 +18,7 @@ public sealed class PersistenceServiceTests : IDisposable
         var config = new PersistenceConfig { SaveDirectory = _dir, AutosaveInterval = TimeSpan.FromHours(1) };
         var journal = new BinaryJournalService(Path.Combine(_dir, config.JournalFileName));
         var snapshot = new SnapshotService(_dir, config.SnapshotFileSuffix);
-        var service = new PersistenceService(registry, journal, snapshot, config, eventBus: null);
+        var service = new PersistenceService(registry, journal, snapshot, config, null);
 
         return (service, registry);
     }
@@ -29,7 +29,7 @@ public sealed class PersistenceServiceTests : IDisposable
         var (service, _) = Create();
         await service.InitializeAsync();
         var store = service.GetStore<Player, int>();
-        await store.UpsertAsync(new Player { Id = 1, Name = "Bob" });
+        await store.UpsertAsync(new() { Id = 1, Name = "Bob" });
         await service.SaveSnapshotAsync();
 
         var (reloaded, _) = Create();
@@ -45,7 +45,7 @@ public sealed class PersistenceServiceTests : IDisposable
     {
         var (service, _) = Create();
         await service.InitializeAsync();
-        await service.GetStore<Player, int>().UpsertAsync(new Player { Id = 7, Name = "Eve" });
+        await service.GetStore<Player, int>().UpsertAsync(new() { Id = 7, Name = "Eve" });
 
         var (reloaded, _) = Create();
         await reloaded.InitializeAsync(); // only journal exists, no snapshot
@@ -60,9 +60,9 @@ public sealed class PersistenceServiceTests : IDisposable
         var (service, _) = Create();
         await service.InitializeAsync();
         var store = service.GetStore<Player, int>();
-        await store.UpsertAsync(new Player { Id = 1, Name = "First" });
+        await store.UpsertAsync(new() { Id = 1, Name = "First" });
         await service.SaveSnapshotAsync();
-        await store.UpsertAsync(new Player { Id = 2, Name = "Second" });
+        await store.UpsertAsync(new() { Id = 2, Name = "Second" });
 
         var (reloaded, _) = Create();
         await reloaded.InitializeAsync();
@@ -76,7 +76,7 @@ public sealed class PersistenceServiceTests : IDisposable
     {
         var (service, _) = Create();
         await service.InitializeAsync();
-        await service.GetStore<Player, int>().UpsertAsync(new Player { Id = 1 });
+        await service.GetStore<Player, int>().UpsertAsync(new() { Id = 1 });
         await service.SaveSnapshotAsync();
 
         var journal = new BinaryJournalService(Path.Combine(_dir, "world.journal.bin"));
@@ -95,11 +95,11 @@ public sealed class PersistenceServiceTests : IDisposable
         // (untrimmed) journal — the exact state a partial snapshot save leaves behind.
         var journal = new BinaryJournalService(Path.Combine(_dir, config.JournalFileName));
         var faulty = new FailOnSecondSaveSnapshotService(new SnapshotService(_dir, config.SnapshotFileSuffix));
-        var service = new PersistenceService(BuildRegistry(serializer), journal, faulty, config, eventBus: null);
+        var service = new PersistenceService(BuildRegistry(serializer), journal, faulty, config);
 
         await service.InitializeAsync();
-        await service.GetStore<Player, int>().UpsertAsync(new Player { Id = 1, Name = "First" });
-        await service.GetStore<Item, int>().UpsertAsync(new Item { Id = 1, Name = "Sword" });
+        await service.GetStore<Player, int>().UpsertAsync(new() { Id = 1, Name = "First" });
+        await service.GetStore<Item, int>().UpsertAsync(new() { Id = 1, Name = "Sword" });
 
         await Assert.ThrowsAnyAsync<Exception>(async () => await service.SaveSnapshotAsync());
         await journal.DisposeAsync();
@@ -108,7 +108,10 @@ public sealed class PersistenceServiceTests : IDisposable
         // watermark would skip the journal entry for whichever type's snapshot did persist, losing it.
         var reloadJournal = new BinaryJournalService(Path.Combine(_dir, config.JournalFileName));
         var reloaded = new PersistenceService(
-            BuildRegistry(serializer), reloadJournal, new SnapshotService(_dir, config.SnapshotFileSuffix), config, eventBus: null
+            BuildRegistry(serializer),
+            reloadJournal,
+            new SnapshotService(_dir, config.SnapshotFileSuffix),
+            config
         );
 
         await reloaded.InitializeAsync();
@@ -150,8 +153,10 @@ public sealed class PersistenceServiceTests : IDisposable
         public string Name { get; set; } = string.Empty;
     }
 
-    /// <summary>Delegates to a real snapshot service but throws on the second bucket save, simulating a
-    /// snapshot run that persists one type's bucket and then fails before the next.</summary>
+    /// <summary>
+    /// Delegates to a real snapshot service but throws on the second bucket save, simulating a
+    /// snapshot run that persists one type's bucket and then fails before the next.
+    /// </summary>
     private sealed class FailOnSecondSaveSnapshotService : ISnapshotService
     {
         private readonly ISnapshotService _inner;
@@ -163,7 +168,9 @@ public sealed class PersistenceServiceTests : IDisposable
         }
 
         public ValueTask SaveBucketAsync(
-            EntitySnapshotBucket bucket, long lastSequenceId, CancellationToken cancellationToken = default
+            EntitySnapshotBucket bucket,
+            long lastSequenceId,
+            CancellationToken cancellationToken = default
         )
         {
             if (++_saveCount >= 2)
@@ -175,15 +182,13 @@ public sealed class PersistenceServiceTests : IDisposable
         }
 
         public ValueTask<PersistedBucket?> LoadBucketAsync(
-            string typeName, ushort typeId, CancellationToken cancellationToken = default
+            string typeName,
+            ushort typeId,
+            CancellationToken cancellationToken = default
         )
-        {
-            return _inner.LoadBucketAsync(typeName, typeId, cancellationToken);
-        }
+            => _inner.LoadBucketAsync(typeName, typeId, cancellationToken);
 
         public ValueTask DeleteBucketAsync(string typeName, ushort typeId, CancellationToken cancellationToken = default)
-        {
-            return _inner.DeleteBucketAsync(typeName, typeId, cancellationToken);
-        }
+            => _inner.DeleteBucketAsync(typeName, typeId, cancellationToken);
     }
 }

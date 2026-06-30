@@ -3,7 +3,7 @@ using DryIoc;
 namespace SquidStd.Abstractions.Extensions.Container;
 
 /// <summary>
-///     Extension methods for registering typed lists in the dependency injection container.
+/// Extension methods for registering typed lists in the dependency injection container.
 /// </summary>
 public static class AddTypedListMethodExtension
 {
@@ -11,8 +11,8 @@ public static class AddTypedListMethodExtension
     extension(IContainer container)
     {
         /// <summary>
-        ///     Adds an entity to a typed list in the DryIoc container.
-        ///     If the list doesn't exist, it creates and registers a new one.
+        /// Adds an entity to a typed list in the DryIoc container.
+        /// If the list doesn't exist, it creates and registers a new one.
         /// </summary>
         /// <typeparam name="TListEntity">The type of entities in the list.</typeparam>
         /// <param name="entity">The entity to add to the list.</param>

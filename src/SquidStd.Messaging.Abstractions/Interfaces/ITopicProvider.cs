@@ -3,8 +3,8 @@ using SquidStd.Abstractions.Interfaces.Services;
 namespace SquidStd.Messaging.Abstractions.Interfaces;
 
 /// <summary>
-///     Byte-level publish/subscribe transport: every current subscriber of a topic receives every message
-///     (transient, at-most-once fan-out).
+/// Byte-level publish/subscribe transport: every current subscriber of a topic receives every message
+/// (transient, at-most-once fan-out).
 /// </summary>
 public interface ITopicProvider : ISquidStdService, IAsyncDisposable
 {

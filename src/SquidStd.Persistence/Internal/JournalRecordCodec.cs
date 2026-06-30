@@ -36,7 +36,7 @@ internal static class JournalRecordCodec
         var payloadLength = BinaryPrimitives.ReadInt32LittleEndian(bytes[19..]);
         var payload = bytes.Slice(FixedHeader, payloadLength).ToArray();
 
-        return new JournalEntry
+        return new()
         {
             SequenceId = sequenceId,
             TimestampUnixMilliseconds = timestamp,
