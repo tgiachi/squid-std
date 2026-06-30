@@ -24,6 +24,22 @@ public class RegisterTuiExtensionsTests
         }
     }
 
+    // Real views derive from Window (IDisposable); this fake reproduces that shape.
+    private sealed class DisposableView : ITuiView, IDisposable
+    {
+        public void Bind(object viewModel)
+        {
+        }
+
+        public void Initialize()
+        {
+        }
+
+        public void Dispose()
+        {
+        }
+    }
+
     [Fact]
     public void RegisterTui_RegistersNavigatorAndRegistry()
     {
@@ -49,5 +65,17 @@ public class RegisterTuiExtensionsTests
         Assert.Equal(typeof(HomeView), registry.ViewTypeFor(typeof(HomeViewModel)));
         Assert.NotNull(container.Resolve<HomeViewModel>());
         Assert.NotNull(container.Resolve<HomeView>());
+    }
+
+    [Fact]
+    public void RegisterView_AllowsDisposableTransientView()
+    {
+        var container = new Container();
+        container.RegisterTui();
+
+        // Real views are IDisposable (Window); DryIoc throws on disposable transients unless allowed.
+        container.RegisterView<DisposableView, HomeViewModel>();
+
+        Assert.NotNull(container.Resolve<DisposableView>());
     }
 }

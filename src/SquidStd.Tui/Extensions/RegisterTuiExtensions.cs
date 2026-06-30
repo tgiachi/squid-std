@@ -28,7 +28,10 @@ public static class RegisterTuiExtensions
             where TView : class, ITuiView
             where TViewModel : TuiViewModel
         {
-            container.Register<TView>(Reuse.Transient);
+            // Views derive from Window (IDisposable). DryIoc refuses disposable transients by default;
+            // allow it without tracking — the view host disposes each view on Remove, so the container
+            // must not also dispose it (which would double-dispose).
+            container.Register<TView>(Reuse.Transient, setup: Setup.With(allowDisposableTransient: true));
             container.Register<TViewModel>(Reuse.Transient);
             container.Resolve<TuiViewRegistry>().Map(typeof(TViewModel), typeof(TView));
 
