@@ -23,6 +23,13 @@ dotnet add package SquidStd.Persistence.Abstractions
 | `JournalEntityOperationType`                                                      | `Upsert` / `Remove` journal operation discriminator.         |
 | `SnapshotSaveStartedEvent` / `SnapshotSaveCompletedEvent`                         | Snapshot lifecycle events (`IEvent`).                        |
 
+## Related
+
+- Article: [Persistence abstractions](https://tgiachi.github.io/squid-std/articles/persistence-abstractions.html)
+- Tutorial: [Persistence](https://tgiachi.github.io/squid-std/tutorials/persistence.html)
+- [`SquidStd.Persistence`](https://tgiachi.github.io/squid-std/articles/persistence.html) - the binary persistence engine implementing these contracts
+- [`SquidStd.Persistence.MessagePack`](https://tgiachi.github.io/squid-std/articles/persistence-messagepack.html) - MessagePack entity descriptors for the engine
+
 ## License
 
 MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).
