@@ -37,4 +37,26 @@ public class SquidStdBootstrapLoggingTests
 
         Assert.Same(first, second);
     }
+
+    [Fact]
+    public async Task ConfigureLogging_ThenStartAsync_DoesNotRebuildLogger()
+    {
+        using var temp = new TempDirectory();
+        await using var bootstrap =
+            SquidStdBootstrap.Create(new() { ConfigName = "app", RootDirectory = temp.Path });
+
+        bootstrap.ConfigureLogging();
+        var eager = bootstrap.Container.Resolve<SerilogILogger>();
+
+        await bootstrap.StartAsync();
+        try
+        {
+            var afterStart = bootstrap.Container.Resolve<SerilogILogger>();
+            Assert.Same(eager, afterStart);
+        }
+        finally
+        {
+            await bootstrap.StopAsync();
+        }
+    }
 }
