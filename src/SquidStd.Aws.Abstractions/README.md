@@ -33,6 +33,13 @@ client at that endpoint instead of the regional AWS endpoint.
 |------------------|-----------------------------------------------------------------------------------|
 | `AwsConfigEntry` | Region, optional credentials and an optional endpoint override (e.g. LocalStack). |
 
+## Related
+
+- Article: [AWS abstractions](https://tgiachi.github.io/squid-std/articles/aws-abstractions.html)
+- [`SquidStd.Secrets.Aws`](https://tgiachi.github.io/squid-std/articles/secrets-aws.html) - AWS Secrets Manager provider using this config
+- [`SquidStd.Messaging.Sqs`](https://tgiachi.github.io/squid-std/articles/messaging-sqs.html) - SQS messaging provider using this config
+- [`SquidStd.Storage.S3`](https://tgiachi.github.io/squid-std/articles/storage-s3.html) - S3 storage provider using this config
+
 ## License
 
 MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

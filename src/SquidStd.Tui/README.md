@@ -79,6 +79,11 @@ public sealed class CounterView : TuiComposedView<CounterViewModel>
 | `TuiApplicationHost`                  | Boots the Terminal.Gui loop with a root ViewModel.                            |
 | `RegisterTui()` / `RegisterView<,>()` | DryIoc registration.                                                          |
 
+## Related
+
+- Article: [Terminal UI](https://tgiachi.github.io/squid-std/articles/tui.html)
+- Tutorial: [Terminal UI (MVVM)](https://tgiachi.github.io/squid-std/tutorials/tui.html)
+
 ## License
 
 MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

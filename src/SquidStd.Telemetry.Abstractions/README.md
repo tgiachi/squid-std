@@ -31,6 +31,12 @@ captures every `SquidStd.*` source automatically.
 | `OtlpProtocolType` | OTLP transport: gRPC or HTTP.                                              |
 | `SquidStdActivity` | Shared `ActivitySource` and the `SquidStd.*` source naming convention.     |
 
+## Related
+
+- Article: [Telemetry abstractions](https://tgiachi.github.io/squid-std/articles/telemetry-abstractions.html)
+- Guide: [Observability](https://tgiachi.github.io/squid-std/articles/guides/observability.html)
+- [`SquidStd.Telemetry.OpenTelemetry`](https://tgiachi.github.io/squid-std/articles/telemetry-opentelemetry.html) - OTLP tracing/metrics provider consuming these options
+
 ## License
 
 MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

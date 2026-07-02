@@ -45,6 +45,12 @@ builder.Services.AddSquidStdTelemetry(new TelemetryOptions { ServiceName = "orde
 | `TelemetryService`                         | Configures tracing/metrics providers and exporters from `TelemetryOptions`. |
 | `MetricsSnapshotBridge`                    | Exports the existing SquidStd metrics snapshot to OTel instruments.         |
 
+## Related
+
+- Article: [Telemetry OpenTelemetry](https://tgiachi.github.io/squid-std/articles/telemetry-opentelemetry.html)
+- Guide: [Observability](https://tgiachi.github.io/squid-std/articles/guides/observability.html)
+- [`SquidStd.Telemetry.Abstractions`](https://tgiachi.github.io/squid-std/articles/telemetry-abstractions.html) - `TelemetryOptions` and the `SquidStd.*` ActivitySource convention
+
 ## License
 
 MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).
