@@ -1,9 +1,11 @@
 using System.Collections.Concurrent;
 using Scriban;
+using Scriban.Runtime;
 using Scriban.Syntax;
 using SquidStd.Abstractions.Interfaces.Services;
 using SquidStd.Core.Directories;
 using SquidStd.Templating.Interfaces;
+using SquidStd.Templating.Internal;
 
 namespace SquidStd.Templating.Services;
 
@@ -17,10 +19,13 @@ public sealed class ScribanTemplateRenderer : ITemplateRenderer, ISquidStdServic
 
     private readonly DirectoriesConfig _directories;
     private readonly ConcurrentDictionary<string, Template> _named = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, string> _sources = new(StringComparer.Ordinal);
+    private readonly NamedTemplateLoader _loader;
 
     public ScribanTemplateRenderer(DirectoriesConfig directories)
     {
         _directories = directories;
+        _loader = new NamedTemplateLoader(_sources);
     }
 
     /// <inheritdoc />
@@ -54,6 +59,7 @@ public sealed class ScribanTemplateRenderer : ITemplateRenderer, ISquidStdServic
         ArgumentException.ThrowIfNullOrWhiteSpace(template);
 
         _named[name] = Parse(template, name);
+        _sources[name] = template;
     }
 
     /// <inheritdoc />
@@ -93,11 +99,21 @@ public sealed class ScribanTemplateRenderer : ITemplateRenderer, ISquidStdServic
         return template;
     }
 
-    private static async ValueTask<string> RenderCompiledAsync(Template template, object? model, string name)
+    private async ValueTask<string> RenderCompiledAsync(Template template, object? model, string name)
     {
+        var context = new TemplateContext { TemplateLoader = _loader };
+        var scriptObject = new ScriptObject();
+
+        if (model is not null)
+        {
+            scriptObject.Import(model);
+        }
+
+        context.PushGlobal(scriptObject);
+
         try
         {
-            return await template.RenderAsync(model);
+            return await template.RenderAsync(context);
         }
         catch (ScriptRuntimeException ex)
         {
