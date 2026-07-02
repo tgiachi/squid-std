@@ -69,7 +69,9 @@ public class SquidStdSerilogExtensionsTests
         {
             await app.StartAsync();
             var logger = app.Services.GetRequiredService<ILogger<SquidStdSerilogExtensionsTests>>();
+#pragma warning disable CA1848, CA1873 // LoggerMessage delegates are overkill for a one-shot test log.
             logger.LogInformation("emitting {Marker}", marker);
+#pragma warning restore CA1848, CA1873
             await app.StopAsync();
         }
 
