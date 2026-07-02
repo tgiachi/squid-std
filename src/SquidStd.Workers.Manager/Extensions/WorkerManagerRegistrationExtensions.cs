@@ -2,6 +2,7 @@ using DryIoc;
 using SquidStd.Abstractions.Extensions.Config;
 using SquidStd.Abstractions.Extensions.Services;
 using SquidStd.Core.Data.Timing;
+using SquidStd.Core.Interfaces.Timing;
 using SquidStd.Services.Core.Services.Scheduling;
 using SquidStd.Workers.Manager.Data.Config;
 using SquidStd.Workers.Manager.Interfaces;
@@ -33,10 +34,11 @@ public static class WorkerManagerRegistrationExtensions
             container.RegisterStdService<HeartbeatCollectorService, HeartbeatCollectorService>(100);
             container.RegisterStdService<WorkerOfflineSweepService, WorkerOfflineSweepService>(110);
 
-            if (!container.IsRegistered<TimerWheelPumpService>())
+            if (!container.IsRegistered<ITimerWheelDriver>())
             {
                 container.RegisterConfigSection("timerWheelPump", static () => new TimerWheelPumpConfig(), -90);
                 container.RegisterStdService<TimerWheelPumpService, TimerWheelPumpService>(-1);
+                container.RegisterMapping<ITimerWheelDriver, TimerWheelPumpService>();
             }
 
             return container;
