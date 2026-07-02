@@ -1,4 +1,5 @@
 using DryIoc;
+using SquidStd.Abstractions.Extensions.Config;
 using SquidStd.Storage.Abstractions.Data.Config;
 using SquidStd.Storage.Abstractions.Interfaces;
 using SquidStd.Storage.Services;
@@ -17,7 +18,16 @@ public static class StorageRegistrationExtensions
         {
             ArgumentNullException.ThrowIfNull(container);
 
-            container.RegisterInstance(config ?? new StorageConfig());
+            if (config is not null)
+            {
+                container.RegisterInstance(config, IfAlreadyRegistered.Replace);
+            }
+            else
+            {
+                container.RegisterConfigSection("storage", static () => new StorageConfig(), -70);
+                container.RegisterInstance(new StorageConfig(), IfAlreadyRegistered.Keep);
+            }
+
             container.Register<IStorageService, FileStorageService>(Reuse.Singleton);
             container.Register<IObjectStorageService, YamlObjectStorageService>(Reuse.Singleton);
 

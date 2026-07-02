@@ -2,10 +2,11 @@ using SquidStd.Search.Abstractions.Attributes;
 using SquidStd.Search.Abstractions.Interfaces;
 using SquidStd.Search.Elasticsearch.Extensions;
 using SquidStd.Search.Elasticsearch.Linq;
+using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Services.Core.Services.Bootstrap;
 
 var bootstrap = SquidStdBootstrap.Create(
-    new()
+    new SquidStdOptions()
     {
         ConfigName = "squidstd",
         RootDirectory = AppContext.BaseDirectory

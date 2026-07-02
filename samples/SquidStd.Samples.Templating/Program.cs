@@ -1,9 +1,10 @@
+using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Services.Core.Services.Bootstrap;
 using SquidStd.Templating.Extensions;
 using SquidStd.Templating.Interfaces;
 
 var bootstrap = SquidStdBootstrap.Create(
-    new()
+    new SquidStdOptions()
     {
         ConfigName = "squidstd",
         RootDirectory = AppContext.BaseDirectory

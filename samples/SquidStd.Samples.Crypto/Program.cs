@@ -2,10 +2,11 @@ using System.Text;
 using SquidStd.Crypto.Pgp.Extensions;
 using SquidStd.Crypto.Pgp.Interfaces;
 using SquidStd.Crypto.Pgp.Services;
+using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Services.Core.Services.Bootstrap;
 
 var bootstrap = SquidStdBootstrap.Create(
-    new()
+    new SquidStdOptions()
     {
         ConfigName = "squidstd",
         RootDirectory = AppContext.BaseDirectory

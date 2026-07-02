@@ -1,5 +1,6 @@
 using SquidStd.Generators.Workers;
 using SquidStd.Messaging.Extensions;
+using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Services.Core.Services.Bootstrap;
 using SquidStd.Workers.Abstractions.Data;
 using SquidStd.Workers.Attributes;
@@ -9,7 +10,7 @@ using SquidStd.Workers.Manager.Extensions;
 using SquidStd.Workers.Manager.Interfaces;
 
 var bootstrap = SquidStdBootstrap.Create(
-    new()
+    new SquidStdOptions()
     {
         ConfigName = "squidstd",
         RootDirectory = AppContext.BaseDirectory
