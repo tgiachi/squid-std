@@ -10,6 +10,8 @@ internal sealed class FakeSquidStdBootstrap : ISquidStdBootstrap
 
     public int StopCount { get; private set; }
 
+    public int ConfigureLoggingCount { get; private set; }
+
     public SquidStdOptions Options { get; } = new();
 
     public IContainer Container { get; } = new Container();
@@ -36,6 +38,9 @@ internal sealed class FakeSquidStdBootstrap : ISquidStdBootstrap
 
     public TService Resolve<TService>()
         => Container.Resolve<TService>();
+
+    public void ConfigureLogging()
+        => ConfigureLoggingCount++;
 
     public async Task RunAsync(CancellationToken cancellationToken = default)
         => await StartAsync(cancellationToken);
