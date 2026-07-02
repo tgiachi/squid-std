@@ -61,6 +61,7 @@ await seeded.DispatchAsync(command, connection);   // factory maps connection ->
 | `TimerWheelService`                 | Timer-wheel scheduling.                                                   |
 | `MainThreadDispatcherService`       | Main-thread work dispatch.                                                |
 | `MetricsCollectionService`          | Metric sample aggregation.                                                |
+| `EventLoopService`                  | Frame-driven loop: drains the dispatcher and advances the timer wheel.    |
 
 ## Related
 

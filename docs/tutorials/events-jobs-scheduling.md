@@ -51,6 +51,11 @@ You'll see `received: hello`, `job ran on a worker thread`, and—if you let it 
 The event bus dispatches to sync and async listeners; the job system is a fixed-size worker-thread pool; the cron
 scheduler is driven by the timer wheel (registered by `RegisterSchedulerServices`).
 
+The timer wheel is advanced by a *driver*. `RegisterSchedulerServices()` uses `TimerWheelPumpService`, a
+periodic background pump. Apps that need a frame-rate loop can instead call `RegisterEventLoop()`, which advances
+the wheel and drains the main-thread dispatcher on a dedicated thread — see
+[Scheduler → Event loop](../articles/scheduler.md#event-loop). The two are mutually exclusive: register exactly one.
+
 ## See also
 
 - [SquidStd.Services.Core reference](../articles/services-core.md)
