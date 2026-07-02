@@ -81,6 +81,75 @@ public class ScribanTemplateRendererTests
         Assert.Equal("Welcome squid", result);
     }
 
+    [Fact]
+    public async Task Include_ResolvesRegisteredTemplate()
+    {
+        using var temp = new TempDirectory();
+        var renderer = NewRenderer(temp.Path);
+        renderer.Register("partials/header", "HEADER");
+        renderer.Register("page", "{{ include 'partials/header' }} BODY");
+
+        var result = await renderer.RenderByNameAsync("page", null);
+
+        Assert.Equal("HEADER BODY", result);
+    }
+
+    [Fact]
+    public async Task Include_FromInlineTemplate_Works()
+    {
+        using var temp = new TempDirectory();
+        var renderer = NewRenderer(temp.Path);
+        renderer.Register("partials/header", "HEADER");
+
+        var result = await renderer.RenderAsync("{{ include 'partials/header' }}!", null);
+
+        Assert.Equal("HEADER!", result);
+    }
+
+    [Fact]
+    public async Task Include_WithModel_BindsModel()
+    {
+        using var temp = new TempDirectory();
+        var renderer = NewRenderer(temp.Path);
+        renderer.Register("partials/hello", "Hi {{ user.name }}");
+        renderer.Register("page", "{{ include 'partials/hello' }}");
+
+        var result = await renderer.RenderByNameAsync("page", new { User = new { Name = "squid" } });
+
+        Assert.Equal("Hi squid", result);
+    }
+
+    [Fact]
+    public async Task Include_MissingTemplate_Throws()
+    {
+        using var temp = new TempDirectory();
+        var renderer = NewRenderer(temp.Path);
+
+        await Assert.ThrowsAsync<TemplateException>(
+            async () => await renderer.RenderAsync("{{ include 'nope' }}", null)
+        );
+    }
+
+    [Fact]
+    public async Task Include_AutoLoadedFromDisk_Works()
+    {
+        using var temp = new TempDirectory();
+        var templatesDir = Path.Combine(temp.Path, "templates");
+        Directory.CreateDirectory(Path.Combine(templatesDir, "partials"));
+        await File.WriteAllTextAsync(Path.Combine(templatesDir, "partials", "header.tmpl"), "HEADER");
+        await File.WriteAllTextAsync(
+            Path.Combine(templatesDir, "page.tmpl"),
+            "{{ include 'partials/header' }} BODY"
+        );
+
+        var renderer = NewRenderer(temp.Path);
+        await renderer.StartAsync();
+
+        var result = await renderer.RenderByNameAsync("page", null);
+
+        Assert.Equal("HEADER BODY", result);
+    }
+
     private static ScribanTemplateRenderer NewRenderer(string root)
         => new(new(root, []));
 }
