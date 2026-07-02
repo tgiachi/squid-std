@@ -2,6 +2,7 @@ using DryIoc;
 using SquidStd.Abstractions.Extensions.Config;
 using SquidStd.Abstractions.Extensions.Services;
 using SquidStd.Core.Data.Timing;
+using SquidStd.Core.Interfaces.Timing;
 using SquidStd.Mail.Abstractions.Data.Config;
 using SquidStd.Mail.Abstractions.Interfaces;
 using SquidStd.Mail.Abstractions.Types.Mail;
@@ -43,10 +44,11 @@ public static class MailRegistrationExtensions
 
             container.RegisterStdService<MailPollingService, MailPollingService>(100);
 
-            if (!container.IsRegistered<TimerWheelPumpService>())
+            if (!container.IsRegistered<ITimerWheelDriver>())
             {
                 container.RegisterConfigSection("timerWheelPump", static () => new TimerWheelPumpConfig(), -90);
                 container.RegisterStdService<TimerWheelPumpService, TimerWheelPumpService>(-1);
+                container.RegisterMapping<ITimerWheelDriver, TimerWheelPumpService>();
             }
 
             return container;
