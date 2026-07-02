@@ -2,10 +2,12 @@ using System.Text;
 using SquidStd.Crypto.Pgp.Extensions;
 using SquidStd.Crypto.Pgp.Interfaces;
 using SquidStd.Crypto.Pgp.Services;
+using SquidStd.Core.Data.Bootstrap;
+using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 
 var bootstrap = SquidStdBootstrap.Create(
-    new()
+    new SquidStdOptions()
     {
         ConfigName = "squidstd",
         RootDirectory = AppContext.BaseDirectory
@@ -17,7 +19,7 @@ var keyStoreDirectory = Path.Combine(AppContext.BaseDirectory, "pgp-keys");
 #region step-1
 
 // Register the PGP keyring, service, and a file-backed key store (armored .asc files).
-bootstrap.ConfigureServices(container => container.RegisterPgp(_ => new FilePgpKeyStore(keyStoreDirectory)));
+bootstrap.ConfigureServices(container => container.RegisterCoreServices().RegisterPgp(_ => new FilePgpKeyStore(keyStoreDirectory)));
 
 #endregion
 

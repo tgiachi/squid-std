@@ -9,9 +9,9 @@ integration runs.
 
 1. **Build a fixture** that creates a `SquidStdBootstrap` and starts it once per
    test class.
-2. **Opt into in-memory providers** in `ConfigureServices`: `AddInMemoryCache`,
-   `AddInMemoryMessaging`, and an in-memory VFS via `RegisterVfs` with
-   `InMemoryFileSystem`.
+2. **Opt into the core services and in-memory providers** in `ConfigureServices`:
+   `RegisterCoreServices`, then `AddInMemoryCache`, `AddInMemoryMessaging`, and an
+   in-memory VFS via `RegisterVfs` with `InMemoryFileSystem`.
 3. **Resolve abstractions** (`ICacheService`, the event bus, `IVirtualFileSystem`, …)
    from the container in your tests.
 4. **Swap to real backends** in a separate integration suite by replacing the
@@ -28,6 +28,7 @@ public sealed class TestHostFixture : IAsyncDisposable
             new SquidStdOptions { ConfigName = "squidstd", RootDirectory = AppContext.BaseDirectory });
 
         Bootstrap.ConfigureServices(container => container
+            .RegisterCoreServices()
             .AddInMemoryCache()
             .AddInMemoryMessaging()
             .RegisterVfs(_ => new InMemoryFileSystem()));

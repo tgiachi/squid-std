@@ -1,0 +1,21 @@
+logger:
+  MinimumLevel: Information
+  EnableConsole: true
+  EnableFile: false
+  LogDirectory: logs
+  FileName: squidstd-.log
+  RollingInterval: Day
+jobs:
+  WorkerThreadCount: 0
+  ShutdownTimeoutSeconds: 1
+timerWheel:
+  TickDuration: 00:00:00.0080000
+  WheelSize: 512
+metrics:
+  Enabled: true
+  IntervalMilliseconds: 1000
+  LogEnabled: true
+  LogLevel: Trace
+secrets:
+  RootDirectory: secrets
+  KeyEnvironmentVariable: SQUIDSTD_SECRETS_KEY

@@ -14,20 +14,42 @@ var bootstrap = SquidStdBootstrap.Create(new SquidStdOptions
 });
 ```
 
-`ConfigName` selects the configuration file and `RootDirectory` anchors relative paths.
+`ConfigName` selects the configuration file and `RootDirectory` anchors relative paths. Creating the bootstrap registers the configuration core - `DirectoriesConfig`, the `logger` config section and the config manager. Everything else is registered explicitly in `ConfigureServices`.
 
 ## ConfigureServices
 
-Register your services into the DryIoc container:
+Register your services into the DryIoc container. Call `RegisterCoreServices()` first to bring up the core services, then add the modules you need:
 
 ```csharp
 bootstrap.ConfigureServices(container =>
 {
-    container.AddSomething();
+    return container
+        .RegisterCoreServices()
+        .AddSomething();
 });
 ```
 
 See [dependency injection](dependency-injection.md) for the container and the `AddXxx` / `RegisterXxx` pattern.
+
+## Migrating to 0.15: explicit core services
+
+Up to 0.14, `SquidStdBootstrap.Create` registered every core service on creation. From 0.15 the bootstrap registers only the configuration core - `DirectoriesConfig`, the `logger` config section and the config manager. The remaining core services (JSON serializer, event bus, job system, main-thread dispatcher, timer wheel, metrics collection, secrets) are opted into with the parameterless `RegisterCoreServices()`:
+
+```csharp
+var bootstrap = SquidStdBootstrap.Create(o => o.ConfigName = "myapp");
+bootstrap.ConfigureServices(c => c.RegisterCoreServices());
+await bootstrap.StartAsync();
+```
+
+If you only need a subset, pick individual services with the granular methods instead - `RegisterEventBusService()`, `RegisterJobSystemService()`, `RegisterTimerWheelService()`, `RegisterMainThreadDispatcherService()`, `RegisterMetricsCollectionService()`, `RegisterSecretServices()`, `RegisterDataSerializer()`.
+
+The `RegisterCoreServices(configName, configDirectory)` overload is unchanged: it registers the configuration core plus all core services, for standalone containers that do not use a bootstrap.
+
+In ASP.NET Core, pass the registration through the container callback:
+
+```csharp
+builder.UseSquidStd(options => options.ConfigName = "myapp", c => c.RegisterCoreServices());
+```
 
 ## Start and stop over ISquidStdService
 

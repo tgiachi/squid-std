@@ -6,6 +6,7 @@ using SquidStd.Abstractions.Interfaces.Services;
 using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Interfaces.Bootstrap;
 using SquidStd.Core.Interfaces.Config;
+using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 using SquidStd.Tests.Support;
 
@@ -19,7 +20,7 @@ public class SquidStdBootstrapTests
     {
         using var temp = new TempDirectory();
         await using var bootstrap =
-            SquidStdBootstrap.Create(new() { ConfigName = "app", RootDirectory = temp.Path });
+            SquidStdBootstrap.Create(new SquidStdOptions { ConfigName = "app", RootDirectory = temp.Path });
 
         var resolved = bootstrap.Resolve<ISquidStdBootstrap>();
         var configManager = bootstrap.Resolve<IConfigManagerService>();
@@ -80,7 +81,7 @@ public class SquidStdBootstrapTests
         using var cancellation = new CancellationTokenSource();
         var state = new RunTrackedState();
         await using var bootstrap =
-            SquidStdBootstrap.Create(new() { ConfigName = "app", RootDirectory = temp.Path });
+            SquidStdBootstrap.Create(new SquidStdOptions { ConfigName = "app", RootDirectory = temp.Path });
 
         bootstrap.ConfigureService(
             container =>
@@ -126,7 +127,9 @@ public class SquidStdBootstrapTests
             """
         );
         await using var bootstrap =
-            SquidStdBootstrap.Create(new() { ConfigName = "app", RootDirectory = temp.Path });
+            SquidStdBootstrap.Create(new SquidStdOptions { ConfigName = "app", RootDirectory = temp.Path });
+
+        bootstrap.ConfigureServices(c => c.RegisterCoreServices());
 
         await bootstrap.StartAsync(CancellationToken.None);
         await bootstrap.StopAsync(CancellationToken.None);
@@ -152,7 +155,7 @@ public class SquidStdBootstrapTests
         );
         var events = new List<string>();
         await using var bootstrap =
-            SquidStdBootstrap.Create(new() { ConfigName = "app", RootDirectory = temp.Path });
+            SquidStdBootstrap.Create(new SquidStdOptions { ConfigName = "app", RootDirectory = temp.Path });
 
         bootstrap.ConfigureServices(
             container =>
@@ -183,7 +186,7 @@ public class SquidStdBootstrapTests
         using var temp = new TempDirectory();
         var events = new List<string>();
         await using var bootstrap =
-            SquidStdBootstrap.Create(new() { ConfigName = "app", RootDirectory = temp.Path });
+            SquidStdBootstrap.Create(new SquidStdOptions { ConfigName = "app", RootDirectory = temp.Path });
 
         bootstrap.ConfigureServices(
             container =>

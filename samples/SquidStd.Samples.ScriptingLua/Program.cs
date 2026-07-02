@@ -6,10 +6,12 @@ using SquidStd.Scripting.Lua.Attributes.Scripts;
 using SquidStd.Scripting.Lua.Data.Config;
 using SquidStd.Scripting.Lua.Interfaces.Scripts;
 using SquidStd.Scripting.Lua.Services;
+using SquidStd.Core.Data.Bootstrap;
+using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 
 var bootstrap = SquidStdBootstrap.Create(
-    new()
+    new SquidStdOptions()
     {
         ConfigName = "squidstd",
         RootDirectory = AppContext.BaseDirectory
@@ -24,6 +26,8 @@ Directory.CreateDirectory(scriptsDirectory);
 bootstrap.ConfigureServices(
     container =>
     {
+        container.RegisterCoreServices();
+
         var engineConfig = new LuaEngineConfig(
             AppContext.BaseDirectory,
             scriptsDirectory,
