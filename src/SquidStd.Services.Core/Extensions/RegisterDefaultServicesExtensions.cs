@@ -131,8 +131,8 @@ public static class RegisterDefaultServicesExtensions
 
         /// <summary>
         /// Registers the recursive file watcher service as a singleton resolving the event bus.
-        /// Not part of <see cref="RegisterCoreServices()" />: opt in, then call
-        /// <see cref="Core.Interfaces.Files.IFileWatcherService.Watch(string)" /> for the directories to watch.
+        /// Not part of <c>RegisterCoreServices</c>: opt in, then call
+        /// <see cref="IFileWatcherService.Watch(string)" /> for the directories to watch.
         /// </summary>
         /// <param name="debounceDelay">Optional debounce window; defaults to 300ms when null.</param>
         /// <returns>The same container for chaining.</returns>
