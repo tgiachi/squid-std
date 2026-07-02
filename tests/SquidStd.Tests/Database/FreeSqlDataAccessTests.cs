@@ -1,3 +1,4 @@
+using SquidStd.Core.Directories;
 using SquidStd.Database.Abstractions.Data.Entities;
 using SquidStd.Database.Data;
 using SquidStd.Database.Services;
@@ -33,7 +34,8 @@ public class FreeSqlDataAccessTests : IAsyncLifetime
             {
                 ConnectionString = $"sqlite://{_dbPath}",
                 AutoMigrate = true
-            }
+            },
+            new DirectoriesConfig(Path.GetTempPath(), [])
         );
         await _service.StartAsync();
     }

@@ -1,4 +1,5 @@
 using System.Text;
+using SquidStd.Core.Directories;
 using SquidStd.Database.Abstractions.Data.Database;
 using SquidStd.Database.Data;
 using SquidStd.Database.Services;
@@ -21,7 +22,8 @@ public sealed class DatabaseFileSystemTests : IAsyncLifetime
             {
                 ConnectionString = $"sqlite://{_dbPath}",
                 AutoMigrate = true
-            }
+            },
+            new DirectoriesConfig(Path.GetTempPath(), [])
         );
         await _service.StartAsync();
         _fs = new DatabaseFileSystem(NewAccess());

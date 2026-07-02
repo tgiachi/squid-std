@@ -2,6 +2,7 @@ using FreeSql;
 using Serilog;
 using SquidStd.Database.Abstractions.Data.Database;
 using SquidStd.Database.Abstractions.Types.Data;
+using SquidStd.Core.Directories;
 using SquidStd.Database.Connection;
 using SquidStd.Database.Interfaces.Services;
 
@@ -15,6 +16,7 @@ public sealed class DatabaseService : IDatabaseService
     private static readonly ILogger Logger = Log.ForContext<DatabaseService>();
 
     private readonly DatabaseConfig _config;
+    private readonly DirectoriesConfig _directories;
     private IFreeSql? _orm;
     private int _started;
 
@@ -25,9 +27,11 @@ public sealed class DatabaseService : IDatabaseService
     /// Initializes the database service.
     /// </summary>
     /// <param name="config">The database configuration section.</param>
-    public DatabaseService(DatabaseConfig config)
+    /// <param name="directories">The directories configuration, providing the root directory.</param>
+    public DatabaseService(DatabaseConfig config, DirectoriesConfig directories)
     {
         _config = config;
+        _directories = directories;
     }
 
     /// <inheritdoc />
@@ -40,7 +44,18 @@ public sealed class DatabaseService : IDatabaseService
             return ValueTask.CompletedTask;
         }
 
-        var parsed = ConnectionStringParser.Parse(_config.ConnectionString);
+        var parsed = ConnectionStringParser.Parse(_config.ConnectionString, _directories.Root);
+
+        if (parsed.SqliteFilePath is { } sqliteFile)
+        {
+            var directory = Path.GetDirectoryName(sqliteFile);
+
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+        }
+
         Logger.Verbose("Building FreeSql for provider {Provider}", parsed.Provider);
 
         var builder = new FreeSqlBuilder()
