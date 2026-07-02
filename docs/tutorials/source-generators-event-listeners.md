@@ -32,10 +32,13 @@ public sealed class PingListener : IEventListener<PingEvent>
 
 ```csharp
 using SquidStd.Generators.Events;
+using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 
 var bootstrap = SquidStdBootstrap.Create()
-    .ConfigureServices(container => container.RegisterGeneratedEventListeners());
+    .ConfigureServices(container => container
+        .RegisterCoreServices()
+        .RegisterGeneratedEventListeners());
 
 await bootstrap.StartAsync();
 ```

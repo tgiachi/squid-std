@@ -1,8 +1,11 @@
 <h1 align="center">SquidStd.Services.Core</h1>
 
-Concrete implementations of the SquidStd.Core contracts, wired for DryIoc. A single
-`RegisterCoreServices()` call brings up the configuration manager, event bus, job system, timer wheel,
-main-thread dispatcher, metrics collection, storage, and secrets services.
+Concrete implementations of the SquidStd.Core contracts, wired for DryIoc. `RegisterCoreServices()`
+brings up the core services - JSON serializer, event bus, job system, timer wheel, main-thread
+dispatcher, metrics collection, and secrets. The `RegisterCoreServices(configName, configDirectory)`
+overload also registers the configuration core (directories, `logger` section, config manager) for
+standalone containers. File storage moved to `SquidStd.Storage` (`AddFileStorage()`), which also
+registers the `storage` config section.
 
 ## Install
 
@@ -18,8 +21,22 @@ using SquidStd.Services.Core.Extensions;
 
 var container = new Container();
 
-// Registers config manager + event bus + jobs + timer wheel + dispatcher + metrics + storage + secrets.
+// Standalone container: config core + serializer + event bus + jobs + timer wheel
+// + dispatcher + metrics + secrets.
 container.RegisterCoreServices("squidstd", Directory.GetCurrentDirectory());
+```
+
+With `SquidStdBootstrap`, `Create` already registers the configuration core, so opt into the core
+services with the parameterless overload (or pick individual ones with the granular
+`RegisterEventBusService()`, `RegisterTimerWheelService()`, … methods):
+
+```csharp
+using SquidStd.Services.Core.Services.Bootstrap;
+
+var bootstrap = SquidStdBootstrap.Create(o => o.ConfigName = "squidstd");
+bootstrap.ConfigureServices(c => c.RegisterCoreServices());
+
+await bootstrap.StartAsync();
 ```
 
 ### Command dispatch

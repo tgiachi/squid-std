@@ -17,7 +17,9 @@ the registered SquidStd health checks at `/health`, and answers a simple root en
 ### 1. Register SquidStd on the builder
 
 `UseSquidStd` swaps in DryIoc as the ASP.NET Core service provider and bootstraps SquidStd. The root directory is
-taken from the host environment automatically, so you only set the config name.
+taken from the host environment automatically, so you only set the config name. The bootstrap registers only the
+configuration core; pass a container callback as the second argument and call `RegisterCoreServices()` there to
+bring up the core services.
 
 [!code-csharp[](../../samples/SquidStd.Samples.AspNetCore/Program.cs#step-1)]
 
@@ -41,7 +43,7 @@ through the same Serilog logger SquidStd configures from `squidstd.yaml`, giving
 single configuration source:
 
 ```csharp
-builder.UseSquidStd(options => options.ConfigName = "squidstd");
+builder.UseSquidStd(options => options.ConfigName = "squidstd", c => c.RegisterCoreServices());
 builder.AddSquidStdSerilog();
 builder.AddSquidStdHealthChecks();
 ```

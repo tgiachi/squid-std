@@ -2,7 +2,8 @@
 
 ASP.NET Core integration for SquidStd. A single `builder.UseSquidStd(...)` call wires the SquidStd
 DryIoc container into the web host and registers a hosted service that starts and stops every
-`ISquidStdService` alongside the application lifecycle.
+`ISquidStdService` alongside the application lifecycle. The bootstrap registers only the configuration
+core; opt into the core services with `RegisterCoreServices()` in the container callback.
 
 ## Install
 
@@ -14,13 +15,16 @@ dotnet add package SquidStd.AspNetCore
 
 ```csharp
 using SquidStd.AspNetCore.Extensions;
+using SquidStd.Services.Core.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.UseSquidStd(options =>
-{
-    // configure SquidStd options here
-});
+builder.UseSquidStd(
+    options =>
+    {
+        // configure SquidStd options here
+    },
+    container => container.RegisterCoreServices());
 
 var app = builder.Build();
 app.Run();
@@ -34,7 +38,9 @@ Bridge your SquidStd health checks into the standard `/health` endpoint:
 using SquidStd.AspNetCore.Extensions;
 using SquidStd.Services.Core.Extensions;
 
-builder.UseSquidStd(options => { }, container => container.RegisterHealthChecksService());
+builder.UseSquidStd(
+    options => { },
+    container => container.RegisterCoreServices().RegisterHealthChecksService());
 builder.AddSquidStdHealthChecks(); // call after UseSquidStd
 
 var app = builder.Build();
@@ -59,7 +65,7 @@ ASP.NET Core framework logger run as two separate pipelines, producing two conso
 so everything shares one configuration and one format:
 
 ```csharp
-builder.UseSquidStd(options => options.ConfigName = "squidstd");
+builder.UseSquidStd(options => options.ConfigName = "squidstd", c => c.RegisterCoreServices());
 builder.AddSquidStdSerilog();
 ```
 
