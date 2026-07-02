@@ -11,7 +11,7 @@ namespace SquidStd.Services.Core.Services.Scheduling;
 /// (non-game-loop) application. Drives <see cref="ITimerService.UpdateTicksDelta" /> on a
 /// background loop.
 /// </summary>
-public sealed class TimerWheelPumpService : ISquidStdService, IDisposable
+public sealed class TimerWheelPumpService : ISquidStdService, ITimerWheelDriver, IDisposable
 {
     private readonly CancellationTokenSource _cts = new();
     private readonly ILogger _logger = Log.ForContext<TimerWheelPumpService>();
