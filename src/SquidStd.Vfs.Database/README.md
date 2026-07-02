@@ -47,8 +47,8 @@ The `VfsFileEntity` table is created automatically by FreeSql on first access (s
 ## Related
 
 - Tutorial: [Virtual filesystem](https://tgiachi.github.io/squid-std/tutorials/vfs.html)
-- [`SquidStd.Vfs`](../SquidStd.Vfs/README.md) - core backends and decorators
-- [`SquidStd.Database`](../SquidStd.Database/README.md) - required database module
+- [`SquidStd.Vfs`](https://tgiachi.github.io/squid-std/articles/vfs.html) - core backends and decorators
+- [`SquidStd.Database`](https://tgiachi.github.io/squid-std/articles/database.html) - required database module
 
 ## License
 

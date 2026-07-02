@@ -8,7 +8,7 @@ namespace SquidStd.Tui;
 /// <summary>
 /// Base class for views: a Terminal.Gui <see cref="Window" /> that owns a typed ViewModel and a
 /// <see cref="ViewBinder" />. Implement <see cref="BuildLayout" /> to create widgets and
-/// <see cref="Bind" /> to declare bindings; both run once during <see cref="Initialize" />.
+/// <see cref="Bind" /> to declare bindings; both run once during <see cref="ITuiView.Initialize" />.
 /// </summary>
 /// <typeparam name="TViewModel">The ViewModel type for this view.</typeparam>
 public abstract class TuiView<TViewModel> : Window, ITuiView
@@ -16,7 +16,7 @@ public abstract class TuiView<TViewModel> : Window, ITuiView
 {
     private readonly ViewBinder _binder;
 
-    /// <summary>The bound ViewModel. Set by the navigator before <see cref="Initialize" />.</summary>
+    /// <summary>The bound ViewModel. Set by the navigator before <see cref="ITuiView.Initialize" />.</summary>
     protected TViewModel ViewModel { get; private set; } = null!;
 
     protected TuiView()

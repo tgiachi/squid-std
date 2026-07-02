@@ -52,3 +52,8 @@ table > thead { background-color: rgba(75, 180, 189, 0.12); }
 
 /* Affix (right-hand "In this article") active marker. */
 .affix ul li.active > a { color: var(--sqd-brand); border-left-color: var(--sqd-brand); }
+
+/* Package READMEs use <h1 align="center"> for GitHub/NuGet; on the site keep typography consistent. */
+article h1[align] {
+  text-align: start;
+}

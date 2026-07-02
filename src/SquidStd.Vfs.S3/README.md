@@ -48,7 +48,7 @@ For native AWS with the default credential chain, omit `AccessKey`/`SecretKey` a
 ## Related
 
 - Tutorial: [Virtual filesystem](https://tgiachi.github.io/squid-std/tutorials/vfs.html)
-- [`SquidStd.Vfs`](../SquidStd.Vfs/README.md) - core backends and decorators
+- [`SquidStd.Vfs`](https://tgiachi.github.io/squid-std/articles/vfs.html) - core backends and decorators
 
 ## License
 
