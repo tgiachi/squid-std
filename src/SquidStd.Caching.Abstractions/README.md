@@ -38,4 +38,4 @@ public Task<int> GetOrComputeAsync(ICacheService cache)
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

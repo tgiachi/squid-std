@@ -52,7 +52,7 @@ await container.Resolve<TuiApplicationHost>().RunAsync<CounterViewModel>();
 
 Instead of imperative `BuildLayout` + `Bind`, derive from `TuiComposedView<TViewModel>` and return a node
 tree from `Compose()`. One node = widget + binding; direction is inferred (Label one-way, TextField
-two-way, Button command) and bindings are typed lambdas — no magic strings.
+two-way, Button command) and bindings are typed lambdas - no magic strings.
 
 ```csharp
 public sealed class CounterView : TuiComposedView<CounterViewModel>
@@ -81,4 +81,4 @@ public sealed class CounterView : TuiComposedView<CounterViewModel>
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

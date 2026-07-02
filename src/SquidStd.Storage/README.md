@@ -1,7 +1,7 @@
 <h1 align="center">SquidStd.Storage</h1>
 
 Local file storage for SquidStd. Provides a filesystem-backed `IStorageService` (atomic writes, path-safe
-keys) and a YAML-backed `IObjectStorageService` that layers typed objects on top of it — registered with a
+keys) and a YAML-backed `IObjectStorageService` that layers typed objects on top of it - registered with a
 single `AddFileStorage()` call. Storage is opt-in: it is not registered by `RegisterCoreServices`.
 
 ## Install
@@ -42,4 +42,4 @@ enumerates stored keys (`/`-separated), excluding in-flight temp files.
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

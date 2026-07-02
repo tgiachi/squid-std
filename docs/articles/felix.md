@@ -1,7 +1,7 @@
 # Felix Network
 
 **[Felix Network](https://github.com/tgiachi/SquidStd-Felix)** is a standalone companion library to
-SquidStd: secure, cross-platform **binary mesh networking** for .NET — and for a constrained C
+SquidStd: secure, cross-platform **binary mesh networking** for .NET - and for a constrained C
 target such as the ESP32. It lives in its own repository and ships its own NuGet packages under the
 `SquidStd.Felix.*` prefix.
 
@@ -12,15 +12,15 @@ nodes over **ENet** (reliable UDP), behind a small **portable binary frame** tha
 can speak byte-for-byte. On top of that secure node it adds an optional self-forming **mesh** layer
 (seed discovery + gossip of the peer list with auto-connect).
 
-- **Secure node** — ENet transport, the portable frame (its header is authenticated as AES-GCM
+- **Secure node** - ENet transport, the portable frame (its header is authenticated as AES-GCM
   additional data), best-effort DEFLATE, and a raw `(type, bytes)` API.
-- **Typed layer** — optional `Send<T>` / `On<T>` over MemoryPack with a `[FelixMessage(id)]`
+- **Typed layer** - optional `Send<T>` / `On<T>` over MemoryPack with a `[FelixMessage(id)]`
   attribute mapping message types to wire ids.
-- **Mesh** — fully-connected, self-healing peer discovery via seeds and portable gossip.
-- **Pluggable transport** — the encrypted frame is transport-agnostic; `ITransport` decouples the
+- **Mesh** - fully-connected, self-healing peer discovery via seeds and portable gossip.
+- **Pluggable transport** - the encrypted frame is transport-agnostic; `ITransport` decouples the
   node from the link (ENet ships; a serial/UART transport carries Felix over a reliable serial or
   Bluetooth RFCOMM stream without WiFi).
-- **Portable** — the wire format is documented for non-.NET targets, with a host-testable C core
+- **Portable** - the wire format is documented for non-.NET targets, with a host-testable C core
   (`felix-c`) and ESP32 (ESP-IDF) examples proving byte-for-byte C↔.NET parity.
 
 ## Packages
@@ -84,7 +84,7 @@ mesh.Broadcast(type: 7, "hi mesh"u8.ToArray());
 
 The protocol is portable. The Felix repository ships a portable C core (`felix-c`: AES-256-GCM over
 mbedTLS, raw-DEFLATE inflate, the Felix frame, an ENet leaf transport, and a `felix_serial` UART
-module) plus host harnesses — all testable without an ESP32, proving byte-for-byte C↔.NET parity.
+module) plus host harnesses - all testable without an ESP32, proving byte-for-byte C↔.NET parity.
 The same C builds on an ESP32 (ESP-IDF), over ENet/WiFi or over UART / Bluetooth Classic SPP.
 
 ## Learn more

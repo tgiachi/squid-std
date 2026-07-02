@@ -51,4 +51,4 @@ Tutorial: [Source generators: registration](https://tgiachi.github.io/squid-std/
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

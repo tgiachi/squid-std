@@ -45,4 +45,4 @@ public async Task PublishAsync(IMessageQueue queue)
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

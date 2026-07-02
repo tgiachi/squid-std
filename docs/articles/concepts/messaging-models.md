@@ -8,7 +8,7 @@ The Event Bus (`IEventBus`) is a stateless broadcast. Publishers call `PublishAs
 
 ## Command Dispatcher
 
-The Command Dispatcher is a stateless request routed to a single handler that returns a result. Unlike the Event Bus there is exactly one handler per command, and the caller awaits its result. Use it for request/response work — validating input, performing an operation, returning an outcome — where ownership of the action is unambiguous.
+The Command Dispatcher is a stateless request routed to a single handler that returns a result. Unlike the Event Bus there is exactly one handler per command, and the caller awaits its result. Use it for request/response work - validating input, performing an operation, returning an outcome - where ownership of the action is unambiguous.
 
 ## Actors
 

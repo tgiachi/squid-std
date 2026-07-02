@@ -4,7 +4,7 @@ Generate ready-to-run SquidStd projects from the command line with the `SquidStd
 
 ## What you'll build
 
-Nothing by hand — you'll install the template pack and scaffold a console host, an ASP.NET app, a worker
+Nothing by hand - you'll install the template pack and scaffold a console host, an ASP.NET app, a worker
 microservice, and a worker manager, each pre-wired to SquidStd.
 
 ## Prerequisites

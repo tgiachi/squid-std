@@ -17,7 +17,7 @@ keys survive a restart by reloading them from the armored `.asc` files on disk.
 
 ### 1. Register the PGP services and a file-backed key store
 
-`RegisterPgp` wires the keyring and `IPgpService`; the factory chooses the key store — here a
+`RegisterPgp` wires the keyring and `IPgpService`; the factory chooses the key store - here a
 `FilePgpKeyStore` that reads and writes armored `.asc` files in a directory.
 
 [!code-csharp[](../../samples/SquidStd.Samples.Crypto/Program.cs#step-1)]
@@ -45,7 +45,7 @@ survives a restart.
 
 ## Password-based encryption
 
-`PasswordCipher` encrypts a payload directly under a password — no key management required. Argon2id
+`PasswordCipher` encrypts a payload directly under a password - no key management required. Argon2id
 derives the key, AES-256-GCM seals the data, and the result is a self-describing, versioned envelope
 (salt, nonce, tag and KDF cost are embedded). Decryption needs only the password and the blob.
 
@@ -57,7 +57,7 @@ using SquidStd.Crypto.Password.Data;
 byte[] blob = PasswordCipher.Encrypt(payloadBytes, "correct horse battery staple");
 byte[] back = PasswordCipher.Decrypt(blob, "correct horse battery staple");
 
-// Text round-trip — the envelope is base64-encoded, safe to store in config or JSON.
+// Text round-trip - the envelope is base64-encoded, safe to store in config or JSON.
 string protectedText = PasswordCipher.EncryptString("a secret", "pw");
 string clear         = PasswordCipher.DecryptString(protectedText, "pw");
 ```
@@ -66,7 +66,7 @@ The cost of the Argon2id key derivation defaults to `PbkdfCost.Moderate`. Raise 
 long-lived secrets:
 
 ```csharp
-// PbkdfCost.Sensitive — slower derivation, stronger resistance to offline attacks.
+// PbkdfCost.Sensitive - slower derivation, stronger resistance to offline attacks.
 byte[] strong = PasswordCipher.Encrypt(payloadBytes, "pw", PbkdfCost.Sensitive);
 ```
 

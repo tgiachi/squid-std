@@ -16,7 +16,7 @@ encrypted-vault round-trip using `CryptoFileSystem` (`SquidStd.Crypto.Vfs`).
 
 ### 1. Register a virtual filesystem
 
-`RegisterVfs` wires `IVirtualFileSystem`; the factory chooses the backend — here a plain
+`RegisterVfs` wires `IVirtualFileSystem`; the factory chooses the backend - here a plain
 in-memory filesystem.
 
 [!code-csharp[](../../samples/SquidStd.Samples.Vfs/Program.cs#step-1)]
@@ -37,8 +37,8 @@ Re-opening a fresh instance over the same file with the passphrase decrypts the 
 
 This sample backs the vault with a single on-disk zip file via `ZipFileSystem`, writes a secret,
 disposes the vault, then re-opens a brand-new instance over the same file to prove on-disk
-persistence. The DI helper `RegisterCryptoVault` wires exactly this — a vault over a single-file
-zip — as a lockable singleton.
+persistence. The DI helper `RegisterCryptoVault` wires exactly this - a vault over a single-file
+zip - as a lockable singleton.
 
 [!code-csharp[](../../samples/SquidStd.Samples.Vfs/Program.cs#step-3)]
 
@@ -64,7 +64,7 @@ container.RegisterS3FileSystem(o =>
     o.Aws.SecretKey  = "...";
 });
 
-// IVirtualFileSystem is now backed by S3 — the rest of your code is unchanged.
+// IVirtualFileSystem is now backed by S3 - the rest of your code is unchanged.
 var fs = container.Resolve<IVirtualFileSystem>();
 await fs.WriteAllBytesAsync("reports/2026.json", payload);
 ```
@@ -122,13 +122,13 @@ unreachable.
 ### Other decorators
 
 ```csharp
-// Reject all writes — safe read-only access to a shared backend.
+// Reject all writes - safe read-only access to a shared backend.
 container.RegisterVfs(_ => new ReadOnlyFileSystem(new PhysicalFileSystem("/shared/data")));
 
-// Chroot to a subdirectory — all paths are resolved relative to the prefix.
+// Chroot to a subdirectory - all paths are resolved relative to the prefix.
 container.RegisterVfs(_ => new ScopedFileSystem(new PhysicalFileSystem("/var/lib/app"), "tenant-1"));
 
-// Overlay — reads overlay-first then fall back to base; writes go to the overlay only.
+// Overlay - reads overlay-first then fall back to base; writes go to the overlay only.
 container.RegisterVfs(_ => new OverlayFileSystem(
     baseFileSystem: new PhysicalFileSystem("/defaults"),
     overlay:        new InMemoryFileSystem()));

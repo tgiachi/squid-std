@@ -27,7 +27,7 @@ A host that resolves `ICacheService` (`SquidStd.Caching.Abstractions`) backed by
 
 ### 3. Switch to Redis
 
-Replace the registration with the Redis backend — the `ICacheService` usage is identical:
+Replace the registration with the Redis backend - the `ICacheService` usage is identical:
 
 ```csharp
 container.AddRedisCache("redis://localhost:6379");

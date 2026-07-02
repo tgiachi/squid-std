@@ -1,7 +1,7 @@
 <h1 align="center">SquidStd.Caching</h1>
 
 In-memory backend for SquidStd.Caching. Provides an `IMemoryCache`-backed `ICacheProvider` with
-absolute TTL and eviction, wired to the shared typed `ICacheService` facade — registered with a
+absolute TTL and eviction, wired to the shared typed `ICacheService` facade - registered with a
 single `AddInMemoryCache()` call. Ideal for single-process apps, tests, and local dev.
 
 ## Install
@@ -38,4 +38,4 @@ var user = await cache.GetAsync<object>("user:1");
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

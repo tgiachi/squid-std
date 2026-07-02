@@ -41,7 +41,7 @@ Prints `queue handled order-1` and `topic saw order-2`.
 ## How it works
 
 Queues use competing-consumers with retry and dead-lettering (`MessagingOptions`); topics use transient fan-out
-(at-most-once). Swap `AddInMemoryMessaging()` for `AddRabbitMqMessaging(...)` for a durable broker — the
+(at-most-once). Swap `AddInMemoryMessaging()` for `AddRabbitMqMessaging(...)` for a durable broker - the
 `IMessageQueue`/`IMessageTopic` code is unchanged.
 
 ## See also

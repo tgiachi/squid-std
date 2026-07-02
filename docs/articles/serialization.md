@@ -2,8 +2,8 @@
 
 SquidStd uses a single serialization abstraction across the framework, defined in `SquidStd.Core`:
 
-- `IDataSerializer` — `ReadOnlyMemory<byte> Serialize<T>(T value)`
-- `IDataDeserializer` — `T Deserialize<T>(ReadOnlyMemory<byte> data)`
+- `IDataSerializer` - `ReadOnlyMemory<byte> Serialize<T>(T value)`
+- `IDataDeserializer` - `T Deserialize<T>(ReadOnlyMemory<byte> data)`
 
 The default implementation, `JsonDataSerializer`, uses `System.Text.Json` Web defaults and implements
 both interfaces. It is registered by `RegisterCoreServices()` (via `RegisterDataSerializer()`), so both

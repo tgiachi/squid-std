@@ -69,7 +69,7 @@ container.ApplyPersistedEntityRegistrations();   // builds descriptors into IPer
 ### Durability
 
 `PersistenceConfig.DurabilityMode` selects how writes reach disk. `Buffered` (default) flushes to the OS
-cache — fast, and safe across a process crash. `Durable` fsyncs each journal append and the snapshot temp
+cache - fast, and safe across a process crash. `Durable` fsyncs each journal append and the snapshot temp
 file before its atomic rename, so committed data survives power loss. Pass it through when constructing the
 services: `new BinaryJournalService(path, config.DurabilityMode)` and
 `new SnapshotService(dir, suffix, config.DurabilityMode)`. (.NET has no portable directory fsync, so the
@@ -81,4 +81,4 @@ guarantee is per-file content durability plus atomic rename.)
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

@@ -23,7 +23,7 @@ set/get/list.
 ### 1. Register the KMS protector and Secrets Manager store
 
 `RegisterKmsSecretProtector` and `RegisterAwsSecretsManagerStore` take the KMS key alias, the
-secret name prefix, and the AWS endpoint — pointed here at a LocalStack `ServiceUrl`.
+secret name prefix, and the AWS endpoint - pointed here at a LocalStack `ServiceUrl`.
 
 [!code-csharp[](../../samples/SquidStd.Samples.Secrets/Program.cs#step-1)]
 

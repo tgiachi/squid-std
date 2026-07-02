@@ -43,4 +43,4 @@ var page = await users.GetPagedAsync(page: 1, pageSize: 20, orderBy: u => u.Name
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

@@ -34,4 +34,4 @@ dotnet new squidstd-manager -n Acme.Manager
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

@@ -1,6 +1,6 @@
 # Terminal UI (MVVM)
 
-Build a Counter terminal app with an observable ViewModel, then display it two ways — the
+Build a Counter terminal app with an observable ViewModel, then display it two ways - the
 imperative `TuiView<T>` and the declarative `TuiComposedView<T>` DSL.
 
 ## What you'll build
@@ -8,9 +8,9 @@ imperative `TuiView<T>` and the declarative `TuiComposedView<T>` DSL.
 A small Counter app where a `CounterViewModel` holds a `Value` property and an `IncrementCommand`.
 You will see both ways to build the view:
 
-1. **Imperative** — `TuiView<T>`: override `BuildLayout` to add Terminal.Gui widgets, then
+1. **Imperative** - `TuiView<T>`: override `BuildLayout` to add Terminal.Gui widgets, then
    override `Bind` to wire them through `ViewBinder`.
-2. **Declarative** — `TuiComposedView<T>`: override `Compose` and return a `TuiNode` tree built
+2. **Declarative** - `TuiComposedView<T>`: override `Compose` and return a `TuiNode` tree built
    with the `Ui.*` DSL; bindings and layout are inferred from the node types.
 
 ## Prerequisites
@@ -43,7 +43,7 @@ public sealed partial class CounterViewModel : TuiViewModel
 }
 ```
 
-### 2. Imperative view — `TuiView<T>`
+### 2. Imperative view - `TuiView<T>`
 
 Override `BuildLayout` to create and add Terminal.Gui widgets, then override `Bind` to wire them
 through `ViewBinder`. The binder tracks property-changed notifications and updates widgets without
@@ -75,7 +75,7 @@ public sealed class CounterView : TuiView<CounterViewModel>
 }
 ```
 
-### 3. Declarative view — `TuiComposedView<T>`
+### 3. Declarative view - `TuiComposedView<T>`
 
 Instead of `BuildLayout` + `Bind`, derive from `TuiComposedView<T>` and return a node tree from
 `Compose`. The framework infers binding direction from the node type (Label → one-way, TextField →

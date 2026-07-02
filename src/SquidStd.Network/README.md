@@ -1,7 +1,7 @@
 <h1 align="center">SquidStd.Network</h1>
 
 Networking primitives for SquidStd: TCP and UDP servers and clients with per-connection sessions, a
-pluggable framing + middleware pipeline, span-based binary readers/writers, and a circular buffer —
+pluggable framing + middleware pipeline, span-based binary readers/writers, and a circular buffer -
 designed for low-allocation, high-throughput byte processing.
 
 ## Install
@@ -39,4 +39,4 @@ await server.StopAsync(CancellationToken.None);
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

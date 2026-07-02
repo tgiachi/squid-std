@@ -39,4 +39,4 @@ public async Task DumpKeysAsync(IStorageService storage)
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

@@ -20,4 +20,4 @@ bootstrap.ConfigureServices(container => container.RegisterDatabase());
 
 Reach for `AddElasticsearch` when the core requirement is searching text or
 documents by relevance; use `RegisterDatabase` with the FreeSql provider that
-matches your engine for everything relational. They compose — many apps use both.
+matches your engine for everything relational. They compose - many apps use both.
