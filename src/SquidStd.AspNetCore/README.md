@@ -49,7 +49,7 @@ Each registered `IHealthCheck` appears as its own entry in the report. Check nam
 |---------------------------------------|------------------------------------------------------------------------|
 | `SquidStdAspNetCoreBuilderExtensions` | `UseSquidStd(...)` builder extension.                                  |
 | `SquidStdHostedService`               | Hosted service bridging SquidStd service lifecycle to the host.        |
-| `SquidStdHealthChecksExtensions`      | `AddSquidStdHealthChecks(...)` — bridge to ASP.NET Core health checks. |
+| `SquidStdHealthChecksExtensions`      | `AddSquidStdHealthChecks(...)` - bridge to ASP.NET Core health checks. |
 
 ## Unified logging (opt-in)
 
@@ -81,4 +81,4 @@ logger:
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

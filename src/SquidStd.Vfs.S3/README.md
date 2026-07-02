@@ -1,6 +1,6 @@
 <h1 align="center">SquidStd.Vfs.S3</h1>
 
-An `IVirtualFileSystem` over S3-compatible object storage — AWS S3, MinIO, Cloudflare R2, Backblaze B2 — via
+An `IVirtualFileSystem` over S3-compatible object storage - AWS S3, MinIO, Cloudflare R2, Backblaze B2 - via
 the MinIO .NET SDK. Each logical path maps directly to an object key inside a single bucket. The bucket is
 created lazily on first use.
 
@@ -48,8 +48,8 @@ For native AWS with the default credential chain, omit `AccessKey`/`SecretKey` a
 ## Related
 
 - Tutorial: [Virtual filesystem](https://tgiachi.github.io/squid-std/tutorials/vfs.html)
-- [`SquidStd.Vfs`](../SquidStd.Vfs/README.md) — core backends and decorators
+- [`SquidStd.Vfs`](../SquidStd.Vfs/README.md) - core backends and decorators
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

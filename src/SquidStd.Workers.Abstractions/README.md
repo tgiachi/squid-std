@@ -25,4 +25,4 @@ dotnet add package SquidStd.Workers.Abstractions
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

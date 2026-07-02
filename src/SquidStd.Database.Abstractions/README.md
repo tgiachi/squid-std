@@ -1,8 +1,8 @@
 <h1 align="center">SquidStd.Database.Abstractions</h1>
 
 Provider-agnostic data-access contracts for SquidStd. Entities derive from `BaseEntity` (a `Guid` id
-plus UTC timestamps) and are accessed through the generic `IDataAccess<TEntity>` — full CRUD, bulk
-operations, paging, and composable queries — without binding to any specific ORM.
+plus UTC timestamps) and are accessed through the generic `IDataAccess<TEntity>` - full CRUD, bulk
+operations, paging, and composable queries - without binding to any specific ORM.
 
 ## Install
 
@@ -45,4 +45,4 @@ public async Task ExampleAsync(IDataAccess<User> users)
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

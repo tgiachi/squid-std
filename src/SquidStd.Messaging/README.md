@@ -1,7 +1,7 @@
 <h1 align="center">SquidStd.Messaging</h1>
 
 In-memory transport for SquidStd.Messaging. Provides a channel-backed `IQueueProvider` with per-queue
-buffering, round-robin delivery to subscribers, retry/dead-letter handling, and metrics — registered
+buffering, round-robin delivery to subscribers, retry/dead-letter handling, and metrics - registered
 with a single `AddInMemoryMessaging()` call. Ideal for single-process apps, tests, and local dev.
 
 ## Install
@@ -37,4 +37,4 @@ await queue.PublishAsync("orders", new { Id = 1 });
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

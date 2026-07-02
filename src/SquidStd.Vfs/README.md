@@ -1,7 +1,7 @@
 <h1 align="center">SquidStd.Vfs</h1>
 
 A path-based virtual filesystem abstraction for SquidStd with interchangeable backends. One interface
-(`IVirtualFileSystem`) is implemented by real directories, a single zip archive, and an in-memory store — and
+(`IVirtualFileSystem`) is implemented by real directories, a single zip archive, and an in-memory store - and
 decorated by an encrypted vault in `SquidStd.Crypto`. `VfsDirectories` is a VFS-backed analogue of
 `DirectoriesConfig`, so named directory layouts work over any backend (a zip or an encrypted container can
 stand in for real folders).
@@ -71,7 +71,7 @@ Decorators wrap any `IVirtualFileSystem` to add behaviour without touching the b
 | `OverlayFileSystem(base, overlay)` | Reads overlay-first then falls back to base. Writes and deletes go to the overlay only. List returns the union of both; overlay entries shadow base entries with the same path. |
 | `CachingFileSystem(remote, cache)` | Read-through cache: reads prefer the remote and refresh the cache copy on success; on a transport failure they fall back to the (possibly stale) cache. Writes are write-through (remote then cache) and fail when the remote is unreachable. |
 
-Composition example — S3 with a local disk cache for resilience to an unstable connection:
+Composition example - S3 with a local disk cache for resilience to an unstable connection:
 
 ```csharp
 // S3 with a local disk cache for resilience to an unstable connection.
@@ -92,4 +92,4 @@ container.RegisterVfs(_ => new ReadOnlyFileSystem(new PhysicalFileSystem("/var/l
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

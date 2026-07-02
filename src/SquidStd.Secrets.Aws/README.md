@@ -55,17 +55,17 @@ await foreach (var name in store.ListNamesAsync("db/")) { /* ... */ }
 
 ## Notes
 
-- **Envelope encryption** — `KmsSecretProtector` calls `GenerateDataKey` per `Protect`, encrypts the payload
+- **Envelope encryption** - `KmsSecretProtector` calls `GenerateDataKey` per `Protect`, encrypts the payload
   locally with AES-256-GCM, and frames the KMS-wrapped data key alongside the ciphertext. The plaintext
   data key is zeroed immediately after use; `Unprotect` calls `Decrypt` to unwrap it. KMS never sees the
   payload, and large payloads are not bound by the 4 KB KMS direct-encrypt limit.
-- **NamePrefix** — `AwsSecretsManagerStore` prepends `NamePrefix` to every secret id, giving each
+- **NamePrefix** - `AwsSecretsManagerStore` prepends `NamePrefix` to every secret id, giving each
   application its own namespace inside a shared account. `ListNamesAsync` strips the prefix so callers
   always see logical names. `Delete` returns `false` for a missing secret.
-- **Credentials** — when `Aws.AccessKey` / `Aws.SecretKey` are omitted, the AWS SDK default credential
+- **Credentials** - when `Aws.AccessKey` / `Aws.SecretKey` are omitted, the AWS SDK default credential
   chain is used (environment, shared profile, EC2/ECS role). Set `Aws.ServiceUrl` to target LocalStack
   or another compatible endpoint.
-- **Tested against LocalStack** — the KMS and Secrets Manager adapters are covered by integration tests
+- **Tested against LocalStack** - the KMS and Secrets Manager adapters are covered by integration tests
   running on a `localstack/localstack` container.
 
 ## Related
@@ -74,4 +74,4 @@ await foreach (var name in store.ListNamesAsync("db/")) { /* ... */ }
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

@@ -24,4 +24,4 @@ dotnet add package SquidStd.Search.Abstractions
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

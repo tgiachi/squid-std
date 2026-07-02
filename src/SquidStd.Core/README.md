@@ -1,8 +1,8 @@
 <h1 align="center">SquidStd.Core</h1>
 
 Foundational contracts and utilities for the SquidStd stack. It defines the core service interfaces
-(configuration, event bus, jobs, timing, metrics, storage) and ships dependency-free helpers — YAML/JSON
-serialization, a Serilog event sink, and string/environment/directory extensions — that the other
+(configuration, event bus, jobs, timing, metrics, storage) and ships dependency-free helpers - YAML/JSON
+serialization, a Serilog event sink, and string/environment/directory extensions - that the other
 SquidStd packages build on.
 
 ## Install
@@ -68,4 +68,4 @@ pool.Return(builder);
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

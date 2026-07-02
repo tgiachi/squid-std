@@ -37,7 +37,7 @@ keyring.Import(bobPublicArmored); // a correspondent's public key
 string armored = await pgp.EncryptForAsync("bob@example.com", payloadBytes);
 byte[] plaintext = await pgp.DecryptAsync(armoredFromBob, "passphrase");
 
-// Sign and verify (signed message — the data is embedded in the armored block).
+// Sign and verify (signed message - the data is embedded in the armored block).
 string signed = await pgp.SignAsync(payloadBytes, "alice@example.com", "passphrase");
 var verification = await pgp.VerifyAsync(signed);   // verification.IsValid, verification.Data
 
@@ -52,7 +52,7 @@ await keyring.LoadAsync(container.Resolve<IPgpKeyStore>());
 
 ## Password-based encryption
 
-`PasswordCipher` encrypts a payload under a password — Argon2id derives the key, AES-256-GCM seals the data,
+`PasswordCipher` encrypts a payload under a password - Argon2id derives the key, AES-256-GCM seals the data,
 and the result is a self-describing, versioned envelope (salt, nonce, tag and KDF cost are embedded, so
 decryption needs only the password and the blob).
 
@@ -89,14 +89,14 @@ encryption use `CryptoUtils` / `ISecretProtector` instead.
 
 ## Key stores
 
-- **`FilePgpKeyStore(directory)`** — one armored `.asc` per key (public, plus secret when held). gpg-interoperable.
-- **`AesGcmPgpKeyStore(ISecretProtector, path)`** — the whole keyring serialized to a single file, encrypted at
+- **`FilePgpKeyStore(directory)`** - one armored `.asc` per key (public, plus secret when held). gpg-interoperable.
+- **`AesGcmPgpKeyStore(ISecretProtector, path)`** - the whole keyring serialized to a single file, encrypted at
   rest with the application key via `SquidStd`'s `ISecretProtector`.
 
 ## Notes
 
 - **Signatures are signed messages**, not detached signatures: `SignAsync` embeds the data in the armored block
-  and `VerifyAsync` recovers it. Verification is **pass/fail** — PgpCore does not expose the signer's key id or
+  and `VerifyAsync` recovers it. Verification is **pass/fail** - PgpCore does not expose the signer's key id or
   identity, so the results carry no signer attribution.
 - `DecryptAndVerifyAsync` never throws on a bad/absent signature when the ciphertext itself is valid: it always
   recovers `Data` and reports `IsSigned` / `IsValid`.
@@ -154,4 +154,4 @@ var folderVault = new CryptoFileSystem(new PhysicalFileSystem("/secure/dir"));
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

@@ -33,7 +33,7 @@ await foreach (var entry in fs.ListAsync("config"))
 
 The `VfsFileEntity` table is created automatically by FreeSql on first access (sync-structure mode).
 
-> **Single-writer assumption** — upsert operations are not serialised across concurrent writers. Use this
+> **Single-writer assumption** - upsert operations are not serialised across concurrent writers. Use this
 > backend in single-process scenarios or where last-write-wins is acceptable.
 
 ## Key types
@@ -47,9 +47,9 @@ The `VfsFileEntity` table is created automatically by FreeSql on first access (s
 ## Related
 
 - Tutorial: [Virtual filesystem](https://tgiachi.github.io/squid-std/tutorials/vfs.html)
-- [`SquidStd.Vfs`](../SquidStd.Vfs/README.md) — core backends and decorators
-- [`SquidStd.Database`](../SquidStd.Database/README.md) — required database module
+- [`SquidStd.Vfs`](../SquidStd.Vfs/README.md) - core backends and decorators
+- [`SquidStd.Database`](../SquidStd.Database/README.md) - required database module
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

@@ -51,4 +51,4 @@ Retry/backoff/dead-letter are configured via `MessagingOptions` (`MaxDeliveryAtt
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

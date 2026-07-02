@@ -33,7 +33,7 @@ var open = await search.Query<Order>()
 
 Supported LINQ: `Where` (`==`, `!=`, `<`, `>`, `<=`, `>=`, `&&`, `||`, `!`, `string.Contains`/`StartsWith`,
 bool members), `OrderBy`/`ThenBy`(`Descending`), `Skip`/`Take`, and `.Match(field, text)` / `.FullText(text)`.
-Anything else throws `NotSupportedException` — drop down to the native `ElasticsearchClient`.
+Anything else throws `NotSupportedException` - drop down to the native `ElasticsearchClient`.
 
 ## Key types
 
@@ -50,4 +50,4 @@ Anything else throws `NotSupportedException` — drop down to the native `Elasti
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

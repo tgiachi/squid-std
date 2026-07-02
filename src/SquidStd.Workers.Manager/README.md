@@ -40,4 +40,4 @@ app.MapWorkerManagerEndpoints(); // GET /workers, GET /workers/{id}, POST /jobs
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

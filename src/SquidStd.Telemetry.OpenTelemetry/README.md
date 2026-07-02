@@ -2,7 +2,7 @@
 
 OpenTelemetry tracing and metrics export for SquidStd. Adds distributed tracing (ASP.NET Core +
 HttpClient + the `SquidStd.*` ActivitySource), runtime metrics, and a bridge that exports the existing
-SquidStd metrics snapshot — all via OTLP (+ optional console). Logs stay on Serilog.
+SquidStd metrics snapshot - all via OTLP (+ optional console). Logs stay on Serilog.
 
 ## Install
 
@@ -47,4 +47,4 @@ builder.Services.AddSquidStdTelemetry(new TelemetryOptions { ServiceName = "orde
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

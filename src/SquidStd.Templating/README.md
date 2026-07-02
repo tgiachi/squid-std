@@ -46,4 +46,4 @@ var welcome = await renderer.RenderByNameAsync("welcome", new { User = new { Nam
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

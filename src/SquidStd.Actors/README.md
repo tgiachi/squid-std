@@ -78,8 +78,8 @@ using var sub = session.SubscribeToEventBus(eventBus, (UserJoinedEvent e) => new
 - **Isolate**: a throwing handler is logged and skipped; the actor stays alive. `AskAsync` exceptions
   always propagate to the caller regardless of policy.
 
-`DisposeAsync` completes the mailbox and drains queued messages — every `Tell` runs and every `Ask`
-replies — within `ShutdownDrainTimeout`. If a handler is still running when that budget elapses, the
+`DisposeAsync` completes the mailbox and drains queued messages - every `Tell` runs and every `Ask`
+replies - within `ShutdownDrainTimeout`. If a handler is still running when that budget elapses, the
 actor cancels its handlers and faults any requests that never completed with `ObjectDisposedException`.
 
 ## Related
@@ -89,4 +89,4 @@ actor cancels its handlers and faults any requests that never completed with `Ob
 
 ## License
 
-MIT — part of [SquidStd](https://github.com/tgiachi/squid-std).
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).
