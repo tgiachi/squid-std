@@ -64,6 +64,19 @@ eventLoop:
   SlowTickThresholdMs: 250  # warn above this per-tick time
 ```
 
+```mermaid
+flowchart TD
+  subgraph Drivers["Drivers - register exactly one"]
+    EL[EventLoopService<br/>frame-rate thread]
+    PU[TimerWheelPumpService<br/>periodic pump]
+  end
+  EL -->|UpdateTicksDelta| W[Timer wheel]
+  PU -->|UpdateTicksDelta| W
+  EL -->|DrainPending| D[MainThreadDispatcher]
+  W --> T1[Cron jobs]
+  W --> T2[Wheel timers]
+```
+
 ### Event loop vs. timer-wheel pump
 
 Both `EventLoopService` and `TimerWheelPumpService` advance the timer wheel, so they are **mutually

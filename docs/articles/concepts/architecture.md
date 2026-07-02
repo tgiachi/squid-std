@@ -21,9 +21,20 @@ Higher layers depend on lower ones, never the reverse.
 
 ```mermaid
 graph TD
-  Core[SquidStd.Core] --> Services[SquidStd.Services.Core]
-  Abstr[*.Abstractions contracts] --> Providers[Provider packages]
-  Services --> Host[SquidStdBootstrap host]
+  subgraph Foundation
+    Core[SquidStd.Core<br/>primitives, options]
+    Abstr[SquidStd.*.Abstractions<br/>contracts + DTOs]
+  end
+  subgraph Implementations
+    Services[SquidStd.Services.Core<br/>config, events, jobs, timers]
+    Providers[Provider packages<br/>Redis, RabbitMQ, S3, ...]
+    InMem[In-memory providers<br/>for tests]
+  end
+  Core --> Services
+  Core --> Abstr
+  Abstr --> Providers
+  Abstr --> InMem
+  Services --> Host[SquidStdBootstrap]
   Providers --> Host
   Host --> App[Your application]
 ```

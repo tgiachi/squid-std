@@ -57,3 +57,55 @@ table > thead { background-color: rgba(75, 180, 189, 0.12); }
 article h1[align] {
   text-align: start;
 }
+
+/* ---- Landing page ---- */
+.sqd-hero {
+  text-align: center;
+  padding: 3rem 1rem 2.5rem;
+  margin: -1rem -1rem 2rem;
+  background: linear-gradient(160deg, var(--sqd-brand-dark), var(--sqd-brand-deep));
+  color: #eaf6f8;
+  border-radius: 0 0 1rem 1rem;
+}
+.sqd-hero h1 { color: #fff; margin-top: 0.75rem; }
+.sqd-tagline { max-width: 46rem; margin: 0.75rem auto 1rem; opacity: 0.92; }
+.sqd-badges img { margin: 0 0.15rem; }
+.sqd-install {
+  display: inline-block;
+  background: var(--sqd-ink);
+  border-radius: 0.5rem;
+  padding: 0.6rem 1.4rem;
+  margin: 0.75rem 0;
+}
+.sqd-install code { color: var(--sqd-accent); background: transparent; }
+.sqd-cta { margin-top: 0.5rem; }
+.sqd-cta .btn { margin: 0 0.25rem; }
+
+.sqd-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 0.9rem;
+  margin: 1.25rem 0 2rem;
+}
+.sqd-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(19, 144, 163, 0.25);
+  border-radius: 0.6rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.sqd-card:hover {
+  border-color: var(--sqd-brand);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+.sqd-card b { color: var(--sqd-brand-deep); }
+.sqd-card span { font-size: 0.85rem; opacity: 0.8; }
+
+[data-bs-theme="dark"] .sqd-card b { color: var(--sqd-accent); }
+[data-bs-theme="dark"] .sqd-card { border-color: rgba(75, 180, 189, 0.25); }
+[data-bs-theme="dark"] .sqd-card:hover { border-color: var(--sqd-accent); }
