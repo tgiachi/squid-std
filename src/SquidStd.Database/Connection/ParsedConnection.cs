@@ -7,4 +7,9 @@ namespace SquidStd.Database.Connection;
 /// </summary>
 /// <param name="Provider">The resolved database provider.</param>
 /// <param name="NativeConnectionString">The provider-native connection string for FreeSql.</param>
-public sealed record ParsedConnection(DatabaseProviderType Provider, string NativeConnectionString);
+/// <param name="SqliteFilePath">The resolved on-disk SQLite file path, or null for :memory: and server providers.</param>
+public sealed record ParsedConnection(
+    DatabaseProviderType Provider,
+    string NativeConnectionString,
+    string? SqliteFilePath = null
+);
