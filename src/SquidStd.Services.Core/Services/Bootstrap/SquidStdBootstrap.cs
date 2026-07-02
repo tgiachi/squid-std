@@ -121,6 +121,20 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
     }
 
     /// <inheritdoc />
+    public void ConfigureLogging()
+    {
+        ThrowIfDisposed();
+
+        if (_loggerConfigured)
+        {
+            return;
+        }
+
+        Container.Resolve<IConfigManagerService>().Load();
+        ConfigureLogger();
+    }
+
+    /// <inheritdoc />
     public async Task RunAsync(CancellationToken cancellationToken = default)
     {
         await StartAsync(cancellationToken);
@@ -224,7 +238,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 
     private void ConfigureLogger()
     {
-        if (!Container.IsRegistered<SquidStdLoggerOptions>())
+        if (_loggerConfigured || !Container.IsRegistered<SquidStdLoggerOptions>())
         {
             return;
         }
