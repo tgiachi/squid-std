@@ -27,7 +27,7 @@ A host that resolves `IObjectStorageService` (`SquidStd.Storage.Abstractions`) b
 
 ### 3. Switch to S3
 
-Replace the registration with the S3 backend — the `IObjectStorageService` usage is identical:
+Replace the registration with the S3 backend - the `IObjectStorageService` usage is identical:
 
 ```csharp
 container.AddS3Storage(/* endpoint, bucket and credentials */);

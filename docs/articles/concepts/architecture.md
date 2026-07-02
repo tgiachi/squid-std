@@ -10,10 +10,10 @@ Every capability is split in two: an `*.Abstractions` package that holds the con
 
 The dependency flow runs in one direction:
 
-- **Core** (`SquidStd.Core`) — primitives, options, and the building blocks everything else sits on.
-- **Abstractions** — per-capability contract packages.
-- **Providers** — concrete implementations of those contracts.
-- **Host** — `SquidStdBootstrap` composes services and runs them.
+- **Core** (`SquidStd.Core`) - primitives, options, and the building blocks everything else sits on.
+- **Abstractions** - per-capability contract packages.
+- **Providers** - concrete implementations of those contracts.
+- **Host** - `SquidStdBootstrap` composes services and runs them.
 
 Higher layers depend on lower ones, never the reverse.
 
@@ -30,5 +30,5 @@ graph TD
 
 ## Next
 
-- [Bootstrap lifecycle](bootstrap-lifecycle.md) — how the host starts and stops services.
-- [Abstractions first](abstractions-first.md) — the contract-plus-provider pattern in depth.
+- [Bootstrap lifecycle](bootstrap-lifecycle.md) - how the host starts and stops services.
+- [Abstractions first](abstractions-first.md) - the contract-plus-provider pattern in depth.

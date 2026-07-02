@@ -39,5 +39,5 @@ hashing credentials, protecting payloads with a key, and storing named secrets.
 ## Recommendation
 
 Use `HashUtils` for credentials, `ISecretProtector` (AES-GCM locally, KMS in the
-cloud) for encrypting blobs, and `ISecretStore` for named secrets — backed by
+cloud) for encrypting blobs, and `ISecretStore` for named secrets - backed by
 files in development and AWS Secrets Manager in production.

@@ -6,7 +6,7 @@ Register typed command handlers, dispatch commands against a context, and read b
 
 A `Container` with a `RegisterCommandDispatcher<Session>` and several handlers
 (`SquidStd.Services.Core`), dispatching commands that carry a `Session` context. One command type
-has two handlers — both run on dispatch.
+has two handlers - both run on dispatch.
 
 ## Prerequisites
 
@@ -19,14 +19,14 @@ has two handlers — both run on dispatch.
 
 Register the dispatcher for the context type, then each handler. `EchoCommand` has two handlers
 (`EchoHandler` and `AuditHandler`); both will run. The subscription loop is what
-`CommandDispatcherActivator<Session>` does at runtime — inlined here to keep the sample
+`CommandDispatcherActivator<Session>` does at runtime - inlined here to keep the sample
 self-contained.
 
 [!code-csharp[](../../samples/SquidStd.Samples.Commands/Program.cs#step-1)]
 
 ### 2. Dispatch commands with a context
 
-The context (here a `Session`) is passed explicitly at dispatch time — in a server this is the
+The context (here a `Session`) is passed explicitly at dispatch time - in a server this is the
 session the message arrived on.
 
 [!code-csharp[](../../samples/SquidStd.Samples.Commands/Program.cs#step-2)]

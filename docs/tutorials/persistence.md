@@ -6,7 +6,7 @@ survives a restart.
 ## What you'll build
 
 A standalone demo of `SquidStd.Persistence`: a `Player` store that loads existing state on
-startup, appends every change to a journal, and captures a snapshot. Run it twice — the second run
+startup, appends every change to a journal, and captures a snapshot. Run it twice - the second run
 reloads what the first saved.
 
 ## Prerequisites
