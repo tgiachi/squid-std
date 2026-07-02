@@ -58,7 +58,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         Container.RegisterInstance<ISquidStdBootstrap>(this, IfAlreadyRegistered.Replace);
         Container.RegisterInstance(this, IfAlreadyRegistered.Replace);
         Container.RegisterInstance(Options, IfAlreadyRegistered.Replace);
-        Container.RegisterCoreServices(Options.ConfigName, Options.RootDirectory);
+        Container.RegisterConfigServices(Options.ConfigName, Options.RootDirectory);
     }
 
     /// <inheritdoc />
@@ -235,6 +235,21 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
     /// <returns>The created bootstrapper.</returns>
     public static SquidStdBootstrap Create(SquidStdOptions options, IContainer container)
         => new(options, container, false);
+
+    /// <summary>
+    /// Creates a bootstrapper configuring the options through a callback.
+    /// </summary>
+    /// <param name="configure">Callback that mutates the default <see cref="SquidStdOptions" />.</param>
+    /// <returns>The configured bootstrapper.</returns>
+    public static SquidStdBootstrap Create(Action<SquidStdOptions> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+
+        var options = new SquidStdOptions();
+        configure(options);
+
+        return Create(options);
+    }
 
     private void ConfigureLogger()
     {

@@ -41,9 +41,10 @@ _layout: landing
 
 ```csharp
 var container = new Container();
-container.AddInMemoryMessaging();
 
 var bootstrap = SquidStdBootstrap.Create(new SquidStdOptions { ConfigName = "myapp" }, container);
+bootstrap.ConfigureServices(c => c.RegisterCoreServices().AddInMemoryMessaging());
+
 await bootstrap.StartAsync();
 ```
 

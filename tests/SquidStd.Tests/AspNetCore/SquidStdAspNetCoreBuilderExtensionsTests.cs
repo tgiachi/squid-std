@@ -10,6 +10,7 @@ using SquidStd.Core.Interfaces.Bootstrap;
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Core.Interfaces.Metrics;
 using SquidStd.Core.Interfaces.Timing;
+using SquidStd.Services.Core.Extensions;
 using SquidStd.Tests.Support;
 
 namespace SquidStd.Tests.AspNetCore;
@@ -21,7 +22,7 @@ public class SquidStdAspNetCoreBuilderExtensionsTests
     {
         using var temp = new TempDirectory();
         var builder = CreateBuilder(temp.Path);
-        builder.UseSquidStd(options => options.ConfigName = "app");
+        builder.UseSquidStd(options => options.ConfigName = "app", container => container.RegisterCoreServices());
 
         await using var app = builder.Build();
         app.MapGet("/timer", (ITimerService timer) => Results.Ok(timer.GetType().Name));
@@ -85,7 +86,7 @@ public class SquidStdAspNetCoreBuilderExtensionsTests
     {
         using var temp = new TempDirectory();
         var builder = CreateBuilder(temp.Path);
-        builder.UseSquidStd(options => options.ConfigName = "app");
+        builder.UseSquidStd(options => options.ConfigName = "app", container => container.RegisterCoreServices());
 
         await using var app = builder.Build();
         await app.StartAsync();

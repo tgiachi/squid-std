@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\SquidStd.Abstractions\SquidStd.Abstractions.csproj"/>
         <ProjectReference Include="..\SquidStd.Storage.Abstractions\SquidStd.Storage.Abstractions.csproj"/>
         <ProjectReference Include="..\SquidStd.Core\SquidStd.Core.csproj"/>
     </ItemGroup>

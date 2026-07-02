@@ -17,8 +17,10 @@ and `SquidStd.Abstractions`). It loads its config, wires the default services, a
 
 ### 1. Create the bootstrapper
 
-`SquidStdBootstrap.Create` takes a `SquidStdOptions` (config name + root directory) and registers the core
-services (config, logging, event bus, jobs, timers…) into an owned DryIoc container.
+`SquidStdBootstrap.Create` takes a `SquidStdOptions` (config name + root directory) and registers the
+configuration core (directories, the `logger` section and the config manager) into an owned DryIoc
+container. The core services (event bus, jobs, timers…) are explicit: opt in with
+`bootstrap.ConfigureServices(c => c.RegisterCoreServices())`.
 
 [!code-csharp[](../../samples/SquidStd.Samples.GettingStarted/Program.cs#step-1)]
 
@@ -45,9 +47,10 @@ The host starts, logs the service lifecycle, and waits until you press Ctrl+C.
 
 ## How it works
 
-`SquidStdBootstrap` is the composition root: it builds the container, registers the core services, loads the
-config sections, and orchestrates the `ISquidStdService` lifecycle. Every other SquidStd module plugs into this
-container through its `Add…` extension methods.
+`SquidStdBootstrap` is the composition root: it builds the container, registers the configuration core, loads
+the config sections, and orchestrates the `ISquidStdService` lifecycle. The core services come from the
+explicit `RegisterCoreServices()` call in `ConfigureServices`, and every other SquidStd module plugs into the
+same container through its `Add…` extension methods.
 
 ## See also
 

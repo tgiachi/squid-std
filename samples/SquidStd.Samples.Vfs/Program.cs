@@ -1,12 +1,14 @@
 using System.Text;
 using SquidStd.Crypto.Vfs.Services;
+using SquidStd.Core.Data.Bootstrap;
+using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 using SquidStd.Vfs.Abstractions.Interfaces;
 using SquidStd.Vfs.Extensions;
 using SquidStd.Vfs.Services;
 
 var bootstrap = SquidStdBootstrap.Create(
-    new()
+    new SquidStdOptions()
     {
         ConfigName = "squidstd",
         RootDirectory = AppContext.BaseDirectory
@@ -16,7 +18,7 @@ var bootstrap = SquidStdBootstrap.Create(
 #region step-1
 
 // Register a plain in-memory virtual filesystem.
-bootstrap.ConfigureServices(container => container.RegisterVfs(_ => new InMemoryFileSystem()));
+bootstrap.ConfigureServices(container => container.RegisterCoreServices().RegisterVfs(_ => new InMemoryFileSystem()));
 
 #endregion
 

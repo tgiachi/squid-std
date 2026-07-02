@@ -14,7 +14,7 @@ public class SquidStdBootstrapLoggingTests
     {
         using var temp = new TempDirectory();
         await using var bootstrap =
-            SquidStdBootstrap.Create(new() { ConfigName = "app", RootDirectory = temp.Path });
+            SquidStdBootstrap.Create(new SquidStdOptions { ConfigName = "app", RootDirectory = temp.Path });
 
         bootstrap.ConfigureLogging();
 
@@ -27,7 +27,7 @@ public class SquidStdBootstrapLoggingTests
     {
         using var temp = new TempDirectory();
         await using var bootstrap =
-            SquidStdBootstrap.Create(new() { ConfigName = "app", RootDirectory = temp.Path });
+            SquidStdBootstrap.Create(new SquidStdOptions { ConfigName = "app", RootDirectory = temp.Path });
 
         bootstrap.ConfigureLogging();
         var first = bootstrap.Container.Resolve<SerilogILogger>();
@@ -43,7 +43,7 @@ public class SquidStdBootstrapLoggingTests
     {
         using var temp = new TempDirectory();
         await using var bootstrap =
-            SquidStdBootstrap.Create(new() { ConfigName = "app", RootDirectory = temp.Path });
+            SquidStdBootstrap.Create(new SquidStdOptions { ConfigName = "app", RootDirectory = temp.Path });
 
         bootstrap.ConfigureLogging();
         var eager = bootstrap.Container.Resolve<SerilogILogger>();

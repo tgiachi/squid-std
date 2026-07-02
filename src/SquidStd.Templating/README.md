@@ -19,7 +19,7 @@ using DryIoc;
 using SquidStd.Templating.Extensions;
 using SquidStd.Templating.Interfaces;
 
-container.AddTemplating(); // after RegisterCoreServices (a shared DirectoriesConfig is registered there)
+container.AddTemplating(); // after the bootstrap Create (the shared DirectoriesConfig comes from the config core)
 
 var renderer = container.Resolve<ITemplateRenderer>();
 

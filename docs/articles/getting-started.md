@@ -10,13 +10,17 @@ dotnet add package SquidStd.Services.Core
 using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Services.Core.Services.Bootstrap;
 
-// Core services wired automatically: config manager, event bus, command dispatcher,
-// job system, timer/cron scheduler, metrics, health checks, storage and secrets.
+// Create registers the configuration core: DirectoriesConfig, the `logger`
+// section and the config manager. Everything else is explicit.
 var bootstrap = SquidStdBootstrap.Create(
     new SquidStdOptions { ConfigName = "squidstd", RootDirectory = AppContext.BaseDirectory });
 
+// Opt into the core services: JSON serializer, event bus, job system,
+// main-thread dispatcher, timer wheel, metrics and secrets.
+bootstrap.ConfigureServices(container => container.RegisterCoreServices());
+
 await bootstrap.StartAsync();
-// … resolve services, opt into modules with bootstrap.ConfigureServices(…) …
+// … resolve services …
 await bootstrap.StopAsync();
 ```
 

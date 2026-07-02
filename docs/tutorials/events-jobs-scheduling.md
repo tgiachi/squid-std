@@ -12,7 +12,8 @@ A host that uses three core services from `SquidStd.Services.Core`: the `IEventB
 - .NET 10 SDK
 - `dotnet add package SquidStd.Services.Core`
 
-The cron scheduler and timer wheel are opt-in - enable them with `RegisterSchedulerServices()`:
+The core services are explicit: enable the event bus, job system and timer wheel with
+`RegisterCoreServices()`, and add the cron scheduler on top with `RegisterSchedulerServices()`:
 
 [!code-csharp[](../../samples/SquidStd.Samples.EventsJobsScheduling/Program.cs#step-1)]
 
@@ -48,8 +49,9 @@ You'll see `received: hello`, `job ran on a worker thread`, and, if you let it r
 
 ## How it works
 
-The event bus dispatches to sync and async listeners; the job system is a fixed-size worker-thread pool; the cron
-scheduler is driven by the timer wheel (registered by `RegisterSchedulerServices`).
+The event bus and the job system come from `RegisterCoreServices()` - the bus dispatches to sync and async
+listeners, the job system is a fixed-size worker-thread pool. The cron scheduler is driven by the timer wheel
+(registered by `RegisterSchedulerServices`).
 
 The timer wheel is advanced by a *driver*. `RegisterSchedulerServices()` uses `TimerWheelPumpService`, a
 periodic background pump. Apps that need a frame-rate loop can instead call `RegisterEventLoop()`, which advances

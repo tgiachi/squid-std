@@ -11,11 +11,22 @@ The DI container is [DryIoc](https://github.com/dadhi/DryIoc), exposed as `ICont
 Modules register themselves through C# 14 `extension(IContainer)` members named `AddXxx(...)` or `RegisterXxx(...)`. Each capability ships its own registration entry point, so wiring a module is a single call:
 
 ```csharp
-container.AddInMemoryMessaging();
-container.RegisterCoreServices();
+bootstrap.ConfigureServices(container => container
+    .RegisterCoreServices()
+    .AddInMemoryMessaging());
 ```
 
 This keeps registration discoverable and colocated with the package that owns it.
+
+`RegisterCoreServices` comes in two flavors:
+
+- **Parameterless** - registers the core services only (JSON serializer, event bus, job system, main-thread dispatcher, timer wheel, metrics collection, secrets). Use it inside `ConfigureServices` after the bootstrap is created, since the bootstrap already provides the configuration core. Granular methods such as `RegisterEventBusService()` or `RegisterTimerWheelService()` let you pick individual services instead.
+- **`RegisterCoreServices(configName, configDirectory)`** - registers the configuration core (directories, `logger` section, config manager) plus all core services. Use it on a standalone container without a bootstrap:
+
+```csharp
+var container = new Container();
+container.RegisterCoreServices("myapp", Directory.GetCurrentDirectory());
+```
 
 ## Resolving through the bootstrap
 

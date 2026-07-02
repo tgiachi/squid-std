@@ -23,7 +23,6 @@ using SquidStd.Core.Interfaces.Timing;
 using SquidStd.Core.Json;
 using SquidStd.Services.Core.Services;
 using SquidStd.Services.Core.Services.Storage;
-using SquidStd.Storage.Abstractions.Data.Config;
 
 namespace SquidStd.Services.Core.Extensions;
 
@@ -35,6 +34,12 @@ public static class RegisterDefaultServicesExtensions
     /// <param name="container">Container that receives the core service registrations.</param>
     extension(IContainer container)
     {
+        /// <summary>
+        /// Registers the default config manager service as a singleton instance.
+        /// </summary>
+        /// <param name="configName">The logical config name or YAML file name.</param>
+        /// <param name="configDirectory">The directory where the config file is searched.</param>
+        /// <returns>The same container for chaining.</returns>
         public IContainer RegisterConfigManagerService(string configName, string configDirectory)
         {
             var service = new ConfigManagerService(container, configName, configDirectory);
@@ -48,24 +53,32 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        /// Registers the default SquidStd core services using the default config file location.
-        /// </summary>
-        /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterCoreServices()
-            => container.RegisterCoreServices("squidstd", Directory.GetCurrentDirectory());
-
-        /// <summary>
-        /// Registers the default SquidStd core services and config manager.
+        /// Registers only the configuration core: the shared <see cref="DirectoriesConfig" />, the
+        /// logger config section and the config manager. Every other service is opt-in via
+        /// <c>RegisterCoreServices()</c> or the individual registration methods.
         /// </summary>
         /// <param name="configName">The logical config name or YAML file name.</param>
         /// <param name="configDirectory">The directory where the config file is searched.</param>
         /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterCoreServices(string configName, string configDirectory)
+        public IContainer RegisterConfigServices(string configName, string configDirectory)
         {
-            container.RegisterInstance(new DirectoriesConfig(configDirectory, []));
-            container.RegisterDataSerializer();
-            container.RegisterDefaultCoreConfigSections();
+            container.RegisterInstance(new DirectoriesConfig(configDirectory, []), IfAlreadyRegistered.Keep);
+            container.RegisterConfigSection("logger", static () => new SquidStdLoggerOptions(), -1000);
             container.RegisterConfigManagerService(configName, configDirectory);
+
+            return container;
+        }
+
+        /// <summary>
+        /// Registers the default SquidStd services: JSON serializer, event bus, job system,
+        /// main-thread dispatcher, timer wheel, metrics collection and secrets. Does NOT register
+        /// the configuration core - call this after the bootstrap has been created (which registers
+        /// it), or use <c>RegisterCoreServices(string, string)</c> on a standalone container.
+        /// </summary>
+        /// <returns>The same container for chaining.</returns>
+        public IContainer RegisterCoreServices()
+        {
+            container.RegisterDataSerializer();
             container.RegisterEventBusService();
             container.RegisterJobSystemService();
             container.RegisterMainThreadDispatcherService();
@@ -77,11 +90,19 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        /// Registers the default config manager service as a singleton instance.
+        /// Registers the configuration core and the default SquidStd services in one call.
         /// </summary>
         /// <param name="configName">The logical config name or YAML file name.</param>
         /// <param name="configDirectory">The directory where the config file is searched.</param>
         /// <returns>The same container for chaining.</returns>
+        public IContainer RegisterCoreServices(string configName, string configDirectory)
+        {
+            container.RegisterConfigServices(configName, configDirectory);
+            container.RegisterCoreServices();
+
+            return container;
+        }
+
         /// <summary>
         /// Registers the default JSON data serializer for <see cref="IDataSerializer" /> and
         /// <see cref="IDataDeserializer" /> (same singleton instance).
@@ -92,22 +113,6 @@ public static class RegisterDefaultServicesExtensions
             var serializer = new JsonDataSerializer();
             container.RegisterInstance<IDataSerializer>(serializer, IfAlreadyRegistered.Keep);
             container.RegisterInstance<IDataDeserializer>(serializer, IfAlreadyRegistered.Keep);
-
-            return container;
-        }
-
-        /// <summary>
-        /// Registers the default SquidStd core configuration sections.
-        /// </summary>
-        /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterDefaultCoreConfigSections()
-        {
-            container.RegisterConfigSection("logger", static () => new SquidStdLoggerOptions(), -1000);
-            container.RegisterConfigSection("jobs", static () => new JobsConfig(), -100);
-            container.RegisterConfigSection("timerWheel", static () => new TimerWheelConfig(), -90);
-            container.RegisterConfigSection("metrics", static () => new MetricsConfig(), -80);
-            container.RegisterConfigSection("storage", static () => new StorageConfig(), -70);
-            container.RegisterConfigSection("secrets", static () => new SecretsConfig(), -60);
 
             return container;
         }

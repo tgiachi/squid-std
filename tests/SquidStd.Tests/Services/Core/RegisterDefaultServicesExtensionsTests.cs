@@ -15,6 +15,7 @@ using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services;
 using SquidStd.Storage.Abstractions.Data.Config;
 using SquidStd.Storage.Abstractions.Interfaces;
+using SquidStd.Storage.Extensions;
 using SquidStd.Tests.Support;
 
 namespace SquidStd.Tests.Services.Core;
@@ -118,11 +119,12 @@ public class RegisterDefaultServicesExtensionsTests
     }
 
     [Fact]
-    public void RegisterDefaultCoreConfigSections_RegistersJobsAndTimerWheelMetadata()
+    public void RegisterJobSystemAndTimerWheelServices_RegisterJobsAndTimerWheelMetadata()
     {
         using var container = new Container();
 
-        container.RegisterDefaultCoreConfigSections();
+        container.RegisterJobSystemService();
+        container.RegisterTimerWheelService();
 
         var entries = container.Resolve<List<ConfigRegistrationData>>();
 
@@ -133,11 +135,12 @@ public class RegisterDefaultServicesExtensionsTests
     }
 
     [Fact]
-    public void RegisterDefaultCoreConfigSections_RegistersLoggerMetadata()
+    public void RegisterConfigServices_RegistersLoggerMetadata()
     {
+        using var temp = new TempDirectory();
         using var container = new Container();
 
-        container.RegisterDefaultCoreConfigSections();
+        container.RegisterConfigServices("app", temp.Path);
 
         var entries = container.Resolve<List<ConfigRegistrationData>>();
 
@@ -149,11 +152,11 @@ public class RegisterDefaultServicesExtensionsTests
     }
 
     [Fact]
-    public void RegisterDefaultCoreConfigSections_RegistersMetricsMetadata()
+    public void RegisterMetricsCollectionService_RegistersMetricsMetadata()
     {
         using var container = new Container();
 
-        container.RegisterDefaultCoreConfigSections();
+        container.RegisterMetricsCollectionService();
 
         var entries = container.Resolve<List<ConfigRegistrationData>>();
 
@@ -162,17 +165,18 @@ public class RegisterDefaultServicesExtensionsTests
     }
 
     [Fact]
-    public void RegisterDefaultCoreConfigSections_RegistersStorageAndSecretsMetadata()
+    public void AddFileStorageAndSecretServices_RegisterStorageAndSecretsMetadata()
     {
         using var container = new Container();
 
-        container.RegisterDefaultCoreConfigSections();
+        container.AddFileStorage();
+        container.RegisterSecretServices();
 
         var entries = container.Resolve<List<ConfigRegistrationData>>();
 
         Assert.Contains(entries, entry => entry.SectionName == "storage" && entry.ConfigType == typeof(StorageConfig));
         Assert.Contains(entries, entry => entry.SectionName == "secrets" && entry.ConfigType == typeof(SecretsConfig));
-        Assert.False(container.IsRegistered<StorageConfig>());
+        Assert.True(container.IsRegistered<StorageConfig>());
         Assert.False(container.IsRegistered<SecretsConfig>());
     }
 
