@@ -1,4 +1,5 @@
 using SquidStd.Core.Data.Bootstrap;
+using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 using SquidStd.Templating.Extensions;
 using SquidStd.Templating.Interfaces;
@@ -13,7 +14,7 @@ var bootstrap = SquidStdBootstrap.Create(
 
 #region step-1
 
-bootstrap.ConfigureServices(container => container.AddTemplating());
+bootstrap.ConfigureServices(container => container.RegisterCoreServices().AddTemplating());
 
 #endregion
 

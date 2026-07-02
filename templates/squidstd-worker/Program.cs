@@ -1,4 +1,5 @@
 using DryIoc;
+using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 using SquidStd.Workers.Extensions;
 #if (messaging == "rabbitmq")
@@ -14,6 +15,8 @@ var bootstrap = SquidStdBootstrap.Create(options =>
 
 bootstrap.ConfigureServices(container =>
 {
+    container.RegisterCoreServices();
+
 #if (messaging == "rabbitmq")
     container.AddRabbitMqMessaging("rabbitmq://guest:guest@localhost:5672");
 #else

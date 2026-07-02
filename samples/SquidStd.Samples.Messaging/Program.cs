@@ -1,6 +1,7 @@
 using SquidStd.Messaging.Abstractions.Interfaces;
 using SquidStd.Messaging.Extensions;
 using SquidStd.Core.Data.Bootstrap;
+using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 
 var bootstrap = SquidStdBootstrap.Create(
@@ -13,7 +14,7 @@ var bootstrap = SquidStdBootstrap.Create(
 
 #region step-1
 
-bootstrap.ConfigureServices(container => container.AddInMemoryMessaging());
+bootstrap.ConfigureServices(container => container.RegisterCoreServices().AddInMemoryMessaging());
 
 #endregion
 

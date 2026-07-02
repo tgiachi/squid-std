@@ -2,6 +2,7 @@ using System.Text;
 using SquidStd.Core.Interfaces.Secrets;
 using SquidStd.Secrets.Aws.Extensions;
 using SquidStd.Core.Data.Bootstrap;
+using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 
 var bootstrap = SquidStdBootstrap.Create(
@@ -18,6 +19,16 @@ var bootstrap = SquidStdBootstrap.Create(
 bootstrap.ConfigureServices(
     container =>
     {
+        // Core services are registered one by one here: RegisterCoreServices() would also add
+        // the default AES-GCM protector and file secret store, which must not compete with the
+        // KMS protector and AWS Secrets Manager store registered below.
+        container.RegisterDataSerializer();
+        container.RegisterEventBusService();
+        container.RegisterJobSystemService();
+        container.RegisterMainThreadDispatcherService();
+        container.RegisterTimerWheelService();
+        container.RegisterMetricsCollectionService();
+
         container.RegisterKmsSecretProtector(
             options =>
             {

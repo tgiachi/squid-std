@@ -1,6 +1,7 @@
 using SquidStd.Generators.Workers;
 using SquidStd.Messaging.Extensions;
 using SquidStd.Core.Data.Bootstrap;
+using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 using SquidStd.Workers.Abstractions.Data;
 using SquidStd.Workers.Attributes;
@@ -22,6 +23,7 @@ var bootstrap = SquidStdBootstrap.Create(
 bootstrap.ConfigureServices(
     c =>
     {
+        c.RegisterCoreServices();
         c.AddInMemoryMessaging();
         c.AddWorkers();
         c.RegisterGeneratedJobHandlers();

@@ -8,6 +8,7 @@ using SquidStd.Mail.Queue.Extensions;
 using SquidStd.Mail.Queue.Interfaces;
 using SquidStd.Messaging.Extensions;
 using SquidStd.Core.Data.Bootstrap;
+using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 
 var bootstrap = SquidStdBootstrap.Create(
@@ -21,7 +22,7 @@ var bootstrap = SquidStdBootstrap.Create(
 #region step-1
 
 bootstrap.ConfigureServices(
-    container => container.AddMail(
+    container => container.RegisterCoreServices().AddMail(
         new()
         {
             Protocol = MailProtocolType.Imap,

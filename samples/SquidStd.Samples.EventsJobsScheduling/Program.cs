@@ -18,6 +18,7 @@ var bootstrap = SquidStdBootstrap.Create(
 // The cron scheduler and timer wheel are opt-in.
 bootstrap.ConfigureServices(
     container => container
+                 .RegisterCoreServices()
                  .RegisterSchedulerServices()
                  .RegisterGeneratedEventListeners()
 );

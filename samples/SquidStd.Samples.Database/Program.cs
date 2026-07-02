@@ -2,6 +2,7 @@ using SquidStd.Database.Abstractions.Data.Entities;
 using SquidStd.Database.Abstractions.Interfaces.Data;
 using SquidStd.Database.Extensions;
 using SquidStd.Core.Data.Bootstrap;
+using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 
 var bootstrap = SquidStdBootstrap.Create(
@@ -14,7 +15,7 @@ var bootstrap = SquidStdBootstrap.Create(
 
 #region step-1
 
-bootstrap.ConfigureServices(container => container.RegisterDatabase());
+bootstrap.ConfigureServices(container => container.RegisterCoreServices().RegisterDatabase());
 
 await bootstrap.StartAsync();
 

@@ -3,6 +3,7 @@ using SquidStd.Search.Abstractions.Interfaces;
 using SquidStd.Search.Elasticsearch.Extensions;
 using SquidStd.Search.Elasticsearch.Linq;
 using SquidStd.Core.Data.Bootstrap;
+using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Services.Bootstrap;
 
 var bootstrap = SquidStdBootstrap.Create(
@@ -16,7 +17,7 @@ var bootstrap = SquidStdBootstrap.Create(
 #region step-1
 
 bootstrap.ConfigureServices(
-    container => container.AddElasticsearch(
+    container => container.RegisterCoreServices().AddElasticsearch(
         new()
         {
             Uri = new("http://localhost:9200")

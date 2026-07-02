@@ -1,4 +1,5 @@
 using SquidStd.AspNetCore.Extensions;
+using SquidStd.Services.Core.Extensions;
 using SquidStd.Workers.Manager.Extensions;
 #if (messaging == "rabbitmq")
 using SquidStd.Messaging.RabbitMq.Extensions;
@@ -12,6 +13,8 @@ builder.UseSquidStd(
     options => options.ConfigName = "squidstd",
     container =>
     {
+        container.RegisterCoreServices();
+
 #if (messaging == "rabbitmq")
         container.AddRabbitMqMessaging("rabbitmq://guest:guest@localhost:5672");
 #else
