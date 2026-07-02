@@ -77,4 +77,51 @@ public class ConnectionStringParserTests
     [Fact]
     public void Parse_UnknownScheme_Throws()
         => Assert.Throws<NotSupportedException>(() => ConnectionStringParser.Parse("oracle://h/db"));
+
+    [Fact]
+    public void Parse_SqliteRelativePath_WithBaseDirectory_ResolvesAgainstBase()
+    {
+        var baseDir = Path.Combine(Path.GetTempPath(), "squidstd-base");
+        var result = ConnectionStringParser.Parse("sqlite://app.db", baseDir);
+
+        var expected = Path.GetFullPath(Path.Combine(baseDir, "app.db"));
+        Assert.Equal(DatabaseProviderType.Sqlite, result.Provider);
+        Assert.Equal($"Data Source={expected}", result.NativeConnectionString);
+        Assert.Equal(expected, result.SqliteFilePath);
+    }
+
+    [Fact]
+    public void Parse_SqliteRelativePath_WithoutBaseDirectory_StaysVerbatim()
+    {
+        var result = ConnectionStringParser.Parse("sqlite://app.db");
+
+        Assert.Equal("Data Source=app.db", result.NativeConnectionString);
+        Assert.Equal("app.db", result.SqliteFilePath);
+    }
+
+    [Fact]
+    public void Parse_SqliteAbsolutePath_WithBaseDirectory_Unchanged()
+    {
+        var result = ConnectionStringParser.Parse("sqlite:///var/data/app.db", "/tmp/base");
+
+        Assert.Equal("Data Source=/var/data/app.db", result.NativeConnectionString);
+        Assert.Equal("/var/data/app.db", result.SqliteFilePath);
+    }
+
+    [Fact]
+    public void Parse_SqliteInMemory_WithBaseDirectory_HasNullFilePath()
+    {
+        var result = ConnectionStringParser.Parse("sqlite://:memory:", "/tmp/base");
+
+        Assert.Equal("Data Source=:memory:", result.NativeConnectionString);
+        Assert.Null(result.SqliteFilePath);
+    }
+
+    [Fact]
+    public void Parse_ServerProvider_HasNullSqliteFilePath()
+    {
+        var result = ConnectionStringParser.Parse("postgres://user:pass@db.host:5433/appdb");
+
+        Assert.Null(result.SqliteFilePath);
+    }
 }

@@ -12,8 +12,9 @@ public static class ConnectionStringParser
     /// Parses the given URI connection string.
     /// </summary>
     /// <param name="connectionString">The URI connection string.</param>
+    /// <param name="sqliteBaseDirectory">Base directory used to resolve relative SQLite file paths; null keeps them verbatim.</param>
     /// <returns>The parsed provider and native connection string.</returns>
-    public static ParsedConnection Parse(string connectionString)
+    public static ParsedConnection Parse(string connectionString, string? sqliteBaseDirectory = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
 
@@ -28,11 +29,14 @@ public static class ConnectionStringParser
         var remainder = connectionString[(schemeEnd + 3)..];
         var provider = ResolveProvider(scheme);
 
-        var native = provider == DatabaseProviderType.Sqlite
-                         ? BuildSqlite(remainder)
-                         : BuildServer(provider, remainder);
+        if (provider == DatabaseProviderType.Sqlite)
+        {
+            var filePath = ResolveSqlitePath(remainder, sqliteBaseDirectory);
 
-        return new(provider, native);
+            return new(provider, $"Data Source={filePath ?? remainder}", filePath);
+        }
+
+        return new(provider, BuildServer(provider, remainder));
     }
 
     private static string BuildServer(DatabaseProviderType provider, string remainder)
@@ -76,14 +80,24 @@ public static class ConnectionStringParser
         };
     }
 
-    private static string BuildSqlite(string remainder)
+    private static string? ResolveSqlitePath(string remainder, string? baseDirectory)
     {
         if (string.IsNullOrWhiteSpace(remainder))
         {
             throw new FormatException("SQLite connection string requires a file path or ':memory:'.");
         }
 
-        return $"Data Source={remainder}";
+        if (string.Equals(remainder, ":memory:", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        if (!Path.IsPathRooted(remainder) && !string.IsNullOrWhiteSpace(baseDirectory))
+        {
+            return Path.GetFullPath(Path.Combine(baseDirectory, remainder));
+        }
+
+        return remainder;
     }
 
     private static DatabaseProviderType ResolveProvider(string scheme)
