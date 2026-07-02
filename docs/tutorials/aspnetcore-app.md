@@ -28,6 +28,12 @@ after `UseSquidStd`.
 
 [!code-csharp[](../../samples/SquidStd.Samples.AspNetCore/Program.cs#step-2)]
 
+### 3. Build the app and map endpoints
+
+Build the app, expose the health checks with the standard `MapHealthChecks`, add a root endpoint, and run.
+
+[!code-csharp[](../../samples/SquidStd.Samples.AspNetCore/Program.cs#step-3)]
+
 ## Unified Serilog logging
 
 Add `AddSquidStdSerilog()` to send ASP.NET Core framework logs (Kestrel, `Microsoft.Hosting.Lifetime`)
@@ -42,12 +48,6 @@ builder.AddSquidStdHealthChecks();
 
 Without this call the two loggers stay separate (two console formats). With it, `squidstd.yaml` drives
 all logging.
-
-### 3. Build the app and map endpoints
-
-Build the app, expose the health checks with the standard `MapHealthChecks`, add a root endpoint, and run.
-
-[!code-csharp[](../../samples/SquidStd.Samples.AspNetCore/Program.cs#step-3)]
 
 ## Run it
 
