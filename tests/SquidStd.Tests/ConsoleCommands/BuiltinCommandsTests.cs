@@ -4,6 +4,7 @@ using SquidStd.ConsoleCommands.Services;
 using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Interfaces.Bootstrap;
 using SquidStd.Core.Interfaces.Config;
+using SquidStd.Services.Core.Services.Lifecycle;
 
 namespace SquidStd.Tests.ConsoleCommands;
 
@@ -14,7 +15,7 @@ public class BuiltinCommandsTests
     {
         var lines = new List<string>();
         var system = new CommandSystemService(lines.Add);
-        BuiltinConsoleCommands.Register(system, bootstrap: null, clearScreen: () => { });
+        BuiltinConsoleCommands.Register(system, lifetime: null, bootstrap: null, clearScreen: () => { });
         system.RegisterCommand("custom", _ => Task.CompletedTask, "does things");
 
         var output = await system.ExecuteCommandWithOutputAsync("help");
@@ -29,7 +30,7 @@ public class BuiltinCommandsTests
     public async Task Exit_WithoutBootstrap_ReportsUnavailable()
     {
         var system = new CommandSystemService(_ => { });
-        BuiltinConsoleCommands.Register(system, bootstrap: null, clearScreen: () => { });
+        BuiltinConsoleCommands.Register(system, lifetime: null, bootstrap: null, clearScreen: () => { });
 
         var output = await system.ExecuteCommandWithOutputAsync("exit");
 
@@ -43,6 +44,7 @@ public class BuiltinCommandsTests
         var stopSignal = new TaskCompletionSource();
         BuiltinConsoleCommands.Register(
             system,
+            lifetime: null,
             bootstrap: new StopSpyBootstrap(() => stopSignal.TrySetResult()),
             clearScreen: () => { }
         );
@@ -51,6 +53,26 @@ public class BuiltinCommandsTests
         var stopped = await Task.WhenAny(stopSignal.Task, Task.Delay(2000)) == stopSignal.Task;
 
         Assert.True(stopped);
+    }
+
+    [Fact]
+    public async Task Exit_WithLifetime_RequestsShutdown_WithoutStoppingBootstrapDirectly()
+    {
+        var system = new CommandSystemService(_ => { });
+        using var lifetime = new SquidStdLifetimeService();
+        var bootstrapStopped = false;
+        BuiltinConsoleCommands.Register(
+            system,
+            lifetime: lifetime,
+            bootstrap: new StopSpyBootstrap(() => bootstrapStopped = true),
+            clearScreen: () => { }
+        );
+
+        await system.ExecuteCommandAsync("exit");
+        await Task.Delay(100);
+
+        Assert.True(lifetime.ShutdownToken.IsCancellationRequested);
+        Assert.False(bootstrapStopped);
     }
 
     private sealed class StopSpyBootstrap : ISquidStdBootstrap

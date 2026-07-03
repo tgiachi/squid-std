@@ -1,5 +1,6 @@
 using SquidStd.ConsoleCommands.Interfaces;
 using SquidStd.Core.Interfaces.Bootstrap;
+using SquidStd.Core.Interfaces.Lifecycle;
 
 namespace SquidStd.ConsoleCommands.Internal;
 
@@ -8,7 +9,12 @@ namespace SquidStd.ConsoleCommands.Internal;
 /// </summary>
 internal static class BuiltinConsoleCommands
 {
-    internal static void Register(ICommandSystemService system, ISquidStdBootstrap? bootstrap, Action clearScreen)
+    internal static void Register(
+        ICommandSystemService system,
+        ISquidStdLifetime? lifetime,
+        ISquidStdBootstrap? bootstrap,
+        Action clearScreen
+    )
     {
         system.RegisterCommand(
             "help|?",
@@ -42,9 +48,17 @@ internal static class BuiltinConsoleCommands
             "exit|quit",
             context =>
             {
+                if (lifetime is not null)
+                {
+                    context.WriteLine("Shutting down...");
+                    lifetime.RequestShutdown();
+
+                    return Task.CompletedTask;
+                }
+
                 if (bootstrap is null)
                 {
-                    context.WriteLine("Shutdown is not available: no bootstrap registered.");
+                    context.WriteLine("Shutdown is not available: no bootstrap or lifetime registered.");
 
                     return Task.CompletedTask;
                 }
