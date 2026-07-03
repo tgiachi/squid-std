@@ -6,11 +6,13 @@ using SquidStd.Scripting.Lua.Interfaces.Events;
 namespace SquidStd.Scripting.Lua.Services;
 
 /// <summary>
-/// Default Lua event bridge backed by named MoonSharp closures.
+/// Default Lua event bridge backed by named MoonSharp closures. Closure invocations are
+/// serialized because bus events may arrive on arbitrary threads and MoonSharp is not thread-safe.
 /// </summary>
 public sealed class LuaEventBridge : ILuaEventBridge
 {
     private readonly ConcurrentDictionary<string, List<Closure>> _callbacks = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Lock _invokeSync = new();
     private readonly ILogger _logger = Log.ForContext<LuaEventBridge>();
 
     private Script? _script;
@@ -30,7 +32,10 @@ public sealed class LuaEventBridge : ILuaEventBridge
         var script = _script ?? throw new InvalidOperationException("Lua event bridge is not attached to a script.");
         var table = CreatePayloadTable(script, payload);
 
-        return script.Call(callback, table);
+        lock (_invokeSync)
+        {
+            return script.Call(callback, table);
+        }
     }
 
     public void Publish(string eventName, IReadOnlyDictionary<string, object?> payload)
