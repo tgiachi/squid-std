@@ -55,6 +55,8 @@ builder.UseSquidStd(options => options.ConfigName = "myapp", c => c.RegisterCore
 
 Services implementing `ISquidStdService` participate in the lifecycle. On `StartAsync` they are started in registration order; on `StopAsync` they are stopped in reverse order, so dependencies remain available while their dependents shut down.
 
+The bootstrap logs its whole lifecycle: a startup banner with the application name and version (set `SquidStdOptions.AppName`; it defaults to the entry assembly name and is attached to every event as the `Application` / `ApplicationVersion` properties), a registration summary (per-registration detail at Debug), one line per service started with its duration, and the shutdown sequence. A service that fails to stop is logged as a warning and the remaining services are still stopped. Extra Serilog sinks can be plugged by registering `ILogEventSink` instances in the container before start.
+
 ```mermaid
 sequenceDiagram
   participant App

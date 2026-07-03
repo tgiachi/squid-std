@@ -239,13 +239,33 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
             return;
         }
 
+        var logger = Log.ForContext<SquidStdBootstrap>();
+        var appName = ResolveAppName(Options);
+        logger.Information("{Application:l} stopping ({Count} service(s))", appName, _startedServices.Count);
+
         try
         {
             for (var i = _startedServices.Count - 1; i >= 0; i--)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                await _startedServices[i].StopAsync(cancellationToken);
+                var service = _startedServices[i];
+
+                try
+                {
+                    await service.StopAsync(cancellationToken);
+                    logger.Information("Stopped {Service:l}", service.GetType().Name);
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    logger.Warning(ex, "Service {Service:l} failed to stop", service.GetType().Name);
+                }
             }
+
+            logger.Information("{Application:l} shutdown complete", appName);
         }
         finally
         {

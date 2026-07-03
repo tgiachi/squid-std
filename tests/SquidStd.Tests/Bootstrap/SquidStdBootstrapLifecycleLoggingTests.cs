@@ -1,5 +1,6 @@
 using DryIoc;
 using Serilog.Core;
+using Serilog.Events;
 using SquidStd.Abstractions.Data.Internal.Services;
 using SquidStd.Abstractions.Extensions.Container;
 using SquidStd.Core.Data.Bootstrap;
@@ -138,6 +139,56 @@ public class SquidStdBootstrapLifecycleLoggingTests
         }
     }
 
+    [Fact]
+    public async Task StopAsync_LogsStoppedServicesAndShutdownComplete()
+    {
+        using var temp = new TempDirectory();
+        var (bootstrap, sink) = NewBootstrapWithSink(temp.Path, "MyApp");
+        await using var _ = bootstrap;
+        bootstrap.ConfigureServices(c => c.RegisterCoreServices());
+
+        await bootstrap.StartAsync();
+        await bootstrap.StopAsync();
+
+        Assert.True(HasMessage(sink, "MyApp stopping"));
+        Assert.True(HasMessage(sink, "Stopped JobSystemService"));
+        Assert.True(HasMessage(sink, "shutdown complete"));
+    }
+
+    [Fact]
+    public async Task StopAsync_FailingService_WarnsAndStopsTheOthers()
+    {
+        using var temp = new TempDirectory();
+        var (bootstrap, sink) = NewBootstrapWithSink(temp.Path);
+        await using var _ = bootstrap;
+        var healthy = new HealthyFake();
+        var failing = new FailingFake { ThrowOnStop = true };
+        bootstrap.ConfigureServices(c =>
+        {
+            c.RegisterInstance<HealthyFake>(healthy);
+            c.AddToRegisterTypedList(
+                new ServiceRegistrationData(typeof(HealthyFake), typeof(HealthyFake), -50)
+            );
+            c.RegisterInstance<FailingFake>(failing);
+            c.AddToRegisterTypedList(
+                new ServiceRegistrationData(typeof(FailingFake), typeof(FailingFake), -40)
+            );
+            return c;
+        });
+
+        await bootstrap.StartAsync();
+        await bootstrap.StopAsync();
+
+        Assert.True(healthy.Stopped);
+        Assert.True(
+            sink.Events.Any(e =>
+                e.Level == LogEventLevel.Warning
+                && e.RenderMessage().Contains("failed to stop", StringComparison.Ordinal)
+            )
+        );
+        Assert.True(HasMessage(sink, "shutdown complete"));
+    }
+
     private static (SquidStdBootstrap Bootstrap, CapturingLogSink Sink) NewBootstrapWithSink(
         string root,
         string? appName = null
@@ -158,4 +209,8 @@ public class SquidStdBootstrapLifecycleLoggingTests
 
     private static bool HasMessage(CapturingLogSink sink, string fragment)
         => sink.Events.Any(e => e.RenderMessage().Contains(fragment, StringComparison.Ordinal));
+
+    private sealed class HealthyFake : FakeLifecycleService;
+
+    private sealed class FailingFake : FakeLifecycleService;
 }
