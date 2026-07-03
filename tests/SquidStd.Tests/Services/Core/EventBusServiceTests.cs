@@ -257,6 +257,48 @@ public class EventBusServiceTests
     public class Telemetry
     {
         [Fact]
+        public async Task PublishAsync_AtVerbose_TracesEventFlow()
+        {
+            var sink = new CapturingLogSink();
+            var original = Log.Logger;
+            Log.Logger = new LoggerConfiguration()
+                         .MinimumLevel
+                         .Verbose()
+                         .WriteTo
+                         .Sink(sink)
+                         .CreateLogger();
+
+            try
+            {
+                using var eventBus = new EventBusService(new());
+                IEventBus bus = eventBus;
+                bus.Subscribe<TestEvent>((_, _) => Task.CompletedTask);
+
+                await bus.PublishAsync(new TestEvent("payload"), CancellationToken.None);
+                await bus.PublishAsync(new OtherEvent(), CancellationToken.None);   // zero listeners
+
+                Assert.Contains(
+                    sink.Events,
+                    e => e.Level == LogEventLevel.Verbose
+                         && e.RenderMessage().Contains("TestEvent", StringComparison.Ordinal)
+                         && e.RenderMessage().Contains("1 listener", StringComparison.Ordinal)
+                );
+                Assert.Contains(
+                    sink.Events,
+                    e => e.Level == LogEventLevel.Verbose
+                         && e.RenderMessage().Contains("OtherEvent", StringComparison.Ordinal)
+                         && e.RenderMessage().Contains("0 listener", StringComparison.Ordinal)
+                );
+            }
+            finally
+            {
+                Log.Logger = original;
+            }
+        }
+
+        private sealed record OtherEvent : IEvent;
+
+        [Fact]
         public async Task PublishAsync_SlowListener_LogsWarning()
         {
             var sink = new CapturingLogSink();
