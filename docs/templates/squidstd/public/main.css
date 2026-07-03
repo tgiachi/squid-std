@@ -86,6 +86,18 @@ article h1[align] {
 .sqd-install code { color: var(--sqd-accent); background: transparent; }
 .sqd-cta { margin-top: 0.5rem; }
 .sqd-cta .btn { margin: 0 0.25rem; }
+/* The hero background is always dark: the outline button must use light text/border,
+   regardless of the page color mode. */
+.sqd-cta .btn-outline-primary {
+  --bs-btn-color: #eaf6f8;
+  --bs-btn-border-color: var(--sqd-accent);
+  --bs-btn-hover-color: var(--sqd-ink);
+  --bs-btn-hover-bg: var(--sqd-accent);
+  --bs-btn-hover-border-color: var(--sqd-accent);
+  --bs-btn-active-color: var(--sqd-ink);
+  --bs-btn-active-bg: var(--sqd-accent);
+  --bs-btn-active-border-color: var(--sqd-accent);
+}
 
 .sqd-cards {
   display: grid;
