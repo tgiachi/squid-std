@@ -47,7 +47,7 @@ dotnet run --project samples/SquidStd.Samples.ScriptingLua
 Prints:
 
 ```
-lua modules = 1
+lua modules = 3
 3 + 4 = 7
 result = hello from C# and lua
 ```

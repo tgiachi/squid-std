@@ -77,6 +77,9 @@ Services implementing `ISquidStdService` participate in the lifecycle. On `Start
 
 The bootstrap logs its whole lifecycle: a startup banner with the application name and version (set `SquidStdOptions.AppName`; it defaults to the entry assembly name and is attached to every event as the `Application` / `ApplicationVersion` properties), a registration summary (per-registration detail at Debug), one line per service started with its duration, and the shutdown sequence. A service that fails to stop is logged as a warning and the remaining services are still stopped. Extra Serilog sinks can be plugged by registering `ILogEventSink` instances in the container before start.
 
+When an event bus is registered, the bootstrap publishes `EngineStartingEvent`, `EngineStartedEvent` and `EngineStoppedEvent` on it during the lifecycle.
+`EngineStartingEvent` is only visible to subscriptions made before start - auto-registered listeners start during the service loop.
+
 ```mermaid
 sequenceDiagram
   participant App
