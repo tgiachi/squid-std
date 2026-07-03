@@ -96,3 +96,11 @@ sequenceDiagram
 ## RunAsync for long-running hosts
 
 For long-running hosts, call `RunAsync`. It starts every service and then blocks until cancellation, stopping services cleanly on shutdown. Resolve dependencies anywhere with `bootstrap.Resolve<T>()`. See the [architecture](architecture.md) overview for how the host fits the layers.
+
+`RunAsync` also completes when a shutdown is requested through the shared lifetime - this is
+what the `exit` command of SquidStd.ConsoleCommands does - and Ctrl+C performs an orderly
+shutdown instead of killing the process:
+
+```csharp
+bootstrap.Container.Resolve<ISquidStdLifetime>().RequestShutdown();
+```

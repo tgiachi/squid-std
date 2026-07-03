@@ -8,6 +8,7 @@ using SquidStd.ConsoleCommands.Internal;
 using SquidStd.ConsoleCommands.Internal.Logging;
 using SquidStd.ConsoleCommands.Services;
 using SquidStd.Core.Interfaces.Bootstrap;
+using SquidStd.Core.Interfaces.Lifecycle;
 
 namespace SquidStd.ConsoleCommands.Extensions;
 
@@ -35,9 +36,11 @@ public static class ConsoleCommandsRegistrationExtensions
                 {
                     var ui = resolver.Resolve<IConsoleUiService>();
                     var system = new CommandSystemService(ui.WriteLine);
+                    var lifetime = resolver.Resolve<ISquidStdLifetime>(IfUnresolved.ReturnDefault);
                     var bootstrap = resolver.Resolve<ISquidStdBootstrap>(IfUnresolved.ReturnDefault);
                     BuiltinConsoleCommands.Register(
                         system,
+                        lifetime,
                         bootstrap,
                         static () =>
                         {
