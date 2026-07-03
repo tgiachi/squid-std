@@ -1,7 +1,10 @@
+using System.Diagnostics;
 using System.Reflection;
 using DryIoc;
 using Serilog;
 using Serilog.Core;
+using Serilog.Events;
+using SquidStd.Abstractions.Data.Internal.Config;
 using SquidStd.Abstractions.Data.Internal.Services;
 using SquidStd.Abstractions.Interfaces.Services;
 using SquidStd.Core.Data.Bootstrap;
@@ -161,8 +164,25 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 
         try
         {
+            ConfigureLogging();
+
+            var logger = Log.ForContext<SquidStdBootstrap>();
+            var appName = ResolveAppName(Options);
+
+            logger.Information(
+                "{Application} {ApplicationVersion} starting (SquidStd {SquidStdVersion}, config {ConfigName}, root {RootDirectory})",
+                appName,
+                ResolveVersion(Assembly.GetEntryAssembly()),
+                ResolveVersion(typeof(SquidStdBootstrap).Assembly),
+                Options.ConfigName,
+                Options.RootDirectory
+            );
+
             var registrations = GetServiceRegistrations();
+            LogRegistrations(logger, registrations);
+
             var startedInstances = new HashSet<ISquidStdService>(ReferenceEqualityComparer.Instance);
+            var totalStopwatch = Stopwatch.StartNew();
 
             for (var i = 0; i < registrations.Length; i++)
             {
@@ -175,14 +195,33 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
                     continue;
                 }
 
-                await service.StartAsync(cancellationToken);
-                _startedServices.Add(service);
+                var serviceStopwatch = Stopwatch.StartNew();
 
-                if (service is IConfigManagerService)
+                try
                 {
-                    ConfigureLogger();
+                    await service.StartAsync(cancellationToken);
                 }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, "Service {Service:l} failed to start", service.GetType().Name);
+
+                    throw;
+                }
+
+                _startedServices.Add(service);
+                logger.Information(
+                    "Started {Service:l} in {Elapsed:0.#}ms",
+                    service.GetType().Name,
+                    serviceStopwatch.Elapsed.TotalMilliseconds
+                );
             }
+
+            logger.Information(
+                "{Application} started: {Count} service(s) in {TotalElapsed:0.#}ms",
+                appName,
+                _startedServices.Count,
+                totalStopwatch.Elapsed.TotalMilliseconds
+            );
         }
         catch
         {
@@ -316,6 +355,58 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         Log.Logger = logger;
         Container.RegisterInstance<ILogger>(logger, IfAlreadyRegistered.Replace);
         _loggerConfigured = true;
+    }
+
+    private void LogRegistrations(ILogger logger, ServiceRegistrationData[] lifecycleRegistrations)
+    {
+        List<ConfigRegistrationData> sections = Container.IsRegistered<List<ConfigRegistrationData>>()
+                                                    ? Container.Resolve<List<ConfigRegistrationData>>()
+                                                    : [];
+        var containerRegistrations = Container.GetServiceRegistrations().ToArray();
+
+        logger.Information(
+            "Registered {LifecycleCount} lifecycle service(s), {SectionCount} config section(s), {ContainerCount} container registration(s)",
+            lifecycleRegistrations.Length,
+            sections.Count,
+            containerRegistrations.Length
+        );
+
+        if (!logger.IsEnabled(LogEventLevel.Debug))
+        {
+            return;
+        }
+
+        foreach (var registration in lifecycleRegistrations)
+        {
+            logger.Debug(
+                "Lifecycle service {Service} -> {Implementation} (priority {Priority})",
+                registration.ServiceType.Name,
+                registration.ImplementationType.Name,
+                registration.Priority
+            );
+        }
+
+        foreach (var section in sections)
+        {
+            logger.Debug("Config section '{Section}' -> {Type}", section.SectionName, section.ConfigType.Name);
+        }
+
+        foreach (var group in containerRegistrations
+                     .GroupBy(registration => registration.ServiceType.Assembly.GetName().Name ?? "unknown")
+                     .OrderBy(group => group.Key, StringComparer.Ordinal))
+        {
+            logger.Debug(
+                "{Assembly}: {Count} registration(s): {Services}",
+                group.Key,
+                group.Count(),
+                string.Join(
+                    ", ",
+                    group.Select(registration => registration.ServiceType.Name)
+                         .Distinct()
+                         .Order(StringComparer.Ordinal)
+                )
+            );
+        }
     }
 
     private ServiceRegistrationData[] GetServiceRegistrations()
