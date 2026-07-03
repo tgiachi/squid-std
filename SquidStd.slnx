@@ -10,6 +10,7 @@
         <Project Path="src/SquidStd.Caching.Abstractions/SquidStd.Caching.Abstractions.csproj"/>
         <Project Path="src/SquidStd.Caching.Redis/SquidStd.Caching.Redis.csproj"/>
         <Project Path="src/SquidStd.Caching/SquidStd.Caching.csproj"/>
+        <Project Path="src/SquidStd.ConsoleCommands/SquidStd.ConsoleCommands.csproj"/>
         <Project Path="src/SquidStd.Core/SquidStd.Core.csproj"/>
         <Project Path="src/SquidStd.Database.Abstractions/SquidStd.Database.Abstractions.csproj"/>
         <Project Path="src/SquidStd.Database/SquidStd.Database.csproj"/>

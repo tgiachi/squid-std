@@ -77,6 +77,7 @@
         <ProjectReference Include="..\..\src\SquidStd.Vfs.Database\SquidStd.Vfs.Database.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Secrets.Aws\SquidStd.Secrets.Aws.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Tui\SquidStd.Tui.csproj"/>
+        <ProjectReference Include="..\..\src\SquidStd.ConsoleCommands\SquidStd.ConsoleCommands.csproj"/>
     </ItemGroup>
 
 </Project>
