@@ -24,6 +24,7 @@ namespace SquidStd.Services.Core.Services.Bootstrap;
 public sealed class SquidStdBootstrap : ISquidStdBootstrap
 {
     private readonly List<(Type ConfigType, Action<object> Apply)> _configHooks = [];
+    private readonly List<Action<IConfigManagerService>> _configReadyCallbacks = [];
     private readonly bool _ownsContainer;
     private readonly List<ISquidStdService> _startedServices = [];
     private readonly Lock _syncRoot = new();
@@ -108,6 +109,25 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         }
 
         _configHooks.Add((typeof(TConfig), instance => configure((TConfig)instance)));
+
+        return this;
+    }
+
+    /// <inheritdoc />
+    public ISquidStdBootstrap OnConfigReady(Action<IConfigManagerService> ready)
+    {
+        ArgumentNullException.ThrowIfNull(ready);
+        ThrowIfDisposed();
+
+        lock (_syncRoot)
+        {
+            if (_state != BootstrapStateType.Created)
+            {
+                throw new InvalidOperationException("Config callbacks cannot be registered after bootstrap start.");
+            }
+        }
+
+        _configReadyCallbacks.Add(ready);
 
         return this;
     }
@@ -413,7 +433,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 
     private void ApplyConfigHooks()
     {
-        if (_configHooks.Count == 0)
+        if (_configHooks.Count == 0 && _configReadyCallbacks.Count == 0)
         {
             return;
         }
@@ -436,6 +456,20 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
             apply(Container.Resolve(configType));
             logger.Debug("Applied config hook to {Section:l}", configType.Name);
         }
+
+        if (_configReadyCallbacks.Count == 0)
+        {
+            return;
+        }
+
+        var configManager = Container.Resolve<IConfigManagerService>();
+
+        foreach (var ready in _configReadyCallbacks)
+        {
+            ready(configManager);
+        }
+
+        logger.Debug("Invoked {Count} config ready callback(s)", _configReadyCallbacks.Count);
     }
 
     private void LogRegistrations(ILogger logger, ServiceRegistrationData[] lifecycleRegistrations)

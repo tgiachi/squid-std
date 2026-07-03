@@ -46,7 +46,9 @@ await bootstrap.StartAsync();
 ```
 
 The effective order is: load configuration, apply config hooks, configure the logger, start
-services. Hooks are re-applied on every configuration load, so overrides are never lost. See
+services. Hooks are re-applied on every configuration load, so overrides are never lost. To
+receive the whole configuration manager once every typed hook has run, use
+`bootstrap.OnConfigReady(cfg => ...)`. See
 [Inspecting and overriding loaded configuration](../guides/configuration.md#inspecting-and-overriding-loaded-configuration) for more examples.
 
 ## Migrating to 0.15: explicit core services
