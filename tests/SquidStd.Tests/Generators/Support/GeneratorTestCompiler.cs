@@ -6,6 +6,7 @@ using SquidStd.Abstractions.Attributes;
 using SquidStd.Abstractions.Extensions.Config;
 using SquidStd.Abstractions.Extensions.Events;
 using SquidStd.Abstractions.Extensions.Services;
+using SquidStd.ConsoleCommands.Attributes;
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Generators.Events;
 using SquidStd.Scripting.Lua.Attributes;
@@ -77,6 +78,7 @@ internal static class GeneratorTestCompiler
         AddReference(references, typeof(RegisterJobHandlerAttribute).Assembly.Location);
         AddReference(references, typeof(WorkersRegistrationExtensions).Assembly.Location);
         AddReference(references, typeof(IJobHandler).Assembly.Location);
+        AddReference(references, typeof(RegisterConsoleCommandAttribute).Assembly.Location);
         AddReference(references, typeof(IContainer).Assembly.Location);
 
         return references;

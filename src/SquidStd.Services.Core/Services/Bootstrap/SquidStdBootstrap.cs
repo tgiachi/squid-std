@@ -11,9 +11,12 @@ using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Extensions.Logger;
 using SquidStd.Core.Interfaces.Bootstrap;
 using SquidStd.Core.Interfaces.Config;
+using SquidStd.Core.Interfaces.Events;
+using SquidStd.Core.Interfaces.Lifecycle;
 using SquidStd.Core.Types;
 using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Extensions.Logger;
+using SquidStd.Services.Core.Services.Lifecycle;
 using SquidStd.Services.Core.Types;
 
 namespace SquidStd.Services.Core.Services.Bootstrap;
@@ -25,6 +28,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 {
     private readonly List<(Type ConfigType, Action<object> Apply)> _configHooks = [];
     private readonly List<Action<IConfigManagerService>> _configReadyCallbacks = [];
+    private readonly SquidStdLifetimeService _lifetime = new();
     private readonly bool _ownsContainer;
     private readonly List<ISquidStdService> _startedServices = [];
     private readonly Lock _syncRoot = new();
@@ -66,6 +70,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         Container.RegisterInstance<ISquidStdBootstrap>(this, IfAlreadyRegistered.Replace);
         Container.RegisterInstance(this, IfAlreadyRegistered.Replace);
         Container.RegisterInstance(Options, IfAlreadyRegistered.Replace);
+        Container.RegisterInstance<ISquidStdLifetime>(_lifetime, IfAlreadyRegistered.Replace);
         Container.RegisterConfigServices(Options.ConfigName, Options.RootDirectory);
     }
 
@@ -151,6 +156,8 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
                 await Log.CloseAndFlushAsync();
             }
 
+            _lifetime.Dispose();
+
             if (_ownsContainer)
             {
                 Container.Dispose();
@@ -193,13 +200,29 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
     {
         await StartAsync(cancellationToken);
 
+        ConsoleCancelEventHandler? cancelHandler = null;
+
         try
         {
-            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _lifetime.ShutdownToken);
+            cancelHandler = (_, args) =>
+            {
+                args.Cancel = true;
+                _lifetime.RequestShutdown();
+            };
+            Console.CancelKeyPress += cancelHandler;
+
+            await Task.Delay(Timeout.InfiniteTimeSpan, linked.Token);
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested
+                                                 || _lifetime.ShutdownToken.IsCancellationRequested) { }
         finally
         {
+            if (cancelHandler is not null)
+            {
+                Console.CancelKeyPress -= cancelHandler;
+            }
+
             await StopAsync(CancellationToken.None);
         }
     }
@@ -229,6 +252,8 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 
             var registrations = GetServiceRegistrations();
             LogRegistrations(logger, registrations);
+
+            await PublishEngineEventAsync(new EngineStartingEvent(appName), cancellationToken);
 
             var startedInstances = new HashSet<ISquidStdService>(ReferenceEqualityComparer.Instance);
             var totalStopwatch = Stopwatch.StartNew();
@@ -270,6 +295,11 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
                 appName,
                 _startedServices.Count,
                 totalStopwatch.Elapsed.TotalMilliseconds
+            );
+
+            await PublishEngineEventAsync(
+                new EngineStartedEvent(appName, _startedServices.Count, totalStopwatch.Elapsed.TotalMilliseconds),
+                cancellationToken
             );
         }
         catch
@@ -315,6 +345,19 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
             }
 
             logger.Information("{Application:l} shutdown complete", appName);
+
+            try
+            {
+                await PublishEngineEventAsync(new EngineStoppedEvent(appName), cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                logger.Warning(ex, "EngineStoppedEvent publish failed");
+            }
         }
         finally
         {
@@ -429,6 +472,17 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         Log.Logger = logger;
         Container.RegisterInstance<ILogger>(logger, IfAlreadyRegistered.Replace);
         _loggerConfigured = true;
+    }
+
+    private async Task PublishEngineEventAsync<TEvent>(TEvent engineEvent, CancellationToken cancellationToken)
+        where TEvent : IEvent
+    {
+        if (!Container.IsRegistered<IEventBus>())
+        {
+            return;
+        }
+
+        await Container.Resolve<IEventBus>().PublishAsync(engineEvent, cancellationToken);
     }
 
     private void ApplyConfigHooks()

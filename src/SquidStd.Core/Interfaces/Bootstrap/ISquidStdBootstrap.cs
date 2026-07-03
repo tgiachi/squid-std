@@ -68,7 +68,9 @@ public interface ISquidStdBootstrap : IAsyncDisposable
     void ConfigureLogging();
 
     /// <summary>
-    /// Starts services, waits until cancellation, and then stops services.
+    /// Starts services, waits until the caller token is cancelled or a shutdown is requested
+    /// through <see cref="Lifecycle.ISquidStdLifetime" /> (Ctrl+C is turned into a graceful
+    /// shutdown request), and then stops services.
     /// </summary>
     /// <param name="cancellationToken">Token that controls the run lifetime.</param>
     /// <returns>A task that completes after services have stopped.</returns>

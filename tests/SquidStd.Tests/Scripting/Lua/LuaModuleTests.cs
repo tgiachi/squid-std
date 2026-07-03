@@ -21,6 +21,20 @@ public class LuaModuleTests
     }
 
     [Fact]
+    public void EventsModule_SubscribeIsEquivalentToOn()
+    {
+        var script = new Script();
+        var bridge = new CapturingLuaEventBridge();
+        var callback = script.DoString("return function() end").Function;
+        var module = new EventsModule(bridge);
+
+        module.Subscribe("engine_started", callback);
+
+        Assert.Equal("engine_started", bridge.EventName);
+        Assert.Same(callback, bridge.Callback);
+    }
+
+    [Fact]
     public void RandomModule_ChanceHandlesBoundaries()
     {
         var module = new RandomModule();

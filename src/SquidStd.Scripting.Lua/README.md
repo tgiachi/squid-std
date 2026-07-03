@@ -33,6 +33,25 @@ container.RegisterGeneratedScriptModules();
 // Resolve IScriptEngineService to load and execute scripts that call math2.add(1, 2).
 ```
 
+## Subscribing to server events
+
+Register the Lua events stack, then subscribe from any script by snake_case event name - the
+CLR type name minus the `Event` suffix (`EngineStartedEvent` becomes `engine_started`). Payload
+keys are snake_case too. The convention applies to every event published on the event bus.
+
+```csharp
+container.RegisterLuaEvents();   // bridge + events module + bus forwarder
+```
+
+```lua
+events.subscribe("engine_started", function(e)
+    log.info("engine ready: " .. e.application .. " (" .. e.service_count .. " services)")
+end)
+```
+
+The forwarder is a no-op when no event bus is registered. `events.on` remains available as an
+alias of `subscribe`.
+
 ## Key types
 
 | Type                                                | Purpose                                                             |
