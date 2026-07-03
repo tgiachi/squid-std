@@ -1,6 +1,7 @@
 using DryIoc;
 using Serilog.Core;
 using SquidStd.Abstractions.Extensions.Config;
+using SquidStd.Abstractions.Extensions.Services;
 using SquidStd.ConsoleCommands.Data.Config;
 using SquidStd.ConsoleCommands.Interfaces;
 using SquidStd.ConsoleCommands.Internal;
@@ -55,6 +56,7 @@ public static class ConsoleCommandsRegistrationExtensions
                 resolver => new ConsolePromptLogSink(resolver.Resolve<IConsoleUiService>()),
                 Reuse.Singleton
             );
+            container.RegisterStdService<ConsoleInputLoopService, ConsoleInputLoopService>(500);
 
             return container;
         }
