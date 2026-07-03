@@ -10,3 +10,4 @@
  SQDGEN003 | SquidStd.Generators | Warning  | Config section cannot be generated
  SQDGEN004 | SquidStd.Generators | Warning  | Job handler cannot be generated
  SQDGEN005 | SquidStd.Generators | Warning  | Script module cannot be generated
+ SQDGEN006 | SquidStd.Generators | Warning  | Console command cannot be generated

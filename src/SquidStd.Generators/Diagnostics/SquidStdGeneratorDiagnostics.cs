@@ -48,4 +48,13 @@ internal static class SquidStdGeneratorDiagnostics
         DiagnosticSeverity.Warning,
         true
     );
+
+    public static readonly DiagnosticDescriptor UnsupportedConsoleCommand = new(
+        "SQDGEN006",
+        "Console command cannot be generated",
+        "Console command '{0}' must be a non-generic public or internal class implementing IConsoleCommandExecutor with a non-empty command name",
+        "SquidStd.Generators",
+        DiagnosticSeverity.Warning,
+        true
+    );
 }
