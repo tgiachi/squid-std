@@ -1,6 +1,7 @@
 using DryIoc;
 using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Interfaces.Bootstrap;
+using SquidStd.Core.Interfaces.Config;
 
 namespace SquidStd.Tests.AspNetCore;
 
@@ -32,6 +33,13 @@ internal sealed class FakeSquidStdBootstrap : ISquidStdBootstrap
     public ISquidStdBootstrap OnConfigLoaded<TConfig>(Action<TConfig> configure) where TConfig : class
     {
         ArgumentNullException.ThrowIfNull(configure);
+
+        return this;
+    }
+
+    public ISquidStdBootstrap OnConfigReady(Action<IConfigManagerService> ready)
+    {
+        ArgumentNullException.ThrowIfNull(ready);
 
         return this;
     }
