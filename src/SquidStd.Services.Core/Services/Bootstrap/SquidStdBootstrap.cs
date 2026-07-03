@@ -172,7 +172,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
             logger.Information(
                 "{Application:l} {ApplicationVersion:l} starting (SquidStd {SquidStdVersion:l}, config {ConfigName}, root {RootDirectory})",
                 appName,
-                ResolveVersion(Assembly.GetEntryAssembly()),
+                ResolveAppVersion(Options),
                 ResolveVersion(typeof(SquidStdBootstrap).Assembly),
                 Options.ConfigName,
                 Options.RootDirectory
@@ -317,6 +317,11 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
                ? options.AppName
                : Assembly.GetEntryAssembly()?.GetName().Name ?? "SquidStd";
 
+    private static string ResolveAppVersion(SquidStdOptions options)
+        => !string.IsNullOrWhiteSpace(options.AppVersion)
+               ? options.AppVersion
+               : ResolveVersion(Assembly.GetEntryAssembly());
+
     private static string ResolveVersion(Assembly? assembly)
     {
         var informational = assembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
@@ -344,7 +349,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 
         loggerConfiguration
             .Enrich.WithProperty("Application", ResolveAppName(Options))
-            .Enrich.WithProperty("ApplicationVersion", ResolveVersion(Assembly.GetEntryAssembly()));
+            .Enrich.WithProperty("ApplicationVersion", ResolveAppVersion(Options));
 
         if (options.MinimumLevel != LogLevelType.None)
         {

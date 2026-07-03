@@ -20,4 +20,11 @@ public sealed class SquidStdOptions
     /// "Application" property. When null or empty, the entry assembly name is used.
     /// </summary>
     public string? AppName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the application version used in the startup banner and as the Serilog
+    /// "ApplicationVersion" property. When null or empty, the entry assembly informational
+    /// version is used.
+    /// </summary>
+    public string? AppVersion { get; set; }
 }
