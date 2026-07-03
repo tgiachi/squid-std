@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using Serilog;
+using Serilog.Events;
 using SquidStd.Core.Data.Events;
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Services.Core.Services.Internal;
@@ -47,6 +48,11 @@ public sealed class EventBusService : IEventBus, IDisposable
         var global = typeof(TEvent) == typeof(IEvent) ? null : Snapshot(typeof(IEvent));
 
         var total = (typed?.Length ?? 0) + (global?.Length ?? 0);
+
+        if (_logger.IsEnabled(LogEventLevel.Verbose))
+        {
+            _logger.Verbose("Publishing {EventType} to {ListenerCount} listener(s)", typeof(TEvent).Name, total);
+        }
 
         if (total == 0)
         {
