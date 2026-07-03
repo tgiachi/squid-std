@@ -31,6 +31,24 @@ bootstrap.ConfigureServices(container =>
 
 See [dependency injection](dependency-injection.md) for the container and the `AddXxx` / `RegisterXxx` pattern.
 
+## OnConfigLoaded
+
+After the configuration is loaded - and before the logger is built and services start - the
+bootstrap applies any typed config hooks. Use them to inspect or override loaded sections at
+startup; changes are in-memory only:
+
+```csharp
+var bootstrap = SquidStdBootstrap.Create(o => o.ConfigName = "myapp");
+bootstrap.ConfigureServices(c => c.RegisterCoreServices());
+bootstrap.OnConfigLoaded<SquidStdLoggerOptions>(o => o.MinimumLevel = LogLevelType.Debug);
+
+await bootstrap.StartAsync();
+```
+
+The effective order is: load configuration, apply config hooks, configure the logger, start
+services. Hooks are re-applied on every configuration load, so overrides are never lost. See
+[Inspecting and overriding loaded configuration](../guides/configuration.md#inspecting-and-overriding-loaded-configuration) for more examples.
+
 ## Migrating to 0.15: explicit core services
 
 Up to 0.14, `SquidStdBootstrap.Create` registered every core service on creation. From 0.15 the bootstrap registers only the configuration core - `DirectoriesConfig`, the `logger` config section and the config manager. The remaining core services (JSON serializer, event bus, job system, main-thread dispatcher, timer wheel, metrics collection, secrets) are opted into with the parameterless `RegisterCoreServices()`:
@@ -53,7 +71,7 @@ builder.UseSquidStd(options => options.ConfigName = "myapp", c => c.RegisterCore
 
 ## Start and stop over ISquidStdService
 
-Services implementing `ISquidStdService` participate in the lifecycle. On `StartAsync` they are started in registration order; on `StopAsync` they are stopped in reverse order, so dependencies remain available while their dependents shut down.
+Services implementing `ISquidStdService` participate in the lifecycle. On `StartAsync` the configuration is loaded and the config hooks are applied, then services are started in registration order; on `StopAsync` they are stopped in reverse order, so dependencies remain available while their dependents shut down.
 
 The bootstrap logs its whole lifecycle: a startup banner with the application name and version (set `SquidStdOptions.AppName`; it defaults to the entry assembly name and is attached to every event as the `Application` / `ApplicationVersion` properties), a registration summary (per-registration detail at Debug), one line per service started with its duration, and the shutdown sequence. A service that fails to stop is logged as a warning and the remaining services are still stopped. Extra Serilog sinks can be plugged by registering `ILogEventSink` instances in the container before start.
 

@@ -43,3 +43,39 @@ myService:
   endpoint: "https://$API_HOST"
   retries: 5
 ```
+
+## Inspecting and overriding loaded configuration
+
+The config manager loads sections transparently, but nothing stays hidden:
+
+```csharp
+var config = bootstrap.Resolve<IConfigManagerService>();
+Console.WriteLine(config.Compose());                      // full current configuration as YAML
+var logger = config.GetConfig<SquidStdLoggerOptions>();   // one typed section
+```
+
+To inspect or tweak a section at startup - before the logger and the services consume it -
+register a typed hook on the bootstrap. Hooks run after every configuration load and mutate
+the section in memory only: the YAML file is never rewritten (call `Save()` explicitly if you
+want to persist).
+
+```csharp
+// Tune a section at startup
+bootstrap.OnConfigLoaded<SquidStdLoggerOptions>(o => o.MinimumLevel = LogLevelType.Debug);
+
+// Override from the environment (WorkersConfig comes with SquidStd.Workers)
+bootstrap.OnConfigLoaded<WorkersConfig>(w =>
+{
+    if (int.TryParse(Environment.GetEnvironmentVariable("WORKERS_MAX"), out var max))
+    {
+        w.MaxConcurrency = max;
+    }
+});
+
+// Inspect a loaded section before services start
+bootstrap.OnConfigLoaded<StorageConfig>(s => Console.WriteLine($"storage root: {s.RootDirectory}"));
+```
+
+Hooks compose: register as many as you need, also on the same section - they run in
+registration order. Registering a hook for a type that is not a config section fails at
+startup with a clear error; registering one after the bootstrap has started throws.

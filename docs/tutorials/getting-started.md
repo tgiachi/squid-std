@@ -48,7 +48,8 @@ The host starts, logs the service lifecycle, and waits until you press Ctrl+C.
 ## How it works
 
 `SquidStdBootstrap` is the composition root: it builds the container, registers the configuration core, loads
-the config sections, and orchestrates the `ISquidStdService` lifecycle. The core services come from the
+the config sections, and orchestrates the `ISquidStdService` lifecycle. Need to inspect or tweak a loaded
+value before services start? See [Inspecting and overriding loaded configuration](../articles/guides/configuration.md#inspecting-and-overriding-loaded-configuration). The core services come from the
 explicit `RegisterCoreServices()` call in `ConfigureServices`, and every other SquidStd module plugs into the
 same container through its `Add…` extension methods.
 
