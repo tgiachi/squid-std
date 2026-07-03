@@ -21,7 +21,14 @@ public sealed class SquidStdLifetimeService : ISquidStdLifetime, IDisposable
             return;
         }
 
-        _shutdownSource.Cancel();
+        try
+        {
+            _shutdownSource.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+            // Requested after the bootstrap disposed the lifetime: idempotent no-op.
+        }
     }
 
     /// <inheritdoc />

@@ -72,7 +72,9 @@ internal sealed class PingCommand : IConsoleCommandExecutor
 
 The builtin commands `help` (`?`), `clear` (`cls`) and `exit` (`quit`) are registered by
 `AddConsoleCommands()`. `exit` requests a graceful shutdown through `ISquidStdLifetime` - with a
-`RunAsync` host the process stops its services in order and exits cleanly.
+`RunAsync` host the process stops its services in order and exits cleanly. With a manual
+`StartAsync`/`StopAsync` host, observe `ISquidStdLifetime.ShutdownToken` yourself - or just use
+`RunAsync`.
 
 ## Configuration
 
