@@ -1,3 +1,5 @@
+## [0.19.0](https://github.com/tgiachi/squid-std/compare/v0.18.0...v0.19.0) (2026-07-03)
+
 ## [0.18.0](https://github.com/tgiachi/squid-std/compare/v0.17.0...v0.18.0) (2026-07-03)
 
 ## [0.17.0](https://github.com/tgiachi/squid-std/compare/v0.16.0...v0.17.0) (2026-07-03)
