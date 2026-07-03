@@ -178,6 +178,97 @@ public class SquidStdBootstrapConfigHooksTests
         }
     }
 
+    [Fact]
+    public async Task OnConfigReady_ReceivesManagerWithHookAdjustedValues()
+    {
+        using var temp = new TempDirectory();
+        await using var bootstrap = NewBootstrap(temp.Path);
+        var observedLimit = 0;
+        var invocations = 0;
+        bootstrap.ConfigureServices(c =>
+        {
+            c.RegisterConfigSection("fakeSection", static () => new FakeSectionConfig(), 0);
+            return c;
+        });
+        bootstrap.OnConfigLoaded<FakeSectionConfig>(f => f.Limit = 42);
+        bootstrap.OnConfigReady(cfg =>
+        {
+            invocations++;
+            observedLimit = cfg.GetConfig<FakeSectionConfig>().Limit;
+        });
+
+        await bootstrap.StartAsync();
+        try
+        {
+            Assert.True(invocations >= 1);
+            Assert.Equal(42, observedLimit);
+        }
+        finally
+        {
+            await bootstrap.StopAsync();
+        }
+    }
+
+    [Fact]
+    public async Task OnConfigReady_MultipleCallbacks_RunInOrder()
+    {
+        using var temp = new TempDirectory();
+        await using var bootstrap = NewBootstrap(temp.Path);
+        var order = new List<string>();
+        bootstrap.OnConfigReady(_ => order.Add("a"));
+        bootstrap.OnConfigReady(_ => order.Add("b"));
+
+        await bootstrap.StartAsync();
+        try
+        {
+            Assert.True(order.Count >= 2);
+            Assert.Equal("a", order[0]);
+            Assert.Equal("b", order[1]);
+        }
+        finally
+        {
+            await bootstrap.StopAsync();
+        }
+    }
+
+    [Fact]
+    public async Task OnConfigReady_WithoutTypedHooks_StillRuns()
+    {
+        using var temp = new TempDirectory();
+        await using var bootstrap = NewBootstrap(temp.Path);
+        var composed = string.Empty;
+        bootstrap.OnConfigReady(cfg => composed = cfg.Compose());
+
+        await bootstrap.StartAsync();
+        try
+        {
+            Assert.Contains("logger", composed, StringComparison.Ordinal);
+        }
+        finally
+        {
+            await bootstrap.StopAsync();
+        }
+    }
+
+    [Fact]
+    public async Task OnConfigReady_AfterStart_Throws()
+    {
+        using var temp = new TempDirectory();
+        await using var bootstrap = NewBootstrap(temp.Path);
+
+        await bootstrap.StartAsync();
+        try
+        {
+            Assert.Throws<InvalidOperationException>(
+                () => bootstrap.OnConfigReady(_ => { })
+            );
+        }
+        finally
+        {
+            await bootstrap.StopAsync();
+        }
+    }
+
     private static SquidStdBootstrap NewBootstrap(string root)
         => SquidStdBootstrap.Create(new SquidStdOptions { ConfigName = "app", RootDirectory = root });
 }

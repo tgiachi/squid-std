@@ -79,3 +79,17 @@ bootstrap.OnConfigLoaded<StorageConfig>(s => Console.WriteLine($"storage root: {
 Hooks compose: register as many as you need, also on the same section - they run in
 registration order. Registering a hook for a type that is not a config section fails at
 startup with a clear error; registering one after the bootstrap has started throws.
+
+To receive the whole configuration in one callback - after every typed hook has been
+applied - use `OnConfigReady`. It hands you the config manager, so you can dump or inspect
+the final values:
+
+```csharp
+bootstrap.OnConfigReady(cfg =>
+{
+    Console.WriteLine(cfg.Compose());   // final configuration, overrides included
+});
+```
+
+`OnConfigReady` follows the same rules as the typed hooks: it runs after every configuration
+load, before the logger and the services, and must be registered before the bootstrap starts.

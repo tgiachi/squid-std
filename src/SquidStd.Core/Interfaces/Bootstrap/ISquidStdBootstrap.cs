@@ -1,5 +1,6 @@
 using DryIoc;
 using SquidStd.Core.Data.Bootstrap;
+using SquidStd.Core.Interfaces.Config;
 
 namespace SquidStd.Core.Interfaces.Bootstrap;
 
@@ -42,6 +43,16 @@ public interface ISquidStdBootstrap : IAsyncDisposable
     /// <param name="configure">Callback that receives the loaded section.</param>
     /// <returns>The same bootstrap for chaining.</returns>
     ISquidStdBootstrap OnConfigLoaded<TConfig>(Action<TConfig> configure) where TConfig : class;
+
+    /// <summary>
+    /// Registers a callback invoked with the whole configuration manager after every load, once
+    /// all <see cref="OnConfigLoaded{TConfig}" /> hooks have been applied and before the logger
+    /// and services consume the sections. Use it to inspect (or dump via
+    /// <see cref="IConfigManagerService.Compose" />) the final configuration.
+    /// </summary>
+    /// <param name="ready">Callback that receives the configuration manager.</param>
+    /// <returns>The same bootstrap for chaining.</returns>
+    ISquidStdBootstrap OnConfigReady(Action<IConfigManagerService> ready);
 
     /// <summary>
     /// Resolves a service from the owned dependency injection container.
