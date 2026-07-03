@@ -120,6 +120,8 @@
   href: aws-abstractions.md
 - name: SquidStd.Tui
   href: tui.md
+- name: SquidStd.ConsoleCommands
+  href: consolecommands.md
 - name: SquidStd.Crypto
   href: crypto.md
 - name: SquidStd.Secrets.Aws

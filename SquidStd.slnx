@@ -10,6 +10,7 @@
         <Project Path="src/SquidStd.Caching.Abstractions/SquidStd.Caching.Abstractions.csproj"/>
         <Project Path="src/SquidStd.Caching.Redis/SquidStd.Caching.Redis.csproj"/>
         <Project Path="src/SquidStd.Caching/SquidStd.Caching.csproj"/>
+        <Project Path="src/SquidStd.ConsoleCommands/SquidStd.ConsoleCommands.csproj"/>
         <Project Path="src/SquidStd.Core/SquidStd.Core.csproj"/>
         <Project Path="src/SquidStd.Database.Abstractions/SquidStd.Database.Abstractions.csproj"/>
         <Project Path="src/SquidStd.Database/SquidStd.Database.csproj"/>
@@ -55,6 +56,7 @@
         <Project Path="samples/SquidStd.Samples.Networking/SquidStd.Samples.Networking.csproj"/>
         <Project Path="samples/SquidStd.Samples.Persistence/SquidStd.Samples.Persistence.csproj"/>
         <Project Path="samples/SquidStd.Samples.Commands/SquidStd.Samples.Commands.csproj"/>
+        <Project Path="samples/SquidStd.Samples.ConsoleCommands/SquidStd.Samples.ConsoleCommands.csproj"/>
         <Project Path="samples/SquidStd.Samples.Email/SquidStd.Samples.Email.csproj"/>
         <Project Path="samples/SquidStd.Samples.Database/SquidStd.Samples.Database.csproj"/>
         <Project Path="samples/SquidStd.Samples.AspNetCore/SquidStd.Samples.AspNetCore.csproj"/>
