@@ -12,9 +12,11 @@ using SquidStd.Core.Extensions.Logger;
 using SquidStd.Core.Interfaces.Bootstrap;
 using SquidStd.Core.Interfaces.Config;
 using SquidStd.Core.Interfaces.Events;
+using SquidStd.Core.Interfaces.Lifecycle;
 using SquidStd.Core.Types;
 using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Extensions.Logger;
+using SquidStd.Services.Core.Services.Lifecycle;
 using SquidStd.Services.Core.Types;
 
 namespace SquidStd.Services.Core.Services.Bootstrap;
@@ -26,6 +28,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 {
     private readonly List<(Type ConfigType, Action<object> Apply)> _configHooks = [];
     private readonly List<Action<IConfigManagerService>> _configReadyCallbacks = [];
+    private readonly SquidStdLifetimeService _lifetime = new();
     private readonly bool _ownsContainer;
     private readonly List<ISquidStdService> _startedServices = [];
     private readonly Lock _syncRoot = new();
@@ -67,6 +70,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         Container.RegisterInstance<ISquidStdBootstrap>(this, IfAlreadyRegistered.Replace);
         Container.RegisterInstance(this, IfAlreadyRegistered.Replace);
         Container.RegisterInstance(Options, IfAlreadyRegistered.Replace);
+        Container.RegisterInstance<ISquidStdLifetime>(_lifetime, IfAlreadyRegistered.Replace);
         Container.RegisterConfigServices(Options.ConfigName, Options.RootDirectory);
     }
 
@@ -152,6 +156,8 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
                 await Log.CloseAndFlushAsync();
             }
 
+            _lifetime.Dispose();
+
             if (_ownsContainer)
             {
                 Container.Dispose();
@@ -194,13 +200,29 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
     {
         await StartAsync(cancellationToken);
 
+        ConsoleCancelEventHandler? cancelHandler = null;
+
         try
         {
-            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _lifetime.ShutdownToken);
+            cancelHandler = (_, args) =>
+            {
+                args.Cancel = true;
+                _lifetime.RequestShutdown();
+            };
+            Console.CancelKeyPress += cancelHandler;
+
+            await Task.Delay(Timeout.InfiniteTimeSpan, linked.Token);
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested
+                                                 || _lifetime.ShutdownToken.IsCancellationRequested) { }
         finally
         {
+            if (cancelHandler is not null)
+            {
+                Console.CancelKeyPress -= cancelHandler;
+            }
+
             await StopAsync(CancellationToken.None);
         }
     }
