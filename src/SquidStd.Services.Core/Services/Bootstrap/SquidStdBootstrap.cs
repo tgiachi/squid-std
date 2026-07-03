@@ -1,5 +1,7 @@
+using System.Reflection;
 using DryIoc;
 using Serilog;
+using Serilog.Core;
 using SquidStd.Abstractions.Data.Internal.Services;
 using SquidStd.Abstractions.Interfaces.Services;
 using SquidStd.Core.Data.Bootstrap;
@@ -251,6 +253,26 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         return Create(options);
     }
 
+    private static string ResolveAppName(SquidStdOptions options)
+        => !string.IsNullOrWhiteSpace(options.AppName)
+               ? options.AppName
+               : Assembly.GetEntryAssembly()?.GetName().Name ?? "SquidStd";
+
+    private static string ResolveVersion(Assembly? assembly)
+    {
+        var informational = assembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                                    ?.InformationalVersion;
+
+        if (string.IsNullOrWhiteSpace(informational))
+        {
+            return assembly?.GetName().Version?.ToString() ?? "0.0.0";
+        }
+
+        var metadataStart = informational.IndexOf('+');
+
+        return metadataStart > 0 ? informational[..metadataStart] : informational;
+    }
+
     private void ConfigureLogger()
     {
         if (_loggerConfigured || !Container.IsRegistered<SquidStdLoggerOptions>())
@@ -260,6 +282,10 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 
         var options = Container.Resolve<SquidStdLoggerOptions>();
         var loggerConfiguration = new LoggerConfiguration();
+
+        loggerConfiguration
+            .Enrich.WithProperty("Application", ResolveAppName(Options))
+            .Enrich.WithProperty("ApplicationVersion", ResolveVersion(Assembly.GetEntryAssembly()));
 
         if (options.MinimumLevel != LogLevelType.None)
         {
@@ -278,6 +304,11 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
                     rollingInterval: options.RollingInterval.ToSerilogRollingInterval(),
                     restrictedToMinimumLevel: minimumLevel
                 );
+            }
+
+            foreach (var sink in Container.ResolveMany<ILogEventSink>())
+            {
+                loggerConfiguration.WriteTo.Sink(sink, minimumLevel);
             }
         }
 
