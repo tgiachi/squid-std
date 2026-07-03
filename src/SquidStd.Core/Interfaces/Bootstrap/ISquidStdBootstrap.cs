@@ -33,6 +33,17 @@ public interface ISquidStdBootstrap : IAsyncDisposable
     ISquidStdBootstrap ConfigureServices(Func<IContainer, IContainer> configure);
 
     /// <summary>
+    /// Registers a callback invoked after the configuration is loaded (and re-applied on every
+    /// reload performed through the bootstrap) and before the logger and services consume it.
+    /// The callback receives the section singleton and may inspect or mutate it; changes are
+    /// in-memory only - the YAML file is not rewritten.
+    /// </summary>
+    /// <typeparam name="TConfig">The configuration section type.</typeparam>
+    /// <param name="configure">Callback that receives the loaded section.</param>
+    /// <returns>The same bootstrap for chaining.</returns>
+    ISquidStdBootstrap OnConfigLoaded<TConfig>(Action<TConfig> configure) where TConfig : class;
+
+    /// <summary>
     /// Resolves a service from the owned dependency injection container.
     /// </summary>
     /// <typeparam name="TService">The service type to resolve.</typeparam>

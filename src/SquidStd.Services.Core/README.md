@@ -39,6 +39,13 @@ bootstrap.ConfigureServices(c => c.RegisterCoreServices());
 await bootstrap.StartAsync();
 ```
 
+Need to inspect or override a loaded config section before services start? Register a typed hook
+(in-memory only - the YAML file is untouched):
+
+```csharp
+bootstrap.OnConfigLoaded<SquidStdLoggerOptions>(o => o.MinimumLevel = LogLevelType.Debug);
+```
+
 ### Command dispatch
 
 ```csharp

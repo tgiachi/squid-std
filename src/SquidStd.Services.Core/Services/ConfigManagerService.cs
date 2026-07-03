@@ -29,6 +29,9 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
     /// <inheritdoc />
     public IReadOnlyCollection<IConfigEntry> Entries => GetEntries();
 
+    /// <inheritdoc />
+    public event Action? ConfigLoaded;
+
     /// <summary>
     /// Initializes the config manager service.
     /// </summary>
@@ -80,6 +83,8 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
         {
             Save();
         }
+
+        ConfigLoaded?.Invoke();
     }
 
     /// <inheritdoc />
