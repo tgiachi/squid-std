@@ -23,9 +23,11 @@ namespace SquidStd.Services.Core.Services.Bootstrap;
 /// </summary>
 public sealed class SquidStdBootstrap : ISquidStdBootstrap
 {
+    private readonly List<(Type ConfigType, Action<object> Apply)> _configHooks = [];
     private readonly bool _ownsContainer;
     private readonly List<ISquidStdService> _startedServices = [];
     private readonly Lock _syncRoot = new();
+    private bool _configHooksSubscribed;
     private int _disposed;
     private bool _loggerConfigured;
     private BootstrapStateType _state;
@@ -92,6 +94,25 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
     }
 
     /// <inheritdoc />
+    public ISquidStdBootstrap OnConfigLoaded<TConfig>(Action<TConfig> configure) where TConfig : class
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        ThrowIfDisposed();
+
+        lock (_syncRoot)
+        {
+            if (_state != BootstrapStateType.Created)
+            {
+                throw new InvalidOperationException("Config hooks cannot be registered after bootstrap start.");
+            }
+        }
+
+        _configHooks.Add((typeof(TConfig), instance => configure((TConfig)instance)));
+
+        return this;
+    }
+
+    /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref _disposed, 1) != 0)
@@ -135,7 +156,15 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
             return;
         }
 
-        Container.Resolve<IConfigManagerService>().Load();
+        var configManager = Container.Resolve<IConfigManagerService>();
+
+        if (!_configHooksSubscribed)
+        {
+            configManager.ConfigLoaded += ApplyConfigHooks;
+            _configHooksSubscribed = true;
+        }
+
+        configManager.Load();
         ConfigureLogger();
     }
 
@@ -380,6 +409,33 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         Log.Logger = logger;
         Container.RegisterInstance<ILogger>(logger, IfAlreadyRegistered.Replace);
         _loggerConfigured = true;
+    }
+
+    private void ApplyConfigHooks()
+    {
+        if (_configHooks.Count == 0)
+        {
+            return;
+        }
+
+        List<ConfigRegistrationData> sections = Container.IsRegistered<List<ConfigRegistrationData>>()
+                                                    ? Container.Resolve<List<ConfigRegistrationData>>()
+                                                    : [];
+        var logger = Log.ForContext<SquidStdBootstrap>();
+
+        foreach (var (configType, apply) in _configHooks)
+        {
+            if (!sections.Any(section => section.ConfigType == configType))
+            {
+                throw new InvalidOperationException(
+                    $"No config section registered for type '{configType.Name}'. "
+                    + "Register it with RegisterConfigSection before using OnConfigLoaded."
+                );
+            }
+
+            apply(Container.Resolve(configType));
+            logger.Debug("Applied config hook to {Section:l}", configType.Name);
+        }
     }
 
     private void LogRegistrations(ILogger logger, ServiceRegistrationData[] lifecycleRegistrations)
