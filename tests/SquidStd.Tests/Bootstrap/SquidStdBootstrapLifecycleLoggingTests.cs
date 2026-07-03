@@ -36,6 +36,33 @@ public class SquidStdBootstrapLifecycleLoggingTests
     }
 
     [Fact]
+    public async Task AppVersion_Override_IsUsedForEnrichment()
+    {
+        using var temp = new TempDirectory();
+        var sink = new CapturingLogSink();
+        await using var bootstrap = SquidStdBootstrap.Create(
+            new SquidStdOptions
+            {
+                ConfigName = "app",
+                RootDirectory = temp.Path,
+                AppName = "MyApp",
+                AppVersion = "9.9.9-test"
+            }
+        );
+        bootstrap.ConfigureServices(c =>
+        {
+            c.RegisterInstance<ILogEventSink>(sink);
+            return c;
+        });
+
+        bootstrap.ConfigureLogging();
+        Serilog.Log.Information("probe");
+
+        var probe = sink.Events.Single(e => e.MessageTemplate.Text == "probe");
+        Assert.Equal("\"9.9.9-test\"", probe.Properties["ApplicationVersion"].ToString());
+    }
+
+    [Fact]
     public async Task AppName_DefaultsToEntryAssemblyName()
     {
         using var temp = new TempDirectory();
