@@ -170,7 +170,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
             var appName = ResolveAppName(Options);
 
             logger.Information(
-                "{Application} {ApplicationVersion} starting (SquidStd {SquidStdVersion}, config {ConfigName}, root {RootDirectory})",
+                "{Application:l} {ApplicationVersion:l} starting (SquidStd {SquidStdVersion:l}, config {ConfigName}, root {RootDirectory})",
                 appName,
                 ResolveVersion(Assembly.GetEntryAssembly()),
                 ResolveVersion(typeof(SquidStdBootstrap).Assembly),
@@ -217,7 +217,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
             }
 
             logger.Information(
-                "{Application} started: {Count} service(s) in {TotalElapsed:0.#}ms",
+                "{Application:l} started: {Count} service(s) in {TotalElapsed:0.#}ms",
                 appName,
                 _startedServices.Count,
                 totalStopwatch.Elapsed.TotalMilliseconds

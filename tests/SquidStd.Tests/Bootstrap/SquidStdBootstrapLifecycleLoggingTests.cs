@@ -100,14 +100,15 @@ public class SquidStdBootstrapLifecycleLoggingTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(async () => await bootstrap.StartAsync());
 
-        Assert.True(
-            sink.Events.Any(e =>
+        Assert.Contains(
+            sink.Events,
+            e =>
             {
                 var rendered = e.RenderMessage();
 
                 return rendered.Contains("failed to start", StringComparison.Ordinal)
                        && rendered.Contains("FakeLifecycleService", StringComparison.Ordinal);
-            })
+            }
         );
     }
 
@@ -180,11 +181,10 @@ public class SquidStdBootstrapLifecycleLoggingTests
         await bootstrap.StopAsync();
 
         Assert.True(healthy.Stopped);
-        Assert.True(
-            sink.Events.Any(e =>
-                e.Level == LogEventLevel.Warning
-                && e.RenderMessage().Contains("failed to stop", StringComparison.Ordinal)
-            )
+        Assert.Contains(
+            sink.Events,
+            e => e.Level == LogEventLevel.Warning
+                 && e.RenderMessage().Contains("failed to stop", StringComparison.Ordinal)
         );
         Assert.True(HasMessage(sink, "shutdown complete"));
     }
