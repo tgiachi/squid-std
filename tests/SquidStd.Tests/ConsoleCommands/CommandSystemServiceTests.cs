@@ -139,4 +139,29 @@ public class CommandSystemServiceTests
         var definition = Assert.Single(service.GetRegisteredCommands());
         Assert.Equal("second", definition.Description);
     }
+
+    [Fact]
+    public void RegisterCommand_OnlyPipes_Throws()
+    {
+        var service = new CommandSystemService(_ => { });
+
+        Assert.Throws<ArgumentException>(() => service.RegisterCommand("|", _ => Task.CompletedTask));
+    }
+
+    [Fact]
+    public async Task RedefiningAnAlias_RemovesTheDisplacedEntryEntirely()
+    {
+        var lines = new List<string>();
+        var service = new CommandSystemService(lines.Add);
+        service.RegisterCommand("gc|x", _ => Task.CompletedTask, "old");
+        service.RegisterCommand("x", _ => Task.CompletedTask, "new");
+
+        var definitions = service.GetRegisteredCommands();
+        var redefined = Assert.Single(definitions, definition => definition.Name == "x");
+        Assert.Equal("new", redefined.Description);
+        Assert.DoesNotContain(definitions, definition => definition.Name == "gc");
+
+        await service.ExecuteCommandAsync("gc");
+        Assert.Contains(lines, line => line.Contains("Unknown command", StringComparison.OrdinalIgnoreCase));
+    }
 }

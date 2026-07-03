@@ -27,6 +27,9 @@ bootstrap.ConfigureServices(
     }
 );
 
+// The prompt sink renders the log lines: disable the standard console sink to avoid duplicates.
+bootstrap.OnConfigLoaded<SquidStdLoggerOptions>(o => o.EnableConsole = false);
+
 await bootstrap.StartAsync();
 
 var commands = bootstrap.Resolve<ICommandSystemService>();

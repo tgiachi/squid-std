@@ -40,6 +40,11 @@ public sealed class CommandSystemService : ICommandSystemService
 
         var aliases = commandName.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
+        if (aliases.Length == 0)
+        {
+            throw new ArgumentException("Command name must contain at least one alias.", nameof(commandName));
+        }
+
         var entry = new CommandEntry(
             aliases[0],
             aliases.Skip(1).ToArray(),
@@ -53,7 +58,17 @@ public sealed class CommandSystemService : ICommandSystemService
             if (!_commands.TryAdd(alias, entry))
             {
                 _logger.Warning("Console command '{Command}' redefined", alias);
+                var displaced = _commands[alias];
                 _commands[alias] = entry;
+
+                // Keep help output truthful: drop every other key that still points at the
+                // displaced entry, so its stale alias list is no longer reported.
+                foreach (var staleKey in _commands.Where(pair => ReferenceEquals(pair.Value, displaced))
+                                                  .Select(pair => pair.Key)
+                                                  .ToArray())
+                {
+                    _commands.TryRemove(staleKey, out _);
+                }
             }
         }
     }
