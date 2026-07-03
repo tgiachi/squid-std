@@ -29,6 +29,13 @@ internal sealed class FakeSquidStdBootstrap : ISquidStdBootstrap
                    : throw new InvalidOperationException("ConfigureServices must return the bootstrap container instance.");
     }
 
+    public ISquidStdBootstrap OnConfigLoaded<TConfig>(Action<TConfig> configure) where TConfig : class
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+
+        return this;
+    }
+
     public ValueTask DisposeAsync()
     {
         Container.Dispose();

@@ -26,6 +26,12 @@ public interface IConfigManagerService
     IReadOnlyCollection<IConfigEntry> Entries { get; }
 
     /// <summary>
+    /// Raised after every successful <see cref="Load" />, once the section instances are
+    /// registered into DI.
+    /// </summary>
+    event Action? ConfigLoaded;
+
+    /// <summary>
     /// Composes the currently loaded sections into YAML.
     /// </summary>
     /// <returns>The composed YAML document.</returns>
