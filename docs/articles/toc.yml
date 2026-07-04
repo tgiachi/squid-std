@@ -10,6 +10,8 @@
       href: concepts/abstractions-first.md
     - name: Messaging models
       href: concepts/messaging-models.md
+    - name: Buffers and pooled strings
+      href: concepts/buffers.md
 - name: Guides
   items:
     - name: Configuration
