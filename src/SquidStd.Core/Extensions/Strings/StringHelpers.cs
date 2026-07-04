@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using SquidStd.Core.Buffers;
@@ -5,7 +6,7 @@ using SquidStd.Core.Buffers;
 namespace SquidStd.Core.Extensions.Strings;
 
 /// <summary>
-/// General-purpose string manipulation helpers built on spans and the single-threaded array pool.
+/// General-purpose string manipulation helpers built on spans and pooled buffers.
 /// </summary>
 public static class StringHelpers
 {
@@ -173,13 +174,13 @@ public static class StringHelpers
             return string.Empty;
         }
 
-        var rented = STArrayPool<char>.Shared.Rent(a.Length);
+        var rented = ArrayPool<char>.Shared.Rent(a.Length);
 
         a.Remove(b, comparison, rented.AsSpan(0, a.Length), out var size);
 
         var result = new string(rented, 0, size);
 
-        STArrayPool<char>.Shared.Return(rented);
+        ArrayPool<char>.Shared.Return(rented);
 
         return result;
     }
@@ -215,13 +216,13 @@ public static class StringHelpers
     }
 
     /// <summary>
-    /// Copies the string into a buffer rented from <see cref="STArrayPool{T}" />. The CALLER owns
-    /// the array and must return it via <c>STArrayPool&lt;char&gt;.Shared.Return(array)</c>; the
+    /// Copies the string into a buffer rented from <see cref="ArrayPool{T}" />.Shared. The CALLER owns
+    /// the array and must return it via <c>ArrayPool&lt;char&gt;.Shared.Return(array)</c>; the
     /// buffer may be longer than the string.
     /// </summary>
     public static char[] ToPooledArray(this string str)
     {
-        var chars = STArrayPool<char>.Shared.Rent(str.Length);
+        var chars = ArrayPool<char>.Shared.Rent(str.Length);
 
         str.CopyTo(chars);
 

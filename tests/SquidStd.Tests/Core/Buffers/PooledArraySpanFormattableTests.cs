@@ -1,3 +1,4 @@
+using System.Buffers;
 using SquidStd.Core.Buffers;
 
 namespace SquidStd.Tests.Core.Buffers;
@@ -6,7 +7,7 @@ public class PooledArraySpanFormattableTests
 {
     private static PooledArraySpanFormattable Create(string content)
     {
-        var array = STArrayPool<char>.Shared.Rent(content.Length);
+        var array = ArrayPool<char>.Shared.Rent(content.Length);
         content.CopyTo(array);
 
         return new(array, content.Length);

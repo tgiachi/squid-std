@@ -1,7 +1,9 @@
+using System.Buffers;
+
 namespace SquidStd.Core.Buffers;
 
 /// <summary>
-/// Wraps a <see cref="STArrayPool{T}" />-rented char buffer as an <see cref="ISpanFormattable" /> so it can be
+/// Wraps an <see cref="ArrayPool{T}" />-rented char buffer as an <see cref="ISpanFormattable" /> so it can be
 /// passed through interpolated string handlers without materializing an intermediate string.
 /// <see cref="TryFormat" /> can only be called once: it returns the buffer to the pool. To read the
 /// characters multiple times use <see cref="Chars" />; <see cref="ToString(string?, IFormatProvider?)" />
@@ -21,7 +23,7 @@ public struct PooledArraySpanFormattable : ISpanFormattable, IDisposable
     /// <summary>
     /// Initializes the wrapper over a pooled buffer and the number of valid characters in it.
     /// </summary>
-    /// <param name="arrayToReturnToPool">Buffer rented from <see cref="STArrayPool{T}" />.</param>
+    /// <param name="arrayToReturnToPool">Buffer rented from <see cref="ArrayPool{T}" />.Shared.</param>
     /// <param name="length">Count of valid characters at the start of the buffer.</param>
     public PooledArraySpanFormattable(char[] arrayToReturnToPool, int length)
     {
@@ -79,7 +81,7 @@ public struct PooledArraySpanFormattable : ISpanFormattable, IDisposable
     {
         if (_arrayToReturnToPool is not null)
         {
-            STArrayPool<char>.Shared.Return(_arrayToReturnToPool);
+            ArrayPool<char>.Shared.Return(_arrayToReturnToPool);
             _arrayToReturnToPool = null;
         }
     }

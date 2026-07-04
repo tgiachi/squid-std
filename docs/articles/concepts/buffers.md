@@ -1,10 +1,10 @@
 # Buffers and pooled strings
 
-`SquidStd.Core.Buffers` and `SquidStd.Core.Extensions.Strings` are a small, dependency-free toolkit for allocation-sensitive string and byte work: a single-threaded array pool, a stack-friendly string builder, and a family of ordinal/case-insensitive string helpers that skip culture-aware comparisons entirely.
+`SquidStd.Core.Buffers` and `SquidStd.Core.Extensions.Strings` are a small, dependency-free toolkit for allocation-sensitive string and byte work: a thread-safe-by-default array pool with a single-threaded opt-in, a stack-friendly string builder, and a family of ordinal/case-insensitive string helpers that skip culture-aware comparisons entirely.
 
 ## When to reach for these types
 
-Reach for this toolkit on hot paths that would otherwise allocate a `char[]` or `byte[]` on every call: parsers, network frame encoders/decoders, per-tick game loop work, or any single-threaded pipeline that runs often enough for GC pressure to matter. For one-off, cold-path string work, `string`, `StringBuilder`, and `ArrayPool<T>.Shared` are simpler and perfectly fine.
+Reach for this toolkit on hot paths that would otherwise allocate a `char[]` or `byte[]` on every call: parsers, network frame encoders/decoders, per-tick game loop work, or any pipeline that runs often enough for GC pressure to matter. Everything in this toolkit defaults to the thread-safe `ArrayPool<T>.Shared`, so it is safe to reach for even when you can't prove exclusive, single-threaded access. Opt into `STArrayPool<T>.Shared` only for single-threaded hot paths where you want to skip the BCL pool's locking. For one-off, cold-path string work, plain `string` and `StringBuilder` are simpler and perfectly fine.
 
 ## STArrayPool
 
@@ -17,8 +17,8 @@ Use the decision table to pick the right pool:
 
 | Scenario | Use |
 |---|---|
-| A single-threaded hot path that owns its buffer exclusively (a parser, formatter, or one tick of a game loop) | `STArrayPool<T>.Shared` |
-| Any code that might run concurrently, or where you can't prove exclusive ownership | `ArrayPool<T>.Shared` |
+| The default: any code, including code that might run concurrently or where you can't prove exclusive ownership | `ArrayPool<T>.Shared` |
+| Opt-in: a single-threaded hot path that owns its buffer exclusively (a parser, formatter, or one tick of a game loop) | `STArrayPool<T>.Shared` |
 
 `STArrayPool<T>` trims itself automatically: the first time it caches a returned array it registers a Gen2 GC callback, and every Gen2 collection runs `Trim()`. `Trim()` reads `GC.GetGCMemoryInfo()` and classifies the current memory load into `Low`, `Medium`, or `High` pressure (at or above 70% and 90% of the high memory-load threshold). Under `High` pressure the pool clears its single-slot fast-path cache immediately and ages arrays out of the per-size overflow stacks after only 10 seconds. Under `Medium` and `Low` pressure it is gentler: the fast-path cache ages out after 10 or 30 seconds of sitting idle, and the overflow stacks age out after 60 seconds. This keeps a short burst of activity from being trimmed away between GCs while still giving memory back once the process is actually under pressure.
 
@@ -55,21 +55,21 @@ var text = builder.ToString(); // copies the written span into a new string
 
 `ToString()` only reads the builder's contents - it does not release the buffer. Wrap the builder in a `using` declaration (as above) so `Dispose()` returns any rented buffer to the pool once you're done; if the builder never grew past its initial `stackalloc` span, `Dispose()` is a harmless no-op.
 
-By default (`mt: false`), the builder rents from `STArrayPool<char>.Shared`, so the same single-threaded rule from the previous section applies: create, append to, and dispose the builder from one thread. Pass `mt: true` when the builder - or a buffer it grew into - might cross threads; this switches renting to `ArrayPool<char>.Shared` instead:
+By default (`mt: true`), the builder rents from the thread-safe `ArrayPool<char>.Shared`, so it is safe to use even when the builder - or a buffer it grew into - might cross threads. Pass `mt: false` to opt into `STArrayPool<char>.Shared` for single-threaded hot paths; the same single-threaded rule from the previous section then applies: create, append to, and dispose the builder from one thread:
 
 ```csharp
-var builder = new ValueStringBuilder(64, mt: true);
-builder.Append("thread safe pool path");
+var builder = new ValueStringBuilder(64, mt: false);
+builder.Append("single-threaded pool path");
 var text = builder.ToString();
 builder.Dispose();
 ```
 
 ## Pooled helpers
 
-`ToPooledArray` copies a string into a buffer rented from `STArrayPool<char>.Shared`. The caller owns the returned array and must return it; the buffer may be longer than the source string, so only the first `str.Length` characters are valid.
+`ToPooledArray` copies a string into a buffer rented from `ArrayPool<char>.Shared`. The caller owns the returned array and must return it; the buffer may be longer than the source string, so only the first `str.Length` characters are valid.
 
 ```csharp
-using SquidStd.Core.Buffers;
+using System.Buffers;
 using SquidStd.Core.Extensions.Strings;
 
 var array = "hello world".ToPooledArray();
@@ -79,11 +79,11 @@ try
 }
 finally
 {
-    STArrayPool<char>.Shared.Return(array);
+    ArrayPool<char>.Shared.Return(array);
 }
 ```
 
-`PooledArraySpanFormattable` wraps a `STArrayPool<char>`-rented buffer as an `ISpanFormattable`, so it can flow through interpolated string handlers and span-formatting APIs without allocating an intermediate string. `TryFormat` is single-use: a successful call copies the characters into the destination and returns the buffer to the pool as part of that same call, so the wrapper must not be used again afterward. `ToString()` is idempotent instead - the first call caches the string and releases the buffer, and later calls return the same cached instance.
+`PooledArraySpanFormattable` wraps an `ArrayPool<char>`-rented buffer as an `ISpanFormattable`, so it can flow through interpolated string handlers and span-formatting APIs without allocating an intermediate string. `TryFormat` is single-use: a successful call copies the characters into the destination and returns the buffer to the pool as part of that same call, so the wrapper must not be used again afterward. `ToString()` is idempotent instead - the first call caches the string and releases the buffer, and later calls return the same cached instance.
 
 ## String helpers
 

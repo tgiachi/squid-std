@@ -81,13 +81,13 @@ public class ValueStringBuilderTests
     }
 
     [Fact]
-    public void MultiThreadedMode_UsesSharedPoolAndRoundTrips()
+    public void SingleThreadedMode_UsesSTArrayPoolAndRoundTrips()
     {
-        var builder = new ValueStringBuilder(8, mt: true);
+        var builder = new ValueStringBuilder(8, mt: false);
 
-        builder.Append("thread safe pool path");
+        builder.Append("single-threaded pool path");
 
-        Assert.Equal("thread safe pool path", builder.ToString());
+        Assert.Equal("single-threaded pool path", builder.ToString());
     }
 
     [Fact]
