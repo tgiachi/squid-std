@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Buffers;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -65,7 +66,7 @@ public ref struct RawInterpolatedStringHandler
     public RawInterpolatedStringHandler(int literalLength, int formattedCount)
     {
         _provider = null;
-        _chars = _arrayToReturnToPool = STArrayPool<char>.Shared.Rent(GetDefaultLength(literalLength, formattedCount));
+        _chars = _arrayToReturnToPool = ArrayPool<char>.Shared.Rent(GetDefaultLength(literalLength, formattedCount));
         _pos = 0;
         _hasCustomFormatter = false;
     }
@@ -84,7 +85,7 @@ public ref struct RawInterpolatedStringHandler
     public RawInterpolatedStringHandler(int literalLength, int formattedCount, IFormatProvider? provider)
     {
         _provider = provider;
-        _chars = _arrayToReturnToPool = STArrayPool<char>.Shared.Rent(GetDefaultLength(literalLength, formattedCount));
+        _chars = _arrayToReturnToPool = ArrayPool<char>.Shared.Rent(GetDefaultLength(literalLength, formattedCount));
         _pos = 0;
         _hasCustomFormatter = provider is not null && HasCustomFormatter(provider);
     }
@@ -127,7 +128,7 @@ public ref struct RawInterpolatedStringHandler
 
         if (toReturn is not null)
         {
-            STArrayPool<char>.Shared.Return(toReturn);
+            ArrayPool<char>.Shared.Return(toReturn);
         }
     }
 
@@ -287,7 +288,7 @@ public ref struct RawInterpolatedStringHandler
         var newCapacity = Math.Max(requiredMinCapacity, Math.Min((uint)_chars.Length * 2, 0x3FFFFFDF));
         var arraySize = (int)Math.Clamp(newCapacity, MinimumArrayPoolLength, int.MaxValue);
 
-        var newArray = STArrayPool<char>.Shared.Rent(arraySize);
+        var newArray = ArrayPool<char>.Shared.Rent(arraySize);
         _chars[.._pos].CopyTo(newArray);
 
         var toReturn = _arrayToReturnToPool;
@@ -295,7 +296,7 @@ public ref struct RawInterpolatedStringHandler
 
         if (toReturn is not null)
         {
-            STArrayPool<char>.Shared.Return(toReturn);
+            ArrayPool<char>.Shared.Return(toReturn);
         }
     }
 
