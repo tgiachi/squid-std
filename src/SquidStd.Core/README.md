@@ -2,7 +2,8 @@
 
 Foundational contracts and utilities for the SquidStd stack. It defines the core service interfaces
 (configuration, event bus, jobs, timing, metrics, storage) and ships dependency-free helpers - YAML/JSON
-serialization, a Serilog event sink, and string/environment/directory extensions - that the other
+serialization, a Serilog event sink, string/environment/directory extensions, pooled buffers
+(`STArrayPool`, `ValueStringBuilder`), and ordinal/case-insensitive string helpers - that the other
 SquidStd packages build on.
 
 ## Install
@@ -47,6 +48,13 @@ var builder = pool.Get();
 pool.Return(builder);
 ```
 
+```csharp
+using SquidStd.Core.Extensions.Strings;
+
+"hello world".StartsWithOrdinal("hello"); // true, no culture lookup
+"Hello".InsensitiveEquals("hELLO");       // true
+```
+
 ## Key types
 
 | Type                           | Purpose                                                        |
@@ -65,6 +73,7 @@ pool.Return(builder);
 ## Related
 
 - Tutorial: [Events, jobs & scheduling](https://tgiachi.github.io/squid-std/tutorials/events-jobs-scheduling.html)
+- Concept: [Buffers and pooled strings](https://tgiachi.github.io/squid-std/articles/concepts/buffers.html)
 
 ## License
 
