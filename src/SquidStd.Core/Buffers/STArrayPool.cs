@@ -18,7 +18,7 @@ namespace SquidStd.Core.Buffers;
 /// process-wide singleton that is NOT thread-safe and performs no locking or synchronization. Use it only
 /// from code that already guarantees exclusive access (e.g. a single-threaded parser or formatter). For
 /// concurrent access from multiple threads, use <see cref="ArrayPool{T}.Shared" /> instead. Returned
-/// reference-type arrays are not cleared unless <paramref name="clearArray" /> is passed as
+/// reference-type arrays are not cleared unless <c>clearArray</c> is passed as
 /// <see langword="true" /> to <see cref="Return" />, so stale references may remain reachable through a
 /// rented-then-returned array until it is rented again or overwritten.
 /// </remarks>
