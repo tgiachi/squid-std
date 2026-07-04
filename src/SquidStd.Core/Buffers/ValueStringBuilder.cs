@@ -149,6 +149,7 @@ public ref struct ValueStringBuilder
 
     /// <summary>Appends the text produced by a <see cref="RawInterpolatedStringHandler" />.</summary>
     /// <param name="handler">The interpolated string handler holding the formatted text.</param>
+    /// <remarks>The handler is consumed: its rented buffer is returned to the pool during this call. Do not reuse the handler afterwards or pass the same handler twice.</remarks>
     // Compiler generated
     public void Append(RawInterpolatedStringHandler handler)
     {
@@ -162,6 +163,7 @@ public ref struct ValueStringBuilder
     /// </summary>
     /// <param name="formatProvider">The format provider passed to the interpolated string handler.</param>
     /// <param name="handler">The interpolated string handler holding the formatted text.</param>
+    /// <remarks>The handler is consumed: its rented buffer is returned to the pool during this call. Do not reuse the handler afterwards or pass the same handler twice.</remarks>
     // Compiler generated
     public void Append(
         IFormatProvider? formatProvider,
