@@ -8,7 +8,7 @@ Reach for this toolkit on hot paths that would otherwise allocate a `char[]` or 
 
 ## STArrayPool
 
-`STArrayPool<T>` is a clean-room, single-threaded fork of the .NET runtime's shared `ArrayPool<T>` (`TlsOverPerCoreLockedStacksArrayPool`). It keeps the same bucketing scheme - powers of two, from 16 elements up to roughly 1 GiB - and the same rent/return API, but drops every lock: there is no per-core or thread-local synchronization at all.
+`STArrayPool<T>` is a single-threaded adaptation of the .NET runtime's shared `ArrayPool<T>` (`TlsOverPerCoreLockedStacksArrayPool`). It keeps the same bucketing scheme - powers of two, from 16 elements up to roughly 1 GiB - and the same rent/return API, but drops every lock: there is no per-core or thread-local synchronization at all.
 
 > [!WARNING]
 > `STArrayPool<T>.Shared` is NOT thread-safe. It performs no locking, so renting or returning from more than one thread at a time is a race - it can hand out the same array twice or corrupt its internal buckets. Only use it from code that already guarantees exclusive, single-threaded access.
@@ -114,7 +114,7 @@ using SquidStd.Core.Extensions.Strings;
 - `IndentMultiline` - prefixes every line of a multiline string with an indent.
 - `TrimMultiline` - trims every line of a multiline string independently.
 - `IndexOfTerminator` - finds a null terminator in a byte/char/uint buffer.
-- `ReplaceAny` - replaces every occurrence of a set of characters with their paired replacements, in place or into a copy.
+- `ReplaceAny` - replaces every occurrence of a set of characters with their paired replacements, in place only.
 
 ## Related
 
