@@ -1,3 +1,4 @@
+using System.Buffers;
 using SquidStd.Core.Buffers;
 using SquidStd.Core.Extensions.Strings;
 
@@ -87,7 +88,7 @@ public class StringHelpersTests
         Assert.True(array.Length >= 6);
         Assert.Equal("pooled", array.AsSpan(0, 6).ToString());
 
-        STArrayPool<char>.Shared.Return(array);
+        ArrayPool<char>.Shared.Return(array);
     }
 
     [Fact]

@@ -13,10 +13,11 @@ namespace SquidStd.Core.Buffers;
 /// </summary>
 /// <remarks>
 /// This is a <see langword="ref struct" />: it must stay on the stack and cannot be boxed, stored in a
-/// field of a non-ref struct, or captured by a lambda/async method. With <c>mt: false</c> (the default),
-/// growth buffers are rented from <see cref="STArrayPool{T}" />.Shared, which is NOT thread-safe, so the
-/// builder must be created, appended to, and disposed from a single thread. Pass <c>mt: true</c> to switch
-/// to <see cref="ArrayPool{T}" />.Shared when the builder (or a buffer it grew into) might cross threads.
+/// field of a non-ref struct, or captured by a lambda/async method. With <c>mt: true</c> (the default),
+/// growth buffers are rented from the thread-safe <see cref="ArrayPool{T}" />.Shared, so the builder (or a
+/// buffer it grew into) may safely cross threads. Pass <c>mt: false</c> to opt into the single-threaded
+/// <see cref="STArrayPool{T}" />.Shared for hot paths; the builder must then be created, appended to, and
+/// disposed from a single thread.
 /// </remarks>
 public ref struct ValueStringBuilder
 {
@@ -35,11 +36,12 @@ public ref struct ValueStringBuilder
     /// </summary>
     /// <param name="initialString">The characters to seed the builder with.</param>
     /// <param name="mt">
-    /// When <see langword="true" />, buffers grow via <see cref="ArrayPool{T}" />.Shared instead of the
-    /// single-threaded <see cref="STArrayPool{T}" />.Shared.
+    /// Defaults to <see langword="true" />, so buffers grow via the thread-safe <see cref="ArrayPool{T}" />
+    /// .Shared. Pass <see langword="false" /> to opt into the single-threaded
+    /// <see cref="STArrayPool{T}" />.Shared for hot paths, keeping the builder on one thread.
     /// </param>
     /// <remarks>If this ctor is used, you cannot pass in stackalloc ROS for append/replace.</remarks>
-    public ValueStringBuilder(ReadOnlySpan<char> initialString, bool mt = false) : this(initialString.Length, mt)
+    public ValueStringBuilder(ReadOnlySpan<char> initialString, bool mt = true) : this(initialString.Length, mt)
     {
         Append(initialString);
     }
@@ -51,10 +53,11 @@ public ref struct ValueStringBuilder
     /// <param name="initialString">The characters to seed the builder with.</param>
     /// <param name="initialBuffer">The initial backing storage, e.g. a stackalloc'd span.</param>
     /// <param name="mt">
-    /// When <see langword="true" />, buffers grow via <see cref="ArrayPool{T}" />.Shared instead of the
-    /// single-threaded <see cref="STArrayPool{T}" />.Shared.
+    /// Defaults to <see langword="true" />, so buffers grow via the thread-safe <see cref="ArrayPool{T}" />
+    /// .Shared. Pass <see langword="false" /> to opt into the single-threaded
+    /// <see cref="STArrayPool{T}" />.Shared for hot paths, keeping the builder on one thread.
     /// </param>
-    public ValueStringBuilder(ReadOnlySpan<char> initialString, Span<char> initialBuffer, bool mt = false) : this(
+    public ValueStringBuilder(ReadOnlySpan<char> initialString, Span<char> initialBuffer, bool mt = true) : this(
         initialBuffer,
         mt
     )
@@ -67,10 +70,11 @@ public ref struct ValueStringBuilder
     /// </summary>
     /// <param name="initialBuffer">The initial backing storage.</param>
     /// <param name="mt">
-    /// When <see langword="true" />, buffers grow via <see cref="ArrayPool{T}" />.Shared instead of the
-    /// single-threaded <see cref="STArrayPool{T}" />.Shared.
+    /// Defaults to <see langword="true" />, so buffers grow via the thread-safe <see cref="ArrayPool{T}" />
+    /// .Shared. Pass <see langword="false" /> to opt into the single-threaded
+    /// <see cref="STArrayPool{T}" />.Shared for hot paths, keeping the builder on one thread.
     /// </param>
-    public ValueStringBuilder(Span<char> initialBuffer, bool mt = false)
+    public ValueStringBuilder(Span<char> initialBuffer, bool mt = true)
     {
         _mt = mt;
         _arrayToReturnToPool = null;
@@ -83,11 +87,12 @@ public ref struct ValueStringBuilder
     /// </summary>
     /// <param name="initialCapacity">The minimum initial buffer capacity.</param>
     /// <param name="mt">
-    /// When <see langword="true" />, the initial buffer and any growth are rented from
-    /// <see cref="ArrayPool{T}" />.Shared instead of the single-threaded <see cref="STArrayPool{T}" />.Shared.
+    /// Defaults to <see langword="true" />, so the initial buffer and any growth are rented from the
+    /// thread-safe <see cref="ArrayPool{T}" />.Shared. Pass <see langword="false" /> to opt into the
+    /// single-threaded <see cref="STArrayPool{T}" />.Shared for hot paths, keeping the builder on one thread.
     /// </param>
     /// <remarks>If this ctor is used, you cannot pass in stackalloc ROS for append/replace.</remarks>
-    public ValueStringBuilder(int initialCapacity, bool mt = false)
+    public ValueStringBuilder(int initialCapacity, bool mt = true)
     {
         _mt = mt;
         Length = 0;
@@ -318,11 +323,12 @@ public ref struct ValueStringBuilder
     /// <summary>Creates a builder with a rented buffer of at least <paramref name="capacity" /> characters.</summary>
     /// <param name="capacity">The minimum initial buffer capacity.</param>
     /// <param name="mt">
-    /// When <see langword="true" />, the buffer is rented from <see cref="ArrayPool{T}" />.Shared instead of
-    /// the single-threaded <see cref="STArrayPool{T}" />.Shared.
+    /// Defaults to <see langword="true" />, so the buffer is rented from the thread-safe
+    /// <see cref="ArrayPool{T}" />.Shared. Pass <see langword="false" /> to opt into the single-threaded
+    /// <see cref="STArrayPool{T}" />.Shared for hot paths, keeping the builder on one thread.
     /// </param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ValueStringBuilder Create(int capacity = 64, bool mt = false)
+    public static ValueStringBuilder Create(int capacity = 64, bool mt = true)
         => new(capacity, mt);
 
     /// <summary>Creates a builder whose buffers are rented from <see cref="ArrayPool{T}" />.Shared.</summary>
