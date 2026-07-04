@@ -50,7 +50,10 @@ public static class StringHelpers
                 {
                     ReadOnlySpan<char> remaining = span[index..];
 
-                    if (!remaining.StartsWith("the ", StringComparison.OrdinalIgnoreCase))
+                    var isThe = remaining.StartsWith("the ", StringComparison.OrdinalIgnoreCase)
+                                || remaining.Equals("the", StringComparison.OrdinalIgnoreCase);
+
+                    if (!isThe)
                     {
                         span[index] = char.ToUpperInvariant(span[index]);
                     }
@@ -185,12 +188,18 @@ public static class StringHelpers
     /// Replaces, in place, every character found in <paramref name="invalidChars" /> with the
     /// character at the same index in <paramref name="replacementChars" />.
     /// </summary>
+    /// <exception cref="ArgumentException"><paramref name="replacementChars" /> has a different length than <paramref name="invalidChars" />.</exception>
     public static void ReplaceAny(
         this Span<char> chars,
         ReadOnlySpan<char> invalidChars,
         ReadOnlySpan<char> replacementChars
     )
     {
+        if (invalidChars.Length != replacementChars.Length)
+        {
+            throw new ArgumentException("Replacement characters must have the same length as invalid characters.", nameof(replacementChars));
+        }
+
         while (true)
         {
             var indexOf = chars.IndexOfAny(invalidChars);

@@ -10,6 +10,8 @@ public class StringHelpersTests
     [InlineData("the quick fox", "the Quick Fox")]
     [InlineData("a", "A")]
     [InlineData("", "")]
+    [InlineData("say the", "Say the")]
+    [InlineData("the", "the")]
     public void Capitalize_UppercasesWordsSkippingLeadingThe(string input, string expected)
         => Assert.Equal(expected, input.Capitalize());
 
@@ -63,6 +65,18 @@ public class StringHelpersTests
         chars.ReplaceAny("/\\".AsSpan(), "--".AsSpan());
 
         Assert.Equal("a-b-c", chars.ToString());
+    }
+
+    [Fact]
+    public void ReplaceAny_MismatchedReplacementLength_Throws()
+    {
+        Assert.Throws<ArgumentException>(() =>
+        {
+            Span<char> chars = stackalloc char[3];
+            "a/b".AsSpan().CopyTo(chars);
+
+            chars.ReplaceAny("/:".AsSpan(), "-".AsSpan());
+        });
     }
 
     [Fact]
