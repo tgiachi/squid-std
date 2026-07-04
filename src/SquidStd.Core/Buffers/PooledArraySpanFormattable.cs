@@ -31,10 +31,13 @@ public struct PooledArraySpanFormattable : ISpanFormattable, IDisposable
     }
 
     /// <summary>
-    /// Converts the wrapper to a string, releasing the pooled buffer.
+    /// Converts the wrapper to a string. Materializes the content WITHOUT releasing the pooled buffer:
+    /// the operator receives the struct by value, so releasing through the copy would leave the
+    /// original still owning the array and Dispose would return it to the pool a second time. The
+    /// owner is still responsible for calling <see cref="Dispose" />.
     /// </summary>
     public static implicit operator string(PooledArraySpanFormattable formattable)
-        => formattable.ToString(null, null);
+        => new string(formattable.Chars);
 
     /// <inheritdoc />
     public override string ToString()

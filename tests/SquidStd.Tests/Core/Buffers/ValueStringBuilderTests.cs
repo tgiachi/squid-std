@@ -89,4 +89,26 @@ public class ValueStringBuilderTests
 
         Assert.Equal("thread safe pool path", builder.ToString());
     }
+
+    [Fact]
+    public void Replace_HonorsStartIndexAndCount()
+    {
+        var builder = new ValueStringBuilder(stackalloc char[16]);
+        builder.Append("aaaa");
+
+        builder.Replace('a', 'b', 1, 2);
+
+        Assert.Equal("abba", builder.ToString());
+    }
+
+    [Fact]
+    public void ReplaceAny_HonorsStartIndexAndCount()
+    {
+        var builder = new ValueStringBuilder(stackalloc char[16]);
+        builder.Append("a/a/");
+
+        builder.ReplaceAny("/".AsSpan(), "-".AsSpan(), 0, 2);
+
+        Assert.Equal("a-a/", builder.ToString());
+    }
 }

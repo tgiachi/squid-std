@@ -1,11 +1,11 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace SquidStd.Core.Buffers;
-
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
 
 /// <summary>
 /// A single-use, stack-friendly string builder built on a mutable <see cref="Span{T}" /> buffer instead of
@@ -151,7 +151,10 @@ public ref struct ValueStringBuilder
     /// <param name="handler">The interpolated string handler holding the formatted text.</param>
     // Compiler generated
     public void Append(RawInterpolatedStringHandler handler)
-        => Append(handler.Text);
+    {
+        Append(handler.Text);
+        handler.Clear();
+    }
 
     /// <summary>
     /// Appends the text produced by a <see cref="RawInterpolatedStringHandler" /> using the given
@@ -165,7 +168,10 @@ public ref struct ValueStringBuilder
         [InterpolatedStringHandlerArgument("formatProvider")]
         RawInterpolatedStringHandler handler
     )
-        => Append(handler.Text);
+    {
+        Append(handler.Text);
+        handler.Clear();
+    }
 
     /// <summary>Appends a string. A no-op if <paramref name="s" /> is <see langword="null" />.</summary>
     /// <param name="s">The string to append.</param>
@@ -229,8 +235,8 @@ public ref struct ValueStringBuilder
     }
 
     /// <summary>
-    /// Appends <paramref name="s" /> followed by <see cref="Environment.NewLine" />. A no-op (aside from the
-    /// newline) if <paramref name="s" /> is <see langword="null" />.
+    /// Appends <paramref name="s" /> followed by <see cref="Environment.NewLine" />. A no-op if
+    /// <paramref name="s" /> is <see langword="null" />: nothing is appended, not even the newline.
     /// </summary>
     /// <param name="s">The string to append.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -469,7 +475,7 @@ public ref struct ValueStringBuilder
             throw new ArgumentOutOfRangeException(nameof(count));
         }
 
-        var slice = _chars;
+        var slice = _chars.Slice(startIndex, count);
 
         while (true)
         {
@@ -509,7 +515,7 @@ public ref struct ValueStringBuilder
             throw new ArgumentOutOfRangeException(nameof(count));
         }
 
-        var slice = _chars;
+        var slice = _chars.Slice(startIndex, count);
 
         while (true)
         {
