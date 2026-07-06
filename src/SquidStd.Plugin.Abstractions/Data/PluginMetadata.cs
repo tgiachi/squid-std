@@ -1,11 +1,11 @@
 namespace SquidStd.Plugin.Abstractions.Data;
 
 /// <summary>
-/// Describes a Moongate plugin. This is the source of truth for plugin identity.
+/// Describes a SquidStd plugin. This is the source of truth for plugin identity.
 /// </summary>
 public sealed class PluginMetadata
 {
-    /// <summary>Stable lowercase dotted plugin identifier, for example <c>moongate.weather</c>.</summary>
+    /// <summary>Stable lowercase dotted plugin identifier, for example <c>myapp.weather</c>.</summary>
     public required string Id { get; init; }
 
     /// <summary>Human-readable plugin name.</summary>

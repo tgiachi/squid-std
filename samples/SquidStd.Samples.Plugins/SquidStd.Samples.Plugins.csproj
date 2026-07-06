@@ -10,6 +10,8 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\SquidStd.Plugin.Abstractions\SquidStd.Plugin.Abstractions.csproj"/>
+        <ProjectReference Include="..\..\src\SquidStd.Plugin\SquidStd.Plugin.csproj"/>
+        <ProjectReference Include="..\..\src\SquidStd.Services.Core\SquidStd.Services.Core.csproj"/>
     </ItemGroup>
 
 </Project>

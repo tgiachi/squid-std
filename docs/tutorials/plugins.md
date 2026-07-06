@@ -52,3 +52,4 @@ one plugin by hand so the contract is fully runnable without external assemblies
 ## See also
 
 - [SquidStd.Plugin.Abstractions reference](../articles/plugin-abstractions.md)
+- [SquidStd.Plugin reference](../articles/plugin.md) - the loader that discovers and configures plugins in dependency order
