@@ -1,6 +1,7 @@
 using DryIoc;
 using SquidStd.Abstractions.Data.Internal.Config;
 using SquidStd.Abstractions.Data.Internal.Services;
+using SquidStd.Core.Config;
 using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Data.Jobs;
 using SquidStd.Core.Data.Metrics;
@@ -135,20 +136,26 @@ public class RegisterDefaultServicesExtensionsTests
     }
 
     [Fact]
-    public void RegisterConfigServices_RegistersLoggerMetadata()
+    public void RegisterConfigServices_BindsLoggerSectionEagerly()
     {
+        // RegisterConfigServices registers a SquidStdConfig instance before touching the "logger"
+        // section, so RegisterConfigSection takes the eager-bind path instead of the legacy
+        // List<ConfigRegistrationData> path: the section is bound and resolvable immediately,
+        // with no separate load/start step.
         using var temp = new TempDirectory();
         using var container = new Container();
 
         container.RegisterConfigServices("app", temp.Path);
 
-        var entries = container.Resolve<List<ConfigRegistrationData>>();
+        Assert.True(container.IsRegistered<SquidStdLoggerOptions>());
+        Assert.NotNull(container.Resolve<SquidStdLoggerOptions>());
+
+        var entries = container.Resolve<SquidStdConfig>().Entries;
 
         Assert.Contains(
             entries,
             entry => entry.SectionName == "logger" && entry.ConfigType == typeof(SquidStdLoggerOptions)
         );
-        Assert.False(container.IsRegistered<SquidStdLoggerOptions>());
     }
 
     [Fact]
