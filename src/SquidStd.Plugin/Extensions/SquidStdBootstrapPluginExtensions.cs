@@ -18,7 +18,8 @@ public static class SquidStdBootstrapPluginExtensions
     /// across the whole set, and invokes <see cref="ISquidStdPlugin.Configure" /> for each plugin
     /// in order against the bootstrap container. Must be called before the bootstrap starts, so
     /// plugins can register configuration sections before the configuration is loaded. Relative
-    /// directories are resolved against the bootstrap root directory. Any failure aborts startup:
+    /// directories are resolved against the bootstrap root directory and created when missing
+    /// (an empty directory yields no plugins). Any failure aborts startup:
     /// loader problems raise <see cref="Exceptions.PluginLoadException" /> and plugin exceptions
     /// propagate unchanged. Plugin assemblies load into the default AssemblyLoadContext and are
     /// fully trusted: there is no unloading and no version isolation. Note that plugin load
@@ -55,6 +56,10 @@ public static class SquidStdBootstrapPluginExtensions
             var resolved = Path.IsPathRooted(directory)
                 ? directory
                 : Path.Combine(bootstrap.Options.RootDirectory, directory);
+
+            // Managed like the bootstrap's DirectoriesConfig entries: a missing plugin
+            // directory is created (and simply yields no plugins), not treated as an error.
+            Directory.CreateDirectory(resolved);
 
             plugins.AddRange(PluginAssemblyScanner.Scan(resolved));
         }

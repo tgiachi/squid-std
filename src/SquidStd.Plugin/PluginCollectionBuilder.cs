@@ -44,7 +44,8 @@ public sealed class PluginCollectionBuilder
 
     /// <summary>
     /// Adds a directory to scan for external plugin assemblies (*.dll, non-recursive).
-    /// Relative paths are resolved against the bootstrap root directory.
+    /// Relative paths are resolved against the bootstrap root directory; a missing
+    /// directory is created and yields no plugins.
     /// </summary>
     /// <param name="path">Absolute or root-relative directory path.</param>
     /// <returns>The same builder for chaining.</returns>
