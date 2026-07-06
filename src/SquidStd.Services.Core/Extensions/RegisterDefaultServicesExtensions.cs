@@ -3,6 +3,7 @@ using SquidStd.Abstractions.Data.Internal.Services;
 using SquidStd.Abstractions.Extensions.Config;
 using SquidStd.Abstractions.Extensions.Container;
 using SquidStd.Abstractions.Extensions.Services;
+using SquidStd.Core.Config;
 using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Data.Events;
 using SquidStd.Core.Data.Jobs;
@@ -35,14 +36,19 @@ public static class RegisterDefaultServicesExtensions
     extension(IContainer container)
     {
         /// <summary>
-        /// Registers the default config manager service as a singleton instance.
+        /// Registers the default config manager service as a singleton instance, loading a
+        /// standalone <see cref="SquidStdConfig" /> for the given name/directory. Any subsequent
+        /// <c>RegisterConfigSection</c> call on this container binds eagerly against it.
         /// </summary>
         /// <param name="configName">The logical config name or YAML file name.</param>
         /// <param name="configDirectory">The directory where the config file is searched.</param>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterConfigManagerService(string configName, string configDirectory)
         {
-            var service = new ConfigManagerService(container, configName, configDirectory);
+            var config = SquidStdConfig.Load(configName, configDirectory);
+            container.RegisterInstance(config, IfAlreadyRegistered.Replace);
+
+            var service = new ConfigManagerService(config, container);
             container.RegisterInstance<IConfigManagerService>(service, IfAlreadyRegistered.Replace);
             container.RegisterInstance(service, IfAlreadyRegistered.Replace);
             container.AddToRegisterTypedList(
@@ -55,16 +61,38 @@ public static class RegisterDefaultServicesExtensions
         /// <summary>
         /// Registers only the configuration core: the shared <see cref="DirectoriesConfig" />, the
         /// logger config section and the config manager. Every other service is opt-in via
-        /// <c>RegisterCoreServices()</c> or the individual registration methods.
+        /// <c>RegisterCoreServices()</c> or the individual registration methods. Loads a standalone
+        /// <see cref="SquidStdConfig" /> for the given name/directory.
         /// </summary>
+        /// <remarks>
+        /// Registers a fresh SquidStdConfig: do not call this on a container that already has one (the previous instance and its tracked sections would be replaced).
+        /// </remarks>
         /// <param name="configName">The logical config name or YAML file name.</param>
         /// <param name="configDirectory">The directory where the config file is searched.</param>
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterConfigServices(string configName, string configDirectory)
+            => container.RegisterConfigServices(SquidStdConfig.Load(configName, configDirectory));
+
+        /// <summary>
+        /// Registers only the configuration core against an already-loaded <see cref="SquidStdConfig" />:
+        /// the config instance itself, the shared <see cref="DirectoriesConfig" />, the logger config
+        /// section and the config manager. Every other service is opt-in via <c>RegisterCoreServices()</c>
+        /// or the individual registration methods. Once the config instance is registered, every
+        /// <c>RegisterConfigSection</c> call on this container binds eagerly against it.
+        /// </summary>
+        /// <param name="config">The eagerly-loaded configuration.</param>
+        /// <returns>The same container for chaining.</returns>
+        public IContainer RegisterConfigServices(SquidStdConfig config)
         {
-            container.RegisterInstance(new DirectoriesConfig(configDirectory, []), IfAlreadyRegistered.Keep);
+            ArgumentNullException.ThrowIfNull(config);
+
+            container.RegisterInstance(config, IfAlreadyRegistered.Replace);
+            container.RegisterInstance(new DirectoriesConfig(config.ConfigDirectory, []), IfAlreadyRegistered.Keep);
             container.RegisterConfigSection("logger", static () => new SquidStdLoggerOptions(), -1000);
-            container.RegisterConfigManagerService(configName, configDirectory);
+            container.RegisterDelegate<IConfigManagerService>(
+                resolver => new ConfigManagerService(resolver.Resolve<SquidStdConfig>(), (IContainer)resolver),
+                Reuse.Singleton
+            );
 
             return container;
         }
