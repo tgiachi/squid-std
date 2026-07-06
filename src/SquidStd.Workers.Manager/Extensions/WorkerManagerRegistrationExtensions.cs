@@ -21,11 +21,19 @@ public static class WorkerManagerRegistrationExtensions
         /// Registers the worker manager: config section, registry, job scheduler, the collector and sweep
         /// lifecycle services, and the timer-wheel pump (only if it is not already registered).
         /// </summary>
-        public IContainer AddWorkerManager()
+        /// <param name="config">Explicit configuration; when set, the YAML section is not bound and the file is ignored for this section.</param>
+        public IContainer AddWorkerManager(WorkerManagerConfig? config = null)
         {
             ArgumentNullException.ThrowIfNull(container);
 
-            container.RegisterConfigSection("workerManager", static () => new WorkerManagerConfig(), -50);
+            if (config is not null)
+            {
+                container.RegisterInstance(config, IfAlreadyRegistered.Replace);
+            }
+            else
+            {
+                container.RegisterConfigSection("workerManager", static () => new WorkerManagerConfig(), -50);
+            }
 
             container.Register<WorkerRegistry>(Reuse.Singleton);
             container.RegisterMapping<IWorkerRegistry, WorkerRegistry>();

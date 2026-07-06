@@ -18,10 +18,19 @@ public static class RegisterHealthChecksServiceExtension
         /// Registers the health-check aggregator (<see cref="IHealthCheckService" />) as a singleton.
         /// Concrete checks register themselves as <c>IHealthCheck</c> and are collected automatically.
         /// </summary>
+        /// <param name="config">Explicit configuration; when set, the YAML section is not bound and the file is ignored for this section.</param>
         /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterHealthChecksService()
+        public IContainer RegisterHealthChecksService(HealthCheckOptions? config = null)
         {
-            container.RegisterConfigSection("healthChecks", static () => new HealthCheckOptions(), -80);
+            if (config is not null)
+            {
+                container.RegisterInstance(config, IfAlreadyRegistered.Replace);
+            }
+            else
+            {
+                container.RegisterConfigSection("healthChecks", static () => new HealthCheckOptions(), -80);
+            }
+
             container.Register<IHealthCheckService, HealthCheckService>(Reuse.Singleton);
 
             return container;

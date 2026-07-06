@@ -1,5 +1,4 @@
 using DryIoc;
-using SquidStd.Abstractions.Extensions.Services;
 using SquidStd.Generators.Scripting.Lua;
 using SquidStd.Scripting.Lua.Attributes;
 using SquidStd.Scripting.Lua.Attributes.Scripts;
@@ -37,8 +36,7 @@ bootstrap.ConfigureServices(
             "1.0.0"
         );
 
-        container.RegisterInstance(engineConfig);
-        container.RegisterStdService<IScriptEngineService, LuaScriptEngineService>();
+        container.RegisterLuaEngine(engineConfig);
         container.RegisterGeneratedScriptModules();
         container.RegisterScriptModule<LogModule>();
         container.RegisterLuaEvents();

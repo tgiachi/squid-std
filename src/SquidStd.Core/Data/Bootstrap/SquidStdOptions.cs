@@ -27,4 +27,10 @@ public sealed class SquidStdOptions
     /// version is used.
     /// </summary>
     public string? AppVersion { get; set; }
+
+    /// <summary>
+    /// Explicit logger configuration. When set, the "logger" YAML section is not bound and
+    /// Serilog is configured from this instance only; the file cannot override it.
+    /// </summary>
+    public SquidStdLoggerOptions? Logger { get; set; }
 }

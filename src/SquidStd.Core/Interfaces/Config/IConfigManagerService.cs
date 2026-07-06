@@ -45,7 +45,8 @@ public interface IConfigManagerService
     TConfig GetConfig<TConfig>() where TConfig : class;
 
     /// <summary>
-    /// Loads or creates the configured YAML file and registers every section into DI.
+    /// Re-reads the YAML file, re-binds every tracked section into the container and raises <see cref="ConfigLoaded" />.
+    /// A missing file is not created.
     /// </summary>
     void Load();
 

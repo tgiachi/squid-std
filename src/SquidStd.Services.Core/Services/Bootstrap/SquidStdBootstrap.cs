@@ -4,9 +4,9 @@ using DryIoc;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
-using SquidStd.Abstractions.Data.Internal.Config;
 using SquidStd.Abstractions.Data.Internal.Services;
 using SquidStd.Abstractions.Interfaces.Services;
+using SquidStd.Core.Config;
 using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Extensions.Logger;
 using SquidStd.Core.Interfaces.Bootstrap;
@@ -59,7 +59,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
     public SquidStdBootstrap(SquidStdOptions options)
         : this(options, new Container(), true) { }
 
-    private SquidStdBootstrap(SquidStdOptions options, IContainer container, bool ownsContainer)
+    private SquidStdBootstrap(SquidStdOptions options, IContainer container, bool ownsContainer, SquidStdConfig? config = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(container);
@@ -74,7 +74,15 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         Container.RegisterInstance(this, IfAlreadyRegistered.Replace);
         Container.RegisterInstance(Options, IfAlreadyRegistered.Replace);
         Container.RegisterInstance<ISquidStdLifetime>(_lifetime, IfAlreadyRegistered.Replace);
-        Container.RegisterConfigServices(Options.ConfigName, Options.RootDirectory);
+
+        // Registered before RegisterConfigServices so its guard skips binding the "logger" section
+        // from the file: an explicit instance always wins over the file.
+        if (Options.Logger is not null)
+        {
+            Container.RegisterInstance(Options.Logger, IfAlreadyRegistered.Replace);
+        }
+
+        Container.RegisterConfigServices(config ?? SquidStdConfig.Load(Options.ConfigName, Options.RootDirectory));
     }
 
     /// <inheritdoc />
@@ -194,7 +202,7 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
             _configHooksSubscribed = true;
         }
 
-        configManager.Load();
+        ApplyConfigHooks();
         ConfigureLogger();
     }
 
@@ -230,7 +238,12 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         }
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Starts the bootstrap and all registered SquidStd services.
+    /// </summary>
+    /// <remarks>
+    /// When the configuration file does not exist it is written after the configuration hooks have run, so the file reflects the effective startup configuration.
+    /// </remarks>
     public async ValueTask StartAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -240,6 +253,13 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         try
         {
             ConfigureLogging();
+
+            var squidConfig = Container.Resolve<SquidStdConfig>();
+
+            if (!File.Exists(squidConfig.ConfigPath))
+            {
+                Container.Resolve<IConfigManagerService>().Save();
+            }
 
             var logger = Log.ForContext<SquidStdBootstrap>();
             var appName = ResolveAppName(Options);
@@ -407,6 +427,35 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         return Create(options);
     }
 
+    /// <summary>
+    /// Creates a bootstrapper from an eagerly-loaded <see cref="SquidStdConfig" />, bypassing the
+    /// internal <see cref="SquidStdConfig.Load(string, string)" /> the other overloads perform.
+    /// </summary>
+    /// <param name="config">The eagerly-loaded configuration.</param>
+    /// <param name="options">Bootstrap options used to register core services.</param>
+    /// <returns>The created bootstrapper.</returns>
+    public static SquidStdBootstrap Create(SquidStdConfig config, SquidStdOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(config);
+
+        return new SquidStdBootstrap(options, new Container(), true, config);
+    }
+
+    /// <summary>
+    /// Creates a bootstrapper from an eagerly-loaded <see cref="SquidStdConfig" /> using an
+    /// externally owned DryIoc container.
+    /// </summary>
+    /// <param name="config">The eagerly-loaded configuration.</param>
+    /// <param name="options">Bootstrap options used to register core services.</param>
+    /// <param name="container">Externally owned container that receives SquidStd services.</param>
+    /// <returns>The created bootstrapper.</returns>
+    public static SquidStdBootstrap Create(SquidStdConfig config, SquidStdOptions options, IContainer container)
+    {
+        ArgumentNullException.ThrowIfNull(config);
+
+        return new SquidStdBootstrap(options, container, false, config);
+    }
+
     private static string ResolveAppName(SquidStdOptions options)
         => !string.IsNullOrWhiteSpace(options.AppName)
                ? options.AppName
@@ -495,14 +544,11 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
             return;
         }
 
-        List<ConfigRegistrationData> sections = Container.IsRegistered<List<ConfigRegistrationData>>()
-                                                    ? Container.Resolve<List<ConfigRegistrationData>>()
-                                                    : [];
         var logger = Log.ForContext<SquidStdBootstrap>();
 
         foreach (var (configType, apply) in _configHooks)
         {
-            if (!sections.Any(section => section.ConfigType == configType))
+            if (!Container.IsRegistered(configType))
             {
                 throw new InvalidOperationException(
                     $"No config section registered for type '{configType.Name}'. "
@@ -531,9 +577,9 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 
     private void LogRegistrations(ILogger logger, ServiceRegistrationData[] lifecycleRegistrations)
     {
-        List<ConfigRegistrationData> sections = Container.IsRegistered<List<ConfigRegistrationData>>()
-                                                    ? Container.Resolve<List<ConfigRegistrationData>>()
-                                                    : [];
+        IReadOnlyCollection<IConfigEntry> sections = Container.IsRegistered<SquidStdConfig>()
+                                                        ? Container.Resolve<SquidStdConfig>().Entries
+                                                        : [];
         var containerRegistrations = Container.GetServiceRegistrations().ToArray();
 
         logger.Information(

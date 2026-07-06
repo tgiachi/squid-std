@@ -1,5 +1,6 @@
 using DryIoc;
 using SquidStd.Abstractions.Extensions.Config;
+using SquidStd.Core.Config;
 using SquidStd.Database.Abstractions.Data.Database;
 using SquidStd.Services.Core.Services;
 
@@ -8,8 +9,11 @@ namespace SquidStd.Tests.Services.Core;
 public class ConfigManagerServiceEnvTests
 {
     [Fact]
-    public void Load_SubstitutesEnvTokensInStringProperties()
+    public void Ctor_SubstitutesEnvTokensInStringProperties()
     {
+        // Section binding is eager once the SquidStdConfig instance is registered into the
+        // container, so the substitution is already applied by the time RegisterConfigSection
+        // returns - there is no separate Load() step to trigger it anymore.
         var dir = Path.Combine(Path.GetTempPath(), "squidstd-cfg-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(dir);
         Environment.SetEnvironmentVariable("SQUID_DB_PASS", "p@ss");
@@ -22,13 +26,12 @@ public class ConfigManagerServiceEnvTests
             );
 
             var container = new Container();
+            var config = SquidStdConfig.Load("app", dir);
+            container.RegisterInstance(config, IfAlreadyRegistered.Replace);
             container.RegisterConfigSection<DatabaseConfig>("database");
-            var service = new ConfigManagerService(container, "app", dir);
+            var service = new ConfigManagerService(config, container);
 
-            service.Load();
-
-            var config = container.Resolve<DatabaseConfig>();
-            Assert.Equal("postgres://u:p@ss@h:5432/db", config.ConnectionString);
+            Assert.Equal("postgres://u:p@ss@h:5432/db", service.GetConfig<DatabaseConfig>().ConnectionString);
         }
         finally
         {

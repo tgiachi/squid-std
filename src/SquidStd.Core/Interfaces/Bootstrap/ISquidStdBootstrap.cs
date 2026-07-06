@@ -69,7 +69,7 @@ public interface ISquidStdBootstrap : IAsyncDisposable
     TService Resolve<TService>();
 
     /// <summary>
-    /// Loads configuration and configures the Serilog logger immediately, if not already configured.
+    /// Applies the registered configuration hooks and configures the Serilog logger immediately, if not already configured.
     /// Idempotent: subsequent calls are no-ops. Lets ASP.NET hosts wire Serilog before the host starts.
     /// </summary>
     void ConfigureLogging();

@@ -54,10 +54,11 @@ result = hello from C# and lua
 
 ## How it works
 
-`IScriptEngineService` wraps a MoonSharp `Script`. Registering it with `RegisterStdService` lets the bootstrap
-call its `StartAsync` during `StartAsync`, which wires up modules, constants, and a file watcher over the
-configured scripts directory. Globals you register become Lua variables, and `ExecuteFunction` evaluates a
-`return <expression>` and surfaces the value through `ScriptResult.Data`.
+`IScriptEngineService` wraps a MoonSharp `Script`. `RegisterLuaEngine` registers the `LuaEngineConfig` instance
+and the engine as the standard script engine service in one call, so the bootstrap calls its `StartAsync`
+during `StartAsync`, wiring up modules, constants, and a file watcher over the configured scripts directory.
+Globals you register become Lua variables, and `ExecuteFunction` evaluates a `return <expression>` and
+surfaces the value through `ScriptResult.Data`.
 
 ## See also
 

@@ -25,7 +25,6 @@ public static class StorageRegistrationExtensions
             else
             {
                 container.RegisterConfigSection("storage", static () => new StorageConfig(), -70);
-                container.RegisterInstance(new StorageConfig(), IfAlreadyRegistered.Keep);
             }
 
             container.Register<IStorageService, FileStorageService>(Reuse.Singleton);

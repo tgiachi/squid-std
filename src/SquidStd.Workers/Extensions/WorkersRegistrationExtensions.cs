@@ -31,11 +31,19 @@ public static class WorkersRegistrationExtensions
         /// Registers the worker runtime: the "workers" config section, shared state, job dispatcher, and the
         /// consumer + heartbeat lifecycle services.
         /// </summary>
-        public IContainer AddWorkers()
+        /// <param name="config">Explicit configuration; when set, the YAML section is not bound and the file is ignored for this section.</param>
+        public IContainer AddWorkers(WorkersConfig? config = null)
         {
             ArgumentNullException.ThrowIfNull(container);
 
-            container.RegisterConfigSection("workers", static () => new WorkersConfig(), -50);
+            if (config is not null)
+            {
+                container.RegisterInstance(config, IfAlreadyRegistered.Replace);
+            }
+            else
+            {
+                container.RegisterConfigSection("workers", static () => new WorkersConfig(), -50);
+            }
 
             container.Register<IWorkerState, WorkerState>(Reuse.Singleton);
             container.Register<IJobDispatcher, JobDispatcher>(Reuse.Singleton);
