@@ -45,6 +45,7 @@ public sealed class MyPlugin : ISquidStdPlugin
 ## Related
 
 - Tutorial: [Plugins](https://tgiachi.github.io/squid-std/tutorials/plugins.html)
+- Loader: these contracts are loaded by the [SquidStd.Plugin](https://tgiachi.github.io/squid-std/articles/plugin.html) package via `UsePlugins`.
 
 ## License
 

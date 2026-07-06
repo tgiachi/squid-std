@@ -1,0 +1,58 @@
+<h1 align="center">SquidStd.Plugin</h1>
+
+Loader for SquidStd plugins. Wires internal and external `ISquidStdPlugin` implementations into the
+bootstrap: it collects them, resolves the dependency order across the whole set, and calls `Configure`
+on each one before the bootstrap starts.
+
+## Install
+
+```bash
+dotnet add package SquidStd.Plugin
+```
+
+## Usage
+
+```csharp
+using SquidStd.Plugin.Extensions;
+
+var bootstrap = SquidStdBootstrap.Create(new SquidStdOptions
+{
+    ConfigName = "myapp",
+    RootDirectory = "./data"
+});
+
+bootstrap.UsePlugins(plugins =>
+{
+    plugins.Add<WebPlugin>();          // internal, by type
+    plugins.Add(new MetricsPlugin());  // internal, by instance
+    plugins.FromDirectory("plugins");  // external assemblies (*.dll)
+});
+
+await bootstrap.RunAsync();
+```
+
+## How loading works
+
+- Plugins are ordered by dependency: `PluginMetadata.Dependencies` (plugin ids, compared
+  case-insensitively) is resolved across internal and external plugins together, so an external plugin
+  can depend on an internal one and vice versa.
+- `Configure` runs before the configuration load, so plugins can register their own configuration
+  sections and services ahead of time.
+- Each plugin receives a `PluginContext` populated with the standard keys: `PluginContextKeys.RootDirectory`
+  (the bootstrap root directory) and `PluginContextKeys.AppName` (the bootstrap app name).
+
+## Trusted plugins
+
+External assemblies load into the default `AssemblyLoadContext`: there is no unloading and no
+per-plugin version isolation, so plugins are expected to be trusted. A failing plugin stops startup,
+either with a `PluginLoadException` (discovery, ordering, or instantiation failure) or with the
+plugin's own exception from `Configure`.
+
+## Related
+
+- Contracts: [SquidStd.Plugin.Abstractions](https://tgiachi.github.io/squid-std/articles/plugin-abstractions.html)
+- [SquidStd.Core](https://tgiachi.github.io/squid-std/articles/core.html)
+
+## License
+
+MIT - part of [SquidStd](https://github.com/tgiachi/squid-std).

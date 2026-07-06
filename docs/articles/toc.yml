@@ -46,6 +46,8 @@
   href: network.md
 - name: SquidStd.Plugin.Abstractions
   href: plugin-abstractions.md
+- name: SquidStd.Plugin
+  href: plugin.md
 - name: SquidStd.Database.Abstractions
   href: database-abstractions.md
 - name: SquidStd.Database
