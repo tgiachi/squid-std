@@ -7,6 +7,11 @@ namespace SquidStd.Tests.Abstractions;
 
 public class RegisterConfigSectionExtensionTests
 {
+    public sealed class AnotherConfig
+    {
+        public string Value { get; set; } = string.Empty;
+    }
+
     [Fact]
     public void RegisterConfigSection_WithoutSquidStdConfig_RegistersDefaultFromFactory()
     {
@@ -86,9 +91,4 @@ public class RegisterConfigSectionExtensionTests
 
         Assert.Same(first, container.Resolve<TestConfig>());
     }
-}
-
-public class AnotherConfig
-{
-    public string Value { get; set; } = string.Empty;
 }

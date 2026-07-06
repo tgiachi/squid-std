@@ -30,9 +30,13 @@ resolve like any other service.
    name (the top-level YAML key). Provide a `createDefault` factory so the file
    is generated with sensible defaults on first run (the file is written at `StartAsync`
    when it does not exist yet, once every section is known).
-3. **Use environment variables.** Any `string` property whose value contains a
-   `$VAR` token is expanded from the environment when the section is bound.
-   Unknown tokens are left untouched.
+3. **Use environment variables in SquidStd sections.** Any `string` property of a type whose
+   namespace starts with `SquidStd` (the framework's own sections and any section type shipped
+   in a `SquidStd.*` package) is expanded from the environment when the section is bound: a
+   `$VAR` token is replaced with the matching environment variable, unknown tokens are left
+   untouched. Application-defined sections, like `MyServiceConfig` below, are not walked
+   automatically - call the same expansion yourself with the `string` extension `ReplaceEnv()`
+   (`SquidStd.Core.Extensions.Env`) wherever you read the value.
 4. **Read values.** Resolve the config type from the container wherever you need it - the
    value is available as soon as the registration call returns.
 
@@ -41,6 +45,10 @@ public sealed class MyServiceConfig
 {
     public string Endpoint { get; set; } = string.Empty; // e.g. "https://$API_HOST"
     public int Retries { get; set; } = 3;
+
+    // MyServiceConfig lives outside the SquidStd namespace, so it is not walked by the
+    // automatic substitution pass. Expand tokens explicitly where you read the value:
+    // config.Endpoint = config.Endpoint.ReplaceEnv();
 }
 
 var bootstrap = SquidStdBootstrap.Create(
@@ -188,3 +196,6 @@ Both the typed hooks and `OnConfigReady` also run again on an explicit reload:
 tracked section, and re-applies every hook - so overrides made with `OnConfigLoaded` are never
 lost across a reload. There is no automatic file watch: call `Load()` yourself when you know
 the file changed.
+
+Rebinding replaces the section's registration in the container - a service that already holds
+a direct reference to the old instance keeps using it until it resolves the section again.
