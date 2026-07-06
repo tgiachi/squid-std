@@ -4,7 +4,7 @@ using SquidStd.Plugin.Abstractions.Data;
 namespace SquidStd.Plugin.Abstractions.Interfaces.Plugins;
 
 /// <summary>
-/// Implemented by trusted .NET plugins loaded by Moongate during server startup.
+/// Implemented by trusted .NET plugins loaded by the SquidStd plugin loader during application startup.
 /// </summary>
 public interface ISquidStdPlugin
 {
