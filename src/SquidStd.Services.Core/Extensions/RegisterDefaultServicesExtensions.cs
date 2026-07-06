@@ -184,10 +184,18 @@ public static class RegisterDefaultServicesExtensions
         /// <summary>
         /// Registers the default job system service in the container.
         /// </summary>
+        /// <param name="config">Explicit configuration; when set, the YAML section is not bound and the file is ignored for this section.</param>
         /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterJobSystemService()
+        public IContainer RegisterJobSystemService(JobsConfig? config = null)
         {
-            container.RegisterConfigSection("jobs", static () => new JobsConfig(), -100);
+            if (config is not null)
+            {
+                container.RegisterInstance(config, IfAlreadyRegistered.Replace);
+            }
+            else
+            {
+                container.RegisterConfigSection("jobs", static () => new JobsConfig(), -100);
+            }
 
             return container.RegisterStdService<IJobSystem, JobSystemService>(-1);
         }
@@ -202,10 +210,18 @@ public static class RegisterDefaultServicesExtensions
         /// <summary>
         /// Registers the default metrics collection service in the container.
         /// </summary>
+        /// <param name="config">Explicit configuration; when set, the YAML section is not bound and the file is ignored for this section.</param>
         /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterMetricsCollectionService()
+        public IContainer RegisterMetricsCollectionService(MetricsConfig? config = null)
         {
-            container.RegisterConfigSection("metrics", static () => new MetricsConfig(), -80);
+            if (config is not null)
+            {
+                container.RegisterInstance(config, IfAlreadyRegistered.Replace);
+            }
+            else
+            {
+                container.RegisterConfigSection("metrics", static () => new MetricsConfig(), -80);
+            }
 
             return container.RegisterStdService<IMetricsCollectionService, MetricsCollectionService>(1000);
         }
@@ -213,10 +229,19 @@ public static class RegisterDefaultServicesExtensions
         /// <summary>
         /// Registers default encrypted local secret services in the container.
         /// </summary>
+        /// <param name="config">Explicit configuration; when set, the YAML section is not bound and the file is ignored for this section.</param>
         /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterSecretServices()
+        public IContainer RegisterSecretServices(SecretsConfig? config = null)
         {
-            container.RegisterConfigSection("secrets", static () => new SecretsConfig(), -60);
+            if (config is not null)
+            {
+                container.RegisterInstance(config, IfAlreadyRegistered.Replace);
+            }
+            else
+            {
+                container.RegisterConfigSection("secrets", static () => new SecretsConfig(), -60);
+            }
+
             container.Register<ISecretProtector, AesGcmSecretProtector>(Reuse.Singleton);
             container.Register<ISecretStore, FileSecretStore>(Reuse.Singleton);
 
@@ -226,10 +251,18 @@ public static class RegisterDefaultServicesExtensions
         /// <summary>
         /// Registers the default timer wheel service in the container.
         /// </summary>
+        /// <param name="config">Explicit configuration; when set, the YAML section is not bound and the file is ignored for this section.</param>
         /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterTimerWheelService()
+        public IContainer RegisterTimerWheelService(TimerWheelConfig? config = null)
         {
-            container.RegisterConfigSection("timerWheel", static () => new TimerWheelConfig(), -90);
+            if (config is not null)
+            {
+                container.RegisterInstance(config, IfAlreadyRegistered.Replace);
+            }
+            else
+            {
+                container.RegisterConfigSection("timerWheel", static () => new TimerWheelConfig(), -90);
+            }
 
             return container.RegisterStdService<ITimerService, TimerWheelService>(-1);
         }

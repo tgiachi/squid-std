@@ -24,10 +24,19 @@ public static class RegisterSchedulerServicesExtension
         /// Registers the timer wheel pump and the cron scheduler. Must be called after
         /// <c>RegisterCoreServices</c> so that <c>ITimerService</c> and <c>IJobSystem</c> exist.
         /// </summary>
+        /// <param name="pumpConfig">Explicit configuration; when set, the YAML section is not bound and the file is ignored for this section.</param>
         /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterSchedulerServices()
+        public IContainer RegisterSchedulerServices(TimerWheelPumpConfig? pumpConfig = null)
         {
-            container.RegisterConfigSection("timerWheelPump", static () => new TimerWheelPumpConfig(), -90);
+            if (pumpConfig is not null)
+            {
+                container.RegisterInstance(pumpConfig, IfAlreadyRegistered.Replace);
+            }
+            else
+            {
+                container.RegisterConfigSection("timerWheelPump", static () => new TimerWheelPumpConfig(), -90);
+            }
+
             container.RegisterStdService<TimerWheelPumpService, TimerWheelPumpService>(-1);
             container.RegisterMapping<ITimerWheelDriver, TimerWheelPumpService>();
             container.RegisterStdService<ICronScheduler, CronSchedulerService>(-1);
@@ -41,8 +50,9 @@ public static class RegisterSchedulerServicesExtension
         /// already registered. Must be called after <c>RegisterCoreServices</c> so that
         /// <c>IMainThreadDispatcher</c> and <c>ITimerService</c> exist.
         /// </summary>
+        /// <param name="config">Explicit configuration; when set, the YAML section is not bound and the file is ignored for this section.</param>
         /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterEventLoop()
+        public IContainer RegisterEventLoop(EventLoopConfig? config = null)
         {
             if (container.IsRegistered<ITimerWheelDriver>())
             {
@@ -51,7 +61,15 @@ public static class RegisterSchedulerServicesExtension
                 );
             }
 
-            container.RegisterConfigSection("eventLoop", static () => new EventLoopConfig(), -90);
+            if (config is not null)
+            {
+                container.RegisterInstance(config, IfAlreadyRegistered.Replace);
+            }
+            else
+            {
+                container.RegisterConfigSection("eventLoop", static () => new EventLoopConfig(), -90);
+            }
+
             container.RegisterStdService<IEventLoopService, EventLoopService>(-1);
             container.RegisterMapping<ITimerWheelDriver, IEventLoopService>();
             container.RegisterMapping<IMetricProvider, IEventLoopService>();
