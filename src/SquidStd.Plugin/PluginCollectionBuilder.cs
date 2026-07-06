@@ -16,7 +16,7 @@ public sealed class PluginCollectionBuilder
     internal IReadOnlyList<string> Directories => _directories;
 
     /// <summary>
-    /// Registers an internal plugin by type; the loader instantiates it via the public
+    /// Registers an internal plugin by type; it is instantiated immediately via the public
     /// parameterless constructor.
     /// </summary>
     /// <typeparam name="TPlugin">The plugin type.</typeparam>

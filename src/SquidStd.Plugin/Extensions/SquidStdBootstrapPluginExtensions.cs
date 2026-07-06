@@ -20,7 +20,10 @@ public static class SquidStdBootstrapPluginExtensions
     /// plugins can register configuration sections before the configuration is loaded. Relative
     /// directories are resolved against the bootstrap root directory. Any failure aborts startup:
     /// loader problems raise <see cref="Exceptions.PluginLoadException" /> and plugin exceptions
-    /// propagate unchanged.
+    /// propagate unchanged. Plugin assemblies load into the default AssemblyLoadContext and are
+    /// fully trusted: there is no unloading and no version isolation. Note that plugin load
+    /// logging is emitted before the bootstrap configures Serilog, so it is only visible when
+    /// a logger is configured beforehand.
     /// </summary>
     /// <param name="bootstrap">The bootstrap to configure.</param>
     /// <param name="configure">Callback that registers plugins and directories.</param>

@@ -50,6 +50,10 @@ per-plugin version isolation, so plugins are expected to be trusted. A failing p
 either with a `PluginLoadException` (discovery, ordering, or instantiation failure) or with the
 plugin's own exception from `Configure`.
 
+Call `UsePlugins` before `ConfigureLogging()` or any start method: the bootstrap loads its
+configuration during startup, and config sections registered by plugins after that point are never
+loaded.
+
 ## Related
 
 - Contracts: [SquidStd.Plugin.Abstractions](https://tgiachi.github.io/squid-std/articles/plugin-abstractions.html)
