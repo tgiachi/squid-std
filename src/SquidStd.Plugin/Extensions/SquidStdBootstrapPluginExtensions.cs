@@ -57,9 +57,9 @@ public static class SquidStdBootstrapPluginExtensions
         }
 
         var ordered = PluginDependencyResolver.Sort(plugins);
-        var appName = bootstrap.Options.AppName
-                      ?? Assembly.GetEntryAssembly()?.GetName().Name
-                      ?? bootstrap.Options.ConfigName;
+        var appName = !string.IsNullOrWhiteSpace(bootstrap.Options.AppName)
+            ? bootstrap.Options.AppName
+            : Assembly.GetEntryAssembly()?.GetName().Name ?? bootstrap.Options.ConfigName;
 
         foreach (var plugin in ordered)
         {
