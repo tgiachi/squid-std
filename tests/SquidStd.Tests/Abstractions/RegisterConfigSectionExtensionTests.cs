@@ -1,14 +1,19 @@
 using DryIoc;
-using SquidStd.Abstractions.Data.Internal.Config;
 using SquidStd.Abstractions.Extensions.Config;
+using SquidStd.Core.Config;
 using SquidStd.Tests.Support;
 
 namespace SquidStd.Tests.Abstractions;
 
 public class RegisterConfigSectionExtensionTests
 {
+    public sealed class AnotherConfig
+    {
+        public string Value { get; set; } = string.Empty;
+    }
+
     [Fact]
-    public void RegisterConfigSection_AddsRegistrationData()
+    public void RegisterConfigSection_WithoutSquidStdConfig_RegistersDefaultFromFactory()
     {
         using var container = new Container();
 
@@ -18,35 +23,10 @@ public class RegisterConfigSectionExtensionTests
             4
         );
 
-        var entry = Assert.Single(container.Resolve<List<ConfigRegistrationData>>());
-        var config = Assert.IsType<TestConfig>(entry.CreateDefault());
+        var config = container.Resolve<TestConfig>();
 
-        Assert.Equal("test", entry.SectionName);
-        Assert.Equal(typeof(TestConfig), entry.ConfigType);
-        Assert.Equal(4, entry.Priority);
         Assert.Equal("default", config.Name);
         Assert.Equal(2, config.Count);
-        Assert.False(container.IsRegistered<TestConfig>());
-    }
-
-    [Fact]
-    public void RegisterConfigSection_DuplicateSectionWithDifferentType_Throws()
-    {
-        using var container = new Container();
-
-        container.RegisterConfigSection<TestConfig>("test");
-
-        Assert.Throws<InvalidOperationException>(() => container.RegisterConfigSection<SampleDto>("test"));
-    }
-
-    [Fact]
-    public void RegisterConfigSection_DuplicateTypeWithDifferentSection_Throws()
-    {
-        using var container = new Container();
-
-        container.RegisterConfigSection<TestConfig>("first");
-
-        Assert.Throws<InvalidOperationException>(() => container.RegisterConfigSection<TestConfig>("second"));
     }
 
     [Fact]
@@ -65,8 +45,50 @@ public class RegisterConfigSectionExtensionTests
         using var container = new Container();
 
         container.RegisterConfigSection<TestConfig>("test");
-        container.RegisterConfigSection<TestConfig>("test");
+        var first = container.Resolve<TestConfig>();
 
-        Assert.Single(container.Resolve<List<ConfigRegistrationData>>());
+        container.RegisterConfigSection<TestConfig>("test");
+        var second = container.Resolve<TestConfig>();
+
+        Assert.Same(first, second);
+    }
+
+    [Fact]
+    public void RegisterConfigSection_DuplicateTypeDifferentSectionWithoutSquidStdConfig_IsSkipped()
+    {
+        using var container = new Container();
+
+        container.RegisterConfigSection<TestConfig>("first");
+
+        var exception = Record.Exception(() => container.RegisterConfigSection<TestConfig>("second"));
+
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public void RegisterConfigSection_DuplicateSectionDifferentTypeWithoutSquidStdConfig_RegistersBothDefaults()
+    {
+        using var container = new Container();
+
+        container.RegisterConfigSection("dup", static () => new TestConfig());
+        container.RegisterConfigSection("dup", static () => new AnotherConfig());
+
+        Assert.True(container.IsRegistered<TestConfig>());
+        Assert.True(container.IsRegistered<AnotherConfig>());
+    }
+
+    [Fact]
+    public void RegisterConfigSection_SameTypeAndSectionWithSquidStdConfig_IsIdempotent()
+    {
+        using var root = new TempDirectory();
+        var config = SquidStdConfig.Load("app", root.Path);
+        using var container = new Container();
+        container.RegisterInstance(config);
+
+        container.RegisterConfigSection("sample", static () => new TestConfig());
+        var first = container.Resolve<TestConfig>();
+        container.RegisterConfigSection("sample", static () => new TestConfig());
+
+        Assert.Same(first, container.Resolve<TestConfig>());
     }
 }

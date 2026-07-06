@@ -35,38 +35,11 @@ public class SquidStdBootstrapConfigHooksTests
         }
     }
 
-    [Fact]
-    public async Task OnConfigLoaded_SurvivesTheSecondLoad()
-    {
-        using var temp = new TempDirectory();
-        await using var bootstrap = NewBootstrap(temp.Path);
-        var invocations = 0;
-
-        bootstrap.ConfigureServices(
-            container => container.RegisterConfigSection("fakeSection", static () => new FakeSectionConfig(), 0)
-        );
-        bootstrap.OnConfigLoaded<FakeSectionConfig>(
-            fake =>
-            {
-                invocations++;
-                fake.Limit = 42;
-            }
-        );
-
-        await bootstrap.StartAsync(CancellationToken.None);
-
-        try
-        {
-            var config = bootstrap.Resolve<IConfigManagerService>().GetConfig<FakeSectionConfig>();
-
-            Assert.True(invocations >= 2, $"Expected the hook to run on every load, but it ran {invocations} time(s).");
-            Assert.Equal(42, config.Limit);
-        }
-        finally
-        {
-            await bootstrap.StopAsync(CancellationToken.None);
-        }
-    }
+    // OnConfigLoaded_SurvivesTheSecondLoad was removed: under the config-first contract there is
+    // no implicit second load during StartAsync. Its coverage is now split between
+    // ConfigFirstBootstrapTests.OnConfigLoaded_AppliesOnceAtStart_AndSticks (hooks apply exactly
+    // once at start) and ConfigFirstBootstrapTests.ExplicitLoad_Reloads_FiresEvent_AndReappliesHooks
+    // (hooks re-apply on an explicit IConfigManagerService.Load() reload).
 
     [Fact]
     public async Task OnConfigLoaded_LoggerSection_AffectsLoggerConfiguration()

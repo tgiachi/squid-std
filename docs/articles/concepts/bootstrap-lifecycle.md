@@ -14,7 +14,15 @@ var bootstrap = SquidStdBootstrap.Create(new SquidStdOptions
 });
 ```
 
-`ConfigName` selects the configuration file and `RootDirectory` anchors relative paths. Creating the bootstrap registers the configuration core - `DirectoriesConfig`, the `logger` config section and the config manager. Everything else is registered explicitly in `ConfigureServices`.
+`ConfigName` selects the configuration file and `RootDirectory` anchors relative paths. `Create`
+loads the configuration eagerly - the YAML file, or an empty document when it does not exist
+yet - into a standalone `SquidStdConfig`, before any service registration happens. It also
+registers the configuration core: `DirectoriesConfig`, the `logger` config section (bound
+immediately against that `SquidStdConfig`) and the config manager. Everything else is
+registered explicitly in `ConfigureServices`. To supply an already-loaded configuration
+yourself - useful when values from the file must drive registration decisions - use the
+`Create(SquidStdConfig, SquidStdOptions)` overload; see
+[two-phase setup](../guides/configuration.md#two-phase-setup-moongate-style).
 
 ## ConfigureServices
 
@@ -29,13 +37,18 @@ bootstrap.ConfigureServices(container =>
 });
 ```
 
+Config bound at registration: every `RegisterConfigSection` call inside this callback - direct,
+or through a `RegisterXxx`/`AddXxx` helper - binds its section immediately, so the section
+instance is resolvable as soon as the callback returns. There is no need to wait for
+`StartAsync`.
+
 See [dependency injection](dependency-injection.md) for the container and the `AddXxx` / `RegisterXxx` pattern.
 
 ## OnConfigLoaded
 
-After the configuration is loaded - and before the logger is built and services start - the
-bootstrap applies any typed config hooks. Use them to inspect or override loaded sections at
-startup; changes are in-memory only:
+Once, at `StartAsync` - before the logger is built and services start - the bootstrap applies
+any typed config hooks you registered. Use them to inspect or override the already-bound
+sections at startup; changes are in-memory only:
 
 ```csharp
 var bootstrap = SquidStdBootstrap.Create(o => o.ConfigName = "myapp");
@@ -45,10 +58,11 @@ bootstrap.OnConfigLoaded<SquidStdLoggerOptions>(o => o.MinimumLevel = LogLevelTy
 await bootstrap.StartAsync();
 ```
 
-The effective order is: load configuration, apply config hooks, configure the logger, start
-services. Hooks are re-applied on every configuration load, so overrides are never lost. To
-receive the whole configuration manager once every typed hook has run, use
-`bootstrap.OnConfigReady(cfg => ...)`. See
+The effective order is: sections bind at registration (during `ConfigureServices`), config
+hooks apply once at `StartAsync` entry, the logger is configured, then services start. Hooks
+are re-applied whenever you call `IConfigManagerService.Load()` for an explicit reload, so
+overrides are never lost across a reload. To receive the whole configuration manager once
+every typed hook has run, use `bootstrap.OnConfigReady(cfg => ...)`. See
 [Inspecting and overriding loaded configuration](../guides/configuration.md#inspecting-and-overriding-loaded-configuration) for more examples.
 
 ## Migrating to 0.15: explicit core services
@@ -73,7 +87,7 @@ builder.UseSquidStd(options => options.ConfigName = "myapp", c => c.RegisterCore
 
 ## Start and stop over ISquidStdService
 
-Services implementing `ISquidStdService` participate in the lifecycle. On `StartAsync` the configuration is loaded and the config hooks are applied, then services are started in registration order; on `StopAsync` they are stopped in reverse order, so dependencies remain available while their dependents shut down.
+Services implementing `ISquidStdService` participate in the lifecycle. On `StartAsync` the config hooks are applied once (mutating the already-bound sections in place) and, if the configuration file does not exist yet, it is written with defaults; then services are started in registration order. On `StopAsync` they are stopped in reverse order, so dependencies remain available while their dependents shut down.
 
 The bootstrap logs its whole lifecycle: a startup banner with the application name and version (set `SquidStdOptions.AppName`; it defaults to the entry assembly name and is attached to every event as the `Application` / `ApplicationVersion` properties), a registration summary (per-registration detail at Debug), one line per service started with its duration, and the shutdown sequence. A service that fails to stop is logged as a warning and the remaining services are still stopped. Extra Serilog sinks can be plugged by registering `ILogEventSink` instances in the container before start.
 

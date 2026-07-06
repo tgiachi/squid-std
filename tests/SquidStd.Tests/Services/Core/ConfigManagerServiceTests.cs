@@ -1,5 +1,6 @@
 using DryIoc;
 using SquidStd.Abstractions.Extensions.Config;
+using SquidStd.Core.Config;
 using SquidStd.Core.Interfaces.Config;
 using SquidStd.Services.Core.Services;
 using SquidStd.Tests.Support;
@@ -12,26 +13,30 @@ public class ConfigManagerServiceTests
     public void ConfigPath_AppendsYamlExtension()
     {
         using var container = new Container();
-        IConfigManagerService manager = new ConfigManagerService(container, "app", "/tmp/config");
+        var config = SquidStdConfig.Load("app", "/tmp/config");
+        IConfigManagerService manager = new ConfigManagerService(config, container);
 
         Assert.Equal(Path.Combine("/tmp/config", "app.yaml"), manager.ConfigPath);
     }
 
     [Fact]
-    public async Task GetConfig_ReturnsRegisteredSectionAfterStart()
+    public void GetConfig_ReturnsSectionBoundAtRegistration()
     {
+        // Under the config-first contract, RegisterConfigSection binds eagerly as soon as a
+        // SquidStdConfig instance is registered into the container - there is no separate
+        // "start" step to wait for.
         using var temp = new TempDirectory();
         using var container = new Container();
+        var config = SquidStdConfig.Load("app", temp.Path);
+        container.RegisterInstance(config, IfAlreadyRegistered.Replace);
         container.RegisterConfigSection<TestConfig>("test");
-        IConfigManagerService manager = new ConfigManagerService(container, "app", temp.Path);
-
-        await ((ConfigManagerService)manager).StartAsync(CancellationToken.None);
+        IConfigManagerService manager = new ConfigManagerService(config, container);
 
         Assert.Same(container.Resolve<TestConfig>(), manager.GetConfig<TestConfig>());
     }
 
     [Fact]
-    public async Task StartAsync_ExistingFile_LoadsAndRegistersSection()
+    public void Ctor_ExistingFile_BindsSectionEagerlyFromFile()
     {
         using var temp = new TempDirectory();
         File.WriteAllText(
@@ -43,37 +48,39 @@ public class ConfigManagerServiceTests
             """
         );
         using var container = new Container();
+        var config = SquidStdConfig.Load("app", temp.Path);
+        container.RegisterInstance(config, IfAlreadyRegistered.Replace);
         container.RegisterConfigSection("test", static () => new TestConfig { Name = "default", Count = 3 });
-        IConfigManagerService manager = new ConfigManagerService(container, "app", temp.Path);
+        IConfigManagerService manager = new ConfigManagerService(config, container);
 
-        await ((ConfigManagerService)manager).StartAsync(CancellationToken.None);
-
-        var config = container.Resolve<TestConfig>();
-        Assert.Equal("loaded", config.Name);
-        Assert.Equal(9, config.Count);
+        var result = manager.GetConfig<TestConfig>();
+        Assert.Equal("loaded", result.Name);
+        Assert.Equal(9, result.Count);
     }
 
     [Fact]
-    public async Task StartAsync_MissingFile_CreatesDefaultFileAndRegistersSection()
+    public void Save_MissingFile_CreatesDefaultFileWithRegisteredSection()
     {
         using var temp = new TempDirectory();
         using var container = new Container();
+        var config = SquidStdConfig.Load("app", temp.Path);
+        container.RegisterInstance(config, IfAlreadyRegistered.Replace);
         container.RegisterConfigSection("test", static () => new TestConfig { Name = "default", Count = 3 });
-        IConfigManagerService manager = new ConfigManagerService(container, "app", temp.Path);
+        IConfigManagerService manager = new ConfigManagerService(config, container);
 
-        await ((ConfigManagerService)manager).StartAsync(CancellationToken.None);
+        manager.Save();
 
         var path = Path.Combine(temp.Path, "app.yaml");
-        var config = container.Resolve<TestConfig>();
+        var result = manager.GetConfig<TestConfig>();
 
         Assert.True(File.Exists(path));
-        Assert.Equal("default", config.Name);
-        Assert.Equal(3, config.Count);
+        Assert.Equal("default", result.Name);
+        Assert.Equal(3, result.Count);
         Assert.Contains("test:", File.ReadAllText(path));
     }
 
     [Fact]
-    public async Task StartAsync_MissingSection_UsesDefaultAndSavesIt()
+    public void Save_MissingSection_UsesDefaultAndOmitsUntrackedSections()
     {
         using var temp = new TempDirectory();
         File.WriteAllText(
@@ -84,17 +91,18 @@ public class ConfigManagerServiceTests
             """
         );
         using var container = new Container();
+        var config = SquidStdConfig.Load("app", temp.Path);
+        container.RegisterInstance(config, IfAlreadyRegistered.Replace);
         container.RegisterConfigSection("test", static () => new TestConfig { Name = "default", Count = 3 });
-        IConfigManagerService manager = new ConfigManagerService(container, "app", temp.Path);
+        IConfigManagerService manager = new ConfigManagerService(config, container);
 
-        await ((ConfigManagerService)manager).StartAsync(CancellationToken.None);
         manager.Save();
 
-        var config = container.Resolve<TestConfig>();
+        var result = manager.GetConfig<TestConfig>();
         var yaml = File.ReadAllText(temp.Combine("app.yaml"));
 
-        Assert.Equal("default", config.Name);
-        Assert.Equal(3, config.Count);
+        Assert.Equal("default", result.Name);
+        Assert.Equal(3, result.Count);
         Assert.Contains("test:", yaml);
         Assert.DoesNotContain("other:", yaml);
     }

@@ -35,7 +35,6 @@ container.RegisterConfigSection<MyConfig>("my");
 | `RegisterStdServiceExtension`    | `RegisterStdService<,>` container extension.      |
 | `RegisterConfigSectionExtension` | `RegisterConfigSection<>` container extension.    |
 | `ServiceRegistrationData`        | Ordered service registration record.              |
-| `ConfigRegistrationData`         | Config section registration record.               |
 
 ## Related
 
