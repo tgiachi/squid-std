@@ -1,5 +1,6 @@
 using DryIoc;
 using SquidStd.Abstractions.Extensions.Config;
+using SquidStd.Core.Config;
 using SquidStd.Tests.Support;
 
 namespace SquidStd.Tests.Abstractions;
@@ -58,4 +59,36 @@ public class RegisterConfigSectionExtensionTests
 
         Assert.Null(exception);
     }
+
+    [Fact]
+    public void RegisterConfigSection_DuplicateSectionDifferentTypeWithoutSquidStdConfig_RegistersBothDefaults()
+    {
+        using var container = new Container();
+
+        container.RegisterConfigSection("dup", static () => new TestConfig());
+        container.RegisterConfigSection("dup", static () => new AnotherConfig());
+
+        Assert.True(container.IsRegistered<TestConfig>());
+        Assert.True(container.IsRegistered<AnotherConfig>());
+    }
+
+    [Fact]
+    public void RegisterConfigSection_SameTypeAndSectionWithSquidStdConfig_IsIdempotent()
+    {
+        using var root = new TempDirectory();
+        var config = SquidStdConfig.Load("app", root.Path);
+        using var container = new Container();
+        container.RegisterInstance(config);
+
+        container.RegisterConfigSection("sample", static () => new TestConfig());
+        var first = container.Resolve<TestConfig>();
+        container.RegisterConfigSection("sample", static () => new TestConfig());
+
+        Assert.Same(first, container.Resolve<TestConfig>());
+    }
+}
+
+public class AnotherConfig
+{
+    public string Value { get; set; } = string.Empty;
 }
