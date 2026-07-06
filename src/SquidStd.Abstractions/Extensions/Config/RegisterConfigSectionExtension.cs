@@ -1,6 +1,8 @@
 using DryIoc;
+using Serilog;
 using SquidStd.Abstractions.Data.Internal.Config;
 using SquidStd.Abstractions.Extensions.Container;
+using SquidStd.Core.Config;
 
 namespace SquidStd.Abstractions.Extensions.Config;
 
@@ -18,6 +20,29 @@ public static class RegisterConfigSectionExtension
         ArgumentException.ThrowIfNullOrWhiteSpace(sectionName);
 
         var configType = typeof(TConfig);
+
+        if (container.IsRegistered<TConfig>())
+        {
+            Log.ForContext(typeof(RegisterConfigSectionExtension))
+               .Debug(
+                   "Config section {Section:l} skipped: an explicit {ConfigType:l} instance is already registered",
+                   sectionName,
+                   configType.Name
+               );
+
+            return container;
+        }
+
+        if (container.IsRegistered<SquidStdConfig>())
+        {
+            var squidConfig = container.Resolve<SquidStdConfig>();
+            var bound = squidConfig.BindSection(sectionName, createDefault, priority);
+            container.RegisterInstance(bound, IfAlreadyRegistered.Replace);
+
+            return container;
+        }
+
+        // legacy deferred path below, unchanged (removed by the cleanup task)
 
         if (container.IsRegistered<List<ConfigRegistrationData>>())
         {
