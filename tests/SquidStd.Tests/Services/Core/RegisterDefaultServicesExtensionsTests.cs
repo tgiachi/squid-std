@@ -183,7 +183,8 @@ public class RegisterDefaultServicesExtensionsTests
 
         Assert.Contains(entries, entry => entry.SectionName == "storage" && entry.ConfigType == typeof(StorageConfig));
         Assert.Contains(entries, entry => entry.SectionName == "secrets" && entry.ConfigType == typeof(SecretsConfig));
-        Assert.True(container.IsRegistered<StorageConfig>());
+        // Both sections are section-only in a bare container: no eager default instance, deferred to the config manager.
+        Assert.False(container.IsRegistered<StorageConfig>());
         Assert.False(container.IsRegistered<SecretsConfig>());
     }
 

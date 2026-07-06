@@ -26,10 +26,18 @@ public static class ConsoleCommandsRegistrationExtensions
         /// the prompt. Set <c>logger.EnableConsole: false</c> so the sink replaces the standard
         /// console sink.
         /// </summary>
+        /// <param name="config">Explicit configuration; when set, the YAML section is not bound and the file is ignored for this section.</param>
         /// <returns>The same container for chaining.</returns>
-        public IContainer AddConsoleCommands()
+        public IContainer AddConsoleCommands(ConsoleCommandsConfig? config = null)
         {
-            container.RegisterConfigSection("consoleCommands", static () => new ConsoleCommandsConfig(), -50);
+            if (config is not null)
+            {
+                container.RegisterInstance(config, IfAlreadyRegistered.Replace);
+            }
+            else
+            {
+                container.RegisterConfigSection("consoleCommands", static () => new ConsoleCommandsConfig(), -50);
+            }
             container.Register<IConsoleUiService, ConsoleUiService>(Reuse.Singleton);
             container.RegisterDelegate<ICommandSystemService>(
                 resolver =>
