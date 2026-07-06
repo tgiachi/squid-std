@@ -40,6 +40,8 @@ await bootstrap.RunAsync();
   can depend on an internal one and vice versa.
 - `Configure` runs before the configuration load, so plugins can register their own configuration
   sections and services ahead of time.
+- Plugin directories are managed like the other bootstrap directories: a missing directory is
+  created on the spot and simply yields no plugins.
 - Each plugin receives a `PluginContext` populated with the standard keys: `PluginContextKeys.RootDirectory`
   (the bootstrap root directory) and `PluginContextKeys.AppName` (the bootstrap app name).
 

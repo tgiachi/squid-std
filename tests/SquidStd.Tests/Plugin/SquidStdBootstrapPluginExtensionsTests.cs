@@ -94,6 +94,20 @@ public class SquidStdBootstrapPluginExtensionsTests
     }
 
     [Fact]
+    public async Task UsePlugins_MissingDirectory_IsCreatedAndYieldsNoPlugins()
+    {
+        using var root = new TempDirectory();
+
+        await using var bootstrap = SquidStdBootstrap.Create(
+            new SquidStdOptions { ConfigName = "plugintest", RootDirectory = root.Path }
+        );
+
+        bootstrap.UsePlugins(plugins => plugins.FromDirectory("plugins"));
+
+        Assert.True(Directory.Exists(root.Combine("plugins")));
+    }
+
+    [Fact]
     public async Task UsePlugins_AfterStart_Throws()
     {
         using var root = new TempDirectory();
