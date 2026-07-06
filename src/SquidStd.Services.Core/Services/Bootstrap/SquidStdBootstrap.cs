@@ -14,10 +14,10 @@ using SquidStd.Core.Interfaces.Config;
 using SquidStd.Core.Interfaces.Events;
 using SquidStd.Core.Interfaces.Lifecycle;
 using SquidStd.Core.Types;
+using SquidStd.Core.Types.Bootstrap;
 using SquidStd.Services.Core.Extensions;
 using SquidStd.Services.Core.Extensions.Logger;
 using SquidStd.Services.Core.Services.Lifecycle;
-using SquidStd.Services.Core.Types;
 
 namespace SquidStd.Services.Core.Services.Bootstrap;
 
@@ -42,6 +42,9 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 
     /// <inheritdoc />
     public IContainer Container { get; }
+
+    /// <inheritdoc />
+    public BootstrapStateType State => _state;
 
     /// <summary>
     /// Initializes a bootstrapper with default options.

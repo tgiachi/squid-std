@@ -4,6 +4,7 @@ using SquidStd.ConsoleCommands.Services;
 using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Interfaces.Bootstrap;
 using SquidStd.Core.Interfaces.Config;
+using SquidStd.Core.Types.Bootstrap;
 using SquidStd.Services.Core.Services.Lifecycle;
 
 namespace SquidStd.Tests.ConsoleCommands;
@@ -83,6 +84,8 @@ public class BuiltinCommandsTests
 
         public IContainer Container { get; } = new Container();
 
+        public BootstrapStateType State { get; private set; } = BootstrapStateType.Created;
+
         public StopSpyBootstrap(Action onStop)
         {
             _onStop = onStop;
@@ -111,10 +114,15 @@ public class BuiltinCommandsTests
             => Task.CompletedTask;
 
         public ValueTask StartAsync(CancellationToken cancellationToken = default)
-            => ValueTask.CompletedTask;
+        {
+            State = BootstrapStateType.Started;
+
+            return ValueTask.CompletedTask;
+        }
 
         public ValueTask StopAsync(CancellationToken cancellationToken = default)
         {
+            State = BootstrapStateType.Stopped;
             _onStop();
 
             return ValueTask.CompletedTask;

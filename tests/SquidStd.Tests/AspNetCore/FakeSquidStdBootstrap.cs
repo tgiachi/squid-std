@@ -2,6 +2,7 @@ using DryIoc;
 using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Interfaces.Bootstrap;
 using SquidStd.Core.Interfaces.Config;
+using SquidStd.Core.Types.Bootstrap;
 
 namespace SquidStd.Tests.AspNetCore;
 
@@ -16,6 +17,8 @@ internal sealed class FakeSquidStdBootstrap : ISquidStdBootstrap
     public SquidStdOptions Options { get; } = new();
 
     public IContainer Container { get; } = new Container();
+
+    public BootstrapStateType State { get; set; } = BootstrapStateType.Created;
 
     public ISquidStdBootstrap ConfigureService(Func<IContainer, IContainer> configure)
         => ConfigureServices(configure);
@@ -64,6 +67,7 @@ internal sealed class FakeSquidStdBootstrap : ISquidStdBootstrap
     {
         cancellationToken.ThrowIfCancellationRequested();
         StartCount++;
+        State = BootstrapStateType.Started;
 
         return ValueTask.CompletedTask;
     }
@@ -72,6 +76,7 @@ internal sealed class FakeSquidStdBootstrap : ISquidStdBootstrap
     {
         cancellationToken.ThrowIfCancellationRequested();
         StopCount++;
+        State = BootstrapStateType.Stopped;
 
         return ValueTask.CompletedTask;
     }

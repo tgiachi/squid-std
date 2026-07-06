@@ -1,6 +1,7 @@
 using DryIoc;
 using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Core.Interfaces.Config;
+using SquidStd.Core.Types.Bootstrap;
 
 namespace SquidStd.Core.Interfaces.Bootstrap;
 
@@ -18,6 +19,12 @@ public interface ISquidStdBootstrap : IAsyncDisposable
     /// Gets the owned dependency injection container.
     /// </summary>
     IContainer Container { get; }
+
+    /// <summary>
+    /// Gets the current lifecycle state of the bootstrap. Reads are lock-free and intended for
+    /// pre-start guards, not for synchronizing concurrent lifecycle transitions.
+    /// </summary>
+    BootstrapStateType State { get; }
 
     /// <summary>
     /// Applies custom service registrations before the bootstrap lifecycle starts.

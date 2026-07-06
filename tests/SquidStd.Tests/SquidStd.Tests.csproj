@@ -43,6 +43,7 @@
         <ProjectReference Include="..\..\src\SquidStd.Aws.Abstractions\SquidStd.Aws.Abstractions.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.AspNetCore\SquidStd.AspNetCore.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Plugin.Abstractions\SquidStd.Plugin.Abstractions.csproj"/>
+        <ProjectReference Include="..\..\src\SquidStd.Plugin\SquidStd.Plugin.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Network\SquidStd.Network.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Persistence.Abstractions\SquidStd.Persistence.Abstractions.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Persistence\SquidStd.Persistence.csproj"/>
