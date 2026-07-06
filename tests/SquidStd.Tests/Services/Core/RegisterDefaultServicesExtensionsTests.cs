@@ -1,5 +1,4 @@
 using DryIoc;
-using SquidStd.Abstractions.Data.Internal.Config;
 using SquidStd.Abstractions.Data.Internal.Services;
 using SquidStd.Core.Config;
 using SquidStd.Core.Data.Bootstrap;
@@ -120,28 +119,23 @@ public class RegisterDefaultServicesExtensionsTests
     }
 
     [Fact]
-    public void RegisterJobSystemAndTimerWheelServices_RegisterJobsAndTimerWheelMetadata()
+    public void RegisterJobSystemAndTimerWheelServices_RegisterDefaultConfigInstances()
     {
         using var container = new Container();
 
         container.RegisterJobSystemService();
         container.RegisterTimerWheelService();
 
-        var entries = container.Resolve<List<ConfigRegistrationData>>();
-
-        Assert.Contains(entries, entry => entry.SectionName == "jobs" && entry.ConfigType == typeof(JobsConfig));
-        Assert.Contains(entries, entry => entry.SectionName == "timerWheel" && entry.ConfigType == typeof(TimerWheelConfig));
-        Assert.False(container.IsRegistered<JobsConfig>());
-        Assert.False(container.IsRegistered<TimerWheelConfig>());
+        Assert.True(container.IsRegistered<JobsConfig>());
+        Assert.True(container.IsRegistered<TimerWheelConfig>());
     }
 
     [Fact]
     public void RegisterConfigServices_BindsLoggerSectionEagerly()
     {
         // RegisterConfigServices registers a SquidStdConfig instance before touching the "logger"
-        // section, so RegisterConfigSection takes the eager-bind path instead of the legacy
-        // List<ConfigRegistrationData> path: the section is bound and resolvable immediately,
-        // with no separate load/start step.
+        // section, so RegisterConfigSection binds it against SquidStdConfig eagerly: the section
+        // is bound and resolvable immediately, with no separate load/start step.
         using var temp = new TempDirectory();
         using var container = new Container();
 
@@ -159,33 +153,27 @@ public class RegisterDefaultServicesExtensionsTests
     }
 
     [Fact]
-    public void RegisterMetricsCollectionService_RegistersMetricsMetadata()
+    public void RegisterMetricsCollectionService_RegistersDefaultConfigInstance()
     {
         using var container = new Container();
 
         container.RegisterMetricsCollectionService();
 
-        var entries = container.Resolve<List<ConfigRegistrationData>>();
-
-        Assert.Contains(entries, entry => entry.SectionName == "metrics" && entry.ConfigType == typeof(MetricsConfig));
-        Assert.False(container.IsRegistered<MetricsConfig>());
+        Assert.True(container.IsRegistered<MetricsConfig>());
     }
 
     [Fact]
-    public void AddFileStorageAndSecretServices_RegisterStorageAndSecretsMetadata()
+    public void AddFileStorageAndSecretServices_RegisterDefaultConfigInstances()
     {
         using var container = new Container();
 
         container.AddFileStorage();
         container.RegisterSecretServices();
 
-        var entries = container.Resolve<List<ConfigRegistrationData>>();
-
-        Assert.Contains(entries, entry => entry.SectionName == "storage" && entry.ConfigType == typeof(StorageConfig));
-        Assert.Contains(entries, entry => entry.SectionName == "secrets" && entry.ConfigType == typeof(SecretsConfig));
-        // Both sections are section-only in a bare container: no eager default instance, deferred to the config manager.
-        Assert.False(container.IsRegistered<StorageConfig>());
-        Assert.False(container.IsRegistered<SecretsConfig>());
+        // Bare container (no SquidStdConfig): RegisterConfigSection's degenerate fallback
+        // registers the default instance directly instead of deferring to a config manager.
+        Assert.True(container.IsRegistered<StorageConfig>());
+        Assert.True(container.IsRegistered<SecretsConfig>());
     }
 
     [Fact]

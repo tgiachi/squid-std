@@ -1,5 +1,4 @@
 using DryIoc;
-using SquidStd.Abstractions.Data.Internal.Config;
 using SquidStd.Abstractions.Extensions.Config;
 using SquidStd.Core.Config;
 using SquidStd.Tests.Support;
@@ -46,17 +45,29 @@ public class RegisterConfigSectionEagerTests
     }
 
     [Fact]
-    public void RegisterConfigSection_WithoutSquidStdConfig_UsesLegacyDeferredRegistry()
+    public void RegisterConfigSection_TypeEagerlyTrackedUnderAnotherSection_Throws()
+    {
+        using var root = new TempDirectory();
+        var config = SquidStdConfig.Load("app", root.Path);
+        using var container = new Container();
+        container.RegisterInstance(config);
+        container.RegisterConfigSection("first", static () => new EagerSection());
+
+        Assert.Throws<InvalidOperationException>(
+            () => container.RegisterConfigSection<EagerSection>("second")
+        );
+    }
+
+    [Fact]
+    public void RegisterConfigSection_WithoutSquidStdConfig_RegistersDefaultInstance()
     {
         using var container = new Container();
-        container.RegisterInstance(new List<ConfigRegistrationData>());
 
-        container.RegisterConfigSection("legacy", static () => new EagerSection());
-
-        Assert.Contains(
-            container.Resolve<List<ConfigRegistrationData>>(),
-            entry => entry.SectionName == "legacy"
+        var exception = Record.Exception(
+            () => container.RegisterConfigSection("legacy", static () => new EagerSection())
         );
-        Assert.False(container.IsRegistered<EagerSection>());
+
+        Assert.Null(exception);
+        Assert.Equal("default", container.Resolve<EagerSection>().Name);
     }
 }

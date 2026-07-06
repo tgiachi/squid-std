@@ -64,6 +64,8 @@ eventLoop:
   SlowTickThresholdMs: 250  # warn above this per-tick time
 ```
 
+Skip the file entirely with an explicit instance: `RegisterEventLoop(new EventLoopConfig { IdleSleepMs = 0 })`.
+
 ```mermaid
 flowchart TD
   subgraph Drivers["Drivers - register exactly one"]

@@ -1,7 +1,5 @@
 using DryIoc;
 using Serilog;
-using SquidStd.Abstractions.Data.Internal.Config;
-using SquidStd.Abstractions.Extensions.Container;
 using SquidStd.Core.Config;
 
 namespace SquidStd.Abstractions.Extensions.Config;
@@ -23,6 +21,25 @@ public static class RegisterConfigSectionExtension
 
         if (container.IsRegistered<TConfig>())
         {
+            if (container.IsRegistered<SquidStdConfig>())
+            {
+                var trackedUnderOtherSection = container.Resolve<SquidStdConfig>()
+                                                         .Entries
+                                                         .Any(
+                                                             entry => entry.ConfigType == configType &&
+                                                                      !string.Equals(
+                                                                          entry.SectionName,
+                                                                          sectionName,
+                                                                          StringComparison.Ordinal
+                                                                      )
+                                                         );
+
+                if (trackedUnderOtherSection)
+                {
+                    throw new InvalidOperationException($"Config type '{configType.Name}' is already registered.");
+                }
+            }
+
             Log.ForContext(typeof(RegisterConfigSectionExtension))
                .Debug(
                    "Config section {Section:l} skipped: an explicit {ConfigType:l} instance is already registered",
@@ -42,37 +59,10 @@ public static class RegisterConfigSectionExtension
             return container;
         }
 
-        // legacy deferred path below, unchanged (removed by the cleanup task)
-
-        if (container.IsRegistered<List<ConfigRegistrationData>>())
-        {
-            var entries = container.Resolve<List<ConfigRegistrationData>>();
-            var sameSection = entries.FirstOrDefault(
-                entry => string.Equals(
-                    entry.SectionName,
-                    sectionName,
-                    StringComparison.Ordinal
-                )
-            );
-
-            if (sameSection is not null)
-            {
-                if (sameSection.ConfigType == configType)
-                {
-                    return container;
-                }
-
-                throw new InvalidOperationException($"Config section '{sectionName}' is already registered.");
-            }
-
-            if (entries.Any(entry => entry.ConfigType == configType))
-            {
-                throw new InvalidOperationException($"Config type '{configType.Name}' is already registered.");
-            }
-        }
-
-        var factory = createDefault ?? (() => new());
-        container.AddToRegisterTypedList(new ConfigRegistrationData(sectionName, configType, () => factory(), priority));
+        // Degenerate mode (bare container without the bootstrap/SquidStdConfig): register the
+        // default instance; there is no file to bind from.
+        var fallback = createDefault?.Invoke() ?? new TConfig();
+        container.RegisterInstance(fallback, IfAlreadyRegistered.Keep);
 
         return container;
     }

@@ -4,7 +4,6 @@ using DryIoc;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
-using SquidStd.Abstractions.Data.Internal.Config;
 using SquidStd.Abstractions.Data.Internal.Services;
 using SquidStd.Abstractions.Interfaces.Services;
 using SquidStd.Core.Config;
@@ -578,9 +577,9 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 
     private void LogRegistrations(ILogger logger, ServiceRegistrationData[] lifecycleRegistrations)
     {
-        List<ConfigRegistrationData> sections = Container.IsRegistered<List<ConfigRegistrationData>>()
-                                                    ? Container.Resolve<List<ConfigRegistrationData>>()
-                                                    : [];
+        IReadOnlyCollection<IConfigEntry> sections = Container.IsRegistered<SquidStdConfig>()
+                                                        ? Container.Resolve<SquidStdConfig>().Entries
+                                                        : [];
         var containerRegistrations = Container.GetServiceRegistrations().ToArray();
 
         logger.Information(
