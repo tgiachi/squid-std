@@ -1,6 +1,9 @@
 using DryIoc;
+using SquidStd.Core.Data.Bootstrap;
 using SquidStd.Plugin.Abstractions.Data;
 using SquidStd.Plugin.Abstractions.Interfaces.Plugins;
+using SquidStd.Plugin.Extensions;
+using SquidStd.Services.Core.Services.Bootstrap;
 
 namespace SquidStd.Samples.Plugins;
 
@@ -41,16 +44,16 @@ internal static class Program
     {
     #region step-2
 
-        var container = new Container();
-        var context = new PluginContext();
-        context.Data["startedAt"] = DateTimeOffset.UtcNow;
+        var bootstrap = SquidStdBootstrap.Create(
+            new SquidStdOptions { ConfigName = "plugins-sample", RootDirectory = Directory.GetCurrentDirectory() }
+        );
 
-        ISquidStdPlugin plugin = new WeatherPlugin();
-
+        var plugin = new WeatherPlugin();
         Console.WriteLine($"Loading {plugin.Metadata.Name} v{plugin.Metadata.Version} by {plugin.Metadata.Author}");
-        plugin.Configure(container, context);
 
-        var greeter = container.Resolve<IGreeter>();
+        bootstrap.UsePlugins(plugins => plugins.Add(plugin));
+
+        var greeter = bootstrap.Resolve<IGreeter>();
         Console.WriteLine(greeter.Greet("squid"));
 
     #endregion
