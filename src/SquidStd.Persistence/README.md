@@ -160,6 +160,7 @@ bootstrap.ConfigureServices(c =>
   circular resolution). Receive the service as the `SeedAsync` parameter instead.
 - **Execution order**: Seeders run in registration order. Multiple seeders can be registered via chained
   `RegisterPersistenceSeeder()` calls; plugins interleave naturally.
+- **Fail-fast behavior**: If a seeder exception occurs, startup fails immediately and no remaining seeders run. If an earlier seeder's writes reach the journal before a later seeder fails, the save is no longer fresh at the next boot and the remaining seeders never run - prefer a single seeder, or make the set safe to lose a tail.
 
 ## Key types
 
