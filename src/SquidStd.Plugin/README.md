@@ -52,9 +52,11 @@ per-plugin version isolation, so plugins are expected to be trusted. A failing p
 either with a `PluginLoadException` (discovery, ordering, or instantiation failure) or with the
 plugin's own exception from `Configure`.
 
-Call `UsePlugins` before `ConfigureLogging()` or any start method: the bootstrap loads its
-configuration during startup, and config sections registered by plugins after that point are never
-loaded.
+Ordering with `ConfigureLogging()` is free since the config-first bootstrap: configuration sections
+bind eagerly at registration, so plugins can register their sections at any point before the services
+consume them. Calling `ConfigureLogging()` before `UsePlugins` makes the plugin-load log lines visible.
+The one residual rule: `OnConfigLoaded` hooks targeting a plugin's section must be registered before
+`ConfigureLogging()` runs, because hooks are applied there.
 
 ## Related
 

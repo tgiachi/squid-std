@@ -12,7 +12,11 @@ using SquidStd.Persistence.Services;
 
 namespace SquidStd.Persistence.Extensions;
 
-/// <summary>Registers persisted entity types for descriptor construction at bootstrap.</summary>
+/// <summary>
+/// Registers persisted entity types for descriptor construction at bootstrap, and wires the
+/// persistence stack itself - entity registry, journal, snapshot service, and the
+/// <see cref="IPersistenceService" /> lifecycle service.
+/// </summary>
 public static class PersistenceRegistrationExtensions
 {
     extension(IContainer container)

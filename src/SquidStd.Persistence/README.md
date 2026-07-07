@@ -13,7 +13,10 @@ dotnet add package SquidStd.Persistence
 dotnet add package SquidStd.Persistence.MessagePack   # recommended binary serializer
 ```
 
-## Usage
+## Usage (standalone, no bootstrap)
+
+Wire the stack by hand when you are not using `SquidStdBootstrap` - construct the registry, journal,
+snapshot service, and `PersistenceService` yourself:
 
 ```csharp
 using SquidStd.Persistence.Abstractions.Data;
@@ -47,12 +50,48 @@ await persistence.SaveSnapshotAsync();                            // snapshot + 
 var bob = await players.GetByIdAsync(1);                          // detached clone
 ```
 
-### DI registration
+### Manual DI registration (without `RegisterPersistence`)
 
 ```csharp
 container.RegisterPersistedEntity<Player, int>(typeId: 1, typeName: "Player", schemaVersion: 1, p => p.Id);
 container.ApplyPersistedEntityRegistrations();   // builds descriptors into IPersistenceEntityRegistry
 ```
+
+Only needed when the rest of the stack (registry, journal, snapshot, lifecycle service) is assembled by
+hand instead of through `RegisterPersistence()`, which applies these registrations itself - do not call
+`ApplyPersistedEntityRegistrations()` when `RegisterPersistence()` is in use.
+
+## Bootstrap registration
+
+The one-call path for `SquidStdBootstrap` apps: register a serializer, register the persistence stack,
+then declare the persisted entities.
+
+```csharp
+using SquidStd.Persistence.Extensions;
+using SquidStd.Persistence.MessagePack.Extensions;
+
+bootstrap.ConfigureServices(c =>
+{
+    c.RegisterMessagePackSerializer();   // or RegisterDataSerializer() for JSON
+    c.RegisterPersistence();             // or RegisterPersistence(new PersistenceConfig { ... })
+    c.RegisterPersistedEntity<Player, int>(1, "Player", 1, p => p.Id);
+    return c;
+});
+
+// after StartAsync: snapshot loaded, journal replayed, autosave running
+var players = bootstrap.Resolve<IPersistenceService>().GetStore<Player, int>();
+```
+
+- **Serializer prerequisite**: register a serializer (`RegisterMessagePackSerializer()` or
+  `RegisterDataSerializer()`) before `RegisterPersistence()` - it throws `InvalidOperationException`
+  otherwise, so a missing serializer fails fast instead of at first use.
+- **Config source**: `RegisterPersistence()` binds the `persistence` YAML section by default; pass an
+  explicit `PersistenceConfig` instance to skip the file entirely for that section (it is then ignored).
+  Either way, `SaveDirectory` defaults to the managed `save` directory under the bootstrap root when left
+  blank.
+- **Lifecycle**: `IPersistenceService` is registered as a lifecycle service - the snapshot loads and the
+  journal replays at start, autosave runs while the bootstrap is up, and a final snapshot is written at
+  stop.
 
 ## Key types
 
