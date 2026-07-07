@@ -110,13 +110,13 @@ Register an inline seeding callback:
 bootstrap.ConfigureServices(c =>
 {
     c.RegisterPersistence();
-    c.RegisterPersistedEntity<User, int>(1, "User", 1, u => u.Id);
+    c.RegisterPersistedEntity<Player, int>(1, "Player", 1, p => p.Id);
     
     // Inline delegate seeder
     c.RegisterPersistenceSeeder(async (persistence, ct) =>
     {
-        var users = persistence.GetStore<User, int>();
-        await users.UpsertAsync(new User { Id = 1, Name = "Admin" }, ct);
+        var players = persistence.GetStore<Player, int>();
+        await players.UpsertAsync(new Player { Id = 1, Name = "Admin" }, ct);
     });
     
     return c;
@@ -128,20 +128,20 @@ bootstrap.ConfigureServices(c =>
 Implement `IPersistenceSeeder` and register it by type:
 
 ```csharp
-public sealed class AdminUserSeeder : IPersistenceSeeder
+public sealed class AdminPlayerSeeder : IPersistenceSeeder
 {
     public async ValueTask SeedAsync(IPersistenceService persistence, CancellationToken cancellationToken = default)
     {
-        var users = persistence.GetStore<User, int>();
-        await users.UpsertAsync(new User { Id = 1, Name = "Admin" }, cancellationToken);
+        var players = persistence.GetStore<Player, int>();
+        await players.UpsertAsync(new Player { Id = 1, Name = "Admin" }, cancellationToken);
     }
 }
 
 bootstrap.ConfigureServices(c =>
 {
     c.RegisterPersistence();
-    c.RegisterPersistedEntity<User, int>(1, "User", 1, u => u.Id);
-    c.RegisterPersistenceSeeder<AdminUserSeeder>();
+    c.RegisterPersistedEntity<Player, int>(1, "Player", 1, p => p.Id);
+    c.RegisterPersistenceSeeder<AdminPlayerSeeder>();
     
     return c;
 });
@@ -150,8 +150,9 @@ bootstrap.ConfigureServices(c =>
 ### Key semantics
 
 - **Fresh-save detection**: Seeders run only when the save is brand-new (neither snapshot nor journal existed
-  before). An emptied-but-old save (one whose files were deleted after a prior boot) is not fresh - the
-  absence of files does not re-trigger seeding.
+  before). An emptied-but-old save is one whose entities were removed through the normal store API - the
+  journal still records those removals, so it is not fresh. Deleting the save files from disk, instead,
+  makes the next boot fresh again.
 - **No re-runs**: Since writes go through the normal stores, subsequent boots record the seeded state in the
   snapshot and journal. The save is no longer fresh.
 - **Constructor constraints**: Class-form seeders must not constructor-inject `IPersistenceService` (it causes

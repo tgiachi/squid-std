@@ -45,9 +45,10 @@ history row is written only after a successful run - if a seeder throws, it is r
 process start. A seeder exception aborts startup (fail-fast). The seed and history row are not wrapped
 in a transaction, so a seeder should tolerate running again over data it already wrote.
 
-The history table is created automatically even if `AutoMigrate` is off. Seeder names must be unique
-and are checked case-insensitively (the lookup follows database collation, but the uniqueness check is
-ordinal).
+The history table is created during database service start when at least one seeder is registered,
+independent of whether `AutoMigrate` is on or off. Seeder names must be unique; the startup duplicate
+check is ordinal (case-sensitive), while the history-table lookup for a given seeder's name follows
+the database's collation.
 
 ### Delegate seeder
 
@@ -61,8 +62,7 @@ bootstrap.ConfigureServices(c =>
     // Inline delegate seeder
     c.RegisterDatabaseSeeder("accounts.admin", async (database, ct) =>
     {
-        var users = database.Resolve<IDataAccess<User>>();
-        await users.InsertAsync(new User { Id = 1, Name = "Admin" }, ct);
+        await database.Orm.Insert(new User { Id = 1, Name = "Admin" }).ExecuteAffrowsAsync(ct);
     });
     
     return c;
@@ -80,8 +80,7 @@ public sealed class AdminAccountSeeder : IDatabaseSeeder
     
     public async ValueTask SeedAsync(IDatabaseService database, CancellationToken cancellationToken = default)
     {
-        var users = database.Resolve<IDataAccess<User>>();
-        await users.InsertAsync(new User { Id = 1, Name = "Admin" }, cancellationToken);
+        await database.Orm.Insert(new User { Id = 1, Name = "Admin" }).ExecuteAffrowsAsync(cancellationToken);
     }
 }
 
@@ -100,10 +99,11 @@ bootstrap.ConfigureServices(c =>
   A seeder is skipped if its name already exists in the history.
 - **Failed-seeder retry**: The history row is written only after the seeder succeeds. If a seeder throws,
   the row is not written, and the seeder retries at the next process start.
-- **History table creation**: The table is created automatically during database service initialization,
-  even if `AutoMigrate` is false. Its schema is internal to SquidStd and should not be modified.
-- **Duplicate name check**: Seeder names must be unique. Duplicate names (case-insensitive match) are
-  detected at startup and cause an exception.
+- **History table creation**: The table is created during database service start when at least one seeder
+  is registered (this is what triggers `RunSeedersAsync`), independent of whether `AutoMigrate` is on or
+  off. Its schema is internal to SquidStd and should not be modified.
+- **Duplicate name check**: Seeder names must be unique. Duplicate names (ordinal, case-sensitive match)
+  are detected at startup and cause an exception.
 - **Execution order**: Seeders run in registration order. Multiple seeders can be registered via chained
   `RegisterDatabaseSeeder()` calls.
 - **No transaction wrap**: The seed and its history row are not wrapped in a transaction. Seeders should
