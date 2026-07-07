@@ -4,6 +4,8 @@ using SquidStd.Database.Abstractions.Data.Database;
 using SquidStd.Database.Abstractions.Types.Data;
 using SquidStd.Core.Directories;
 using SquidStd.Database.Connection;
+using SquidStd.Database.Data.Internal;
+using SquidStd.Database.Interfaces.Seeding;
 using SquidStd.Database.Interfaces.Services;
 
 namespace SquidStd.Database.Services;
@@ -17,6 +19,7 @@ public sealed class DatabaseService : IDatabaseService
 
     private readonly DatabaseConfig _config;
     private readonly DirectoriesConfig _directories;
+    private readonly IReadOnlyList<IDatabaseSeeder> _seeders;
     private IFreeSql? _orm;
     private int _started;
 
@@ -28,20 +31,25 @@ public sealed class DatabaseService : IDatabaseService
     /// </summary>
     /// <param name="config">The database configuration section.</param>
     /// <param name="directories">The directories configuration, providing the root directory.</param>
-    public DatabaseService(DatabaseConfig config, DirectoriesConfig directories)
+    /// <param name="seeders">
+    /// Optional seeders run once ever, in order, right after the FreeSql instance is built in
+    /// <see cref="StartAsync" />; applied names are tracked in the __squidstd_seed_history table.
+    /// </param>
+    public DatabaseService(DatabaseConfig config, DirectoriesConfig directories, IReadOnlyList<IDatabaseSeeder>? seeders = null)
     {
         _config = config;
         _directories = directories;
+        _seeders = seeders ?? [];
     }
 
     /// <inheritdoc />
-    public ValueTask StartAsync(CancellationToken cancellationToken = default)
+    public async ValueTask StartAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         if (Interlocked.Exchange(ref _started, 1) != 0)
         {
-            return ValueTask.CompletedTask;
+            return;
         }
 
         var parsed = ConnectionStringParser.Parse(_config.ConnectionString, _directories.Root);
@@ -67,13 +75,49 @@ public sealed class DatabaseService : IDatabaseService
         _orm.Aop.SyncStructureAfter += (_, e) =>
                                            Logger.Verbose("Migrated {Entities} -> {Sql}", e.EntityTypes, e.Sql);
 
+        if (_seeders.Count > 0)
+        {
+            await RunSeedersAsync(cancellationToken);
+        }
+
         Logger.Information(
             "Database service started ({Provider}, autoMigrate={AutoMigrate})",
             parsed.Provider,
             _config.AutoMigrate
         );
+    }
 
-        return ValueTask.CompletedTask;
+    private async ValueTask RunSeedersAsync(CancellationToken cancellationToken)
+    {
+        var duplicate = _seeders.GroupBy(seeder => seeder.Name, StringComparer.Ordinal)
+                                .FirstOrDefault(group => group.Count() > 1);
+
+        if (duplicate is not null)
+        {
+            throw new InvalidOperationException($"Duplicate database seeder name '{duplicate.Key}'.");
+        }
+
+        // The history table must exist even when AutoMigrate is off.
+        Orm.CodeFirst.SyncStructure<SeedHistoryEntity>();
+
+        foreach (var seeder in _seeders)
+        {
+            var applied = await Orm.Select<SeedHistoryEntity>()
+                                   .Where(entry => entry.Name == seeder.Name)
+                                   .AnyAsync(cancellationToken);
+
+            if (applied)
+            {
+                Logger.Debug("Database seeder {Seeder:l} already applied; skipping", seeder.Name);
+
+                continue;
+            }
+
+            await seeder.SeedAsync(this, cancellationToken);
+            await Orm.Insert(new SeedHistoryEntity { Name = seeder.Name, AppliedAt = DateTime.UtcNow })
+                     .ExecuteAffrowsAsync(cancellationToken);
+            Logger.Information("Database seeder {Seeder:l} applied", seeder.Name);
+        }
     }
 
     /// <inheritdoc />
