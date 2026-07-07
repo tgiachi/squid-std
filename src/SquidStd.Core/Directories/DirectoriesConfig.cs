@@ -7,7 +7,7 @@ namespace SquidStd.Core.Directories;
 /// </summary>
 public class DirectoriesConfig
 {
-    private readonly string[] _directories;
+    private readonly List<string> _directories;
 
     /// <summary>
     /// Gets the root directory path.
@@ -35,7 +35,7 @@ public class DirectoriesConfig
     /// <param name="directories">The array of directory types.</param>
     public DirectoriesConfig(string rootDirectory, string[] directories)
     {
-        _directories = directories;
+        _directories = [.. directories];
         Root = rootDirectory;
 
         Init();
@@ -65,6 +65,37 @@ public class DirectoriesConfig
 
         return path;
     }
+
+    /// <summary>
+    /// Adds a managed directory type and creates it immediately (snake_case under the root).
+    /// Idempotent: registering the same type again returns the existing path.
+    /// </summary>
+    /// <param name="directoryType">The directory type name.</param>
+    /// <returns>The full path of the created directory.</returns>
+    public string RegisterDirectory(string directoryType)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(directoryType);
+
+        if (!_directories.Any(entry => string.Equals(
+                entry.ToSnakeCase(),
+                directoryType.ToSnakeCase(),
+                StringComparison.Ordinal
+            )))
+        {
+            _directories.Add(directoryType);
+        }
+
+        return GetPath(directoryType);
+    }
+
+    /// <summary>
+    /// Adds a managed directory type from an enum value and creates it immediately.
+    /// </summary>
+    /// <typeparam name="TEnum">The directory type enum.</typeparam>
+    /// <param name="value">The directory type value.</param>
+    /// <returns>The full path of the created directory.</returns>
+    public string RegisterDirectory<TEnum>(TEnum value) where TEnum : struct, Enum
+        => RegisterDirectory(Enum.GetName(value)!);
 
     /// <summary>
     /// Returns a string representation of the root directory.
