@@ -17,9 +17,10 @@ public static class SquidStdBootstrapPluginExtensions
     /// Collects internal plugins and external plugin directories, resolves the dependency order
     /// across the whole set, and invokes <see cref="ISquidStdPlugin.Configure" /> for each plugin
     /// in order against the bootstrap container. Must be called before the bootstrap starts, so
-    /// plugins can register configuration sections before the configuration is loaded. Relative
-    /// directories are resolved against the bootstrap root directory and created when missing
-    /// (an empty directory yields no plugins). Any failure aborts startup:
+    /// plugins can register configuration sections and services against the container; the
+    /// config-first bootstrap binds those sections eagerly at registration, the same as any
+    /// other registration. Relative directories are resolved against the bootstrap root directory
+    /// and created when missing (an empty directory yields no plugins). Any failure aborts startup:
     /// loader problems raise <see cref="Exceptions.PluginLoadException" /> and plugin exceptions
     /// propagate unchanged. Plugin assemblies load into the default AssemblyLoadContext and are
     /// fully trusted: there is no unloading and no version isolation. Note that plugin load
