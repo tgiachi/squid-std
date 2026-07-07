@@ -33,4 +33,10 @@ public sealed class SquidStdOptions
     /// Serilog is configured from this instance only; the file cannot override it.
     /// </summary>
     public SquidStdLoggerOptions? Logger { get; set; }
+
+    /// <summary>
+    /// Directory names created under <see cref="RootDirectory" /> when the bootstrap is created
+    /// (snake_case on disk, same rule as directory path resolution).
+    /// </summary>
+    public string[] Directories { get; set; } = [];
 }

@@ -24,6 +24,32 @@ yourself - useful when values from the file must drive registration decisions - 
 `Create(SquidStdConfig, SquidStdOptions)` overload; see
 [two-phase setup](../guides/configuration.md#two-phase-setup-moongate-style).
 
+## Managed directories
+
+`SquidStdOptions.Directories` declares directory names that are created under `RootDirectory` as soon
+as `Create` runs, before `ConfigureServices` or `StartAsync`:
+
+```csharp
+var bootstrap = SquidStdBootstrap.Create(new SquidStdOptions
+{
+    ConfigName = "squidstd",
+    RootDirectory = AppContext.BaseDirectory,
+    Directories = ["scripts", "save"]
+});
+```
+
+Modules and plugins that need their own managed directory register it against the same
+`DirectoriesConfig` instance, resolved from the container:
+
+```csharp
+var directories = bootstrap.Container.Resolve<DirectoriesConfig>();
+var worldDir = directories.RegisterDirectory("world");
+```
+
+Directory names are lower-cased to snake_case on disk (`SavedGames` becomes `saved_games`), and
+`RegisterDirectory` is idempotent - registering the same name again just returns the existing path
+without creating it twice.
+
 ## ConfigureServices
 
 Register your services into the DryIoc container. Call `RegisterCoreServices()` first to bring up the core services, then add the modules you need:

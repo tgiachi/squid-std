@@ -8,6 +8,7 @@ using SquidStd.Abstractions.Data.Internal.Services;
 using SquidStd.Abstractions.Interfaces.Services;
 using SquidStd.Core.Config;
 using SquidStd.Core.Data.Bootstrap;
+using SquidStd.Core.Directories;
 using SquidStd.Core.Extensions.Logger;
 using SquidStd.Core.Interfaces.Bootstrap;
 using SquidStd.Core.Interfaces.Config;
@@ -83,6 +84,16 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         }
 
         Container.RegisterConfigServices(config ?? SquidStdConfig.Load(Options.ConfigName, Options.RootDirectory));
+
+        if (Options.Directories.Length > 0)
+        {
+            var directoriesConfig = Container.Resolve<DirectoriesConfig>();
+
+            foreach (var directory in Options.Directories)
+            {
+                directoriesConfig.RegisterDirectory(directory);
+            }
+        }
     }
 
     /// <inheritdoc />
