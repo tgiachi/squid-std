@@ -201,9 +201,45 @@ public class DatabaseSeederTests
         await bootstrap.StopAsync();
     }
 
-    private static DatabaseService CreateService(TempDirectory root, IReadOnlyList<IDatabaseSeeder>? seeders)
+    [Fact]
+    public async Task Seeder_Runs_WithAutoMigrateOff()
+    {
+        using var root = new TempDirectory();
+        var runs = 0;
+
+        IDatabaseSeeder CreateSeeder()
+            => new RecordingSeeder(
+                "counter.seeder",
+                (_, _) =>
+                {
+                    runs++;
+
+                    return ValueTask.CompletedTask;
+                }
+            );
+
+        var first = CreateService(root, [CreateSeeder()], autoMigrate: false);
+        await first.StartAsync();
+
+        Assert.Equal(1, runs);
+        Assert.Equal(1, await first.Orm.Select<SeedHistoryEntity>().CountAsync());
+
+        await first.StopAsync();
+
+        var second = CreateService(root, [CreateSeeder()], autoMigrate: false);
+        await second.StartAsync();
+
+        Assert.Equal(1, runs);
+
+        await second.StopAsync();
+    }
+
+    private static DatabaseService CreateService(
+        TempDirectory root,
+        IReadOnlyList<IDatabaseSeeder>? seeders,
+        bool autoMigrate = true)
         => new(
-            new DatabaseConfig { ConnectionString = $"sqlite://{root.Combine("seed.db")}", AutoMigrate = true },
+            new DatabaseConfig { ConnectionString = $"sqlite://{root.Combine("seed.db")}", AutoMigrate = autoMigrate },
             new DirectoriesConfig(root.Path, []),
             seeders
         );
