@@ -31,7 +31,7 @@ public class PersistenceSeederTests
             _greetings = greetings;
         }
 
-        public async ValueTask SeedAsync(IPersistenceService persistence, CancellationToken cancellationToken = default)
+        public async ValueTask SeedAsync(IPersistenceService persistence, CancellationToken _ = default)
             => await persistence.GetStore<SeedEntity, int>()
                                 .UpsertAsync(new() { Id = 2, Name = _greetings.Greeting });
     }
@@ -66,7 +66,7 @@ public class PersistenceSeederTests
 
         await using var bootstrap = CreateBootstrap(
             root,
-            c => c.RegisterPersistenceSeeder(async (persistence, ct) =>
+            c => c.RegisterPersistenceSeeder(async (persistence, _) =>
             {
                 runs++;
                 await persistence.GetStore<SeedEntity, int>().UpsertAsync(new() { Id = 1, Name = "seeded" });
@@ -87,7 +87,7 @@ public class PersistenceSeederTests
         using var root = new TempDirectory();
         var runs = 0;
 
-        Func<IPersistenceService, CancellationToken, ValueTask> seed = async (persistence, ct) =>
+        Func<IPersistenceService, CancellationToken, ValueTask> seed = async (persistence, _) =>
         {
             runs++;
             await persistence.GetStore<SeedEntity, int>().UpsertAsync(new() { Id = 1, Name = "seeded" });

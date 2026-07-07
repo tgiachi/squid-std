@@ -5,6 +5,9 @@ namespace SquidStd.Persistence.Abstractions.Interfaces.Persistence;
 /// journal replay, only when the save is brand new (no snapshot and no journal existed), in
 /// registration order. Seed writes go through the normal entity stores, so subsequent boots
 /// are no longer fresh and seeders never run again. A seeder exception aborts startup.
+/// A seeder that performs no writes leaves the save fresh, so it runs again at every boot.
+/// Class-form seeders must not constructor-inject IPersistenceService (circular resolution);
+/// use the SeedAsync parameter instead.
 /// </summary>
 public interface IPersistenceSeeder
 {

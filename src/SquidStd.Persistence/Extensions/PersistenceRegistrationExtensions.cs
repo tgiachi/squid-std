@@ -77,6 +77,8 @@ public static class PersistenceRegistrationExtensions
         /// Registers a persistence seeder by type; it is resolved from the container (with its
         /// dependencies) when the persistence service is constructed, and runs only on a fresh
         /// save, in registration order.
+        /// The seeder must not constructor-inject IPersistenceService; the service arrives as the
+        /// SeedAsync parameter.
         /// </summary>
         /// <typeparam name="TSeeder">The seeder type.</typeparam>
         /// <returns>The same container for chaining.</returns>
