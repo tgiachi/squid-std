@@ -94,6 +94,74 @@ var players = bootstrap.Resolve<IPersistenceService>().GetStore<Player, int>();
   journal replays at start, autosave runs while the bootstrap is up, and a final snapshot is written at
   stop.
 
+## Seeding a fresh store
+
+Seeders populate initial data into a brand-new save (one that has no snapshot and no journal). They run
+after snapshot load and journal replay, in registration order, and their writes go through the normal entity
+stores - so subsequent boots are no longer fresh and seeders never run again. If a seeder exception occurs,
+startup fails immediately (fail-fast). A seeder that performs no writes leaves the save fresh, so it runs
+again at every boot.
+
+### Delegate seeder
+
+Register an inline seeding callback:
+
+```csharp
+bootstrap.ConfigureServices(c =>
+{
+    c.RegisterPersistence();
+    c.RegisterPersistedEntity<Player, int>(1, "Player", 1, p => p.Id);
+    
+    // Inline delegate seeder
+    c.RegisterPersistenceSeeder(async (persistence, ct) =>
+    {
+        var players = persistence.GetStore<Player, int>();
+        await players.UpsertAsync(new Player { Id = 1, Name = "Admin" }, ct);
+    });
+    
+    return c;
+});
+```
+
+### Class seeder
+
+Implement `IPersistenceSeeder` and register it by type:
+
+```csharp
+public sealed class AdminPlayerSeeder : IPersistenceSeeder
+{
+    public async ValueTask SeedAsync(IPersistenceService persistence, CancellationToken cancellationToken = default)
+    {
+        var players = persistence.GetStore<Player, int>();
+        await players.UpsertAsync(new Player { Id = 1, Name = "Admin" }, cancellationToken);
+    }
+}
+
+bootstrap.ConfigureServices(c =>
+{
+    c.RegisterPersistence();
+    c.RegisterPersistedEntity<Player, int>(1, "Player", 1, p => p.Id);
+    c.RegisterPersistenceSeeder<AdminPlayerSeeder>();
+    
+    return c;
+});
+```
+
+### Key semantics
+
+- **Fresh-save detection**: Seeders run only when the save is brand-new (neither snapshot nor journal existed
+  before). An emptied-but-old save (entities removed through the normal store API) is not fresh at the
+  immediately following boot - the journal still records the removals. Once a snapshot captures the
+  fully-emptied state (autosave or clean stop), the save becomes indistinguishable from a brand-new one
+  and seeders run again at the next boot. Deleting the save files from disk also makes the next boot fresh.
+- **No re-runs**: Since writes go through the normal stores, subsequent boots record the seeded state in the
+  snapshot and journal. The save is no longer fresh.
+- **Constructor constraints**: Class-form seeders must not constructor-inject `IPersistenceService` (it causes
+  circular resolution). Receive the service as the `SeedAsync` parameter instead.
+- **Execution order**: Seeders run in registration order. Multiple seeders can be registered via chained
+  `RegisterPersistenceSeeder()` calls; plugins interleave naturally.
+- **Fail-fast behavior**: If a seeder exception occurs, startup fails immediately and no remaining seeders run. If an earlier seeder's writes reach the journal before a later seeder fails, the save is no longer fresh at the next boot and the remaining seeders never run - prefer a single seeder, or make the set safe to lose a tail.
+
 ## Key types
 
 | Type                                  | Purpose                                                      |

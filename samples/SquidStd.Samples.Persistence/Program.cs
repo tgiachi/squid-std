@@ -32,7 +32,7 @@ IPersistenceService BuildPersistence()
     return new PersistenceService(registry, journal, snapshot, config);
 }
 
-#region step-1: load existing state (snapshot + journal replay)
+#region step-1
 
 var persistence = BuildPersistence();
 await persistence.InitializeAsync();
@@ -48,7 +48,7 @@ foreach (var existing in await players.GetAllAsync())
 
 #endregion
 
-#region step-2: mutate — every upsert/remove is appended to the journal
+#region step-2
 
 var nextId = await players.CountAsync() + 1;
 await players.UpsertAsync(new() { Id = nextId, Name = $"Hero-{nextId}", Level = nextId * 10 });
@@ -57,7 +57,7 @@ Console.WriteLine($"Added player #{nextId}; store now holds {await players.Count
 
 #endregion
 
-#region step-3: snapshot — capture full state and trim the journal
+#region step-3
 
 await persistence.SaveSnapshotAsync();
 Console.WriteLine("Snapshot saved. Re-run this sample to see the state reload.");
