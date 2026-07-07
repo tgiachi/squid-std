@@ -8,6 +8,7 @@ using SquidStd.Persistence.Abstractions.Data;
 using SquidStd.Persistence.Abstractions.Interfaces.Persistence;
 using SquidStd.Persistence.Data;
 using SquidStd.Persistence.Data.Internal;
+using SquidStd.Persistence.Internal;
 using SquidStd.Persistence.Services;
 
 namespace SquidStd.Persistence.Extensions;
@@ -68,6 +69,40 @@ public static class PersistenceRegistrationExtensions
             {
                 registrations[i].Register(registry, container);
             }
+
+            return container;
+        }
+
+        /// <summary>
+        /// Registers a persistence seeder by type; it is resolved from the container (with its
+        /// dependencies) when the persistence service is constructed, and runs only on a fresh
+        /// save, in registration order.
+        /// </summary>
+        /// <typeparam name="TSeeder">The seeder type.</typeparam>
+        /// <returns>The same container for chaining.</returns>
+        public IContainer RegisterPersistenceSeeder<TSeeder>()
+            where TSeeder : class, IPersistenceSeeder
+        {
+            container.Register<TSeeder>(Reuse.Singleton);
+            container.AddToRegisterTypedList(
+                new PersistenceSeederRegistration(static resolver => resolver.Resolve<TSeeder>())
+            );
+
+            return container;
+        }
+
+        /// <summary>
+        /// Registers a delegate-backed persistence seeder; it runs only on a fresh save, in
+        /// registration order.
+        /// </summary>
+        /// <param name="seed">The seeding callback.</param>
+        /// <returns>The same container for chaining.</returns>
+        public IContainer RegisterPersistenceSeeder(Func<IPersistenceService, CancellationToken, ValueTask> seed)
+        {
+            ArgumentNullException.ThrowIfNull(seed);
+            container.AddToRegisterTypedList(
+                new PersistenceSeederRegistration(_ => new DelegatePersistenceSeeder(seed))
+            );
 
             return container;
         }
@@ -146,6 +181,18 @@ public static class PersistenceRegistrationExtensions
                         effective.SnapshotFileSuffix,
                         effective.DurabilityMode
                     );
+                },
+                Reuse.Singleton
+            );
+
+            container.RegisterDelegate<IReadOnlyList<IPersistenceSeeder>>(
+                static resolver =>
+                {
+                    var recorded = resolver.Resolve<List<PersistenceSeederRegistration>>(IfUnresolved.ReturnDefault);
+
+                    return recorded is null
+                               ? []
+                               : recorded.Select(registration => registration.Resolve(resolver)).ToList();
                 },
                 Reuse.Singleton
             );
