@@ -20,18 +20,29 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
     private readonly IJournalService _journalService;
     private readonly ILogger _logger = Log.ForContext<PersistenceService>();
     private readonly IPersistenceEntityRegistry _registry;
+    private readonly IReadOnlyList<IPersistenceSeeder> _seeders;
     private readonly ISnapshotService _snapshotService;
     private readonly PersistenceStateStore _stateStore = new();
     private readonly SemaphoreSlim _snapshotLock = new(1, 1);
     private CancellationTokenSource? _autosaveCts;
     private Task? _autosaveLoop;
 
+    /// <param name="registry">The entity registry describing every registered persisted type.</param>
+    /// <param name="journalService">Appends and replays journal entries.</param>
+    /// <param name="snapshotService">Loads and saves per-type snapshot buckets.</param>
+    /// <param name="config">Persistence configuration (autosave interval, save directory, etc.).</param>
+    /// <param name="eventBus">Optional event bus used to publish snapshot lifecycle events.</param>
+    /// <param name="seeders">
+    /// Optional seeders run once, in order, right after a fresh save (no snapshot, no journal) finishes
+    /// replaying in <see cref="StartAsync" />.
+    /// </param>
     public PersistenceService(
         IPersistenceEntityRegistry registry,
         IJournalService journalService,
         ISnapshotService snapshotService,
         PersistenceConfig config,
-        IEventBus? eventBus = null
+        IEventBus? eventBus = null,
+        IReadOnlyList<IPersistenceSeeder>? seeders = null
     )
     {
         _registry = registry;
@@ -39,6 +50,7 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
         _snapshotService = snapshotService;
         _config = config;
         _eventBus = eventBus;
+        _seeders = seeders ?? [];
     }
 
     public IEntityStore<TEntity, TKey> GetStore<TEntity, TKey>()
@@ -182,6 +194,16 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
     public async ValueTask StartAsync(CancellationToken cancellationToken = default)
     {
         await InitializeAsync(cancellationToken);
+
+        if (_stateStore.LastSequenceId == 0 && _seeders.Count > 0)
+        {
+            foreach (var seeder in _seeders)
+            {
+                await seeder.SeedAsync(this, cancellationToken);
+            }
+
+            _logger.Information("Seeded fresh persistence store with {Count} seeder(s)", _seeders.Count);
+        }
 
         _autosaveCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _autosaveLoop = Task.Run(() => AutosaveLoopAsync(_autosaveCts.Token), CancellationToken.None);
