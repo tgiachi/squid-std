@@ -150,9 +150,10 @@ bootstrap.ConfigureServices(c =>
 ### Key semantics
 
 - **Fresh-save detection**: Seeders run only when the save is brand-new (neither snapshot nor journal existed
-  before). An emptied-but-old save is one whose entities were removed through the normal store API - the
-  journal still records those removals, so it is not fresh. Deleting the save files from disk, instead,
-  makes the next boot fresh again.
+  before). An emptied-but-old save (entities removed through the normal store API) is not fresh at the
+  immediately following boot - the journal still records the removals. Once a snapshot captures the
+  fully-emptied state (autosave or clean stop), the save becomes indistinguishable from a brand-new one
+  and seeders run again at the next boot. Deleting the save files from disk also makes the next boot fresh.
 - **No re-runs**: Since writes go through the normal stores, subsequent boots record the seeded state in the
   snapshot and journal. The save is no longer fresh.
 - **Constructor constraints**: Class-form seeders must not constructor-inject `IPersistenceService` (it causes
