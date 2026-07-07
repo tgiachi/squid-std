@@ -38,8 +38,7 @@ await bootstrap.RunAsync();
 - Plugins are ordered by dependency: `PluginMetadata.Dependencies` (plugin ids, compared
   case-insensitively) is resolved across internal and external plugins together, so an external plugin
   can depend on an internal one and vice versa.
-- `Configure` runs before the configuration load, so plugins can register their own configuration
-  sections and services ahead of time.
+- `Configure` runs before the bootstrap starts, so plugins can register their own configuration sections and services against the container.
 - Plugin directories are managed like the other bootstrap directories: a missing directory is
   created on the spot and simply yields no plugins.
 - Each plugin receives a `PluginContext` populated with the standard keys: `PluginContextKeys.RootDirectory`

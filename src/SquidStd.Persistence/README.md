@@ -67,6 +67,7 @@ The one-call path for `SquidStdBootstrap` apps: register a serializer, register 
 then declare the persisted entities.
 
 ```csharp
+using SquidStd.Persistence.Abstractions.Interfaces.Persistence;
 using SquidStd.Persistence.Extensions;
 using SquidStd.Persistence.MessagePack.Extensions;
 
