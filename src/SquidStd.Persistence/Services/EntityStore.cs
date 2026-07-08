@@ -77,6 +77,22 @@ public sealed class EntityStore<TEntity, TKey> : IEntityStore<TEntity, TKey>
             {
                 clone = _descriptor.Clone(entity);
                 key = _descriptor.GetKey(clone);
+
+                if (_descriptor is IInternalAutoIdDescriptor<TEntity, TKey> autoId && autoId.IsAutoId)
+                {
+                    if (autoId.IsDefaultKey(key))
+                    {
+                        key = autoId.AllocateNextKey(_stateStore);
+                        autoId.SetKey(clone, key);
+                        // Assign back onto the caller's instance so it observes the generated id.
+                        autoId.SetKey(entity, key);
+                    }
+                    else
+                    {
+                        autoId.NoteKey(_stateStore, key);
+                    }
+                }
+
                 next = _stateStore.LastSequenceId + 1; // computed, not yet committed
                 entry = new()
                 {

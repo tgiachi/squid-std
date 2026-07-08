@@ -11,7 +11,7 @@ namespace SquidStd.Persistence.Data;
 /// serialize-then-deserialize deep copy for snapshot isolation.
 /// </summary>
 public sealed class PersistenceEntityDescriptor<TEntity, TKey>
-    : IPersistenceEntityDescriptor<TEntity, TKey>, IInternalEntityApplier
+    : IPersistenceEntityDescriptor<TEntity, TKey>, IInternalEntityApplier, IInternalAutoIdDescriptor<TEntity, TKey>
     where TKey : notnull
 {
     private readonly IDataDeserializer _deserializer;
@@ -129,7 +129,9 @@ public sealed class PersistenceEntityDescriptor<TEntity, TKey>
     void IInternalEntityApplier.ApplyUpsert(PersistenceStateStore stateStore, byte[] payload)
     {
         var entity = DeserializeEntity(payload);
-        stateStore.GetBucket<TEntity, TKey>(TypeId)[GetKey(entity)] = entity;
+        var key = GetKey(entity);
+        stateStore.GetBucket<TEntity, TKey>(TypeId)[key] = entity;
+        NoteKey(stateStore, key);
     }
 
     void IInternalEntityApplier.ApplyRemove(PersistenceStateStore stateStore, byte[] payload)
@@ -176,4 +178,10 @@ public sealed class PersistenceEntityDescriptor<TEntity, TKey>
 
     void IInternalEntityApplier.LoadHighWater(PersistenceStateStore stateStore, byte[] payload)
         => stateStore.SetLastKey(TypeId, DeserializeKey(payload));
+
+    TKey IInternalAutoIdDescriptor<TEntity, TKey>.AllocateNextKey(PersistenceStateStore stateStore)
+        => AllocateNextKey(stateStore);
+
+    void IInternalAutoIdDescriptor<TEntity, TKey>.NoteKey(PersistenceStateStore stateStore, TKey key)
+        => NoteKey(stateStore, key);
 }
