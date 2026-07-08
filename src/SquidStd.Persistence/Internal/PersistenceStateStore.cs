@@ -8,6 +8,7 @@ namespace SquidStd.Persistence.Internal;
 internal sealed class PersistenceStateStore
 {
     private readonly Dictionary<ushort, object> _entityBuckets = [];
+    private readonly Dictionary<ushort, object> _lastKeys = [];
 
     public object SyncRoot { get; } = new();
 
@@ -29,6 +30,15 @@ internal sealed class PersistenceStateStore
         return created;
     }
 
+    public object? GetLastKey(ushort typeId)
+        => _lastKeys.GetValueOrDefault(typeId);
+
+    public void SetLastKey(ushort typeId, object key)
+        => _lastKeys[typeId] = key;
+
     public void ClearBuckets()
-        => _entityBuckets.Clear();
+    {
+        _entityBuckets.Clear();
+        _lastKeys.Clear();
+    }
 }
