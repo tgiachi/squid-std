@@ -11,11 +11,13 @@ namespace SquidStd.Persistence.Data;
 /// serialize-then-deserialize deep copy for snapshot isolation.
 /// </summary>
 public sealed class PersistenceEntityDescriptor<TEntity, TKey>
-    : IPersistenceEntityDescriptor<TEntity, TKey>, IInternalEntityApplier
+    : IPersistenceEntityDescriptor<TEntity, TKey>, IInternalEntityApplier, IInternalAutoIdDescriptor<TEntity, TKey>
     where TKey : notnull
 {
     private readonly IDataDeserializer _deserializer;
     private readonly Func<TEntity, TKey> _keySelector;
+    private readonly Action<TEntity, TKey>? _keySetter;
+    private readonly IIdGenerator<TKey>? _idGenerator;
     private readonly IDataSerializer _serializer;
 
     public ushort TypeId { get; }
@@ -30,11 +32,21 @@ public sealed class PersistenceEntityDescriptor<TEntity, TKey>
         ushort typeId,
         string typeName,
         int schemaVersion,
-        Func<TEntity, TKey> keySelector
+        Func<TEntity, TKey> keySelector,
+        Action<TEntity, TKey>? keySetter = null,
+        IIdGenerator<TKey>? idGenerator = null
     )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(typeName);
         ArgumentNullException.ThrowIfNull(keySelector);
+
+        if (idGenerator is not null && keySetter is null)
+        {
+            throw new ArgumentException(
+                "An auto-id entity (idGenerator provided) also requires a keySetter to write the generated id.",
+                nameof(keySetter)
+            );
+        }
 
         _serializer = serializer;
         _deserializer = deserializer;
@@ -42,10 +54,56 @@ public sealed class PersistenceEntityDescriptor<TEntity, TKey>
         TypeName = typeName;
         SchemaVersion = schemaVersion;
         _keySelector = keySelector;
+        _keySetter = keySetter;
+        _idGenerator = idGenerator;
     }
+
+    public bool IsAutoId => _idGenerator is not null;
 
     public TKey GetKey(TEntity entity)
         => _keySelector(entity);
+
+    public bool IsDefaultKey(TKey key)
+        => EqualityComparer<TKey>.Default.Equals(key, default!);
+
+    public void SetKey(TEntity entity, TKey key)
+    {
+        if (_keySetter is null)
+        {
+            throw new InvalidOperationException($"Entity '{TypeName}' has no key setter; cannot assign a generated id.");
+        }
+
+        _keySetter(entity, key);
+    }
+
+    internal TKey AllocateNextKey(PersistenceStateStore stateStore)
+    {
+        if (_idGenerator is null)
+        {
+            throw new InvalidOperationException($"Entity '{TypeName}' is not an auto-id type.");
+        }
+
+        var last = stateStore.GetLastKey(TypeId);
+        var next = last is null ? _idGenerator.Initial : _idGenerator.Next((TKey)last);
+        stateStore.SetLastKey(TypeId, next);
+
+        return next;
+    }
+
+    internal void NoteKey(PersistenceStateStore stateStore, TKey key)
+    {
+        if (_idGenerator is null)
+        {
+            return;
+        }
+
+        var last = stateStore.GetLastKey(TypeId);
+
+        if (last is null || Comparer<TKey>.Default.Compare(key, (TKey)last) > 0)
+        {
+            stateStore.SetLastKey(TypeId, key);
+        }
+    }
 
     public TEntity Clone(TEntity entity)
         => DeserializeEntity(SerializeEntity(entity));
@@ -71,7 +129,9 @@ public sealed class PersistenceEntityDescriptor<TEntity, TKey>
     void IInternalEntityApplier.ApplyUpsert(PersistenceStateStore stateStore, byte[] payload)
     {
         var entity = DeserializeEntity(payload);
-        stateStore.GetBucket<TEntity, TKey>(TypeId)[GetKey(entity)] = entity;
+        var key = GetKey(entity);
+        stateStore.GetBucket<TEntity, TKey>(TypeId)[key] = entity;
+        NoteKey(stateStore, key);
     }
 
     void IInternalEntityApplier.ApplyRemove(PersistenceStateStore stateStore, byte[] payload)
@@ -108,4 +168,20 @@ public sealed class PersistenceEntityDescriptor<TEntity, TKey>
 
     int IInternalEntityApplier.Count(PersistenceStateStore stateStore)
         => stateStore.GetBucket<TEntity, TKey>(TypeId).Count;
+
+    byte[]? IInternalEntityApplier.SerializeHighWater(PersistenceStateStore stateStore)
+    {
+        var last = stateStore.GetLastKey(TypeId);
+
+        return last is null ? null : SerializeKey((TKey)last);
+    }
+
+    void IInternalEntityApplier.LoadHighWater(PersistenceStateStore stateStore, byte[] payload)
+        => stateStore.SetLastKey(TypeId, DeserializeKey(payload));
+
+    TKey IInternalAutoIdDescriptor<TEntity, TKey>.AllocateNextKey(PersistenceStateStore stateStore)
+        => AllocateNextKey(stateStore);
+
+    void IInternalAutoIdDescriptor<TEntity, TKey>.NoteKey(PersistenceStateStore stateStore, TKey key)
+        => NoteKey(stateStore, key);
 }
