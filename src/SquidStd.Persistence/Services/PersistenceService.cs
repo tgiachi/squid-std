@@ -27,6 +27,9 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
     private CancellationTokenSource? _autosaveCts;
     private Task? _autosaveLoop;
 
+    private const ushort HighWaterTypeId = ushort.MaxValue;
+    private const string HighWaterTypeName = "__id_sequences";
+
     /// <param name="registry">The entity registry describing every registered persisted type.</param>
     /// <param name="journalService">Appends and replays journal entries.</param>
     /// <param name="snapshotService">Loads and saves per-type snapshot buckets.</param>
@@ -76,6 +79,13 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
             ((IInternalEntityApplier)descriptor).LoadBucket(_stateStore, loaded.Bucket);
             snapshotThresholds[descriptor.TypeId] = loaded.LastSequenceId;
             maxSequenceId = Math.Max(maxSequenceId, loaded.LastSequenceId);
+        }
+
+        var highWater = await _snapshotService.LoadBucketAsync(HighWaterTypeName, HighWaterTypeId, cancellationToken);
+
+        if (highWater is not null)
+        {
+            LoadHighWaters(highWater.Bucket.Payload);
         }
 
         foreach (var entry in await _journalService.ReadAllAsync(cancellationToken))
@@ -131,6 +141,7 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
             long capturedSequenceId;
             List<EntitySnapshotBucket> buckets = [];
             List<(string TypeName, ushort TypeId)> emptyTypes = [];
+            byte[]? highWaterPayload;
 
             await _stateStore.WriteLock.WaitAsync(cancellationToken);
 
@@ -154,6 +165,11 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
                         }
                     }
                 }
+
+                lock (_stateStore.SyncRoot)
+                {
+                    highWaterPayload = CaptureHighWaters();
+                }
             }
             finally
             {
@@ -173,6 +189,25 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
             foreach (var (typeName, typeId) in emptyTypes)
             {
                 await _snapshotService.DeleteBucketAsync(typeName, typeId, cancellationToken);
+            }
+
+            if (highWaterPayload is not null)
+            {
+                await _snapshotService.SaveBucketAsync(
+                    new EntitySnapshotBucket
+                    {
+                        TypeId = HighWaterTypeId,
+                        TypeName = HighWaterTypeName,
+                        SchemaVersion = 1,
+                        Payload = highWaterPayload
+                    },
+                    capturedSequenceId,
+                    cancellationToken
+                );
+            }
+            else
+            {
+                await _snapshotService.DeleteBucketAsync(HighWaterTypeName, HighWaterTypeId, cancellationToken);
             }
 
             await _journalService.TrimThroughSequenceAsync(capturedSequenceId, cancellationToken);
@@ -251,6 +286,68 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
             catch (Exception ex)
             {
                 _logger.Error(ex, "Autosave failed; journal retained for the next attempt");
+            }
+        }
+    }
+
+    private byte[]? CaptureHighWaters()
+    {
+        using var stream = new MemoryStream();
+        using var writer = new BinaryWriter(stream);
+
+        writer.Write(0); // placeholder count
+        var count = 0;
+
+        foreach (var descriptor in _registry.GetRegisteredDescriptors())
+        {
+            var applier = (IInternalEntityApplier)descriptor;
+
+            if (!applier.IsAutoId)
+            {
+                continue;
+            }
+
+            var keyBytes = applier.SerializeHighWater(_stateStore);
+
+            if (keyBytes is null)
+            {
+                continue;
+            }
+
+            writer.Write(descriptor.TypeId);
+            writer.Write(keyBytes.Length);
+            writer.Write(keyBytes);
+            count++;
+        }
+
+        if (count == 0)
+        {
+            return null;
+        }
+
+        writer.Flush();
+        stream.Position = 0;
+        new BinaryWriter(stream).Write(count);
+
+        return stream.ToArray();
+    }
+
+    private void LoadHighWaters(byte[] payload)
+    {
+        using var stream = new MemoryStream(payload);
+        using var reader = new BinaryReader(stream);
+
+        var count = reader.ReadInt32();
+
+        for (var i = 0; i < count; i++)
+        {
+            var typeId = reader.ReadUInt16();
+            var length = reader.ReadInt32();
+            var keyBytes = reader.ReadBytes(length);
+
+            if (_registry.IsRegistered(typeId))
+            {
+                ((IInternalEntityApplier)_registry.GetDescriptor(typeId)).LoadHighWater(_stateStore, keyBytes);
             }
         }
     }

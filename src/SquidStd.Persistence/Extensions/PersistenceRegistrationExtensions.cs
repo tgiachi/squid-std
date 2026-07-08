@@ -27,12 +27,22 @@ public static class PersistenceRegistrationExtensions
             ushort typeId,
             string typeName,
             int schemaVersion,
-            Func<TEntity, TKey> keySelector
+            Func<TEntity, TKey> keySelector,
+            Action<TEntity, TKey>? keySetter = null,
+            IIdGenerator<TKey>? idGenerator = null
         )
             where TKey : notnull
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(typeName);
             ArgumentNullException.ThrowIfNull(keySelector);
+
+            if (typeId == ushort.MaxValue)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(typeId),
+                    "Type id 65535 is reserved for the internal id-sequence bucket."
+                );
+            }
 
             container.AddToRegisterTypedList(
                 new PersistedEntityRegistration(
@@ -45,7 +55,9 @@ public static class PersistenceRegistrationExtensions
                             typeId,
                             typeName,
                             schemaVersion,
-                            keySelector
+                            keySelector,
+                            keySetter,
+                            idGenerator
                         )
                     )
                 )
