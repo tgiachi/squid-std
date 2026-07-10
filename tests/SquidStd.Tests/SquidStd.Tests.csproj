@@ -36,6 +36,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\SquidStd.Core\SquidStd.Core.csproj"/>
+        <ProjectReference Include="..\..\src\SquidStd.Game\SquidStd.Game.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Abstractions\SquidStd.Abstractions.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Generators\SquidStd.Generators.csproj"/>
         <ProjectReference Include="..\..\src\SquidStd.Telemetry.Abstractions\SquidStd.Telemetry.Abstractions.csproj"/>
