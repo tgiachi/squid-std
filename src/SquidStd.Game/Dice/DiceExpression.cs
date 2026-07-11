@@ -1,4 +1,5 @@
 using System.Globalization;
+using SquidStd.Core.Interfaces.Rng;
 using SquidStd.Core.Utils;
 
 namespace SquidStd.Game.Dice;
@@ -27,8 +28,31 @@ public readonly record struct DiceExpression(int Count, int Sides, int Modifier)
 
     /// <summary>Rolls the expression, returning a random total in <c>[Min, Max]</c>.</summary>
     /// <returns>The rolled total, or <see cref="Modifier" /> for a pure constant.</returns>
+    /// <remarks>Uses the ambient <see cref="BuiltInRng" />; for an injected source use <see cref="Roll(IRandom)" />.</remarks>
     public int Roll()
         => IsConstant ? Modifier : RandomUtils.Dice(Count, Sides, Modifier);
+
+    /// <summary>Rolls the expression using the supplied random source, returning a total in <c>[Min, Max]</c>.</summary>
+    /// <param name="random">The random source to draw from.</param>
+    /// <returns>The rolled total, or <see cref="Modifier" /> for a pure constant.</returns>
+    public int Roll(IRandom random)
+    {
+        ArgumentNullException.ThrowIfNull(random);
+
+        if (IsConstant)
+        {
+            return Modifier;
+        }
+
+        var total = Modifier;
+
+        for (var i = 0; i < Count; i++)
+        {
+            total += random.NextInt(1, Sides + 1);
+        }
+
+        return total;
+    }
 
     /// <summary>
     /// Parses dice notation such as <c>2d4+1</c>, <c>d6</c>, <c>5</c>, or the wrapped form

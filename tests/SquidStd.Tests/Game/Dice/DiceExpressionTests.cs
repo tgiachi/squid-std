@@ -1,3 +1,4 @@
+using SquidStd.Core.Rng;
 using SquidStd.Core.Utils;
 using SquidStd.Game.Dice;
 
@@ -89,6 +90,38 @@ public class DiceExpressionTests
         var expression = DiceExpression.Parse("9");
 
         Assert.Equal(9, expression.Roll());
+    }
+
+    [Fact]
+    public void Roll_WithInjectedRandom_StaysWithinMinMax()
+    {
+        var expression = DiceExpression.Parse("3d6+2");
+        var random = RandomFactory.Create(1234u);
+
+        for (var i = 0; i < 1000; i++)
+        {
+            var roll = expression.Roll(random);
+            Assert.InRange(roll, expression.Min, expression.Max);
+        }
+    }
+
+    [Fact]
+    public void Roll_WithInjectedRandom_IsReproducibleWithSameSeed()
+    {
+        var expression = DiceExpression.Parse("2d20+3");
+
+        var first = expression.Roll(RandomFactory.Create(42u));
+        var second = expression.Roll(RandomFactory.Create(42u));
+
+        Assert.Equal(first, second);
+    }
+
+    [Fact]
+    public void Roll_WithInjectedRandom_Constant_ReturnsModifier()
+    {
+        var expression = DiceExpression.Parse("9");
+
+        Assert.Equal(9, expression.Roll(RandomFactory.Create(42u)));
     }
 
     [Theory]
