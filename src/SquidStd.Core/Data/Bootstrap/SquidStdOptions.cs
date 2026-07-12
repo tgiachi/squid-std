@@ -1,3 +1,5 @@
+using SquidStd.Core.Types.Yaml;
+
 namespace SquidStd.Core.Data.Bootstrap;
 
 /// <summary>
@@ -39,4 +41,12 @@ public sealed class SquidStdOptions
     /// (snake_case on disk, same rule as directory path resolution).
     /// </summary>
     public string[] Directories { get; set; } = [];
+
+    /// <summary>
+    /// Naming convention for YAML property keys in the configuration file (PascalCase by
+    /// default). Section names are always matched exactly as registered. Ignored when a
+    /// pre-loaded SquidStdConfig is supplied via Create(SquidStdConfig, SquidStdOptions) -
+    /// that config's own NamingConvention applies.
+    /// </summary>
+    public YamlNamingConventionType YamlNamingConvention { get; set; } = YamlNamingConventionType.PascalCase;
 }

@@ -140,7 +140,7 @@ public static class PersistenceRegistrationExtensions
             {
                 throw new InvalidOperationException(
                     "Register a data serializer before RegisterPersistence "
-                    + "(RegisterDataSerializer() or RegisterMessagePackSerializer())."
+                    + "(RegisterDataSerializer(), RegisterMessagePackSerializer() or RegisterYamlDataSerializer())."
                 );
             }
 

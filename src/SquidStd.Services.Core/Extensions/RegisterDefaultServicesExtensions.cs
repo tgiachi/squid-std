@@ -22,6 +22,8 @@ using SquidStd.Core.Interfaces.Serialization;
 using SquidStd.Core.Interfaces.Threading;
 using SquidStd.Core.Interfaces.Timing;
 using SquidStd.Core.Json;
+using SquidStd.Core.Types.Yaml;
+using SquidStd.Core.Yaml;
 using SquidStd.Services.Core.Services;
 using SquidStd.Services.Core.Services.Storage;
 
@@ -42,10 +44,11 @@ public static class RegisterDefaultServicesExtensions
         /// </summary>
         /// <param name="configName">The logical config name or YAML file name.</param>
         /// <param name="configDirectory">The directory where the config file is searched.</param>
+        /// <param name="convention">Property naming convention for YAML keys; defaults to PascalCase.</param>
         /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterConfigManagerService(string configName, string configDirectory)
+        public IContainer RegisterConfigManagerService(string configName, string configDirectory, YamlNamingConventionType convention = YamlNamingConventionType.PascalCase)
         {
-            var config = SquidStdConfig.Load(configName, configDirectory);
+            var config = SquidStdConfig.Load(configName, configDirectory, convention);
             container.RegisterInstance(config, IfAlreadyRegistered.Replace);
 
             var service = new ConfigManagerService(config, container);
@@ -69,9 +72,10 @@ public static class RegisterDefaultServicesExtensions
         /// </remarks>
         /// <param name="configName">The logical config name or YAML file name.</param>
         /// <param name="configDirectory">The directory where the config file is searched.</param>
+        /// <param name="convention">Property naming convention for YAML keys; defaults to PascalCase.</param>
         /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterConfigServices(string configName, string configDirectory)
-            => container.RegisterConfigServices(SquidStdConfig.Load(configName, configDirectory));
+        public IContainer RegisterConfigServices(string configName, string configDirectory, YamlNamingConventionType convention = YamlNamingConventionType.PascalCase)
+            => container.RegisterConfigServices(SquidStdConfig.Load(configName, configDirectory, convention));
 
         /// <summary>
         /// Registers only the configuration core against an already-loaded <see cref="SquidStdConfig" />:
@@ -265,6 +269,26 @@ public static class RegisterDefaultServicesExtensions
             }
 
             return container.RegisterStdService<ITimerService, TimerWheelService>(-1);
+        }
+
+        /// <summary>
+        /// Registers the YAML data serializer for <see cref="IDataSerializer" /> and
+        /// <see cref="IDataDeserializer" /> (same singleton instance). Existing registrations
+        /// are kept.
+        /// </summary>
+        /// <param name="convention">Property naming convention for the emitted YAML.</param>
+        /// <param name="ignoreUnmatchedProperties">When true (default) unknown YAML keys are ignored.</param>
+        /// <returns>The same container for chaining.</returns>
+        public IContainer RegisterYamlDataSerializer(
+            YamlNamingConventionType convention = YamlNamingConventionType.PascalCase,
+            bool ignoreUnmatchedProperties = true
+        )
+        {
+            var serializer = new YamlDataSerializer(convention, ignoreUnmatchedProperties);
+            container.RegisterInstance<IDataSerializer>(serializer, IfAlreadyRegistered.Keep);
+            container.RegisterInstance<IDataDeserializer>(serializer, IfAlreadyRegistered.Keep);
+
+            return container;
         }
     }
 }
