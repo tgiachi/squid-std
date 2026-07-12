@@ -71,4 +71,14 @@ public class YamlDataSerializerTests
 
         Assert.Contains(nameof(SamplePayload), ex.Message);
     }
+
+    [Fact]
+    public void Deserialize_EmptyInput_ValueType_ThrowsInvalidOperation()
+    {
+        var serializer = new YamlDataSerializer();
+
+        Assert.Throws<InvalidOperationException>(
+            () => serializer.Deserialize<int>(ReadOnlyMemory<byte>.Empty)
+        );
+    }
 }

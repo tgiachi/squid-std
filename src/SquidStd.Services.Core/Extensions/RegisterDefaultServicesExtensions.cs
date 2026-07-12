@@ -148,26 +148,6 @@ public static class RegisterDefaultServicesExtensions
         }
 
         /// <summary>
-        /// Registers the YAML data serializer for <see cref="IDataSerializer" /> and
-        /// <see cref="IDataDeserializer" /> (same singleton instance). Existing registrations
-        /// are kept.
-        /// </summary>
-        /// <param name="convention">Property naming convention for the emitted YAML.</param>
-        /// <param name="ignoreUnmatchedProperties">When true (default) unknown YAML keys are ignored.</param>
-        /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterYamlDataSerializer(
-            YamlNamingConventionType convention = YamlNamingConventionType.PascalCase,
-            bool ignoreUnmatchedProperties = true
-        )
-        {
-            var serializer = new YamlDataSerializer(convention, ignoreUnmatchedProperties);
-            container.RegisterInstance<IDataSerializer>(serializer, IfAlreadyRegistered.Keep);
-            container.RegisterInstance<IDataDeserializer>(serializer, IfAlreadyRegistered.Keep);
-
-            return container;
-        }
-
-        /// <summary>
         /// Registers the default event bus service in the container.
         /// </summary>
         /// <returns>The same container for chaining.</returns>
@@ -287,6 +267,26 @@ public static class RegisterDefaultServicesExtensions
             }
 
             return container.RegisterStdService<ITimerService, TimerWheelService>(-1);
+        }
+
+        /// <summary>
+        /// Registers the YAML data serializer for <see cref="IDataSerializer" /> and
+        /// <see cref="IDataDeserializer" /> (same singleton instance). Existing registrations
+        /// are kept.
+        /// </summary>
+        /// <param name="convention">Property naming convention for the emitted YAML.</param>
+        /// <param name="ignoreUnmatchedProperties">When true (default) unknown YAML keys are ignored.</param>
+        /// <returns>The same container for chaining.</returns>
+        public IContainer RegisterYamlDataSerializer(
+            YamlNamingConventionType convention = YamlNamingConventionType.PascalCase,
+            bool ignoreUnmatchedProperties = true
+        )
+        {
+            var serializer = new YamlDataSerializer(convention, ignoreUnmatchedProperties);
+            container.RegisterInstance<IDataSerializer>(serializer, IfAlreadyRegistered.Keep);
+            container.RegisterInstance<IDataDeserializer>(serializer, IfAlreadyRegistered.Keep);
+
+            return container;
         }
     }
 }

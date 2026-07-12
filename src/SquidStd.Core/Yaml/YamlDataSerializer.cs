@@ -47,8 +47,17 @@ public sealed class YamlDataSerializer : IDataSerializer, IDataDeserializer
 
     /// <inheritdoc />
     public T Deserialize<T>(ReadOnlyMemory<byte> data)
-        => _deserializer.Deserialize<T>(Encoding.UTF8.GetString(data.Span)) ??
-           throw new InvalidOperationException($"Deserialization returned null for type {typeof(T).Name}.");
+    {
+        var yaml = Encoding.UTF8.GetString(data.Span);
+
+        if (string.IsNullOrWhiteSpace(yaml))
+        {
+            throw new InvalidOperationException($"Deserialization returned null for type {typeof(T).Name}.");
+        }
+
+        return _deserializer.Deserialize<T>(yaml) ??
+               throw new InvalidOperationException($"Deserialization returned null for type {typeof(T).Name}.");
+    }
 
     /// <inheritdoc />
     public ReadOnlyMemory<byte> Serialize<T>(T value)
