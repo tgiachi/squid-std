@@ -443,7 +443,8 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
     /// <summary>
     /// Creates a bootstrapper from an eagerly-loaded <see cref="SquidStdConfig" />, bypassing the
     /// internal <see cref="SquidStdConfig.Load(string, string, SquidStd.Core.Types.Yaml.YamlNamingConventionType)" />
-    /// the other overloads perform.
+    /// the other overloads perform. The options' YamlNamingConvention is ignored: the supplied
+    /// config's own NamingConvention applies.
     /// </summary>
     /// <param name="config">The eagerly-loaded configuration.</param>
     /// <param name="options">Bootstrap options used to register core services.</param>

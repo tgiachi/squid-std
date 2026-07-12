@@ -44,10 +44,11 @@ public static class RegisterDefaultServicesExtensions
         /// </summary>
         /// <param name="configName">The logical config name or YAML file name.</param>
         /// <param name="configDirectory">The directory where the config file is searched.</param>
+        /// <param name="convention">Property naming convention for YAML keys; defaults to PascalCase.</param>
         /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterConfigManagerService(string configName, string configDirectory)
+        public IContainer RegisterConfigManagerService(string configName, string configDirectory, YamlNamingConventionType convention = YamlNamingConventionType.PascalCase)
         {
-            var config = SquidStdConfig.Load(configName, configDirectory);
+            var config = SquidStdConfig.Load(configName, configDirectory, convention);
             container.RegisterInstance(config, IfAlreadyRegistered.Replace);
 
             var service = new ConfigManagerService(config, container);
@@ -71,9 +72,10 @@ public static class RegisterDefaultServicesExtensions
         /// </remarks>
         /// <param name="configName">The logical config name or YAML file name.</param>
         /// <param name="configDirectory">The directory where the config file is searched.</param>
+        /// <param name="convention">Property naming convention for YAML keys; defaults to PascalCase.</param>
         /// <returns>The same container for chaining.</returns>
-        public IContainer RegisterConfigServices(string configName, string configDirectory)
-            => container.RegisterConfigServices(SquidStdConfig.Load(configName, configDirectory));
+        public IContainer RegisterConfigServices(string configName, string configDirectory, YamlNamingConventionType convention = YamlNamingConventionType.PascalCase)
+            => container.RegisterConfigServices(SquidStdConfig.Load(configName, configDirectory, convention));
 
         /// <summary>
         /// Registers only the configuration core against an already-loaded <see cref="SquidStdConfig" />:

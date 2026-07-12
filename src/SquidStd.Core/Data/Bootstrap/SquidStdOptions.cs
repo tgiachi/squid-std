@@ -44,7 +44,9 @@ public sealed class SquidStdOptions
 
     /// <summary>
     /// Naming convention for YAML property keys in the configuration file (PascalCase by
-    /// default). Section names are always matched exactly as registered.
+    /// default). Section names are always matched exactly as registered. Ignored when a
+    /// pre-loaded SquidStdConfig is supplied via Create(SquidStdConfig, SquidStdOptions) -
+    /// that config's own NamingConvention applies.
     /// </summary>
     public YamlNamingConventionType YamlNamingConvention { get; set; } = YamlNamingConventionType.PascalCase;
 }

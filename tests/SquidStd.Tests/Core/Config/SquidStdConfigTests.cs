@@ -196,4 +196,16 @@ public class SquidStdConfigTests
         Assert.Contains("max_level:", written);      // keys stay snake_case on round-trip
         Assert.DoesNotContain("MaxLevel:", written);
     }
+
+    [Fact]
+    public void HasSection_IsConventionIndependent()
+    {
+        using var root = new TempDirectory();
+        File.WriteAllText(Path.Combine(root.Path, "app.yaml"), "network:\n  max_level: 3\n");
+
+        var config = SquidStdConfig.Load("app", root.Path, YamlNamingConventionType.SnakeCase);
+
+        Assert.True(config.HasSection("network"));
+        Assert.False(config.HasSection("Network"));
+    }
 }
