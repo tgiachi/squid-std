@@ -52,7 +52,7 @@ public sealed class YamlDataSerializer : IDataSerializer, IDataDeserializer
 
         if (string.IsNullOrWhiteSpace(yaml))
         {
-            throw new InvalidOperationException($"Deserialization returned null for type {typeof(T).Name}.");
+            throw new InvalidOperationException($"Cannot deserialize empty or whitespace-only YAML for type {typeof(T).Name}.");
         }
 
         return _deserializer.Deserialize<T>(yaml) ??
