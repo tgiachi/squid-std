@@ -74,6 +74,75 @@ myService:
   retries: 5
 ```
 
+## YAML naming conventions
+
+Section property keys are bound using a `YamlNamingConventionType` (`SquidStd.Core.Types.Yaml`); section
+names themselves are never affected - they are matched exactly as registered (the `sectionName` argument
+of `RegisterConfigSection`, e.g. `myService` above).
+
+| `YamlNamingConventionType` | Example key for `MaxRetryCount` |
+|-----------------------------|----------------------------------|
+| `PascalCase` (default)      | `MaxRetryCount`                  |
+| `CamelCase`                 | `maxRetryCount`                  |
+| `SnakeCase`                 | `max_retry_count`                |
+| `KebabCase`                 | `max-retry-count`                |
+| `LowerCase`                 | `maxretrycount`                  |
+
+The convention is fixed at load time and applies to every section bound from that `SquidStdConfig`:
+
+- **Through the bootstrap** - `SquidStdOptions.YamlNamingConvention` (default `PascalCase`) is passed to
+  the internal `SquidStdConfig.Load(configName, configDirectory, convention)` call the bootstrap makes for
+  you. It has no effect when you supply a pre-loaded `SquidStdConfig` via
+  `SquidStdBootstrap.Create(SquidStdConfig, SquidStdOptions)` (see the two-phase setup below) - that
+  config's own convention always applies, since the file was already loaded before `Create` saw the options.
+- **Loading `SquidStdConfig` yourself** - pass the convention as the third argument:
+  `SquidStdConfig.Load("squidstd", "~/.squidstd", YamlNamingConventionType.SnakeCase)`.
+- **Registering against a container directly** - `RegisterConfigServices(configName, configDirectory,
+  convention)` and `RegisterConfigManagerService(configName, configDirectory, convention)` both accept the
+  same trailing `convention` parameter (default `PascalCase`).
+
+Every path through `SquidStdConfig` - `GetSection`, `BindSection`, `HasSection`, `Compose`, `Save` - uses
+the convention recorded at `Load` time, so binding a section and later re-serializing it with `Compose()`
+or `Save()` round-trip through the same casing.
+
+A `squidstd.yaml` written in `SnakeCase`:
+
+```yaml
+network:
+  bind_address: 0.0.0.0
+  max_connections: 128
+```
+
+binds against a plain, PascalCase-declared C# type once the option is set:
+
+```csharp
+public sealed class NetworkConfig
+{
+    public string BindAddress { get; set; } = string.Empty;
+    public int MaxConnections { get; set; }
+}
+
+var bootstrap = SquidStdBootstrap.Create(
+    new SquidStdOptions
+    {
+        ConfigName = "squidstd",
+        RootDirectory = AppContext.BaseDirectory,
+        YamlNamingConvention = YamlNamingConventionType.SnakeCase
+    });
+
+bootstrap.ConfigureServices(container =>
+{
+    container.RegisterConfigSection("network", static () => new NetworkConfig());
+    return container;
+});
+```
+
+The `network` section name is untouched by the convention - only its property keys
+(`BindAddress`/`bind_address`, `MaxConnections`/`max_connections`) are. `YamlUtils.Deserialize`,
+`Serialize`, `SerializeSections`, and the standalone `YamlDataSerializer` (the `IDataSerializer` /
+`IDataDeserializer` implementation behind `RegisterYamlDataSerializer()`) accept the same enum as a
+trailing parameter and default to `PascalCase` too.
+
 ## Four ways to configure a service
 
 Sectioned registrations (`RegisterEventLoop`, `RegisterJobSystemService`,
