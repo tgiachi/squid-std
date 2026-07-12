@@ -1,6 +1,7 @@
 using SquidStd.Core.Config.Internal;
 using SquidStd.Core.Extensions.Directories;
 using SquidStd.Core.Interfaces.Config;
+using SquidStd.Core.Types.Yaml;
 using SquidStd.Core.Yaml;
 
 namespace SquidStd.Core.Config;
@@ -25,6 +26,12 @@ public sealed class SquidStdConfig
     /// <summary>Gets the full path of the YAML configuration file.</summary>
     public string ConfigPath { get; }
 
+    /// <summary>
+    /// Gets the naming convention applied to YAML property keys when binding, composing and
+    /// saving sections. Section names are always matched exactly as registered.
+    /// </summary>
+    public YamlNamingConventionType NamingConvention { get; }
+
     /// <summary>Gets the tracked sections (bound and unbound), ordered by priority then name.</summary>
     public IReadOnlyCollection<IConfigEntry> Entries
     {
@@ -37,12 +44,13 @@ public sealed class SquidStdConfig
         }
     }
 
-    private SquidStdConfig(string configName, string configDirectory, string rawYaml)
+    private SquidStdConfig(string configName, string configDirectory, string rawYaml, YamlNamingConventionType convention)
     {
         ConfigName = configName;
         ConfigDirectory = configDirectory;
         ConfigPath = ResolveConfigPath(configName, configDirectory);
         _rawYaml = rawYaml;
+        NamingConvention = convention;
     }
 
     /// <summary>
@@ -52,8 +60,13 @@ public sealed class SquidStdConfig
     /// </summary>
     /// <param name="configName">Logical configuration name or YAML file name.</param>
     /// <param name="configDirectory">Directory where the configuration file is searched.</param>
+    /// <param name="convention">The naming convention applied to YAML property keys.</param>
     /// <returns>The loaded configuration.</returns>
-    public static SquidStdConfig Load(string configName, string configDirectory)
+    public static SquidStdConfig Load(
+        string configName,
+        string configDirectory,
+        YamlNamingConventionType convention = YamlNamingConventionType.PascalCase
+    )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(configName);
         ArgumentException.ThrowIfNullOrWhiteSpace(configDirectory);
@@ -62,7 +75,7 @@ public sealed class SquidStdConfig
         var path = ResolveConfigPath(configName, resolvedDirectory);
         var raw = File.Exists(path) ? File.ReadAllText(path) : string.Empty;
 
-        return new(configName, resolvedDirectory, raw);
+        return new(configName, resolvedDirectory, raw, convention);
     }
 
     /// <summary>
@@ -134,7 +147,7 @@ public sealed class SquidStdConfig
         lock (_sync)
         {
             return !string.IsNullOrWhiteSpace(_rawYaml) &&
-                   YamlUtils.DeserializeSection(_rawYaml, sectionName, typeof(Dictionary<object, object>)) is not null;
+                   YamlUtils.DeserializeSection(_rawYaml, sectionName, typeof(Dictionary<object, object>), NamingConvention) is not null;
         }
     }
 
@@ -181,7 +194,7 @@ public sealed class SquidStdConfig
     {
         lock (_sync)
         {
-            return YamlUtils.SerializeSections(BuildSectionMap());
+            return YamlUtils.SerializeSections(BuildSectionMap(), NamingConvention);
         }
     }
 
@@ -192,7 +205,7 @@ public sealed class SquidStdConfig
     {
         lock (_sync)
         {
-            YamlUtils.SerializeToFile(BuildSectionMap(), ConfigPath);
+            YamlUtils.SerializeToFile(BuildSectionMap(), ConfigPath, NamingConvention);
         }
     }
 
@@ -223,7 +236,7 @@ public sealed class SquidStdConfig
     {
         var value = string.IsNullOrWhiteSpace(_rawYaml)
                         ? entry.CreateDefault()
-                        : YamlUtils.DeserializeSection(_rawYaml, entry.SectionName, entry.ConfigType) ??
+                        : YamlUtils.DeserializeSection(_rawYaml, entry.SectionName, entry.ConfigType, NamingConvention) ??
                           entry.CreateDefault();
 
         ConfigEnvSubstitution.Apply(value);

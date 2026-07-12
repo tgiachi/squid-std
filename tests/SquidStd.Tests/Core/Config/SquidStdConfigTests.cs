@@ -1,4 +1,5 @@
 using SquidStd.Core.Config;
+using SquidStd.Core.Types.Yaml;
 using SquidStd.Tests.Support;
 
 namespace SquidStd.Tests.Core.Config;
@@ -15,6 +16,13 @@ public class SquidStdConfigTests
     public sealed class OtherSection
     {
         public bool Enabled { get; set; }
+    }
+
+    // Two-word property so snake_case (max_level) is distinguishable from the PascalCase
+    // default (MaxLevel); SampleSection's single-word properties snake_case to themselves.
+    public sealed class ConventionSection
+    {
+        public int MaxLevel { get; set; }
     }
 
     private static SquidStdConfig CreateWithYaml(TempDirectory root, string yaml)
@@ -169,5 +177,23 @@ public class SquidStdConfigTests
         {
             Environment.SetEnvironmentVariable("SQUIDSTD_TEST_DIR", null);
         }
+    }
+
+    [Fact]
+    public void Load_WithSnakeCaseConvention_BindsAndRoundTrips()
+    {
+        using var root = new TempDirectory();
+        File.WriteAllText(Path.Combine(root.Path, "app.yaml"), "sample:\n  max_level: 7\n");
+
+        var config = SquidStdConfig.Load("app", root.Path, YamlNamingConventionType.SnakeCase);
+        var section = config.GetSection<ConventionSection>("sample");
+
+        Assert.Equal(7, section.MaxLevel);
+        Assert.Equal(YamlNamingConventionType.SnakeCase, config.NamingConvention);
+
+        config.Save();
+        var written = File.ReadAllText(config.ConfigPath);
+        Assert.Contains("max_level:", written);      // keys stay snake_case on round-trip
+        Assert.DoesNotContain("MaxLevel:", written);
     }
 }

@@ -83,7 +83,9 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
             Container.RegisterInstance(Options.Logger, IfAlreadyRegistered.Replace);
         }
 
-        Container.RegisterConfigServices(config ?? SquidStdConfig.Load(Options.ConfigName, Options.RootDirectory));
+        Container.RegisterConfigServices(
+            config ?? SquidStdConfig.Load(Options.ConfigName, Options.RootDirectory, Options.YamlNamingConvention)
+        );
 
         if (Options.Directories.Length > 0)
         {
@@ -440,7 +442,8 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
 
     /// <summary>
     /// Creates a bootstrapper from an eagerly-loaded <see cref="SquidStdConfig" />, bypassing the
-    /// internal <see cref="SquidStdConfig.Load(string, string)" /> the other overloads perform.
+    /// internal <see cref="SquidStdConfig.Load(string, string, SquidStd.Core.Types.Yaml.YamlNamingConventionType)" />
+    /// the other overloads perform.
     /// </summary>
     /// <param name="config">The eagerly-loaded configuration.</param>
     /// <param name="options">Bootstrap options used to register core services.</param>
