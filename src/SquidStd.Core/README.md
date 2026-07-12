@@ -73,7 +73,7 @@ using SquidStd.Core.Extensions.Strings;
 | `IStorageService`              | File/object storage abstraction.                               |
 | `IFileWatcherService`          | Recursive, debounced file watcher publishing to the event bus. |
 | `ObjectPool<T>`                | Thread-safe, non-blocking object pool.                         |
-| `FastPriorityQueue<T>` / `StablePriorityQueue<T>` / `GenericPriorityQueue<T>` / `SimplePriorityQueue<T>` | Min-priority queues in `SquidStd.Core.Collections.PriorityQueues` with UpdatePriority, O(1) Contains, and Remove - features not in System.Collections.Generic.PriorityQueue. |
+| `FastPriorityQueue<T>` / `StablePriorityQueue<T>` / `GenericPriorityQueue<TItem, TPriority>` / `SimplePriorityQueue<T>` | Min-priority queues in `SquidStd.Core.Collections.PriorityQueues` with UpdatePriority, O(1) Contains, and O(log n) Remove - capabilities System.Collections.Generic.PriorityQueue lacks or only offers as an O(n) scan. |
 | `ICommandDispatcher<TContext>` | Typed protocol command dispatch with context.                  |
 
 ## Related

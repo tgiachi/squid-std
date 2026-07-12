@@ -141,4 +141,74 @@ public class SimplePriorityQueueTests
 
         Assert.Equal(1000, queue.Count);
     }
+
+    [Fact]
+    public void EnqueueWithoutDuplicates_SameItemTwice_EnqueuesOnlyOnce()
+    {
+        var queue = new SimplePriorityQueue<string, int>();
+
+        Assert.True(queue.EnqueueWithoutDuplicates("x", 1));
+        Assert.False(queue.EnqueueWithoutDuplicates("x", 2));
+
+        Assert.Equal(1, queue.Count);
+        Assert.Equal(1, queue.GetPriority("x"));
+    }
+
+    [Fact]
+    public void TryUpdatePriority_ItemNotInQueue_ReturnsFalse()
+    {
+        var queue = new SimplePriorityQueue<string, int>();
+
+        Assert.False(queue.TryUpdatePriority("missing", 1));
+    }
+
+    [Fact]
+    public void TryUpdatePriority_ItemInQueue_ReturnsTrueAndReordersQueue()
+    {
+        var queue = new SimplePriorityQueue<string, int>();
+        queue.Enqueue("a", 1);
+        queue.Enqueue("b", 2);
+
+        Assert.True(queue.TryUpdatePriority("b", 0));
+
+        Assert.Equal("b", queue.First);
+    }
+
+    [Fact]
+    public void TryGetPriority_ItemNotInQueue_ReturnsFalse()
+    {
+        var queue = new SimplePriorityQueue<string, int>();
+
+        Assert.False(queue.TryGetPriority("missing", out var priority));
+        Assert.Equal(0, priority);
+    }
+
+    [Fact]
+    public void TryGetPriority_ItemInQueue_ReturnsTrueAndPriority()
+    {
+        var queue = new SimplePriorityQueue<string, int>();
+        queue.Enqueue("a", 7);
+
+        Assert.True(queue.TryGetPriority("a", out var priority));
+        Assert.Equal(7, priority);
+    }
+
+    [Fact]
+    public void Enqueue_NullItem_SupportsContainsAndDequeue()
+    {
+        var queue = new SimplePriorityQueue<string, int>();
+
+        queue.Enqueue(null!, 1);
+
+        Assert.True(queue.Contains(null!));
+        Assert.Null(queue.Dequeue());
+    }
+
+    [Fact]
+    public void UpdatePriority_ItemNotInQueue_ThrowsInvalidOperationException()
+    {
+        var queue = new SimplePriorityQueue<string, int>();
+
+        Assert.Throws<InvalidOperationException>(() => queue.UpdatePriority("missing", 1));
+    }
 }

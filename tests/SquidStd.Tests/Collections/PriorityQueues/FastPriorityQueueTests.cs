@@ -150,4 +150,40 @@ public class FastPriorityQueueTests
         queue.Dequeue();
         Assert.False(queue.Contains(a));
     }
+
+    [Fact]
+    public void Clear_RemovesAllNodes_AllowsSameNodeToBeReenqueued()
+    {
+        var queue = new FastPriorityQueue<FastTestNode>(10);
+        var a = new FastTestNode { Name = "a" };
+        var b = new FastTestNode { Name = "b" };
+        queue.Enqueue(a, 1f);
+        queue.Enqueue(b, 2f);
+
+        queue.Clear();
+
+        Assert.Equal(0, queue.Count);
+        Assert.False(queue.Contains(a));
+
+        queue.Enqueue(a, 3f);
+
+        Assert.Equal(1, queue.Count);
+        Assert.Equal("a", queue.Dequeue().Name);
+    }
+
+    [Fact]
+    public void ResetNode_OnDequeuedNode_AllowsEnqueueingIntoADifferentQueue()
+    {
+        var queue1 = new FastPriorityQueue<FastTestNode>(10);
+        var queue2 = new FastPriorityQueue<FastTestNode>(10);
+        var a = new FastTestNode { Name = "a" };
+        queue1.Enqueue(a, 1f);
+
+        Assert.Equal("a", queue1.Dequeue().Name);
+
+        queue1.ResetNode(a);
+        queue2.Enqueue(a, 5f);
+
+        Assert.Equal("a", queue2.Dequeue().Name);
+    }
 }
