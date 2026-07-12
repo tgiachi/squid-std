@@ -16,6 +16,7 @@ dotnet add package SquidStd.Core
 
 ```csharp
 using SquidStd.Core.Extensions.Env;
+using SquidStd.Core.Types.Yaml;
 using SquidStd.Core.Yaml;
 
 // Expand "$VAR" tokens against the environment (unknown vars are left untouched).
@@ -23,6 +24,10 @@ var path = "$HOME/squidstd/data".ReplaceEnv();
 
 // Serialize / deserialize YAML.
 var yaml = YamlUtils.Serialize(new { name = "squid", port = 9000 });
+
+// IDataSerializer/IDataDeserializer over YAML, with a configurable naming convention
+// (PascalCase by default) and a strict mode that rejects unknown keys.
+var yamlSerializer = new YamlDataSerializer(YamlNamingConventionType.SnakeCase, ignoreUnmatchedProperties: false);
 ```
 
 ```csharp

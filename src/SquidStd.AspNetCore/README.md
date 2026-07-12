@@ -69,7 +69,8 @@ builder.UseSquidStd(options => options.ConfigName = "squidstd", c => c.RegisterC
 builder.AddSquidStdSerilog();
 ```
 
-The logger is driven entirely by `squidstd.yaml` (keys are PascalCase and case-sensitive):
+The logger is driven entirely by `squidstd.yaml` (keys follow the configured convention - PascalCase by
+default - and are case-sensitive):
 
 ```yaml
 logger:

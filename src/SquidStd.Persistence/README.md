@@ -83,9 +83,10 @@ bootstrap.ConfigureServices(c =>
 var players = bootstrap.Resolve<IPersistenceService>().GetStore<Player, int>();
 ```
 
-- **Serializer prerequisite**: register a serializer (`RegisterMessagePackSerializer()` or
-  `RegisterDataSerializer()`) before `RegisterPersistence()` - it throws `InvalidOperationException`
-  otherwise, so a missing serializer fails fast instead of at first use.
+- **Serializer prerequisite**: register a serializer (`RegisterMessagePackSerializer()`,
+  `RegisterDataSerializer()` for JSON, or `RegisterYamlDataSerializer()` for human-readable saves) before
+  `RegisterPersistence()` - it throws `InvalidOperationException` otherwise, so a missing serializer fails
+  fast instead of at first use.
 - **Config source**: `RegisterPersistence()` binds the `persistence` YAML section by default; pass an
   explicit `PersistenceConfig` instance to skip the file entirely for that section (it is then ignored).
   Either way, `SaveDirectory` defaults to the managed `save` directory under the bootstrap root when left

@@ -54,8 +54,8 @@ var loop = container.Resolve<IEventLoopService>();
 Console.WriteLine($"{loop.TickCount} ticks, avg {loop.AverageTickMs:0.###} ms");
 ```
 
-Configure it via the `eventLoop` section (section keys are matched as registered, property names are
-PascalCase):
+Configure it via the `eventLoop` section (section keys are matched as registered, property names follow
+the configured convention - PascalCase by default):
 
 ```yaml
 eventLoop:
