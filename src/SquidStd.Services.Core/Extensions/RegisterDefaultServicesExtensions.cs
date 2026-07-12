@@ -22,6 +22,8 @@ using SquidStd.Core.Interfaces.Serialization;
 using SquidStd.Core.Interfaces.Threading;
 using SquidStd.Core.Interfaces.Timing;
 using SquidStd.Core.Json;
+using SquidStd.Core.Types.Yaml;
+using SquidStd.Core.Yaml;
 using SquidStd.Services.Core.Services;
 using SquidStd.Services.Core.Services.Storage;
 
@@ -139,6 +141,26 @@ public static class RegisterDefaultServicesExtensions
         public IContainer RegisterDataSerializer()
         {
             var serializer = new JsonDataSerializer();
+            container.RegisterInstance<IDataSerializer>(serializer, IfAlreadyRegistered.Keep);
+            container.RegisterInstance<IDataDeserializer>(serializer, IfAlreadyRegistered.Keep);
+
+            return container;
+        }
+
+        /// <summary>
+        /// Registers the YAML data serializer for <see cref="IDataSerializer" /> and
+        /// <see cref="IDataDeserializer" /> (same singleton instance). Existing registrations
+        /// are kept.
+        /// </summary>
+        /// <param name="convention">Property naming convention for the emitted YAML.</param>
+        /// <param name="ignoreUnmatchedProperties">When true (default) unknown YAML keys are ignored.</param>
+        /// <returns>The same container for chaining.</returns>
+        public IContainer RegisterYamlDataSerializer(
+            YamlNamingConventionType convention = YamlNamingConventionType.PascalCase,
+            bool ignoreUnmatchedProperties = true
+        )
+        {
+            var serializer = new YamlDataSerializer(convention, ignoreUnmatchedProperties);
             container.RegisterInstance<IDataSerializer>(serializer, IfAlreadyRegistered.Keep);
             container.RegisterInstance<IDataDeserializer>(serializer, IfAlreadyRegistered.Keep);
 
