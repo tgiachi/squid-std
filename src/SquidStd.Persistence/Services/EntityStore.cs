@@ -28,31 +28,40 @@ public sealed class EntityStore<TEntity, TKey> : IEntityStore<TEntity, TKey>
         _descriptor = descriptor;
     }
 
-    public ValueTask<int> CountAsync(CancellationToken cancellationToken = default)
+    public int Count()
     {
         lock (_stateStore.SyncRoot)
         {
-            return ValueTask.FromResult(Bucket().Count);
+            return Bucket().Count;
         }
     }
 
-    public ValueTask<IReadOnlyCollection<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
+    public ValueTask<int> CountAsync(CancellationToken cancellationToken = default)
+        => ValueTask.FromResult(Count());
+
+    public IReadOnlyCollection<TEntity> GetAll()
     {
         lock (_stateStore.SyncRoot)
         {
             IReadOnlyCollection<TEntity> clones = [.. Bucket().Values.Select(_descriptor.Clone)];
 
-            return ValueTask.FromResult(clones);
+            return clones;
+        }
+    }
+
+    public ValueTask<IReadOnlyCollection<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
+        => ValueTask.FromResult(GetAll());
+
+    public TEntity? GetById(TKey id)
+    {
+        lock (_stateStore.SyncRoot)
+        {
+            return Bucket().TryGetValue(id, out var entity) ? _descriptor.Clone(entity) : default;
         }
     }
 
     public ValueTask<TEntity?> GetByIdAsync(TKey id, CancellationToken cancellationToken = default)
-    {
-        lock (_stateStore.SyncRoot)
-        {
-            return ValueTask.FromResult(Bucket().TryGetValue(id, out var entity) ? _descriptor.Clone(entity) : default);
-        }
-    }
+        => ValueTask.FromResult(GetById(id));
 
     public IQueryable<TEntity> Query()
     {
