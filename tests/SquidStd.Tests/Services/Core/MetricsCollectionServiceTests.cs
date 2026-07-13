@@ -83,7 +83,14 @@ public class MetricsCollectionServiceTests
         );
 
         await service.StartAsync(CancellationToken.None);
-        await WaitUntilAsync(() => firstListener.LastEvent is not null && secondListener.LastEvent is not null);
+
+        // The collection loop's first tick still has to be scheduled via Task.Run, so give it
+        // more headroom than the default: on a loaded CI runner that scheduling can lag well
+        // past a couple of seconds even though the collector itself collects immediately.
+        await WaitUntilAsync(
+            () => firstListener.LastEvent is not null && secondListener.LastEvent is not null,
+            TimeSpan.FromSeconds(30)
+        );
         await service.StopAsync(CancellationToken.None);
 
         Assert.NotNull(firstListener.LastEvent);
@@ -161,9 +168,9 @@ public class MetricsCollectionServiceTests
         Assert.Equal(countAfterStop, provider.CollectionCount);
     }
 
-    private static async Task WaitUntilAsync(Func<bool> predicate)
+    private static async Task WaitUntilAsync(Func<bool> predicate, TimeSpan? timeout = null)
     {
-        var deadline = DateTime.UtcNow.AddSeconds(2);
+        var deadline = DateTime.UtcNow + (timeout ?? TimeSpan.FromSeconds(2));
 
         while (DateTime.UtcNow < deadline)
         {

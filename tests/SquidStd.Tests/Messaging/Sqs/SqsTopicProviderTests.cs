@@ -42,8 +42,8 @@ public class SqsTopicProviderTests
             }
         );
 
-        // Allow the subscriptions to be wired before publishing.
-        await Task.Delay(2000);
+        // Subscribe() now blocks until the SNS subscription is confirmed (see SqsTopicProvider),
+        // so both subscriptions are already fanned-in by the time it returns; no delay needed.
         await provider.PublishAsync(topic, Bytes("hello"));
 
         Assert.Equal("hello", await a.Task.WaitAsync(Timeout));
