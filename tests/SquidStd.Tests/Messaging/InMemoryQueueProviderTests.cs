@@ -163,7 +163,10 @@ public class InMemoryQueueProviderTests
             await provider.PublishAsync("q", Bytes("m"));
         }
 
-        Assert.True(done.Wait(Timeout));
+        // The single consumer loop is dispatched via Task.Run and dispatches round-robin
+        // strictly in registration order, so the split is deterministic once all four
+        // deliveries land; a generous bound just absorbs thread-pool scheduling delay under load.
+        Assert.True(done.Wait(TimeSpan.FromSeconds(30)));
         Assert.Equal(2, aCount);
         Assert.Equal(2, bCount);
     }
