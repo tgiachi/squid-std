@@ -91,6 +91,49 @@ public sealed class EntityStoreTests : IAsyncDisposable
         Assert.Equal(["Alice"], names);
     }
 
+    [Fact]
+    public async Task Count_And_GetAll_Sync_ReflectStateAfterUpserts()
+    {
+        await _store.UpsertAsync(new() { Id = 1 });
+        await _store.UpsertAsync(new() { Id = 2 });
+
+        Assert.Equal(2, _store.Count());
+        Assert.Equal(2, _store.GetAll().Count);
+    }
+
+    [Fact]
+    public async Task GetById_Sync_ReturnsDetachedClone()
+    {
+        await _store.UpsertAsync(new() { Id = 1, Tags = ["a"] });
+
+        var first = _store.GetById(1);
+        first!.Tags.Add("mutated");
+        var second = _store.GetById(1);
+
+        Assert.Equal(["a"], second!.Tags);
+    }
+
+    [Fact]
+    public void GetById_Sync_MissingKey_ReturnsDefault()
+    {
+        Assert.Null(_store.GetById(99));
+    }
+
+    [Fact]
+    public async Task SyncAndAsyncReads_Agree()
+    {
+        await _store.UpsertAsync(new() { Id = 1, Name = "Alice" });
+        await _store.UpsertAsync(new() { Id = 2, Name = "Bob" });
+
+        Assert.Equal(await _store.CountAsync(), _store.Count());
+        Assert.Equal((await _store.GetAllAsync()).Count, _store.GetAll().Count);
+
+        var asyncEntity = await _store.GetByIdAsync(1);
+        var syncEntity = _store.GetById(1);
+
+        Assert.Equal(asyncEntity!.Name, syncEntity!.Name);
+    }
+
     public async ValueTask DisposeAsync()
     {
         await _journal.DisposeAsync();
