@@ -5,6 +5,12 @@ namespace SquidStd.Persistence.Abstractions.Interfaces.Persistence;
 /// and return detached clones; writes append to the journal then apply to memory. Reads are available
 /// in both synchronous and asynchronous forms; the async overloads delegate to the synchronous ones.
 /// </summary>
+/// <remarks>
+/// WARNING: do not register or resolve <see cref="IEntityStore{TEntity,TKey}" /> directly in the DI
+/// container - it is intentionally never registered there, and its implementation cannot be constructed
+/// by the container. Register the entity with <c>RegisterPersistedEntity</c> and obtain the store from
+/// <see cref="IPersistenceService.GetStore{TEntity,TKey}" /> instead.
+/// </remarks>
 public interface IEntityStore<TEntity, in TKey>
 {
     /// <summary>Completes synchronously from memory. Returns the number of entities of this type currently held.</summary>
