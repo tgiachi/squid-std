@@ -149,8 +149,19 @@ public sealed class SqsTopicProvider : ITopicProvider
             _handler = handler;
         }
 
+        // SNS only fans a publish out to subscriptions that are already confirmed at publish time
+        // (unlike a plain SQS queue, it does not buffer for endpoints that subscribe later), so the
+        // subscribe/queue/policy/SNS-subscribe wiring below must complete before Start() returns.
+        // This mirrors RabbitMqTopicProvider.Subscription.Start(), which blocks the same way.
         public void Start()
-            => _loop = Task.Run(() => RunAsync(_cts.Token));
+        {
+            var queueUrl = SetupAsync(_cts.Token).GetAwaiter().GetResult();
+
+            if (queueUrl is not null)
+            {
+                _loop = Task.Run(() => ReceiveLoopAsync(queueUrl, _cts.Token));
+            }
+        }
 
         private static string BuildPolicy(string queueArn, string topicArn)
             => JsonSerializer.Serialize(
@@ -171,18 +182,21 @@ public sealed class SqsTopicProvider : ITopicProvider
                 }
             );
 
-        private async Task RunAsync(CancellationToken cancellationToken)
+        /// <summary>
+        /// Creates the subscriber's dedicated queue, grants SNS permission to send to it and
+        /// confirms the SNS subscription. Returns the queue URL once the subscription is fully
+        /// wired and ready to receive fanned-out messages, or null on failure/cancellation.
+        /// </summary>
+        private async Task<string?> SetupAsync(CancellationToken cancellationToken)
         {
-            string queueUrl;
-
             try
             {
                 var topicArn = await _provider.EnsureTopicAsync(_topic, cancellationToken);
                 var queueName = SqsNames.Sanitize(_topic) + "-sub-" + _index;
-                queueUrl = (await _provider._sqs!.CreateQueueAsync(
-                                new CreateQueueRequest { QueueName = queueName },
-                                cancellationToken
-                            )).QueueUrl;
+                var queueUrl = (await _provider._sqs!.CreateQueueAsync(
+                                    new CreateQueueRequest { QueueName = queueName },
+                                    cancellationToken
+                                )).QueueUrl;
                 _queueUrl = queueUrl;
 
                 var attributes = await _provider._sqs.GetQueueAttributesAsync(
@@ -211,18 +225,23 @@ public sealed class SqsTopicProvider : ITopicProvider
                                         },
                                         cancellationToken
                                     )).SubscriptionArn;
+
+                return queueUrl;
             }
             catch (OperationCanceledException)
             {
-                return;
+                return null;
             }
             catch (Exception ex)
             {
                 _provider._logger.Warning(ex, "SQS topic '{Topic}' subscribe setup failed", _topic);
 
-                return;
+                return null;
             }
+        }
 
+        private async Task ReceiveLoopAsync(string queueUrl, CancellationToken cancellationToken)
+        {
             while (!cancellationToken.IsCancellationRequested)
             {
                 ReceiveMessageResponse response;
