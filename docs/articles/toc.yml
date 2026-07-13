@@ -130,5 +130,7 @@
   href: crypto.md
 - name: SquidStd.Secrets.Aws
   href: secrets-aws.md
+- name: SquidStd.Game
+  href: game.md
 - name: Felix Network
   href: felix.md
