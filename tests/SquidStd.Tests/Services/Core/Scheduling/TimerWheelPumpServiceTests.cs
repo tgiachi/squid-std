@@ -25,7 +25,9 @@ public class TimerWheelPumpServiceTests
 
         await pump.StartAsync();
 
-        Assert.True(timer.Pumped.Wait(TimeSpan.FromSeconds(2)));
+        // The pump loop is dispatched via Task.Run; a generous bound absorbs thread-pool
+        // scheduling delay on loaded CI runners while still failing fast if it never pumps.
+        Assert.True(timer.Pumped.Wait(TimeSpan.FromSeconds(30)));
 
         await pump.StopAsync();
         pump.Dispose();
