@@ -32,7 +32,8 @@ public sealed class AStarPathfinder<TNode> where TNode : notnull
     /// </param>
     /// <param name="cost">
     /// Edge cost from a node to a successor. Must be non-negative; negative costs are
-    /// undefined behavior and only checked in DEBUG builds.
+    /// undefined behavior and only checked in DEBUG builds. Model impassable edges by
+    /// omitting the neighbor rather than returning an infinite cost.
     /// </param>
     /// <param name="heuristic">
     /// Estimated remaining cost from a node to the goal. Consistent (monotone) estimates
@@ -85,6 +86,7 @@ public sealed class AStarPathfinder<TNode> where TNode : notnull
         var nodes = new Dictionary<TNode, SearchNode>(_comparer);
 
         var startNode = new SearchNode(start) { GScore = 0.0, HScore = _heuristic(start, goal) };
+        Debug.Assert(!double.IsNaN(startNode.HScore), "A* requires non-NaN heuristic estimates.");
         nodes[start] = startNode;
         open.Enqueue(startNode, startNode.HScore);
 
@@ -130,6 +132,7 @@ public sealed class AStarPathfinder<TNode> where TNode : notnull
                     {
                         GScore = tentative, HScore = _heuristic(neighbor, goal), Parent = current
                     };
+                    Debug.Assert(!double.IsNaN(created.HScore), "A* requires non-NaN heuristic estimates.");
                     nodes[neighbor] = created;
 
                     if (open.Count == open.MaxSize)
