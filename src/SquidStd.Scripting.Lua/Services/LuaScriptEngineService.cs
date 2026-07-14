@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -697,7 +698,50 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
         };
 
     private DynValue ConvertToLua(object? value)
-        => value == null ? DynValue.Nil : DynValue.FromObject(LuaScript, value);
+    {
+        switch (value)
+        {
+            case null:
+                return DynValue.Nil;
+
+            case DynValue dynValue:
+                return dynValue;
+
+            case string:
+                return DynValue.FromObject(LuaScript, value);
+
+            case IDictionary dictionary:
+            {
+                var table = new Table(LuaScript);
+
+                foreach (DictionaryEntry entry in dictionary)
+                {
+                    table[ConvertKey(entry.Key)] = ConvertToLua(entry.Value);
+                }
+
+                return DynValue.NewTable(table);
+            }
+
+            case IEnumerable enumerable:
+            {
+                var table = new Table(LuaScript);
+                var index = 1;
+
+                foreach (var item in enumerable)
+                {
+                    table[index++] = ConvertToLua(item);
+                }
+
+                return DynValue.NewTable(table);
+            }
+
+            default:
+                return DynValue.FromObject(LuaScript, value);
+        }
+    }
+
+    private static object ConvertKey(object key)
+        => key is string text ? text : Convert.ToString(key, CultureInfo.InvariantCulture) ?? string.Empty;
 
     /// <summary>
     /// Creates a Lua callback that invokes the constructor matching the number of arguments passed from Lua.

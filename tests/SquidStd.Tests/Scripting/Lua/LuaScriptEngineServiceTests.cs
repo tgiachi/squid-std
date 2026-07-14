@@ -60,6 +60,41 @@ public class LuaScriptEngineServiceTests
     }
 
     [Fact]
+    public void ModuleFunctionReturningDictionary_MarshalsToLuaTable()
+    {
+        using var temp = new TempDirectory();
+        using var container = new Container();
+        using var engine = CreateEngine(temp, container);
+
+        engine.AddManualModuleFunction<double, Dictionary<string, object>>(
+            "itemModule",
+            "get",
+            id => new() { ["id"] = id, ["name"] = "Dagger", ["amount"] = 3d }
+        );
+
+        Assert.Equal(5d, engine.ExecuteFunction("item_module.get(5).id").Data);
+        Assert.Equal("Dagger", engine.ExecuteFunction("item_module.get(5).name").Data);
+        Assert.Equal(3d, engine.ExecuteFunction("item_module.get(5).amount").Data);
+    }
+
+    [Fact]
+    public void ModuleFunctionReturningList_MarshalsToLuaArrayTable()
+    {
+        using var temp = new TempDirectory();
+        using var container = new Container();
+        using var engine = CreateEngine(temp, container);
+
+        engine.AddManualModuleFunction<double, List<object>>(
+            "itemModule",
+            "contents",
+            _ => [1073741824d, 1073741825d, 1073741826d]
+        );
+
+        Assert.Equal(3d, engine.ExecuteFunction("#item_module.contents(1)").Data);
+        Assert.Equal(1073741825d, engine.ExecuteFunction("item_module.contents(1)[2]").Data);
+    }
+
+    [Fact]
     public void AddSearchDirectory_AllowsRequireFromAdditionalDirectory()
     {
         using var temp = new TempDirectory();
