@@ -23,6 +23,7 @@ public static class RegisterLuaEventsExtension
         /// <returns>The same container for chaining.</returns>
         public IContainer RegisterLuaEvents()
         {
+            container.Register<ILuaInvokeMarshaller, InlineLuaInvokeMarshaller>(Reuse.Singleton, ifAlreadyRegistered: IfAlreadyRegistered.Keep);
             container.Register<ILuaEventBridge, LuaEventBridge>(Reuse.Singleton, ifAlreadyRegistered: IfAlreadyRegistered.Keep);
             container.RegisterScriptModule<EventsModule>();
             container.RegisterStdService<LuaEventBusForwarder, LuaEventBusForwarder>();
