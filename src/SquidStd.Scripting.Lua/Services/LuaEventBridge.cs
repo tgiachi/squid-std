@@ -14,8 +14,14 @@ public sealed class LuaEventBridge : ILuaEventBridge
     private readonly ConcurrentDictionary<string, List<Closure>> _callbacks = new(StringComparer.OrdinalIgnoreCase);
     private readonly Lock _invokeSync = new();
     private readonly ILogger _logger = Log.ForContext<LuaEventBridge>();
+    private readonly ILuaInvokeMarshaller _marshaller;
 
     private Script? _script;
+
+    public LuaEventBridge(ILuaInvokeMarshaller? marshaller = null)
+    {
+        _marshaller = marshaller ?? new InlineLuaInvokeMarshaller();
+    }
 
     public void Attach(Script script)
     {
@@ -29,13 +35,16 @@ public sealed class LuaEventBridge : ILuaEventBridge
         ArgumentNullException.ThrowIfNull(callback);
         ArgumentNullException.ThrowIfNull(payload);
 
-        var script = _script ?? throw new InvalidOperationException("Lua event bridge is not attached to a script.");
-        var table = CreatePayloadTable(script, payload);
-
-        lock (_invokeSync)
+        return _marshaller.Invoke(() =>
         {
-            return script.Call(callback, table);
-        }
+            var script = _script ?? throw new InvalidOperationException("Lua event bridge is not attached to a script.");
+            var table = CreatePayloadTable(script, payload);
+
+            lock (_invokeSync)
+            {
+                return script.Call(callback, table);
+            }
+        });
     }
 
     public void Publish(string eventName, IReadOnlyDictionary<string, object?> payload)

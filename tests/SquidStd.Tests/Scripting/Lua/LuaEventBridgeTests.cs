@@ -66,4 +66,33 @@ public class LuaEventBridgeTests
         Assert.Equal(1, (int)script.Globals.Get("calls").Number);
         Assert.Equal("slime", script.Globals.Get("captured").String);
     }
+
+    [Fact]
+    public void Invoke_RoutesThroughMarshaller()
+    {
+        var script = new Script();
+        var invoked = 0;
+        var marshaller = new DelegatingMarshaller(call => { invoked++; return call(); });
+        var bridge = new LuaEventBridge(marshaller);
+        bridge.Attach(script);
+        var callback = script.DoString("return function(p) return p.name end").Function;
+
+        var result = bridge.Invoke(callback, new Dictionary<string, object?> { ["name"] = "squid" });
+
+        Assert.Equal(1, invoked);
+        Assert.Equal("squid", result.String);
+    }
+
+    private sealed class DelegatingMarshaller : SquidStd.Scripting.Lua.Interfaces.Events.ILuaInvokeMarshaller
+    {
+        private readonly Func<Func<DynValue>, DynValue> _wrap;
+
+        public DelegatingMarshaller(Func<Func<DynValue>, DynValue> wrap)
+        {
+            _wrap = wrap;
+        }
+
+        public DynValue Invoke(Func<DynValue> call)
+            => _wrap(call);
+    }
 }
