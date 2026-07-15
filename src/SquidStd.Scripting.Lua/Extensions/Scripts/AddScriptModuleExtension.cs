@@ -65,5 +65,29 @@ public static class AddScriptModuleExtension
         /// <returns>The container for method chaining.</returns>
         public IContainer RegisterScriptModule<TScriptModule>() where TScriptModule : class
             => container.RegisterScriptModule(typeof(TScriptModule));
+
+        /// <summary>
+        /// Registers an enum type to expose to Lua as a read-only, case-insensitive global table
+        /// keyed by member name. The exposure is deterministic: the enum is registered during engine
+        /// initialization, independently of Lua meta-file generation.
+        /// </summary>
+        /// <param name="enumType">The enum type to expose.</param>
+        /// <returns>The container for method chaining.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when enumType is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when enumType is not an enum.</exception>
+        public IContainer RegisterScriptEnum(Type enumType)
+        {
+            container.AddToRegisterTypedList(new ScriptEnumData(enumType));
+
+            return container;
+        }
+
+        /// <summary>
+        /// Registers an enum type to expose to Lua using a generic type parameter.
+        /// </summary>
+        /// <typeparam name="TEnum">The enum type to expose.</typeparam>
+        /// <returns>The container for method chaining.</returns>
+        public IContainer RegisterScriptEnum<TEnum>() where TEnum : struct, Enum
+            => container.RegisterScriptEnum(typeof(TEnum));
     }
 }

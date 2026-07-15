@@ -52,6 +52,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, byte>> _manualModuleFunctions = new();
     private readonly ConcurrentDictionary<string, string> _scriptCache = new();
     private readonly List<ScriptModuleData> _scriptModules;
+    private readonly List<ScriptEnumData> _scriptEnums;
     private readonly IContainer _serviceProvider;
 
     private int _cacheHits;
@@ -85,7 +86,8 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
         IContainer serviceProvider,
         LuaEngineConfig engineConfig,
         List<ScriptModuleData> scriptModules = null,
-        List<ScriptUserData> loadedUserData = null
+        List<ScriptUserData> loadedUserData = null,
+        List<ScriptEnumData> scriptEnums = null
     )
     {
         JsonUtils.RegisterJsonContext(SquidStdScriptJsonContext.Default);
@@ -94,6 +96,7 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
         loadedUserData ??= new();
 
         _scriptModules = scriptModules;
+        _scriptEnums = scriptEnums ?? new();
         _directoriesConfig = directoriesConfig;
         _serviceProvider = serviceProvider;
         _engineConfig = engineConfig;
@@ -1101,6 +1104,16 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
                 LuaDocumentationGenerator.AddClassToGenerate(userData.UserType);
             }
 
+            // Document explicitly-registered enums (RegisterScriptEnum) too.
+            foreach (var scriptEnum in _scriptEnums)
+            {
+                if (scriptEnum?.EnumType is { IsEnum: true } enumType &&
+                    !LuaDocumentationGenerator.FoundEnums.Contains(enumType))
+                {
+                    LuaDocumentationGenerator.FoundEnums.Add(enumType);
+                }
+            }
+
             AddConstant("engine_version", _engineConfig.EngineVersion);
 
             // Generate meta.lua
@@ -1420,9 +1433,25 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
     [RequiresUnreferencedCode("Enum metadata is discovered dynamically when building Lua documentation.")]
     private void RegisterEnums()
     {
-        var enumsFound = LuaDocumentationGenerator.FoundEnums.ToArray();
+        // Explicitly registered enums (RegisterScriptEnum) are the deterministic source; the enums
+        // discovered by the documentation generator are folded in for backward compatibility. A set
+        // keyed by type prevents registering the same enum twice.
+        var enumTypes = new HashSet<Type>();
 
-        foreach (var enumType in enumsFound)
+        foreach (var scriptEnum in _scriptEnums)
+        {
+            if (scriptEnum?.EnumType is not null)
+            {
+                enumTypes.Add(scriptEnum.EnumType);
+            }
+        }
+
+        foreach (var enumType in LuaDocumentationGenerator.FoundEnums.ToArray())
+        {
+            enumTypes.Add(enumType);
+        }
+
+        foreach (var enumType in enumTypes)
         {
             RegisterEnum(enumType);
         }

@@ -213,11 +213,41 @@ public class LuaScriptEngineServiceTests
         Assert.Equal("SquidStd", engine.ExecuteFunction("ENGINE").Data);
     }
 
+    [Fact]
+    public async Task RegisterScriptEnum_ExposesReadOnlyCaseInsensitiveGlobalTable()
+    {
+        using var temp = new TempDirectory();
+        using var container = new Container();
+        using var engine = CreateEngine(
+            temp,
+            container,
+            scriptEnums: [new ScriptEnumData(typeof(SampleColor))]
+        );
+
+        await engine.StartAsync(CancellationToken.None);
+
+        // Snake-cased global name, member values, and case-insensitive access.
+        Assert.Equal(2d, engine.ExecuteFunction("sample_color.Green").Data);
+        Assert.Equal(4d, engine.ExecuteFunction("sample_color.blue").Data);
+
+        // Unknown members read as nil.
+        Assert.Equal(true, engine.ExecuteFunction("sample_color.Missing == nil").Data);
+
+        // Adding a new member is rejected (the enum table is guarded against extension).
+        Assert.Equal(
+            false,
+            engine.ExecuteFunction(
+                "(function() local ok = pcall(function() sample_color.NewColor = 99 end); return ok end)()"
+            ).Data
+        );
+    }
+
     private static LuaScriptEngineService CreateEngine(
         TempDirectory temp,
         IContainer container,
         List<ScriptModuleData>? scriptModules = null,
-        List<ScriptUserData>? loadedUserData = null
+        List<ScriptUserData>? loadedUserData = null,
+        List<ScriptEnumData>? scriptEnums = null
     )
     {
         var scriptsDirectory = temp.Combine("scripts");
@@ -229,8 +259,16 @@ public class LuaScriptEngineServiceTests
             container,
             new(luarcDirectory, scriptsDirectory, "SquidStd", "1.0.0"),
             scriptModules,
-            loadedUserData
+            loadedUserData,
+            scriptEnums
         );
+    }
+
+    private enum SampleColor
+    {
+        Red = 1,
+        Green = 2,
+        Blue = 4
     }
 
     public sealed class FiveArgumentUserData(int first, int second, int third, int fourth, int fifth)
