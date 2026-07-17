@@ -71,6 +71,40 @@ public sealed class EntityStore<TEntity, TKey> : IEntityStore<TEntity, TKey>
         }
     }
 
+    public PagedResult<TEntity> QueryPaged<TOrder>(
+        Func<TEntity, bool>? filter,
+        Func<TEntity, TOrder> orderBy,
+        int skip,
+        int take,
+        bool descending = false
+    )
+    {
+        lock (_stateStore.SyncRoot)
+        {
+            // Filtering and ordering run against the live entities, not clones: that is the whole saving.
+            // Only what survives skip/take is cloned, so the cost is O(bucket) comparisons plus O(page)
+            // clones instead of O(bucket) clones.
+            IEnumerable<TEntity> matching = Bucket().Values;
+
+            if (filter is not null)
+            {
+                matching = matching.Where(filter);
+            }
+
+            var matched = matching as IList<TEntity> ?? [.. matching];
+
+            // The entity key breaks ties. The caller's key is rarely unique, and leaving equal keys to
+            // Dictionary order is exactly the instability orderBy exists to remove.
+            var ordered = descending
+                              ? matched.OrderByDescending(orderBy).ThenByDescending(_descriptor.GetKey)
+                              : matched.OrderBy(orderBy).ThenBy(_descriptor.GetKey);
+
+            IReadOnlyList<TEntity> page = [.. ordered.Skip(skip).Take(take).Select(_descriptor.Clone)];
+
+            return new(page, matched.Count, skip, take);
+        }
+    }
+
     public async ValueTask UpsertAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         await _stateStore.WriteLock.WaitAsync(cancellationToken);
