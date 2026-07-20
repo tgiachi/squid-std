@@ -3,6 +3,7 @@ using MoonSharp.Interpreter;
 using SquidStd.Scripting.Lua.Data.Internal;
 using SquidStd.Scripting.Lua.Data.Scripts;
 using SquidStd.Scripting.Lua.Interfaces.Events;
+using SquidStd.Scripting.Lua.Interfaces.Scripts;
 using SquidStd.Scripting.Lua.Services;
 using SquidStd.Tests.Support;
 
@@ -92,6 +93,19 @@ public class LuaScriptEngineServiceTests
 
         Assert.Equal(3d, engine.ExecuteFunction("#item_module.contents(1)").Data);
         Assert.Equal(1073741825d, engine.ExecuteFunction("item_module.contents(1)[2]").Data);
+    }
+
+    [Fact]
+    public void ModuleFunctionReturningLuaTable_MarshalsViaToDictionary()
+    {
+        using var temp = new TempDirectory();
+        using var container = new Container();
+        using var engine = CreateEngine(temp, container);
+
+        engine.AddManualModuleFunction<double, SampleLuaView>("viewModule", "get", id => new SampleLuaView(id));
+
+        Assert.Equal(5d, engine.ExecuteFunction("view_module.get(5).id").Data);
+        Assert.Equal("Dagger", engine.ExecuteFunction("view_module.get(5).name").Data);
     }
 
     [Fact]
@@ -274,6 +288,12 @@ public class LuaScriptEngineServiceTests
     public sealed class FiveArgumentUserData(int first, int second, int third, int fourth, int fifth)
     {
         public int Total { get; } = first + second + third + fourth + fifth;
+    }
+
+    private sealed class SampleLuaView(double id) : ILuaTable
+    {
+        public Dictionary<string, object?> ToDictionary()
+            => new() { ["id"] = id, ["name"] = "Dagger" };
     }
 
     private sealed class CapturingLuaEventBridge : ILuaEventBridge
