@@ -7,6 +7,7 @@ using SquidStd.Core.Extensions.Strings;
 using SquidStd.Scripting.Lua.Attributes;
 using SquidStd.Scripting.Lua.Attributes.Scripts;
 using SquidStd.Scripting.Lua.Data.Internal;
+using SquidStd.Scripting.Lua.Interfaces.Scripts;
 
 namespace SquidStd.Scripting.Lua.Utils;
 
@@ -507,6 +508,13 @@ public static class LuaDocumentationGenerator
         if (type.Name == "Closure" && type.Namespace == "MoonSharp.Interpreter")
         {
             return "function";
+        }
+
+        // A type that projects itself to Lua (ILuaTable) is opaque here: its Lua shape comes from
+        // ToDictionary() at runtime, not from its C# members, so document it as a generic table.
+        if (typeof(ILuaTable).IsAssignableFrom(type))
+        {
+            return "table";
         }
 
         // Handle record types
