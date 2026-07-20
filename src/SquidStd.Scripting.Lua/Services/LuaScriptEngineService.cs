@@ -713,6 +713,9 @@ public class LuaScriptEngineService : IScriptEngineService, IDisposable
             case string:
                 return DynValue.FromObject(LuaScript, value);
 
+            case ILuaTable luaTable:
+                return ConvertToLua(luaTable.ToDictionary());
+
             case IDictionary dictionary:
             {
                 var table = new Table(LuaScript);
