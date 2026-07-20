@@ -54,4 +54,10 @@ public interface IConfigManagerService
     /// Saves the currently loaded sections to the configured YAML file.
     /// </summary>
     void Save();
+
+    /// <summary>
+    /// Writes defaults for every managed config file (primary and external) whose file is absent,
+    /// leaving existing files untouched. Called once at startup for first-launch generation.
+    /// </summary>
+    void EnsureFiles();
 }

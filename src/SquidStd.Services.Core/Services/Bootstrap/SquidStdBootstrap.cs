@@ -267,12 +267,10 @@ public sealed class SquidStdBootstrap : ISquidStdBootstrap
         {
             ConfigureLogging();
 
-            var squidConfig = Container.Resolve<SquidStdConfig>();
-
-            if (!File.Exists(squidConfig.ConfigPath))
-            {
-                Container.Resolve<IConfigManagerService>().Save();
-            }
+            // Write defaults for any managed file (primary + external plugin files) that does not yet
+            // exist; existing files are left untouched. Per-file, so adding a plugin to an existing
+            // install generates only its new file.
+            Container.Resolve<IConfigManagerService>().EnsureFiles();
 
             var logger = Log.ForContext<SquidStdBootstrap>();
             var appName = ResolveAppName(Options);
