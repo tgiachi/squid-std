@@ -36,6 +36,29 @@ public class ConfigFirstBootstrapTests
     }
 
     [Fact]
+    public async Task StartAsync_ExistingPrimary_GeneratesMissingExternalConfigFile()
+    {
+        using var root = new TempDirectory();
+        using var external = new TempDirectory();
+        File.WriteAllText(root.Combine("app.yaml"), "host:\n  Mode: fromfile\n"); // primary already exists
+
+        await using var bootstrap =
+            SquidStdBootstrap.Create(new SquidStdOptions { ConfigName = "app", RootDirectory = root.Path });
+
+        bootstrap.ConfigureServices(c =>
+        {
+            c.RegisterConfigFile<HostSection>("host", external.Path);
+            return c;
+        });
+
+        await bootstrap.StartAsync();
+
+        Assert.True(File.Exists(Path.Combine(external.Path, "host.yaml"))); // generated despite the primary existing
+
+        await bootstrap.StopAsync();
+    }
+
+    [Fact]
     public async Task OnConfigLoaded_AppliesOnceAtStart_AndSticks()
     {
         using var root = new TempDirectory();

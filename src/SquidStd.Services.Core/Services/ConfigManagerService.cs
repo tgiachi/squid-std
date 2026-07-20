@@ -53,10 +53,12 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
     public void Load()
     {
         _config.Reload();
+        Rebind(_config);
 
-        foreach (var (_, configType, instance) in _config.BindAll())
+        foreach (var external in Externals())
         {
-            _container.RegisterInstance(configType, instance, IfAlreadyRegistered.Replace);
+            external.Reload();
+            Rebind(external);
         }
 
         ConfigLoaded?.Invoke();
@@ -64,7 +66,44 @@ public sealed class ConfigManagerService : IConfigManagerService, ISquidStdServi
 
     /// <inheritdoc />
     public void Save()
-        => _config.Save();
+    {
+        _config.Save();
+
+        foreach (var external in Externals())
+        {
+            external.Save();
+        }
+    }
+
+    /// <inheritdoc />
+    public void EnsureFiles()
+    {
+        SaveIfAbsent(_config);
+
+        foreach (var external in Externals())
+        {
+            SaveIfAbsent(external);
+        }
+    }
+
+    private void Rebind(SquidStdConfig config)
+    {
+        foreach (var (_, configType, instance) in config.BindAll())
+        {
+            _container.RegisterInstance(configType, instance, IfAlreadyRegistered.Replace);
+        }
+    }
+
+    private IReadOnlyCollection<SquidStdConfig> Externals()
+        => _container.Resolve<ExternalConfigRegistry>(IfUnresolved.ReturnDefault)?.All ?? [];
+
+    private static void SaveIfAbsent(SquidStdConfig config)
+    {
+        if (!File.Exists(config.ConfigPath))
+        {
+            config.Save();
+        }
+    }
 
     /// <inheritdoc />
     public ValueTask StartAsync(CancellationToken cancellationToken = default)
