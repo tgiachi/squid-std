@@ -69,7 +69,12 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
 
         foreach (var descriptor in _registry.GetRegisteredDescriptors())
         {
-            var loaded = await _snapshotService.LoadBucketAsync(descriptor.TypeName, descriptor.TypeId, cancellationToken);
+            var loaded = await _snapshotService.LoadBucketAsync(
+                descriptor.TypeName,
+                descriptor.TypeId,
+                descriptor.LegacyTypeId,
+                cancellationToken
+            );
 
             if (loaded is null)
             {

@@ -59,9 +59,17 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
         }
     }
 
+    public ValueTask<PersistedBucket?> LoadBucketAsync(
+        string typeName,
+        ushort typeId,
+        CancellationToken cancellationToken = default
+    )
+        => LoadBucketAsync(typeName, typeId, null, cancellationToken);
+
     public async ValueTask<PersistedBucket?> LoadBucketAsync(
         string typeName,
         ushort typeId,
+        ushort? legacyTypeId,
         CancellationToken cancellationToken = default
     )
     {
@@ -81,6 +89,18 @@ public sealed class SnapshotService : ISnapshotService, IDisposable
                 if (File.Exists(legacyPath))
                 {
                     File.Move(legacyPath, path);
+                }
+            }
+
+            // Migrate a snapshot written before this store's id became derived. Same shape as the
+            // rename above, one scheme later.
+            if (!File.Exists(path) && legacyTypeId is { } legacyId && legacyId != typeId)
+            {
+                var previousPath = PathFor(typeName, legacyId);
+
+                if (File.Exists(previousPath))
+                {
+                    File.Move(previousPath, path);
                 }
             }
 
