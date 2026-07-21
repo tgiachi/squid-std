@@ -23,10 +23,10 @@
 
     <!-- Package Metadata -->
     <PropertyGroup>
-        <Version>0.39.0</Version>
-        <AssemblyVersion>0.39.0.0</AssemblyVersion>
-        <FileVersion>0.39.0.0</FileVersion>
-        <InformationalVersion>0.39.0</InformationalVersion>
+        <Version>0.40.0</Version>
+        <AssemblyVersion>0.40.0.0</AssemblyVersion>
+        <FileVersion>0.40.0.0</FileVersion>
+        <InformationalVersion>0.40.0</InformationalVersion>
         <Authors>Squid Development</Authors>
         <Product>SquidStd</Product>
         <Company>Squid Development</Company>
