@@ -53,13 +53,62 @@ var bob = await players.GetByIdAsync(1);                          // detached cl
 ### Manual DI registration (without `RegisterPersistence`)
 
 ```csharp
-container.RegisterPersistedEntity<Player, int>(typeId: 1, typeName: "Player", schemaVersion: 1, p => p.Id);
+container.RegisterPersistedEntity<Player, int>(typeName: "Player", schemaVersion: 1, p => p.Id);
 container.ApplyPersistedEntityRegistrations();   // builds descriptors into IPersistenceEntityRegistry
 ```
 
 Only needed when the rest of the stack (registry, journal, snapshot, lifecycle service) is assembled by
 hand instead of through `RegisterPersistence()`, which applies these registrations itself - do not call
 `ApplyPersistedEntityRegistrations()` when `RegisterPersistence()` is in use.
+
+## Type ids
+
+Every persisted entity has a `ushort` type id. It is written into each journal record and into the
+snapshot file name, so it must be stable for the life of a save.
+
+**You do not pick it.** It is derived from the store name you pass to `RegisterPersistedEntity`:
+
+```csharp
+c.RegisterPersistedEntity<Player, int>("Player", 1, p => p.Id);   // id derived from "Player"
+```
+
+The store name is the right source because it is already permanent - it is part of the snapshot file
+name, so renaming it already loses data. Deriving from it means nothing has to know which ids are
+taken, which is the only way an author of a plugin or a downstream library can register an entity
+safely. It also survives class and namespace renames.
+
+Because the id is 16 bits, two store names can collide. That is detected at startup, never in
+production, and the message names both stores:
+
+```
+Store 'news' and store 'notes' both use type id 41207. Rename one store, or pin one with the
+explicit-id overload of RegisterPersistedEntity.
+```
+
+The explicit-id overload remains for exactly that case:
+
+```csharp
+c.RegisterPersistedEntity<Player, int>(typeId: 4200, typeName: "Player", schemaVersion: 1, p => p.Id);
+```
+
+### Entities that already have saved data
+
+An entity whose id used to be picked by hand declares where it came from:
+
+```csharp
+c.RegisterPersistedEntity<Player, int>("Player", 1, p => p.Id, legacyTypeId: 1);
+```
+
+On the next start its snapshot is renamed to the derived id and its journal entries are translated.
+The declaration is idempotent - once migrated it does nothing - and it is worth leaving in place,
+because an operator may upgrade from an old build at any time.
+
+### Unknown ids in the journal
+
+A journal entry whose type id matches no registration and no `legacyTypeId` **fails startup**. Such an
+entry is a write that would otherwise be discarded in silence, and the usual cause is an entity that
+was renamed or removed. Set `SkipUnknownJournalEntries` in `PersistenceConfig` to discard them
+deliberately.
 
 ## Bootstrap registration
 
@@ -75,7 +124,7 @@ bootstrap.ConfigureServices(c =>
 {
     c.RegisterMessagePackSerializer();   // or RegisterDataSerializer() for JSON
     c.RegisterPersistence();             // or RegisterPersistence(new PersistenceConfig { ... })
-    c.RegisterPersistedEntity<Player, int>(1, "Player", 1, p => p.Id);
+    c.RegisterPersistedEntity<Player, int>("Player", 1, p => p.Id);
     return c;
 });
 

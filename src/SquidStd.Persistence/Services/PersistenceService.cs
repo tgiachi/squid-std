@@ -69,7 +69,12 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
 
         foreach (var descriptor in _registry.GetRegisteredDescriptors())
         {
-            var loaded = await _snapshotService.LoadBucketAsync(descriptor.TypeName, descriptor.TypeId, cancellationToken);
+            var loaded = await _snapshotService.LoadBucketAsync(
+                descriptor.TypeName,
+                descriptor.TypeId,
+                descriptor.LegacyTypeId,
+                cancellationToken
+            );
 
             if (loaded is null)
             {
@@ -88,6 +93,18 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
             LoadHighWaters(highWater.Bucket.Payload);
         }
 
+        // Entities that changed id declare where they came from, so a journal written before the
+        // change still replays.
+        var legacyTypeIds = new Dictionary<ushort, ushort>();
+
+        foreach (var descriptor in _registry.GetRegisteredDescriptors())
+        {
+            if (descriptor.LegacyTypeId is { } legacyId && legacyId != descriptor.TypeId)
+            {
+                legacyTypeIds[legacyId] = descriptor.TypeId;
+            }
+        }
+
         foreach (var entry in await _journalService.ReadAllAsync(cancellationToken))
         {
             // Replay each entry against its own type's snapshot watermark, not a global maximum: a
@@ -99,18 +116,34 @@ public sealed class PersistenceService : IPersistenceService, IAsyncDisposable
                 continue;
             }
 
-            if (!_registry.IsRegistered(entry.TypeId))
+            var typeId = entry.TypeId;
+
+            if (!_registry.IsRegistered(typeId) && legacyTypeIds.TryGetValue(typeId, out var mapped))
             {
+                typeId = mapped;
+            }
+
+            if (!_registry.IsRegistered(typeId))
+            {
+                if (!_config.SkipUnknownJournalEntries)
+                {
+                    throw new InvalidOperationException(
+                        $"Journal replay: unregistered type id {typeId} at entry {entry.SequenceId}. "
+                        + "Its writes would be lost. Declare the entity's legacyTypeId if its id changed, "
+                        + "or set SkipUnknownJournalEntries to discard them deliberately."
+                    );
+                }
+
                 _logger.Warning(
                     "Journal replay: unregistered type id {TypeId}; skipping entry {SequenceId}",
-                    entry.TypeId,
+                    typeId,
                     entry.SequenceId
                 );
 
                 continue;
             }
 
-            var applier = (IInternalEntityApplier)_registry.GetDescriptor(entry.TypeId);
+            var applier = (IInternalEntityApplier)_registry.GetDescriptor(typeId);
 
             switch (entry.Operation)
             {

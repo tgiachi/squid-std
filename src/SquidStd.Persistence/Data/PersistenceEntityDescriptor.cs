@@ -21,6 +21,7 @@ public sealed class PersistenceEntityDescriptor<TEntity, TKey>
     private readonly IDataSerializer _serializer;
 
     public ushort TypeId { get; }
+    public ushort? LegacyTypeId { get; }
     public string TypeName { get; }
     public int SchemaVersion { get; }
     public Type EntityType => typeof(TEntity);
@@ -34,7 +35,8 @@ public sealed class PersistenceEntityDescriptor<TEntity, TKey>
         int schemaVersion,
         Func<TEntity, TKey> keySelector,
         Action<TEntity, TKey>? keySetter = null,
-        IIdGenerator<TKey>? idGenerator = null
+        IIdGenerator<TKey>? idGenerator = null,
+        ushort? legacyTypeId = null
     )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(typeName);
@@ -51,6 +53,7 @@ public sealed class PersistenceEntityDescriptor<TEntity, TKey>
         _serializer = serializer;
         _deserializer = deserializer;
         TypeId = typeId;
+        LegacyTypeId = legacyTypeId;
         TypeName = typeName;
         SchemaVersion = schemaVersion;
         _keySelector = keySelector;

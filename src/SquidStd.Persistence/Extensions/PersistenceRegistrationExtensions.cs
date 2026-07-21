@@ -4,6 +4,7 @@ using SquidStd.Abstractions.Extensions.Container;
 using SquidStd.Abstractions.Extensions.Services;
 using SquidStd.Core.Directories;
 using SquidStd.Core.Interfaces.Serialization;
+using SquidStd.Persistence.Abstractions;
 using SquidStd.Persistence.Abstractions.Data;
 using SquidStd.Persistence.Abstractions.Interfaces.Persistence;
 using SquidStd.Persistence.Data;
@@ -29,7 +30,8 @@ public static class PersistenceRegistrationExtensions
             int schemaVersion,
             Func<TEntity, TKey> keySelector,
             Action<TEntity, TKey>? keySetter = null,
-            IIdGenerator<TKey>? idGenerator = null
+            IIdGenerator<TKey>? idGenerator = null,
+            ushort? legacyTypeId = null
         )
             where TKey : notnull
         {
@@ -57,7 +59,8 @@ public static class PersistenceRegistrationExtensions
                             schemaVersion,
                             keySelector,
                             keySetter,
-                            idGenerator
+                            idGenerator,
+                            legacyTypeId
                         )
                     )
                 )
@@ -65,6 +68,34 @@ public static class PersistenceRegistrationExtensions
 
             return container;
         }
+
+        /// <summary>
+        /// Records a persisted entity whose type id is derived from <paramref name="typeName" />. Prefer
+        /// this over the explicit-id overload: nothing has to know which ids are already taken, which is
+        /// the only way a plugin author can register an entity safely.
+        /// </summary>
+        /// <param name="legacyTypeId">
+        /// The id this store used before ids became derived. Set it on an entity that already has saved
+        /// data, so its snapshot is renamed and its journal entries are translated on the next start.
+        /// </param>
+        public IContainer RegisterPersistedEntity<TEntity, TKey>(
+            string typeName,
+            int schemaVersion,
+            Func<TEntity, TKey> keySelector,
+            Action<TEntity, TKey>? keySetter = null,
+            IIdGenerator<TKey>? idGenerator = null,
+            ushort? legacyTypeId = null
+        )
+            where TKey : notnull
+            => container.RegisterPersistedEntity(
+                PersistedTypeId.Derive(typeName),
+                typeName,
+                schemaVersion,
+                keySelector,
+                keySetter,
+                idGenerator,
+                legacyTypeId
+            );
 
         /// <summary>Builds and registers all recorded persisted-entity descriptors into the registry.</summary>
         public IContainer ApplyPersistedEntityRegistrations()
