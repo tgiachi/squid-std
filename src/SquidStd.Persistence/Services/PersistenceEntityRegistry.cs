@@ -41,10 +41,16 @@ public sealed class PersistenceEntityRegistry : IPersistenceEntityRegistry
                 throw new InvalidOperationException("Cannot register entities after the registry is frozen.");
             }
 
-            if (!_byTypeId.TryAdd(descriptor.TypeId, descriptor))
+            if (_byTypeId.TryGetValue(descriptor.TypeId, out var existing))
             {
-                throw new InvalidOperationException($"Type id {descriptor.TypeId} is already registered.");
+                throw new InvalidOperationException(
+                    $"Store '{existing.TypeName}' and store '{descriptor.TypeName}' both use type id "
+                    + $"{descriptor.TypeId}. Rename one store, or pin one with the explicit-id overload "
+                    + "of RegisterPersistedEntity."
+                );
             }
+
+            _byTypeId[descriptor.TypeId] = descriptor;
 
             _byTypePair[(typeof(TEntity), typeof(TKey))] = descriptor;
         }
