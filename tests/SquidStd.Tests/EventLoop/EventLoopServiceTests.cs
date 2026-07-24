@@ -80,4 +80,30 @@ public class EventLoopServiceTests
 
         Assert.True(fired);
     }
+
+    [Fact]
+    public async Task IsOnLoopThread_TrueInsidePostedWork_FalseOutside()
+    {
+        var dispatcher = new MainThreadDispatcherService();
+        var timer = new FakeTimerService();
+        using var loop = new EventLoopService(dispatcher, timer, new EventLoopConfig());
+
+        Assert.False(loop.IsOnLoopThread);
+
+        bool onLoopInside = false;
+        var signal = new ManualResetEventSlim(false);
+        dispatcher.Post(() =>
+            {
+                onLoopInside = loop.IsOnLoopThread;
+                signal.Set();
+            }
+        );
+
+        await loop.StartAsync();
+        signal.Wait(TimeSpan.FromSeconds(2));
+        await loop.StopAsync();
+
+        Assert.True(onLoopInside);
+        Assert.False(loop.IsOnLoopThread);
+    }
 }

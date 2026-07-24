@@ -15,4 +15,7 @@ public interface IEventLoopService
 
     /// <summary>Worst observed tick elapsed time in milliseconds.</summary>
     double MaxTickMs { get; }
+
+    /// <summary>True when the calling thread is the dedicated event-loop thread.</summary>
+    bool IsOnLoopThread { get; }
 }
