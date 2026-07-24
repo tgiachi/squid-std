@@ -89,6 +89,9 @@ public sealed class EventLoopService : IEventLoopService, ISquidStdService, IMet
         _cts.Cancel();
         _thread?.Join(TimeSpan.FromSeconds(5));
 
+        // Reset so a recycled managed thread id can't later report as the loop thread.
+        _loopThreadId = -1;
+
         return ValueTask.CompletedTask;
     }
 
