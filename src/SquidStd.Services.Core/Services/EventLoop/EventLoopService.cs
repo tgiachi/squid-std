@@ -28,6 +28,7 @@ public sealed class EventLoopService : IEventLoopService, ISquidStdService, IMet
     private double _maxTickMs;
     private Thread? _thread;
     private long _tickCount;
+    private volatile int _loopThreadId = -1;
 
     /// <inheritdoc />
     public long TickCount => Interlocked.Read(ref _tickCount);
@@ -57,6 +58,9 @@ public sealed class EventLoopService : IEventLoopService, ISquidStdService, IMet
     }
 
     /// <inheritdoc />
+    public bool IsOnLoopThread => _loopThreadId == Environment.CurrentManagedThreadId;
+
+    /// <inheritdoc />
     public string ProviderName => "eventloop";
 
     public EventLoopService(IMainThreadDispatcher dispatcher, ITimerService timer, EventLoopConfig config)
@@ -84,6 +88,9 @@ public sealed class EventLoopService : IEventLoopService, ISquidStdService, IMet
     {
         _cts.Cancel();
         _thread?.Join(TimeSpan.FromSeconds(5));
+
+        // Reset so a recycled managed thread id can't later report as the loop thread.
+        _loopThreadId = -1;
 
         return ValueTask.CompletedTask;
     }
@@ -136,6 +143,8 @@ public sealed class EventLoopService : IEventLoopService, ISquidStdService, IMet
 
     private void RunLoop()
     {
+        _loopThreadId = Environment.CurrentManagedThreadId;
+
         while (!_cts.IsCancellationRequested)
         {
             var work = Tick();
