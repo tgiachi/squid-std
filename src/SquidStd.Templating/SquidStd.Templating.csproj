@@ -14,7 +14,7 @@
 
     <ItemGroup>
         <PackageReference Include="DryIoc.dll" Version="5.4.3"/>
-        <PackageReference Include="Scriban" Version="7.2.5"/>
+        <PackageReference Include="Scriban" Version="7.2.6"/>
     </ItemGroup>
 
 </Project>
