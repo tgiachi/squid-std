@@ -58,13 +58,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
           GH_TOKEN: ${{ secrets.RELEASE_PAT }}
         run: |
+          # Versions pinned: unpinned npx resolves the latest of each package, and
+          # conventional-changelog-conventionalcommits@10 requires conventional-changelog-writer@9,
+          # while @semantic-release/release-notes-generator@14 loads writer@8 -> "Missing helper"
+          # crash. Preset @9 matches the writer@8 that the semantic-release@24 plugins ship.
           npx -y \
-            -p semantic-release \
+            -p semantic-release@24 \
             -p @semantic-release/changelog \
             -p @semantic-release/commit-analyzer \
             -p @semantic-release/release-notes-generator \
             -p @semantic-release/git \
             -p @semantic-release/github \
             -p @semantic-release/exec \
-            -p conventional-changelog-conventionalcommits \
+            -p conventional-changelog-conventionalcommits@9 \
             semantic-release
