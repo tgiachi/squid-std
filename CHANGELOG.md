@@ -1,3 +1,9 @@
+## [0.41.2](https://github.com/tgiachi/squid-std/compare/v0.41.1...v0.41.2) (2026-09-01)
+
+### Bug Fixes
+
+* **deps:** bump third-party libraries and toolchain ([8bf8fc3](https://github.com/tgiachi/squid-std/commit/8bf8fc3255a67f7a709097eb767d1df18ddbd34c))
+
 ## [0.41.1](https://github.com/tgiachi/squid-std/compare/v0.41.0...v0.41.1) (2026-08-05)
 
 ## [0.41.0](https://github.com/tgiachi/squid-std/compare/v0.40.1...v0.41.0) (2026-07-24)
