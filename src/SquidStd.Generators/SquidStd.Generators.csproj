@@ -14,6 +14,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <!-- Pinned to the SDK's bundled Roslyn: a source generator must target a Microsoft.CodeAnalysis
+             version <= the compiler that loads it, otherwise it fails to load and emits nothing.
+             Do not let Dependabot bump these past the minimum supported SDK's Roslyn. -->
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.6.0" PrivateAssets="all"/>
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="5.6.0" PrivateAssets="all"/>
     </ItemGroup>
